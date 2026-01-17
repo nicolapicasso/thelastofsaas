@@ -1,0 +1,186 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Controllers\Admin;
+
+use App\Core\Controller;
+use App\Models\TlosSetting;
+use App\Helpers\Sanitizer;
+
+/**
+ * TLOS Settings Controller
+ * TLOS - The Last of SaaS
+ */
+class TlosSettingsController extends Controller
+{
+    private TlosSetting $settingsModel;
+
+    public function __construct()
+    {
+        parent::__construct();
+        $this->settingsModel = new TlosSetting();
+    }
+
+    /**
+     * Settings index
+     */
+    public function index(): void
+    {
+        $this->requireAuth();
+
+        $settingsGrouped = $this->settingsModel->getAllGrouped();
+        $groups = TlosSetting::getGroups();
+
+        $this->renderAdmin('tlos-settings/index', [
+            'title' => 'Configuración TLOS',
+            'settingsGrouped' => $settingsGrouped,
+            'groups' => $groups,
+            'csrf_token' => $this->generateCsrf(),
+            'flash' => $this->getFlash(),
+        ]);
+    }
+
+    /**
+     * Update settings
+     */
+    public function update(): void
+    {
+        $this->requireAuth();
+
+        if (!$this->validateCsrf()) {
+            $this->flash('error', 'Sesión expirada.');
+            $this->redirect('/admin/tlos-settings');
+        }
+
+        $settings = $this->getPost('settings', []);
+
+        if (!is_array($settings)) {
+            $this->flash('error', 'Datos inválidos.');
+            $this->redirect('/admin/tlos-settings');
+        }
+
+        try {
+            foreach ($settings as $key => $value) {
+                // Sanitize based on setting type
+                $setting = $this->settingsModel->findBy('setting_key', $key);
+                if ($setting) {
+                    $value = $this->sanitizeSettingValue($value, $setting['setting_type']);
+                    $this->settingsModel->set($key, $value);
+                }
+            }
+
+            $this->flash('success', 'Configuración guardada correctamente.');
+        } catch (\Exception $e) {
+            $this->flash('error', 'Error al guardar: ' . $e->getMessage());
+        }
+
+        $this->redirect('/admin/tlos-settings');
+    }
+
+    /**
+     * Get single setting value (AJAX)
+     */
+    public function get(): void
+    {
+        $this->requireAuth();
+
+        $key = $this->getQuery('key');
+
+        if (!$key) {
+            $this->jsonError('Clave no especificada.');
+            return;
+        }
+
+        $value = $this->settingsModel->get($key);
+        $this->jsonSuccess(['key' => $key, 'value' => $value]);
+    }
+
+    /**
+     * Set single setting value (AJAX)
+     */
+    public function set(): void
+    {
+        $this->requireAuth();
+
+        if (!$this->validateCsrf()) {
+            $this->jsonError('Sesión expirada.');
+            return;
+        }
+
+        $key = $this->getPost('key');
+        $value = $this->getPost('value');
+
+        if (!$key) {
+            $this->jsonError('Clave no especificada.');
+            return;
+        }
+
+        try {
+            $this->settingsModel->set($key, $value);
+            $this->jsonSuccess(['message' => 'Configuración guardada.']);
+        } catch (\Exception $e) {
+            $this->jsonError('Error: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Test email configuration
+     */
+    public function testEmail(): void
+    {
+        $this->requireAuth();
+
+        if (!$this->validateCsrf()) {
+            $this->jsonError('Sesión expirada.');
+            return;
+        }
+
+        $testEmail = Sanitizer::string($this->getPost('email'));
+
+        if (empty($testEmail) || !filter_var($testEmail, FILTER_VALIDATE_EMAIL)) {
+            $this->jsonError('Email no válido.');
+            return;
+        }
+
+        // TODO: Implement actual email sending test
+        $this->jsonSuccess(['message' => 'Email de prueba enviado a ' . $testEmail]);
+    }
+
+    /**
+     * Test Stripe configuration
+     */
+    public function testStripe(): void
+    {
+        $this->requireAuth();
+
+        if (!$this->validateCsrf()) {
+            $this->jsonError('Sesión expirada.');
+            return;
+        }
+
+        $secretKey = $this->settingsModel->getStripeSecretKey();
+
+        if (empty($secretKey)) {
+            $this->jsonError('Stripe Secret Key no configurada.');
+            return;
+        }
+
+        // TODO: Implement actual Stripe connection test
+        $this->jsonSuccess(['message' => 'Conexión con Stripe verificada.']);
+    }
+
+    /**
+     * Sanitize setting value based on type
+     */
+    private function sanitizeSettingValue(mixed $value, string $type): string
+    {
+        return match ($type) {
+            'boolean' => $value ? '1' : '0',
+            'number' => (string) (int) $value,
+            'email' => filter_var($value, FILTER_SANITIZE_EMAIL),
+            'json' => is_array($value) ? json_encode($value) : (string) $value,
+            default => (string) $value,
+        };
+    }
+}

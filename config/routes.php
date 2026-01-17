@@ -290,6 +290,95 @@ $router->post('/admin/profile', 'Admin\\ProfileController', 'update');
 $router->post('/admin/profile/password', 'Admin\\ProfileController', 'updatePassword');
 
 // ============================================
+// TLOS Admin Routes
+// ============================================
+
+// Events
+$router->get('/admin/events', 'Admin\\EventsController', 'index');
+$router->get('/admin/events/create', 'Admin\\EventsController', 'create');
+$router->post('/admin/events', 'Admin\\EventsController', 'store');
+$router->get('/admin/events/{id}/edit', 'Admin\\EventsController', 'edit');
+$router->post('/admin/events/{id}', 'Admin\\EventsController', 'update');
+$router->post('/admin/events/{id}/delete', 'Admin\\EventsController', 'destroy');
+$router->get('/admin/events/{id}/stats', 'Admin\\EventsController', 'stats');
+$router->post('/admin/events/{id}/sponsors', 'Admin\\EventsController', 'addSponsor');
+$router->post('/admin/events/{id}/sponsors/{sponsorId}/delete', 'Admin\\EventsController', 'removeSponsor');
+$router->post('/admin/events/{id}/sponsors/{sponsorId}/level', 'Admin\\EventsController', 'updateSponsorLevel');
+$router->post('/admin/events/{id}/features', 'Admin\\EventsController', 'addFeature');
+
+// Sponsors
+$router->get('/admin/sponsors', 'Admin\\SponsorsController', 'index');
+$router->get('/admin/sponsors/create', 'Admin\\SponsorsController', 'create');
+$router->post('/admin/sponsors', 'Admin\\SponsorsController', 'store');
+$router->get('/admin/sponsors/import', 'Admin\\SponsorsController', 'import');
+$router->post('/admin/sponsors/import', 'Admin\\SponsorsController', 'import');
+$router->get('/admin/sponsors/export', 'Admin\\SponsorsController', 'export');
+$router->get('/admin/sponsors/{id}/edit', 'Admin\\SponsorsController', 'edit');
+$router->post('/admin/sponsors/{id}', 'Admin\\SponsorsController', 'update');
+$router->post('/admin/sponsors/{id}/delete', 'Admin\\SponsorsController', 'destroy');
+$router->post('/admin/sponsors/{id}/regenerate-code', 'Admin\\SponsorsController', 'regenerateCode');
+
+// Companies
+$router->get('/admin/companies', 'Admin\\CompaniesController', 'index');
+$router->get('/admin/companies/create', 'Admin\\CompaniesController', 'create');
+$router->post('/admin/companies', 'Admin\\CompaniesController', 'store');
+$router->get('/admin/companies/import', 'Admin\\CompaniesController', 'import');
+$router->post('/admin/companies/import', 'Admin\\CompaniesController', 'import');
+$router->get('/admin/companies/export', 'Admin\\CompaniesController', 'export');
+$router->get('/admin/companies/{id}/edit', 'Admin\\CompaniesController', 'edit');
+$router->post('/admin/companies/{id}', 'Admin\\CompaniesController', 'update');
+$router->post('/admin/companies/{id}/delete', 'Admin\\CompaniesController', 'destroy');
+$router->post('/admin/companies/{id}/regenerate-code', 'Admin\\CompaniesController', 'regenerateCode');
+
+// Tickets
+$router->get('/admin/tickets', 'Admin\\TicketsController', 'index');
+$router->get('/admin/tickets/export', 'Admin\\TicketsController', 'export');
+$router->get('/admin/tickets/scanner', 'Admin\\TicketsController', 'scanner');
+$router->post('/admin/tickets/validate-code', 'Admin\\TicketsController', 'validateCode');
+$router->get('/admin/tickets/types', 'Admin\\TicketsController', 'types');
+$router->post('/admin/tickets/types', 'Admin\\TicketsController', 'createType');
+$router->post('/admin/tickets/types/{id}', 'Admin\\TicketsController', 'updateType');
+$router->post('/admin/tickets/types/{id}/delete', 'Admin\\TicketsController', 'deleteType');
+$router->get('/admin/tickets/{id}', 'Admin\\TicketsController', 'show');
+$router->post('/admin/tickets/{id}/check-in', 'Admin\\TicketsController', 'checkIn');
+$router->post('/admin/tickets/{id}/cancel', 'Admin\\TicketsController', 'cancel');
+
+// Meetings
+$router->get('/admin/meetings/blocks', 'Admin\\MeetingsController', 'blocks');
+$router->post('/admin/meetings/blocks', 'Admin\\MeetingsController', 'createBlock');
+$router->post('/admin/meetings/blocks/{id}', 'Admin\\MeetingsController', 'updateBlock');
+$router->post('/admin/meetings/blocks/{id}/delete', 'Admin\\MeetingsController', 'deleteBlock');
+$router->post('/admin/meetings/blocks/{id}/regenerate-slots', 'Admin\\MeetingsController', 'regenerateSlots');
+$router->get('/admin/meetings/assignments', 'Admin\\MeetingsController', 'assignments');
+$router->get('/admin/meetings/unassigned', 'Admin\\MeetingsController', 'unassigned');
+$router->get('/admin/meetings/available-slots', 'Admin\\MeetingsController', 'availableSlots');
+$router->post('/admin/meetings/assign', 'Admin\\MeetingsController', 'assign');
+$router->post('/admin/meetings/assignments/{id}/cancel', 'Admin\\MeetingsController', 'cancelAssignment');
+$router->get('/admin/meetings/export', 'Admin\\MeetingsController', 'export');
+$router->get('/admin/meetings/matching', 'Admin\\MeetingsController', 'matching');
+
+// Votings
+$router->get('/admin/votings', 'Admin\\VotingsController', 'index');
+$router->get('/admin/votings/create', 'Admin\\VotingsController', 'create');
+$router->post('/admin/votings', 'Admin\\VotingsController', 'store');
+$router->get('/admin/votings/{id}/edit', 'Admin\\VotingsController', 'edit');
+$router->post('/admin/votings/{id}', 'Admin\\VotingsController', 'update');
+$router->post('/admin/votings/{id}/delete', 'Admin\\VotingsController', 'destroy');
+$router->get('/admin/votings/{id}/results', 'Admin\\VotingsController', 'results');
+$router->post('/admin/votings/{id}/reset-votes', 'Admin\\VotingsController', 'resetVotes');
+$router->post('/admin/votings/{id}/candidates', 'Admin\\VotingsController', 'addCandidate');
+$router->post('/admin/votings/{id}/candidates/{candidateId}', 'Admin\\VotingsController', 'updateCandidate');
+$router->post('/admin/votings/{id}/candidates/{candidateId}/delete', 'Admin\\VotingsController', 'deleteCandidate');
+
+// TLOS Settings
+$router->get('/admin/tlos-settings', 'Admin\\TlosSettingsController', 'index');
+$router->post('/admin/tlos-settings', 'Admin\\TlosSettingsController', 'update');
+$router->get('/admin/tlos-settings/get', 'Admin\\TlosSettingsController', 'get');
+$router->post('/admin/tlos-settings/set', 'Admin\\TlosSettingsController', 'set');
+$router->post('/admin/tlos-settings/test-email', 'Admin\\TlosSettingsController', 'testEmail');
+$router->post('/admin/tlos-settings/test-stripe', 'Admin\\TlosSettingsController', 'testStripe');
+
+// ============================================
 // API Routes (for AJAX)
 // ============================================
 
