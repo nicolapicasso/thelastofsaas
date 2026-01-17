@@ -1,0 +1,27 @@
+# Dependencies
+/vendor/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+
+# Storage
+/storage/cache/*
+/storage/logs/*
+!/storage/cache/.gitkeep
+!/storage/logs/.gitkeep
+
+# Uploads (optional - may want to keep some)
+/public/uploads/*
+!/public/uploads/.gitkeep
+
+# Build
+*.map
