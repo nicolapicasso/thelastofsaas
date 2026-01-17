@@ -1,0 +1,240 @@
+<?php
+/**
+ * Sponsor Form Template
+ * TLOS - The Last of SaaS
+ */
+$isEdit = isset($sponsor) && $sponsor;
+?>
+
+<div class="page-header">
+    <div class="page-header-content">
+        <h1><?= $isEdit ? 'Editar Sponsor' : 'Nuevo Sponsor' ?></h1>
+        <p><?= $isEdit ? htmlspecialchars($sponsor['name']) : 'Crear un nuevo sponsor' ?></p>
+    </div>
+    <div class="page-header-actions">
+        <a href="/admin/sponsors" class="btn btn-outline">
+            <i class="fas fa-arrow-left"></i> Volver
+        </a>
+    </div>
+</div>
+
+<?php if (isset($flash) && $flash): ?>
+    <div class="alert alert-<?= $flash['type'] ?>">
+        <?= $flash['message'] ?>
+    </div>
+<?php endif; ?>
+
+<form method="POST" action="<?= $isEdit ? '/admin/sponsors/' . $sponsor['id'] : '/admin/sponsors' ?>">
+    <input type="hidden" name="_csrf_token" value="<?= $csrf_token ?>">
+
+    <div class="form-grid">
+        <div class="form-main">
+            <div class="card">
+                <div class="card-header">
+                    <h3>Información Básica</h3>
+                </div>
+                <div class="card-body">
+                    <div class="form-row">
+                        <div class="form-group" style="flex: 2;">
+                            <label for="name">Nombre *</label>
+                            <input type="text" id="name" name="name" class="form-control"
+                                   value="<?= htmlspecialchars($sponsor['name'] ?? '') ?>" required>
+                        </div>
+                        <div class="form-group" style="flex: 1;">
+                            <label for="category">Categoría</label>
+                            <input type="text" id="category" name="category" class="form-control"
+                                   value="<?= htmlspecialchars($sponsor['category'] ?? '') ?>"
+                                   placeholder="CRM, ERP, Marketing...">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="short_description">Descripción Corta</label>
+                        <input type="text" id="short_description" name="short_description" class="form-control"
+                               value="<?= htmlspecialchars($sponsor['short_description'] ?? '') ?>"
+                               maxlength="500">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="description">Descripción Completa</label>
+                        <textarea id="description" name="description" class="form-control" rows="4"><?= htmlspecialchars($sponsor['description'] ?? '') ?></textarea>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="website">Web</label>
+                            <input type="url" id="website" name="website" class="form-control"
+                                   value="<?= htmlspecialchars($sponsor['website'] ?? '') ?>"
+                                   placeholder="https://...">
+                        </div>
+                        <div class="form-group">
+                            <label for="logo_url">URL del Logo</label>
+                            <div class="input-with-button">
+                                <input type="text" id="logo_url" name="logo_url" class="form-control"
+                                       value="<?= htmlspecialchars($sponsor['logo_url'] ?? '') ?>">
+                                <button type="button" class="btn btn-outline" onclick="openMediaPicker('logo_url')">
+                                    <i class="fas fa-image"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h3>Contacto</h3>
+                </div>
+                <div class="card-body">
+                    <div class="form-group">
+                        <label for="contact_emails">Emails de Contacto</label>
+                        <input type="text" id="contact_emails" name="contact_emails" class="form-control"
+                               value="<?= htmlspecialchars($sponsor['contact_emails'] ?? '') ?>"
+                               placeholder="email1@empresa.com, email2@empresa.com">
+                        <small class="form-help">Separar múltiples emails con comas</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="contact_phone">Teléfono</label>
+                        <input type="text" id="contact_phone" name="contact_phone" class="form-control"
+                               value="<?= htmlspecialchars($sponsor['contact_phone'] ?? '') ?>">
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="linkedin_url">LinkedIn</label>
+                            <input type="url" id="linkedin_url" name="linkedin_url" class="form-control"
+                                   value="<?= htmlspecialchars($sponsor['linkedin_url'] ?? '') ?>">
+                        </div>
+                        <div class="form-group">
+                            <label for="twitter_url">Twitter/X</label>
+                            <input type="url" id="twitter_url" name="twitter_url" class="form-control"
+                                   value="<?= htmlspecialchars($sponsor['twitter_url'] ?? '') ?>">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <?php if ($isEdit && !empty($events)): ?>
+            <div class="card">
+                <div class="card-header">
+                    <h3>Eventos Asociados</h3>
+                </div>
+                <div class="card-body">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Evento</th>
+                                <th>Fecha</th>
+                                <th>Nivel</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($events as $evt): ?>
+                            <tr>
+                                <td>
+                                    <a href="/admin/events/<?= $evt['id'] ?>/edit">
+                                        <?= htmlspecialchars($evt['name']) ?>
+                                    </a>
+                                </td>
+                                <td><?= $evt['event_date'] ? date('d/m/Y', strtotime($evt['event_date'])) : '-' ?></td>
+                                <td>
+                                    <span class="badge badge-<?= $evt['priority_level'] === 'platinum' ? 'warning' : 'secondary' ?>">
+                                        <?= ucfirst($evt['priority_level']) ?>
+                                    </span>
+                                </td>
+                            </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <?php endif; ?>
+        </div>
+
+        <div class="form-sidebar">
+            <div class="card">
+                <div class="card-header">
+                    <h3>Estado</h3>
+                </div>
+                <div class="card-body">
+                    <div class="form-check">
+                        <input type="checkbox" id="active" name="active" value="1"
+                               <?= ($sponsor['active'] ?? 1) ? 'checked' : '' ?>>
+                        <label for="active">Sponsor Activo</label>
+                    </div>
+                </div>
+            </div>
+
+            <?php if ($isEdit): ?>
+            <div class="card">
+                <div class="card-header">
+                    <h3>Código de Acceso</h3>
+                </div>
+                <div class="card-body">
+                    <div class="form-group">
+                        <input type="text" class="form-control" value="<?= htmlspecialchars($sponsor['unique_code']) ?>" readonly
+                               style="font-family: monospace; font-size: 0.85rem;">
+                        <small class="form-help">URL de selección:</small>
+                        <code style="font-size: 0.75rem; word-break: break-all;">
+                            /seleccion-sponsor?code=<?= htmlspecialchars($sponsor['unique_code']) ?>
+                        </code>
+                    </div>
+                    <button type="button" class="btn btn-outline btn-sm btn-block" onclick="regenerateCode()">
+                        <i class="fas fa-sync"></i> Regenerar Código
+                    </button>
+                </div>
+            </div>
+            <?php endif; ?>
+
+            <div class="card">
+                <div class="card-header">
+                    <h3>Reuniones</h3>
+                </div>
+                <div class="card-body">
+                    <div class="form-group">
+                        <label for="max_simultaneous_meetings">Máx. Reuniones Simultáneas</label>
+                        <input type="number" id="max_simultaneous_meetings" name="max_simultaneous_meetings"
+                               class="form-control" min="1" max="10"
+                               value="<?= $sponsor['max_simultaneous_meetings'] ?? 1 ?>">
+                        <small class="form-help">Cuántas reuniones puede tener a la vez</small>
+                    </div>
+
+                    <div class="form-check">
+                        <input type="checkbox" id="can_send_messages" name="can_send_messages" value="1"
+                               <?= ($sponsor['can_send_messages'] ?? 0) ? 'checked' : '' ?>>
+                        <label for="can_send_messages">Puede enviar mensajes</label>
+                    </div>
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-block">
+                <i class="fas fa-save"></i> <?= $isEdit ? 'Guardar Cambios' : 'Crear Sponsor' ?>
+            </button>
+        </div>
+    </div>
+</form>
+
+<?php if ($isEdit): ?>
+<script>
+function regenerateCode() {
+    if (!confirm('¿Regenerar el código? Los enlaces anteriores dejarán de funcionar.')) return;
+
+    const formData = new FormData();
+    formData.append('_csrf_token', '<?= $csrf_token ?>');
+
+    fetch('/admin/sponsors/<?= $sponsor['id'] ?>/regenerate-code', {
+        method: 'POST',
+        body: formData
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        } else {
+            alert(data.error || 'Error');
+        }
+    });
+}
+</script>
+<?php endif; ?>
