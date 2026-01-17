@@ -379,6 +379,55 @@ $router->post('/admin/tlos-settings/test-email', 'Admin\\TlosSettingsController'
 $router->post('/admin/tlos-settings/test-stripe', 'Admin\\TlosSettingsController', 'testStripe');
 
 // ============================================
+// TLOS Frontend Routes
+// ============================================
+
+// Events
+$router->get('/eventos', 'EventsController', 'index');
+$router->get('/eventos/{slug}', 'EventsController', 'show');
+$router->get('/eventos/{slug}/agenda', 'EventsController', 'agenda');
+$router->get('/eventos/{slug}/sponsors', 'EventsController', 'sponsors');
+
+// Tickets
+$router->get('/eventos/{slug}/registro', 'TicketsController', 'register');
+$router->post('/eventos/{slug}/registro', 'TicketsController', 'store');
+$router->get('/eventos/{slug}/ticket/confirmacion', 'TicketsController', 'paymentSuccess');
+$router->get('/eventos/{slug}/ticket/{code}', 'TicketsController', 'show');
+$router->get('/eventos/{slug}/ticket/{code}/download', 'TicketsController', 'download');
+$router->post('/eventos/{slug}/ticket/{code}/resend', 'TicketsController', 'resendEmail');
+
+// Sponsor Panel
+$router->get('/sponsor/login', 'SponsorPanelController', 'login');
+$router->post('/sponsor/login', 'SponsorPanelController', 'login');
+$router->get('/sponsor/logout', 'SponsorPanelController', 'logout');
+$router->get('/sponsor/panel', 'SponsorPanelController', 'panel');
+$router->get('/sponsor/empresas/{eventId}', 'SponsorPanelController', 'companies');
+$router->get('/sponsor/empresas/{eventId}/{companyId}', 'SponsorPanelController', 'companyDetail');
+$router->post('/sponsor/seleccionar', 'SponsorPanelController', 'selectCompany');
+$router->post('/sponsor/deseleccionar', 'SponsorPanelController', 'unselectCompany');
+$router->get('/sponsor/matches/{eventId}', 'SponsorPanelController', 'matches');
+
+// Company Panel
+$router->get('/empresa/login', 'CompanyPanelController', 'login');
+$router->post('/empresa/login', 'CompanyPanelController', 'login');
+$router->get('/empresa/logout', 'CompanyPanelController', 'logout');
+$router->get('/empresa/panel', 'CompanyPanelController', 'panel');
+$router->get('/empresa/sponsors/{eventId}', 'CompanyPanelController', 'sponsors');
+$router->get('/empresa/sponsors/{eventId}/{sponsorId}', 'CompanyPanelController', 'sponsorDetail');
+$router->post('/empresa/seleccionar', 'CompanyPanelController', 'selectSponsor');
+$router->post('/empresa/deseleccionar', 'CompanyPanelController', 'unselectSponsor');
+$router->get('/empresa/matches/{eventId}', 'CompanyPanelController', 'matches');
+$router->post('/empresa/perfil', 'CompanyPanelController', 'updateProfile');
+
+// Voting
+$router->get('/votar/{slug}', 'VotingController', 'show');
+$router->post('/votar/{slug}', 'VotingController', 'vote');
+$router->get('/votar/{slug}/resultados', 'VotingController', 'results');
+
+// Stripe Webhook
+$router->post('/webhook/stripe', 'WebhookController', 'stripe');
+
+// ============================================
 // API Routes (for AJAX)
 // ============================================
 
