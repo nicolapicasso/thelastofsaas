@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 /**
  * Database Configuration
- * Omniwallet CMS
+ * TLOS - The Last of SaaS
  */
 
 return [
