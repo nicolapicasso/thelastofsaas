@@ -111,10 +111,10 @@ class SponsorPanelController extends Controller
         // Get events where this sponsor participates
         $events = $this->sponsorModel->getEvents($sponsor['id']);
 
-        // Get current/upcoming event (first active one)
+        // Get current/upcoming event (first published or active one)
         $currentEvent = null;
         foreach ($events as $event) {
-            if ($event['status'] === 'published') {
+            if (in_array($event['status'], ['published', 'active'])) {
                 $currentEvent = $event;
                 break;
             }
@@ -159,7 +159,7 @@ class SponsorPanelController extends Controller
         if (!$sponsor) return;
 
         $event = $this->eventModel->find($eventId);
-        if (!$event || $event['status'] !== 'published') {
+        if (!$event || !in_array($event['status'], ['published', 'active'])) {
             $this->notFound();
             return;
         }

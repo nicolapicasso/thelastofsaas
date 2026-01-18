@@ -40,7 +40,7 @@ class TicketsController extends Controller
     {
         $event = $this->eventModel->findBySlug($eventSlug);
 
-        if (!$event || $event['status'] !== 'published') {
+        if (!$event || !in_array($event['status'], ['published', 'active'])) {
             $this->notFound();
             return;
         }
@@ -88,7 +88,7 @@ class TicketsController extends Controller
     {
         $event = $this->eventModel->findBySlug($eventSlug);
 
-        if (!$event || $event['status'] !== 'published') {
+        if (!$event || !in_array($event['status'], ['published', 'active'])) {
             $this->jsonError('Evento no encontrado', 404);
             return;
         }

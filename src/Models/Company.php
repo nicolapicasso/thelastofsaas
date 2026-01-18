@@ -69,14 +69,14 @@ class Company extends Model
     }
 
     /**
-     * Get events for a company
+     * Get events for a company (published or active only)
      */
     public function getEvents(int $companyId): array
     {
         $sql = "SELECT e.*
                 FROM events e
                 INNER JOIN event_companies ec ON e.id = ec.event_id
-                WHERE ec.company_id = ?
+                WHERE ec.company_id = ? AND e.status IN ('published', 'active')
                 ORDER BY e.start_date DESC";
 
         return $this->db->fetchAll($sql, [$companyId]);
@@ -171,6 +171,67 @@ class Company extends Model
         $sql = "DELETE FROM company_selections WHERE company_id = ? AND sponsor_id = ? AND event_id = ?";
         $this->db->query($sql, [$companyId, $sponsorId, $eventId]);
         return true;
+    }
+
+    /**
+     * Alias for deselectSponsor
+     */
+    public function unselectSponsor(int $companyId, int $sponsorId, int $eventId): bool
+    {
+        return $this->deselectSponsor($companyId, $sponsorId, $eventId);
+    }
+
+    /**
+     * Get selections (alias for getSelectedSponsors with sponsor_id included)
+     */
+    public function getSelections(int $companyId, int $eventId): array
+    {
+        $sql = "SELECT s.*, cs.created_at, cs.priority, s.id as sponsor_id, es.level
+                FROM sponsors s
+                INNER JOIN company_selections cs ON s.id = cs.sponsor_id
+                LEFT JOIN event_sponsors es ON s.id = es.sponsor_id AND es.event_id = cs.event_id
+                WHERE cs.company_id = ? AND cs.event_id = ? AND s.active = 1
+                ORDER BY cs.priority DESC, cs.created_at ASC";
+
+        return $this->db->fetchAll($sql, [$companyId, $eventId]);
+    }
+
+    /**
+     * Check if company has selected a sponsor
+     */
+    public function hasSelected(int $companyId, int $sponsorId, int $eventId): bool
+    {
+        $sql = "SELECT COUNT(*) FROM company_selections WHERE company_id = ? AND sponsor_id = ? AND event_id = ?";
+        return (int) $this->db->fetchColumn($sql, [$companyId, $sponsorId, $eventId]) > 0;
+    }
+
+    /**
+     * Check if it's a mutual match
+     */
+    public function isMutualMatch(int $companyId, int $sponsorId, int $eventId): bool
+    {
+        $sql = "SELECT COUNT(*) FROM company_selections cs
+                INNER JOIN sponsor_selections ss
+                ON cs.sponsor_id = ss.sponsor_id AND cs.company_id = ss.company_id AND cs.event_id = ss.event_id
+                WHERE cs.company_id = ? AND cs.sponsor_id = ? AND cs.event_id = ?";
+        return (int) $this->db->fetchColumn($sql, [$companyId, $sponsorId, $eventId]) > 0;
+    }
+
+    /**
+     * Get scheduled meetings for company
+     */
+    public function getScheduledMeetings(int $companyId, int $eventId): array
+    {
+        return $this->getMeetings($companyId, $eventId);
+    }
+
+    /**
+     * Get message from a specific sponsor
+     */
+    public function getMessageFromSponsor(int $companyId, int $sponsorId, int $eventId): ?array
+    {
+        $sql = "SELECT * FROM sponsor_messages WHERE company_id = ? AND sponsor_id = ? AND event_id = ?";
+        return $this->db->fetch($sql, [$companyId, $sponsorId, $eventId]) ?: null;
     }
 
     /**

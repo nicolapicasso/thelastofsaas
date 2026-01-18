@@ -111,10 +111,10 @@ class CompanyPanelController extends Controller
         // Get events where this company participates
         $events = $this->companyModel->getEvents($company['id']);
 
-        // Get current/upcoming event
+        // Get current/upcoming event (published or active)
         $currentEvent = null;
         foreach ($events as $event) {
-            if ($event['status'] === 'published') {
+            if (in_array($event['status'], ['published', 'active'])) {
                 $currentEvent = $event;
                 break;
             }
@@ -166,7 +166,7 @@ class CompanyPanelController extends Controller
         if (!$company) return;
 
         $event = $this->eventModel->find($eventId);
-        if (!$event || $event['status'] !== 'published') {
+        if (!$event || !in_array($event['status'], ['published', 'active'])) {
             $this->notFound();
             return;
         }

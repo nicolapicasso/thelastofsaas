@@ -45,7 +45,7 @@ class EventsController extends Controller
     {
         $event = $this->eventModel->findBySlug($slug);
 
-        if (!$event || $event['status'] !== 'published') {
+        if (!$event || !in_array($event['status'], ['published', 'active'])) {
             $this->notFound();
             return;
         }
@@ -85,7 +85,7 @@ class EventsController extends Controller
     {
         $event = $this->eventModel->findBySlug($slug);
 
-        if (!$event || $event['status'] !== 'published') {
+        if (!$event || !in_array($event['status'], ['published', 'active'])) {
             $this->notFound();
             return;
         }
@@ -103,7 +103,7 @@ class EventsController extends Controller
     {
         $event = $this->eventModel->findBySlug($slug);
 
-        if (!$event || $event['status'] !== 'published') {
+        if (!$event || !in_array($event['status'], ['published', 'active'])) {
             $this->notFound();
             return;
         }
