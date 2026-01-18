@@ -130,6 +130,31 @@ a:hover {
     font-weight: 600;
 }
 
+.sidebar-site-name {
+    margin-top: var(--spacing-sm);
+    font-size: 12px;
+    color: var(--color-gray-400);
+    font-weight: 500;
+}
+
+.sidebar-brand {
+    font-size: 11px;
+    color: var(--color-gray-500);
+    text-align: center;
+    margin-bottom: var(--spacing-sm);
+}
+
+/* Section titles in navigation */
+.nav-section-title {
+    padding: var(--spacing-md) var(--spacing-lg) var(--spacing-xs);
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--color-gray-500);
+    margin-top: var(--spacing-sm);
+}
+
 /* Sidebar Navigation */
 .sidebar-nav {
     flex: 1;
@@ -815,6 +840,14 @@ code {
     font-weight: 600;
     margin-left: var(--spacing-sm);
     vertical-align: middle;
+}
+
+.login-site-name {
+    display: block;
+    margin-top: var(--spacing-md);
+    font-size: 14px;
+    color: var(--color-gray-500);
+    font-weight: 500;
 }
 
 .login-form .form-group {

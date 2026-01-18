@@ -4,9 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="robots" content="noindex, nofollow">
-    <title><?= htmlspecialchars($title ?? 'Admin') ?> - We're Sinapsis CMS</title>
+    <title><?= htmlspecialchars($title ?? 'Admin') ?> - The Last of SaaS</title>
     <meta name="csrf-token" content="<?= $_csrf_token ?? '' ?>">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link rel="stylesheet" href="/assets/css/admin.css">
     <?php if (isset($extraCss)): ?>
     <?= $extraCss ?>
@@ -18,9 +18,10 @@
         <aside class="admin-sidebar">
             <div class="sidebar-header">
                 <a href="/admin" class="sidebar-logo">
-                    <span class="logo-text">Sinapsis</span>
+                    <span class="logo-text">Conectoma</span>
                     <span class="logo-badge">CMS</span>
                 </a>
+                <div class="sidebar-site-name">The Last of SaaS</div>
             </div>
 
             <nav class="sidebar-nav">
@@ -31,6 +32,69 @@
                             Dashboard
                         </a>
                     </li>
+
+                    <!-- TLOS Core -->
+                    <li class="nav-section-title">TLOS</li>
+                    <li>
+                        <a href="/admin/events" class="<?= strpos($_SERVER['REQUEST_URI'], '/admin/events') !== false ? 'active' : '' ?>">
+                            <span class="nav-icon"><i class="fas fa-calendar-alt"></i></span>
+                            Eventos
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/admin/sponsors" class="<?= strpos($_SERVER['REQUEST_URI'], '/admin/sponsors') !== false ? 'active' : '' ?>">
+                            <span class="nav-icon"><i class="fas fa-handshake"></i></span>
+                            Sponsors
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/admin/companies" class="<?= strpos($_SERVER['REQUEST_URI'], '/admin/companies') !== false ? 'active' : '' ?>">
+                            <span class="nav-icon"><i class="fas fa-building"></i></span>
+                            Empresas
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/admin/tickets" class="<?= strpos($_SERVER['REQUEST_URI'], '/admin/tickets') !== false ? 'active' : '' ?>">
+                            <span class="nav-icon"><i class="fas fa-ticket-alt"></i></span>
+                            Tickets
+                        </a>
+                    </li>
+                    <li class="has-submenu <?= strpos($_SERVER['REQUEST_URI'], '/admin/meetings') !== false ? 'open' : '' ?>">
+                        <a href="#" class="submenu-toggle" onclick="this.parentElement.classList.toggle('open'); return false;">
+                            <span class="nav-icon"><i class="fas fa-users"></i></span>
+                            Reuniones
+                            <i class="fas fa-chevron-down submenu-arrow"></i>
+                        </a>
+                        <ul class="nav-submenu">
+                            <li>
+                                <a href="/admin/meetings/blocks" class="<?= strpos($_SERVER['REQUEST_URI'], '/admin/meetings/blocks') !== false ? 'active' : '' ?>">
+                                    <span class="nav-icon"><i class="fas fa-th-large"></i></span>
+                                    Bloques
+                                </a>
+                            </li>
+                            <li>
+                                <a href="/admin/meetings/assignments" class="<?= strpos($_SERVER['REQUEST_URI'], '/admin/meetings/assignments') !== false ? 'active' : '' ?>">
+                                    <span class="nav-icon"><i class="fas fa-calendar-check"></i></span>
+                                    Asignaciones
+                                </a>
+                            </li>
+                            <li>
+                                <a href="/admin/meetings/matching" class="<?= strpos($_SERVER['REQUEST_URI'], '/admin/meetings/matching') !== false ? 'active' : '' ?>">
+                                    <span class="nav-icon"><i class="fas fa-random"></i></span>
+                                    Matching
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+                    <li>
+                        <a href="/admin/votings" class="<?= strpos($_SERVER['REQUEST_URI'], '/admin/votings') !== false ? 'active' : '' ?>">
+                            <span class="nav-icon"><i class="fas fa-vote-yea"></i></span>
+                            Votaciones
+                        </a>
+                    </li>
+
+                    <!-- Content -->
+                    <li class="nav-section-title">Contenido</li>
                     <li>
                         <a href="/admin/pages" class="<?= strpos($_SERVER['REQUEST_URI'], '/admin/pages') !== false ? 'active' : '' ?>">
                             <span class="nav-icon"><i class="fas fa-file-alt"></i></span>
@@ -44,81 +108,9 @@
                         </a>
                     </li>
                     <li>
-                        <a href="/admin/categories" class="<?= strpos($_SERVER['REQUEST_URI'], '/admin/categories') !== false ? 'active' : '' ?>">
-                            <span class="nav-icon"><i class="fas fa-folder"></i></span>
-                            Categorías
-                        </a>
-                    </li>
-                    <li class="nav-divider"></li>
-                    <li>
-                        <a href="/admin/services" class="<?= strpos($_SERVER['REQUEST_URI'], '/admin/services') !== false ? 'active' : '' ?>">
-                            <span class="nav-icon"><i class="fas fa-cogs"></i></span>
-                            Servicios
-                        </a>
-                    </li>
-                    <li>
-                        <a href="/admin/tools" class="<?= strpos($_SERVER['REQUEST_URI'], '/admin/tools') !== false ? 'active' : '' ?>">
-                            <span class="nav-icon"><i class="fas fa-tools"></i></span>
-                            Herramientas
-                        </a>
-                    </li>
-                    <li>
-                        <a href="/admin/clients" class="<?= strpos($_SERVER['REQUEST_URI'], '/admin/clients') !== false ? 'active' : '' ?>">
-                            <span class="nav-icon"><i class="fas fa-building"></i></span>
-                            Clientes
-                        </a>
-                    </li>
-                    <li>
-                        <a href="/admin/cases" class="<?= strpos($_SERVER['REQUEST_URI'], '/admin/cases') !== false ? 'active' : '' ?>">
-                            <span class="nav-icon"><i class="fas fa-trophy"></i></span>
-                            Casos de Éxito
-                        </a>
-                    </li>
-                    <li class="nav-divider"></li>
-                    <li>
                         <a href="/admin/faqs" class="<?= strpos($_SERVER['REQUEST_URI'], '/admin/faqs') !== false ? 'active' : '' ?>">
                             <span class="nav-icon"><i class="fas fa-question-circle"></i></span>
                             FAQs
-                        </a>
-                    </li>
-                    <li>
-                        <a href="/admin/team" class="<?= strpos($_SERVER['REQUEST_URI'], '/admin/team') !== false ? 'active' : '' ?>">
-                            <span class="nav-icon"><i class="fas fa-users"></i></span>
-                            Equipo
-                        </a>
-                    </li>
-                    <li class="has-submenu <?= strpos($_SERVER['REQUEST_URI'], '/admin/landing') !== false ? 'open' : '' ?>">
-                        <a href="#" class="submenu-toggle" onclick="this.parentElement.classList.toggle('open'); return false;">
-                            <span class="nav-icon"><i class="fas fa-rocket"></i></span>
-                            Landing Pages
-                            <i class="fas fa-chevron-down submenu-arrow"></i>
-                        </a>
-                        <ul class="nav-submenu">
-                            <li>
-                                <a href="/admin/landing-themes" class="<?= strpos($_SERVER['REQUEST_URI'], '/admin/landing-themes') !== false ? 'active' : '' ?>">
-                                    <span class="nav-icon"><i class="fas fa-layer-group"></i></span>
-                                    Temáticas
-                                </a>
-                            </li>
-                            <li>
-                                <a href="/admin/landings" class="<?= strpos($_SERVER['REQUEST_URI'], '/admin/landings') !== false ? 'active' : '' ?>">
-                                    <span class="nav-icon"><i class="fas fa-file-code"></i></span>
-                                    Landings
-                                </a>
-                            </li>
-                        </ul>
-                    </li>
-                    <li class="nav-divider"></li>
-                    <li>
-                        <a href="/admin/translations" class="<?= strpos($_SERVER['REQUEST_URI'], '/admin/translations') !== false ? 'active' : '' ?>">
-                            <span class="nav-icon"><i class="fas fa-globe"></i></span>
-                            Traducciones
-                        </a>
-                    </li>
-                    <li>
-                        <a href="/admin/seo" class="<?= strpos($_SERVER['REQUEST_URI'], '/admin/seo') !== false ? 'active' : '' ?>">
-                            <span class="nav-icon"><i class="fas fa-search"></i></span>
-                            SEO
                         </a>
                     </li>
                     <li>
@@ -133,6 +125,9 @@
                             Menús
                         </a>
                     </li>
+
+                    <!-- System -->
+                    <li class="nav-section-title">Sistema</li>
                     <li>
                         <a href="/admin/users" class="<?= strpos($_SERVER['REQUEST_URI'], '/admin/users') !== false ? 'active' : '' ?>">
                             <span class="nav-icon"><i class="fas fa-user-cog"></i></span>
@@ -140,15 +135,22 @@
                         </a>
                     </li>
                     <li>
+                        <a href="/admin/tlos-settings" class="<?= strpos($_SERVER['REQUEST_URI'], '/admin/tlos-settings') !== false ? 'active' : '' ?>">
+                            <span class="nav-icon"><i class="fas fa-sliders-h"></i></span>
+                            Configuración TLOS
+                        </a>
+                    </li>
+                    <li>
                         <a href="/admin/settings" class="<?= strpos($_SERVER['REQUEST_URI'], '/admin/settings') !== false ? 'active' : '' ?>">
                             <span class="nav-icon"><i class="fas fa-cog"></i></span>
-                            Configuración
+                            Configuración General
                         </a>
                     </li>
                 </ul>
             </nav>
 
             <div class="sidebar-footer">
+                <div class="sidebar-brand">by We're Sinapsis</div>
                 <a href="/" target="_blank" class="sidebar-link">Ver sitio</a>
                 <a href="/admin/logout" class="sidebar-link logout">Cerrar sesión</a>
             </div>

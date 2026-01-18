@@ -4,15 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="robots" content="noindex, nofollow">
-    <title>Login - We're Sinapsis CMS</title>
+    <title>Login - The Last of SaaS</title>
     <link rel="stylesheet" href="/assets/css/admin.css">
 </head>
 <body class="login-body">
     <div class="login-wrapper">
         <div class="login-card">
             <div class="login-header">
-                <h1 class="login-logo">Sinapsis</h1>
+                <h1 class="login-logo">Conectoma</h1>
                 <span class="login-badge">CMS</span>
+                <div class="login-site-name">The Last of SaaS</div>
             </div>
 
             <?php if (isset($flash) && $flash): ?>
@@ -61,7 +62,7 @@
         </div>
 
         <p class="login-footer">
-            We're Sinapsis CMS &copy; <?= date('Y') ?>
+            Conectoma CMS by We're Sinapsis &copy; <?= date('Y') ?>
         </p>
     </div>
 </body>
