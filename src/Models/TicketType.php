@@ -107,7 +107,8 @@ class TicketType extends Model
     public function incrementSold(int $ticketTypeId, int $amount = 1): bool
     {
         $sql = "UPDATE ticket_types SET quantity_sold = quantity_sold + ? WHERE id = ?";
-        $result = $this->db->execute($sql, [$amount, $ticketTypeId]);
+        $this->db->query($sql, [$amount, $ticketTypeId]);
+        $result = true;
 
         // Check if sold out
         $ticketType = $this->find($ticketTypeId);
@@ -126,7 +127,8 @@ class TicketType extends Model
     public function decrementSold(int $ticketTypeId, int $amount = 1): bool
     {
         $sql = "UPDATE ticket_types SET quantity_sold = GREATEST(0, quantity_sold - ?) WHERE id = ?";
-        $result = $this->db->execute($sql, [$amount, $ticketTypeId]);
+        $this->db->query($sql, [$amount, $ticketTypeId]);
+        $result = true;
 
         // Reactivate if was sold out
         $ticketType = $this->find($ticketTypeId);

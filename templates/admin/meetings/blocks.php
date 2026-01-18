@@ -61,11 +61,11 @@
             </div>
             <div class="form-group">
                 <label>Duración (min)</label>
-                <input type="number" name="meeting_duration" class="form-control" value="15" min="5" max="60">
+                <input type="number" name="slot_duration" class="form-control" value="15" min="5" max="60">
             </div>
             <div class="form-group">
                 <label>Mesas</label>
-                <input type="number" name="simultaneous_meetings" class="form-control" value="10" min="1" max="50">
+                <input type="number" name="total_rooms" class="form-control" value="10" min="1" max="50">
             </div>
             <div class="form-group">
                 <label>Ubicación</label>
@@ -108,8 +108,8 @@
                             <td><strong><?= htmlspecialchars($block['name']) ?></strong></td>
                             <td><?= date('d/m/Y', strtotime($block['event_date'])) ?></td>
                             <td><?= substr($block['start_time'], 0, 5) ?> - <?= substr($block['end_time'], 0, 5) ?></td>
-                            <td><?= $block['meeting_duration'] ?> min</td>
-                            <td><?= $block['simultaneous_meetings'] ?></td>
+                            <td><?= $block['slot_duration'] ?? 15 ?> min</td>
+                            <td><?= $block['total_rooms'] ?? 10 ?></td>
                             <td>
                                 <span class="badge badge-info"><?= $block['stats']['assigned_slots'] ?? 0 ?></span> /
                                 <span class="text-muted"><?= $block['stats']['total_slots'] ?? 0 ?></span>

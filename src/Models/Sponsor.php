@@ -137,7 +137,8 @@ class Sponsor extends Model
                 VALUES (?, ?, ?, ?)
                 ON DUPLICATE KEY UPDATE priority = VALUES(priority)";
 
-        return $this->db->execute($sql, [$eventId, $sponsorId, $companyId, $priority]);
+        $this->db->query($sql, [$eventId, $sponsorId, $companyId, $priority]);
+        return true;
     }
 
     /**
@@ -146,7 +147,8 @@ class Sponsor extends Model
     public function deselectCompany(int $sponsorId, int $companyId, int $eventId): bool
     {
         $sql = "DELETE FROM sponsor_selections WHERE sponsor_id = ? AND company_id = ? AND event_id = ?";
-        return $this->db->execute($sql, [$sponsorId, $companyId, $eventId]);
+        $this->db->query($sql, [$sponsorId, $companyId, $eventId]);
+        return true;
     }
 
     /**
@@ -190,7 +192,8 @@ class Sponsor extends Model
                 VALUES (?, ?, ?, ?)
                 ON DUPLICATE KEY UPDATE message = VALUES(message), sent_at = CURRENT_TIMESTAMP";
 
-        return $this->db->execute($sql, [$eventId, $sponsorId, $companyId, $message]);
+        $this->db->query($sql, [$eventId, $sponsorId, $companyId, $message]);
+        return true;
     }
 
     /**

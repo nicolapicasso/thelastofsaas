@@ -118,7 +118,8 @@ class Event extends Model
                 VALUES (?, ?, ?, ?)
                 ON DUPLICATE KEY UPDATE level = VALUES(level), display_order = VALUES(display_order)";
 
-        return $this->db->execute($sql, [$eventId, $sponsorId, $level, $order]);
+        $this->db->query($sql, [$eventId, $sponsorId, $level, $order]);
+        return true;
     }
 
     /**
@@ -127,7 +128,8 @@ class Event extends Model
     public function removeSponsor(int $eventId, int $sponsorId): bool
     {
         $sql = "DELETE FROM event_sponsors WHERE event_id = ? AND sponsor_id = ?";
-        return $this->db->execute($sql, [$eventId, $sponsorId]);
+        $this->db->query($sql, [$eventId, $sponsorId]);
+        return true;
     }
 
     /**
@@ -136,7 +138,8 @@ class Event extends Model
     public function updateSponsorLevel(int $eventId, int $sponsorId, string $level): bool
     {
         $sql = "UPDATE event_sponsors SET level = ? WHERE event_id = ? AND sponsor_id = ?";
-        return $this->db->execute($sql, [$level, $eventId, $sponsorId]);
+        $this->db->query($sql, [$level, $eventId, $sponsorId]);
+        return true;
     }
 
     /**

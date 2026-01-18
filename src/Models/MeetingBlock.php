@@ -83,7 +83,7 @@ class MeetingBlock extends Model
             for ($room = 1; $room <= $rooms; $room++) {
                 $sql = "INSERT IGNORE INTO meeting_slots (block_id, slot_time, room_number, room_name)
                         VALUES (?, ?, ?, ?)";
-                $this->db->execute($sql, [
+                $this->db->query($sql, [
                     $blockId,
                     $slotTime,
                     $room,
@@ -163,7 +163,8 @@ class MeetingBlock extends Model
         }
 
         $sql = "DELETE FROM meeting_slots WHERE block_id = ?";
-        return $this->db->execute($sql, [$blockId]);
+        $this->db->query($sql, [$blockId]);
+        return true;
     }
 
     /**

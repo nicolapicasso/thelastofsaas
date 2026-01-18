@@ -74,7 +74,8 @@ class Company extends Model
     public function registerForEvent(int $companyId, int $eventId): bool
     {
         $sql = "INSERT IGNORE INTO event_companies (event_id, company_id) VALUES (?, ?)";
-        return $this->db->execute($sql, [$eventId, $companyId]);
+        $this->db->query($sql, [$eventId, $companyId]);
+        return true;
     }
 
     /**
@@ -135,7 +136,8 @@ class Company extends Model
                 VALUES (?, ?, ?, ?)
                 ON DUPLICATE KEY UPDATE priority = VALUES(priority)";
 
-        return $this->db->execute($sql, [$eventId, $companyId, $sponsorId, $priority]);
+        $this->db->query($sql, [$eventId, $companyId, $sponsorId, $priority]);
+        return true;
     }
 
     /**
@@ -144,7 +146,8 @@ class Company extends Model
     public function deselectSponsor(int $companyId, int $sponsorId, int $eventId): bool
     {
         $sql = "DELETE FROM company_selections WHERE company_id = ? AND sponsor_id = ? AND event_id = ?";
-        return $this->db->execute($sql, [$companyId, $sponsorId, $eventId]);
+        $this->db->query($sql, [$companyId, $sponsorId, $eventId]);
+        return true;
     }
 
     /**
@@ -212,7 +215,8 @@ class Company extends Model
     public function addSaasUsage(int $companyId, int $sponsorId): bool
     {
         $sql = "INSERT IGNORE INTO company_saas_usage (company_id, sponsor_id) VALUES (?, ?)";
-        return $this->db->execute($sql, [$companyId, $sponsorId]);
+        $this->db->query($sql, [$companyId, $sponsorId]);
+        return true;
     }
 
     /**
@@ -221,7 +225,8 @@ class Company extends Model
     public function removeSaasUsage(int $companyId, int $sponsorId): bool
     {
         $sql = "DELETE FROM company_saas_usage WHERE company_id = ? AND sponsor_id = ?";
-        return $this->db->execute($sql, [$companyId, $sponsorId]);
+        $this->db->query($sql, [$companyId, $sponsorId]);
+        return true;
     }
 
     /**
