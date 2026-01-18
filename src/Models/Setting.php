@@ -15,10 +15,10 @@ class Setting extends Model
     protected string $table = 'settings';
 
     protected array $fillable = [
-        'key',
-        'value',
-        'type',
-        'group',
+        'setting_key',
+        'setting_value',
+        'setting_type',
+        'setting_group',
     ];
 
     /**
@@ -26,13 +26,13 @@ class Setting extends Model
      */
     public function get(string $key, mixed $default = null): mixed
     {
-        $setting = $this->first(['key' => $key]);
+        $setting = $this->first(['setting_key' => $key]);
 
         if (!$setting) {
             return $default;
         }
 
-        return $this->castValue($setting['value'], $setting['type']);
+        return $this->castValue($setting['setting_value'], $setting['setting_type']);
     }
 
     /**
@@ -40,13 +40,13 @@ class Setting extends Model
      */
     public function set(string $key, mixed $value, string $type = 'string', string $group = 'general'): void
     {
-        $existing = $this->first(['key' => $key]);
+        $existing = $this->first(['setting_key' => $key]);
 
         $data = [
-            'key' => $key,
-            'value' => $this->serializeValue($value, $type),
-            'type' => $type,
-            'group' => $group,
+            'setting_key' => $key,
+            'setting_value' => $this->serializeValue($value, $type),
+            'setting_type' => $type,
+            'setting_group' => $group,
         ];
 
         if ($existing) {
@@ -61,11 +61,11 @@ class Setting extends Model
      */
     public function getAll(): array
     {
-        $settings = $this->all(['key' => 'ASC']);
+        $settings = $this->all(['setting_key' => 'ASC']);
         $result = [];
 
         foreach ($settings as $setting) {
-            $result[$setting['key']] = $this->castValue($setting['value'], $setting['type']);
+            $result[$setting['setting_key']] = $this->castValue($setting['setting_value'], $setting['setting_type']);
         }
 
         return $result;
@@ -76,13 +76,13 @@ class Setting extends Model
      */
     public function getByGroup(string $group): array
     {
-        $settings = $this->where(['group' => $group], ['key' => 'ASC']);
+        $settings = $this->where(['setting_group' => $group], ['setting_key' => 'ASC']);
         $result = [];
 
         foreach ($settings as $setting) {
-            $result[$setting['key']] = [
-                'value' => $this->castValue($setting['value'], $setting['type']),
-                'type' => $setting['type'],
+            $result[$setting['setting_key']] = [
+                'value' => $this->castValue($setting['setting_value'], $setting['setting_type']),
+                'type' => $setting['setting_type'],
             ];
         }
 
@@ -95,18 +95,18 @@ class Setting extends Model
     public function updateBatch(array $settings): void
     {
         foreach ($settings as $key => $value) {
-            $existing = $this->first(['key' => $key]);
+            $existing = $this->first(['setting_key' => $key]);
             if ($existing) {
                 $this->update($existing['id'], [
-                    'value' => $this->serializeValue($value, $existing['type']),
+                    'setting_value' => $this->serializeValue($value, $existing['setting_type']),
                 ]);
             } else {
                 // Create new setting if it doesn't exist
                 $this->create([
-                    'key' => $key,
-                    'value' => $this->serializeValue($value, 'string'),
-                    'type' => 'string',
-                    'group' => $this->guessGroup($key),
+                    'setting_key' => $key,
+                    'setting_value' => $this->serializeValue($value, 'string'),
+                    'setting_type' => 'string',
+                    'setting_group' => $this->guessGroup($key),
                 ]);
             }
         }
