@@ -198,11 +198,12 @@
     z-index: 1000;
 }
 .modal-content {
-    background: var(--bg-primary);
+    background: var(--bg-primary, #ffffff);
     border-radius: 8px;
     width: 90%;
     max-height: 90vh;
     overflow-y: auto;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
 }
 .modal-header {
     display: flex;

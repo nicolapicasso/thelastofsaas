@@ -78,6 +78,22 @@ abstract class Controller
     }
 
     /**
+     * Return JSON success response
+     */
+    protected function jsonSuccess(array $data = []): void
+    {
+        $this->json(array_merge(['success' => true], $data));
+    }
+
+    /**
+     * Return JSON error response
+     */
+    protected function jsonError(string $message, array $data = []): void
+    {
+        $this->json(array_merge(['success' => false, 'error' => $message], $data), 400);
+    }
+
+    /**
      * Redirect to URL
      */
     protected function redirect(string $url, int $statusCode = 302): void

@@ -144,6 +144,7 @@
 
         /* Main Content */
         .panel-main {
+            margin-left: 280px;
             padding: 2rem 3rem;
             min-height: 100vh;
         }
