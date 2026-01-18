@@ -502,13 +502,4 @@ class CompanyPanelController extends Controller
 
         return $company;
     }
-
-    /**
-     * Check if request is AJAX
-     */
-    private function isAjax(): bool
-    {
-        return !empty($_SERVER['HTTP_X_REQUESTED_WITH']) &&
-               strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest';
-    }
 }
