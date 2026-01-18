@@ -498,26 +498,27 @@
 
                 <div class="matches-list">
                     <?php foreach ($matches as $match): ?>
+                        <?php $matchDate = max($match['company_selected_at'] ?? '', $match['sponsor_selected_at'] ?? ''); ?>
                         <div class="match-item">
-                            <?php if (!empty($match['sponsor_logo'])): ?>
-                                <img src="<?= htmlspecialchars($match['sponsor_logo']) ?>" alt="" class="match-logo">
+                            <?php if (!empty($match['logo_url'])): ?>
+                                <img src="<?= htmlspecialchars($match['logo_url']) ?>" alt="" class="match-logo">
                             <?php else: ?>
                                 <div class="logo-placeholder"><i class="fas fa-rocket"></i></div>
                             <?php endif; ?>
                             <div class="match-info">
-                                <h3><?= htmlspecialchars($match['sponsor_name']) ?></h3>
-                                <?php if (!empty($match['sponsor_tagline'])): ?>
-                                    <span class="tagline"><?= htmlspecialchars($match['sponsor_tagline']) ?></span>
+                                <h3><?= htmlspecialchars($match['name'] ?? '') ?></h3>
+                                <?php if (!empty($match['tagline'])): ?>
+                                    <span class="tagline"><?= htmlspecialchars($match['tagline']) ?></span>
                                 <?php endif; ?>
-                                <?php if (!empty($match['matched_at'])): ?>
-                                    <small class="match-date">MATCH: <?= date('d/m/Y', strtotime($match['matched_at'])) ?></small>
+                                <?php if ($matchDate): ?>
+                                    <small class="match-date">MATCH: <?= date('d/m/Y', strtotime($matchDate)) ?></small>
                                 <?php endif; ?>
                             </div>
                             <div class="match-status">
                                 <span class="status-badge"><i class="fas fa-check-circle"></i> MATCH</span>
                             </div>
                             <div class="match-actions">
-                                <a href="/empresa/sponsors/<?= $event['id'] ?>/<?= $match['sponsor_id'] ?>" class="btn btn-outline">
+                                <a href="/empresa/sponsors/<?= $event['id'] ?>/<?= $match['id'] ?>" class="btn btn-outline">
                                     <i class="fas fa-eye"></i> VER
                                 </a>
                             </div>
@@ -532,17 +533,19 @@
                             <?php foreach ($meetings as $meeting): ?>
                                 <div class="meeting-item">
                                     <div class="meeting-time">
-                                        <span class="time"><?= date('H:i', strtotime($meeting['start_time'])) ?></span>
-                                        <span class="date"><?= strtoupper(date('d M', strtotime($meeting['meeting_date']))) ?></span>
+                                        <span class="time"><?= date('H:i', strtotime($meeting['slot_time'] ?? '')) ?></span>
+                                        <span class="date"><?= strtoupper(date('d M', strtotime($meeting['event_date'] ?? ''))) ?></span>
                                     </div>
                                     <div class="meeting-info">
-                                        <strong><?= htmlspecialchars($meeting['sponsor_name']) ?></strong>
-                                        <?php if (!empty($meeting['location'])): ?>
-                                            <span><i class="fas fa-map-marker-alt"></i> <?= htmlspecialchars($meeting['location']) ?></span>
+                                        <strong><?= htmlspecialchars($meeting['sponsor_name'] ?? '') ?></strong>
+                                        <?php if (!empty($meeting['room_name'])): ?>
+                                            <span><i class="fas fa-map-marker-alt"></i> <?= htmlspecialchars($meeting['room_name']) ?></span>
+                                        <?php elseif (!empty($meeting['room_number'])): ?>
+                                            <span><i class="fas fa-map-marker-alt"></i> Mesa <?= $meeting['room_number'] ?></span>
                                         <?php endif; ?>
                                     </div>
                                     <div class="meeting-duration">
-                                        <i class="fas fa-clock"></i> <?= $meeting['duration'] ?? 30 ?> MIN
+                                        <i class="fas fa-clock"></i> <?= $meeting['slot_duration'] ?? 30 ?> MIN
                                     </div>
                                 </div>
                             <?php endforeach; ?>
