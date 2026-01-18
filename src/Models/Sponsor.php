@@ -155,7 +155,7 @@ class Sponsor extends Model
     public function getMeetings(int $sponsorId, int $eventId): array
     {
         $sql = "SELECT ma.*, ms.slot_time, ms.room_number, ms.room_name,
-                       mb.name as block_name, mb.event_date, mb.meeting_duration,
+                       mb.name as block_name, mb.event_date, mb.slot_duration,
                        c.name as company_name, c.logo_url as company_logo
                 FROM meeting_assignments ma
                 INNER JOIN meeting_slots ms ON ma.slot_id = ms.id

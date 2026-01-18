@@ -17,12 +17,11 @@ class MeetingBlock extends Model
     protected array $fillable = [
         'event_id',
         'name',
-        'description',
         'event_date',
         'start_time',
         'end_time',
-        'meeting_duration',
-        'simultaneous_meetings',
+        'slot_duration',
+        'total_rooms',
         'location',
         'active',
     ];
@@ -72,8 +71,8 @@ class MeetingBlock extends Model
 
         $startTime = strtotime($block['start_time']);
         $endTime = strtotime($block['end_time']);
-        $duration = (int) $block['meeting_duration'] * 60; // Convert to seconds
-        $rooms = (int) $block['simultaneous_meetings'];
+        $duration = (int) $block['slot_duration'] * 60; // Convert to seconds
+        $rooms = (int) $block['total_rooms'];
 
         $slotsCreated = 0;
         $currentTime = $startTime;
@@ -183,8 +182,8 @@ class MeetingBlock extends Model
     {
         $startTime = strtotime($block['start_time']);
         $endTime = strtotime($block['end_time']);
-        $duration = (int) $block['meeting_duration'] * 60;
-        $rooms = (int) $block['simultaneous_meetings'];
+        $duration = (int) $block['slot_duration'] * 60;
+        $rooms = (int) $block['total_rooms'];
 
         $timeSlots = 0;
         $currentTime = $startTime;

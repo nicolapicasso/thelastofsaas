@@ -27,7 +27,7 @@ class MeetingSlot extends Model
      */
     public function getWithBlock(int $slotId): ?array
     {
-        $sql = "SELECT ms.*, mb.name as block_name, mb.event_id, mb.event_date, mb.meeting_duration
+        $sql = "SELECT ms.*, mb.name as block_name, mb.event_id, mb.event_date, mb.slot_duration
                 FROM meeting_slots ms
                 INNER JOIN meeting_blocks mb ON ms.block_id = mb.id
                 WHERE ms.id = ?";
@@ -69,7 +69,7 @@ class MeetingSlot extends Model
         $sponsorMaxSimultaneous = (int) ($sponsor['max_simultaneous_meetings'] ?? 1);
         $companyMaxSimultaneous = $companyModel->getMaxSimultaneousMeetings($company);
 
-        $sql = "SELECT ms.*, mb.name as block_name, mb.event_date, mb.meeting_duration, mb.location
+        $sql = "SELECT ms.*, mb.name as block_name, mb.event_date, mb.slot_duration, mb.location
                 FROM meeting_slots ms
                 INNER JOIN meeting_blocks mb ON ms.block_id = mb.id
                 LEFT JOIN meeting_assignments ma ON ms.id = ma.slot_id AND ma.status != 'cancelled'

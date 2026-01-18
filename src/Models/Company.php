@@ -82,7 +82,7 @@ class Company extends Model
      */
     public function getSelectedSponsors(int $companyId, int $eventId): array
     {
-        $sql = "SELECT s.*, cs.selected_at, cs.priority, es.priority_level
+        $sql = "SELECT s.*, cs.selected_at, cs.priority, es.level
                 FROM sponsors s
                 INNER JOIN company_selections cs ON s.id = cs.sponsor_id
                 LEFT JOIN event_sponsors es ON s.id = es.sponsor_id AND es.event_id = cs.event_id
@@ -97,12 +97,12 @@ class Company extends Model
      */
     public function getInterestedSponsors(int $companyId, int $eventId): array
     {
-        $sql = "SELECT s.*, ss.selected_at, es.priority_level
+        $sql = "SELECT s.*, ss.selected_at, es.level
                 FROM sponsors s
                 INNER JOIN sponsor_selections ss ON s.id = ss.sponsor_id
                 LEFT JOIN event_sponsors es ON s.id = es.sponsor_id AND es.event_id = ss.event_id
                 WHERE ss.company_id = ? AND ss.event_id = ? AND s.active = 1
-                ORDER BY FIELD(es.priority_level, 'platinum', 'gold', 'silver', 'bronze'), ss.selected_at ASC";
+                ORDER BY FIELD(es.level, 'platinum', 'gold', 'silver', 'bronze'), ss.selected_at ASC";
 
         return $this->db->fetchAll($sql, [$companyId, $eventId]);
     }
@@ -115,13 +115,13 @@ class Company extends Model
         $sql = "SELECT s.*,
                        cs.selected_at as company_selected_at,
                        ss.selected_at as sponsor_selected_at,
-                       es.priority_level
+                       es.level
                 FROM sponsors s
                 INNER JOIN company_selections cs ON s.id = cs.sponsor_id
                 INNER JOIN sponsor_selections ss ON s.id = ss.sponsor_id AND ss.company_id = cs.company_id AND ss.event_id = cs.event_id
                 LEFT JOIN event_sponsors es ON s.id = es.sponsor_id AND es.event_id = cs.event_id
                 WHERE cs.company_id = ? AND cs.event_id = ? AND s.active = 1
-                ORDER BY FIELD(es.priority_level, 'platinum', 'gold', 'silver', 'bronze')";
+                ORDER BY FIELD(es.level, 'platinum', 'gold', 'silver', 'bronze')";
 
         return $this->db->fetchAll($sql, [$companyId, $eventId]);
     }
@@ -153,7 +153,7 @@ class Company extends Model
     public function getMeetings(int $companyId, int $eventId): array
     {
         $sql = "SELECT ma.*, ms.slot_time, ms.room_number, ms.room_name,
-                       mb.name as block_name, mb.event_date, mb.meeting_duration,
+                       mb.name as block_name, mb.event_date, mb.slot_duration,
                        s.name as sponsor_name, s.logo_url as sponsor_logo
                 FROM meeting_assignments ma
                 INNER JOIN meeting_slots ms ON ma.slot_id = ms.id

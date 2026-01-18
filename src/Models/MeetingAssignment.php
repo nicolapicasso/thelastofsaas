@@ -36,9 +36,9 @@ class MeetingAssignment extends Model
     {
         $sql = "SELECT ma.*,
                        ms.slot_time, ms.room_number, ms.room_name,
-                       mb.name as block_name, mb.event_date, mb.meeting_duration, mb.location,
-                       s.name as sponsor_name, s.logo_url as sponsor_logo, s.contact_emails as sponsor_emails,
-                       c.name as company_name, c.logo_url as company_logo, c.contact_emails as company_emails
+                       mb.name as block_name, mb.event_date, mb.slot_duration, mb.location,
+                       s.name as sponsor_name, s.logo_url as sponsor_logo, s.contact_email as sponsor_email,
+                       c.name as company_name, c.logo_url as company_logo, c.contact_email as company_email
                 FROM meeting_assignments ma
                 INNER JOIN meeting_slots ms ON ma.slot_id = ms.id
                 INNER JOIN meeting_blocks mb ON ms.block_id = mb.id
@@ -56,7 +56,7 @@ class MeetingAssignment extends Model
     {
         $sql = "SELECT ma.*,
                        ms.slot_time, ms.room_number, ms.room_name,
-                       mb.name as block_name, mb.event_date, mb.meeting_duration,
+                       mb.name as block_name, mb.event_date, mb.slot_duration,
                        s.name as sponsor_name, c.name as company_name
                 FROM meeting_assignments ma
                 INNER JOIN meeting_slots ms ON ma.slot_id = ms.id
@@ -76,7 +76,7 @@ class MeetingAssignment extends Model
     {
         $sql = "SELECT ma.*,
                        ms.slot_time, ms.room_number, ms.room_name,
-                       mb.name as block_name, mb.event_date, mb.meeting_duration,
+                       mb.name as block_name, mb.event_date, mb.slot_duration,
                        c.name as company_name, c.logo_url as company_logo
                 FROM meeting_assignments ma
                 INNER JOIN meeting_slots ms ON ma.slot_id = ms.id
@@ -95,7 +95,7 @@ class MeetingAssignment extends Model
     {
         $sql = "SELECT ma.*,
                        ms.slot_time, ms.room_number, ms.room_name,
-                       mb.name as block_name, mb.event_date, mb.meeting_duration,
+                       mb.name as block_name, mb.event_date, mb.slot_duration,
                        s.name as sponsor_name, s.logo_url as sponsor_logo
                 FROM meeting_assignments ma
                 INNER JOIN meeting_slots ms ON ma.slot_id = ms.id

@@ -85,10 +85,9 @@ class MeetingsController extends Controller
         $eventDate = $this->getPost('event_date');
         $startTime = $this->getPost('start_time');
         $endTime = $this->getPost('end_time');
-        $meetingDuration = (int) $this->getPost('meeting_duration', 15);
-        $simultaneousMeetings = (int) $this->getPost('simultaneous_meetings', 10);
+        $slotDuration = (int) $this->getPost('slot_duration', 15);
+        $totalRooms = (int) $this->getPost('total_rooms', 10);
         $location = Sanitizer::string($this->getPost('location'));
-        $description = $this->getPost('description');
 
         if (!$eventId || empty($name) || empty($eventDate) || empty($startTime) || empty($endTime)) {
             $this->flash('error', 'Faltan campos obligatorios.');
@@ -102,10 +101,9 @@ class MeetingsController extends Controller
                 'event_date' => $eventDate,
                 'start_time' => $startTime,
                 'end_time' => $endTime,
-                'meeting_duration' => $meetingDuration,
-                'simultaneous_meetings' => $simultaneousMeetings,
+                'slot_duration' => $slotDuration,
+                'total_rooms' => $totalRooms,
                 'location' => $location ?: null,
-                'description' => $description ?: null,
                 'active' => 1,
             ]);
 
@@ -144,10 +142,9 @@ class MeetingsController extends Controller
             'event_date' => $this->getPost('event_date'),
             'start_time' => $this->getPost('start_time'),
             'end_time' => $this->getPost('end_time'),
-            'meeting_duration' => (int) $this->getPost('meeting_duration', 15),
-            'simultaneous_meetings' => (int) $this->getPost('simultaneous_meetings', 10),
+            'slot_duration' => (int) $this->getPost('slot_duration', 15),
+            'total_rooms' => (int) $this->getPost('total_rooms', 10),
             'location' => Sanitizer::string($this->getPost('location')) ?: null,
-            'description' => $this->getPost('description') ?: null,
             'active' => Sanitizer::bool($this->getPost('active')) ? 1 : 0,
         ];
 
@@ -401,7 +398,7 @@ class MeetingsController extends Controller
             fputcsv($output, [
                 $assignment['event_date'],
                 $assignment['slot_time'],
-                $assignment['meeting_duration'] . ' min',
+                ($assignment['slot_duration'] ?? 15) . ' min',
                 $assignment['room_name'] ?? 'Mesa ' . $assignment['room_number'],
                 $assignment['block_name'],
                 $assignment['sponsor_name'],
