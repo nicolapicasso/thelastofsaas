@@ -43,46 +43,41 @@ class AuthController extends Controller
      */
     public function login(): void
     {
-        // Validate CSRF - temporarily disabled for debugging
-        // if (!$this->validateCsrf()) {
-        //     $this->flash('error', 'Sesión expirada. Por favor, inténtalo de nuevo.');
-        //     $this->redirect('/admin/login');
-        //     return;
-        // }
+        // DEBUG - Show what's happening
+        echo "<h2>DEBUG LOGIN</h2>";
+        echo "<pre>";
+        echo "Email recibido: " . htmlspecialchars($_POST['email'] ?? 'NO EMAIL') . "\n";
+        echo "Password recibido: " . (empty($_POST['password']) ? 'VACÍO' : 'TIENE VALOR') . "\n";
 
         $email = Sanitizer::email($this->getPost('email'));
         $password = $this->getPost('password', '');
-        $remember = Sanitizer::bool($this->getPost('remember'));
 
-        // Validate inputs
-        if (empty($email) || empty($password)) {
-            $this->flash('error', 'Por favor, introduce tu email y contraseña.');
-            $this->redirect('/admin/login');
-        }
+        echo "Email sanitizado: " . htmlspecialchars($email) . "\n";
 
         // Find user
         $user = $this->userModel->findByEmail($email);
 
         if (!$user) {
-            $this->flash('error', 'Credenciales incorrectas.');
-            $this->redirect('/admin/login');
+            echo "Usuario NO encontrado en base de datos\n";
+            echo "</pre>";
+            exit;
         }
 
-        // Check if user is active
-        if (!$user['is_active']) {
-            $this->flash('error', 'Tu cuenta está desactivada. Contacta con el administrador.');
-            $this->redirect('/admin/login');
-        }
+        echo "Usuario encontrado: " . htmlspecialchars($user['name']) . "\n";
+        echo "is_active: " . ($user['is_active'] ?? 'NULL') . "\n";
+        echo "Hash en DB: " . htmlspecialchars(substr($user['password'], 0, 20)) . "...\n";
 
         // Verify password
-        error_log("Verifying password for user: " . $user['email']);
-        if (!$this->userModel->verifyPassword($password, $user['password'])) {
-            error_log("Password verification FAILED");
-            $this->flash('error', 'Credenciales incorrectas.');
-            $this->redirect('/admin/login');
-            return;
+        $passwordOk = $this->userModel->verifyPassword($password, $user['password']);
+        echo "Password verificado: " . ($passwordOk ? 'SÍ' : 'NO') . "\n";
+        echo "</pre>";
+
+        if (!$passwordOk) {
+            echo "<p style='color:red'>La contraseña no coincide</p>";
+            exit;
         }
-        error_log("Password verification PASSED");
+
+        echo "<p style='color:green'>TODO OK - Redirigiendo al dashboard...</p>";
 
         // Create session
         $_SESSION['user_id'] = $user['id'];
@@ -92,11 +87,6 @@ class AuthController extends Controller
 
         // Update last login
         $this->userModel->updateLastLogin($user['id']);
-
-        // Handle remember me (optional - would need cookie implementation)
-        if ($remember) {
-            // Could implement persistent login cookie here
-        }
 
         // Regenerate session ID for security
         session_regenerate_id(true);
