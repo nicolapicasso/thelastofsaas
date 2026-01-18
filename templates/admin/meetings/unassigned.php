@@ -138,45 +138,54 @@
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0,0,0,0.5);
+    background: rgba(0,0,0,0.6);
     display: flex;
     align-items: center;
     justify-content: center;
     z-index: 1000;
 }
 .modal-content {
-    background: var(--bg-primary);
+    background: var(--bg-primary, #ffffff);
     border-radius: 8px;
     width: 90%;
     max-height: 90vh;
     overflow-y: auto;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
 }
 .modal-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
     padding: 1rem 1.5rem;
-    border-bottom: 1px solid var(--border-color);
+    border-bottom: 1px solid var(--border-color, #e5e7eb);
+    background: var(--bg-secondary, #f9fafb);
 }
 .modal-header h3 {
     margin: 0;
+    color: var(--text-primary, #111827);
 }
 .modal-close {
     background: none;
     border: none;
     font-size: 1.5rem;
     cursor: pointer;
-    color: var(--text-secondary);
+    color: var(--text-secondary, #6b7280);
+}
+.modal-close:hover {
+    color: var(--text-primary, #111827);
 }
 .modal-body {
     padding: 1.5rem;
+    background: var(--bg-primary, #ffffff);
+    color: var(--text-primary, #111827);
 }
 .modal-footer {
     display: flex;
     justify-content: flex-end;
     gap: 0.5rem;
     padding: 1rem 1.5rem;
-    border-top: 1px solid var(--border-color);
+    border-top: 1px solid var(--border-color, #e5e7eb);
+    background: var(--bg-secondary, #f9fafb);
 }
 </style>
 
@@ -202,16 +211,35 @@ function openAssignModal(sponsorId, companyId, sponsorName, companyName) {
         .then(data => {
             document.getElementById('slotsLoading').style.display = 'none';
 
-            if (data.slots && data.slots.length > 0) {
+            // Check if we have slots (count > 0 or non-empty grouped object)
+            const hasSlots = data.count > 0 || (data.slots && Object.keys(data.slots).length > 0);
+
+            if (hasSlots) {
                 const select = document.getElementById('slotSelect');
                 select.innerHTML = '<option value="">-- Seleccionar --</option>';
 
-                data.slots.forEach(slot => {
-                    const option = document.createElement('option');
-                    option.value = slot.id;
-                    option.textContent = `${slot.event_date} ${slot.slot_time.substring(0,5)} - ${slot.room_name || 'Mesa ' + slot.room_number} (${slot.block_name})`;
-                    select.appendChild(option);
-                });
+                // Handle grouped slots (object with block names as keys)
+                if (typeof data.slots === 'object' && !Array.isArray(data.slots)) {
+                    Object.keys(data.slots).forEach(blockName => {
+                        const optgroup = document.createElement('optgroup');
+                        optgroup.label = blockName;
+                        data.slots[blockName].forEach(slot => {
+                            const option = document.createElement('option');
+                            option.value = slot.id;
+                            option.textContent = `${slot.slot_time.substring(0,5)} - ${slot.room_name || 'Mesa ' + slot.room_number}`;
+                            optgroup.appendChild(option);
+                        });
+                        select.appendChild(optgroup);
+                    });
+                } else if (Array.isArray(data.slots)) {
+                    // Handle flat array of slots
+                    data.slots.forEach(slot => {
+                        const option = document.createElement('option');
+                        option.value = slot.id;
+                        option.textContent = `${slot.event_date} ${slot.slot_time.substring(0,5)} - ${slot.room_name || 'Mesa ' + slot.room_number} (${slot.block_name})`;
+                        select.appendChild(option);
+                    });
+                }
 
                 document.getElementById('slotsContainer').style.display = 'block';
             } else {
