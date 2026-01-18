@@ -42,7 +42,7 @@ class EventsController extends Controller
             $conditions['status'] = $status;
         }
 
-        $result = $this->eventModel->paginate($page, 20, $conditions, ['event_date' => 'DESC']);
+        $result = $this->eventModel->paginate($page, 20, $conditions, ['start_date' => 'DESC']);
 
         $this->renderAdmin('events/index', [
             'title' => 'Eventos',
