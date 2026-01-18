@@ -87,7 +87,7 @@ class SponsorsController extends Controller
         }
 
         // Generate slug and unique code
-        $data['slug'] = Slug::generate($data['name'], 'sponsors');
+        $data['slug'] = Slug::unique($data['name'], 'sponsors');
         $data['code'] = substr(strtoupper(bin2hex(random_bytes(5))), 0, 10);
 
         try {
@@ -153,7 +153,7 @@ class SponsorsController extends Controller
 
         // Update slug if name changed
         if ($data['name'] !== $sponsor['name']) {
-            $data['slug'] = Slug::generate($data['name'], 'sponsors', (int) $id);
+            $data['slug'] = Slug::unique($data['name'], 'sponsors', 'slug', (int) $id);
         }
 
         try {
@@ -255,7 +255,7 @@ class SponsorsController extends Controller
             try {
                 $sponsorData = [
                     'name' => $data['name'],
-                    'slug' => Slug::generate($data['name'], 'sponsors'),
+                    'slug' => Slug::unique($data['name'], 'sponsors'),
                     'tagline' => $data['tagline'] ?? null,
                     'description' => $data['description'] ?? null,
                     'website' => $data['website'] ?? null,

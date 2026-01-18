@@ -89,7 +89,7 @@ class EventsController extends Controller
         }
 
         // Generate slug
-        $data['slug'] = Slug::generate($data['name'], 'events');
+        $data['slug'] = Slug::unique($data['name'], 'events');
 
         try {
             $eventId = $this->eventModel->create($data);
@@ -161,7 +161,7 @@ class EventsController extends Controller
 
         // Update slug if name changed
         if ($data['name'] !== $event['name']) {
-            $data['slug'] = Slug::generate($data['name'], 'events', (int) $id);
+            $data['slug'] = Slug::unique($data['name'], 'events', 'slug', (int) $id);
         }
 
         try {

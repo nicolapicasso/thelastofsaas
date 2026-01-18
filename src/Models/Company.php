@@ -69,6 +69,29 @@ class Company extends Model
     }
 
     /**
+     * Get events for a company
+     */
+    public function getEvents(int $companyId): array
+    {
+        $sql = "SELECT e.*
+                FROM events e
+                INNER JOIN event_companies ec ON e.id = ec.event_id
+                WHERE ec.company_id = ?
+                ORDER BY e.start_date DESC";
+
+        return $this->db->fetchAll($sql, [$companyId]);
+    }
+
+    /**
+     * Check if company participates in an event
+     */
+    public function participatesInEvent(int $companyId, int $eventId): bool
+    {
+        $sql = "SELECT COUNT(*) FROM event_companies WHERE company_id = ? AND event_id = ?";
+        return (int) $this->db->fetchColumn($sql, [$companyId, $eventId]) > 0;
+    }
+
+    /**
      * Register company for an event
      */
     public function registerForEvent(int $companyId, int $eventId): bool

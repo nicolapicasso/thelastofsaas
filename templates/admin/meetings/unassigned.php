@@ -33,14 +33,14 @@
             </select>
         </div>
         <div>
-            <strong><?= count($unassigned) ?></strong> <span class="text-muted">matches sin asignar</span>
+            <strong><?= count($matches) ?></strong> <span class="text-muted">matches sin asignar</span>
         </div>
     </div>
 </div>
 
 <!-- Unassigned Matches -->
 <div class="card">
-    <?php if (empty($unassigned)): ?>
+    <?php if (empty($matches)): ?>
         <div class="empty-state">
             <i class="fas fa-check-circle"></i>
             <h3>Todos los matches asignados</h3>
@@ -59,7 +59,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <?php foreach ($unassigned as $match): ?>
+                    <?php foreach ($matches as $match): ?>
                         <tr>
                             <td>
                                 <div style="display: flex; align-items: center; gap: 0.75rem;">

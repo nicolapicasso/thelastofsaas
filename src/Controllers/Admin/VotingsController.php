@@ -99,7 +99,7 @@ class VotingsController extends Controller
         }
 
         // Generate slug
-        $data['slug'] = Slug::generate($data['title'], 'votings');
+        $data['slug'] = Slug::unique($data['title'], 'votings');
 
         try {
             $votingId = $this->votingModel->create($data);
@@ -168,7 +168,7 @@ class VotingsController extends Controller
 
         // Update slug if title changed
         if ($data['title'] !== $voting['title']) {
-            $data['slug'] = Slug::generate($data['title'], 'votings', (int) $id);
+            $data['slug'] = Slug::unique($data['title'], 'votings', 'slug', (int) $id);
         }
 
         try {

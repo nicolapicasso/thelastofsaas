@@ -103,7 +103,7 @@ class CompaniesController extends Controller
         }
 
         // Generate slug and unique code
-        $data['slug'] = Slug::generate($data['name'], 'companies');
+        $data['slug'] = Slug::unique($data['name'], 'companies');
         $data['code'] = substr(strtoupper(bin2hex(random_bytes(5))), 0, 10);
 
         try {
@@ -181,7 +181,7 @@ class CompaniesController extends Controller
 
         // Update slug if name changed
         if ($data['name'] !== $company['name']) {
-            $data['slug'] = Slug::generate($data['name'], 'companies', (int) $id);
+            $data['slug'] = Slug::unique($data['name'], 'companies', 'slug', (int) $id);
         }
 
         try {
@@ -307,7 +307,7 @@ class CompaniesController extends Controller
             try {
                 $companyData = [
                     'name' => $data['name'],
-                    'slug' => Slug::generate($data['name'], 'companies'),
+                    'slug' => Slug::unique($data['name'], 'companies'),
                     'description' => $data['description'] ?? null,
                     'website' => $data['website'] ?? null,
                     'logo_url' => $data['logo_url'] ?? null,
