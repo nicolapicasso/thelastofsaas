@@ -4,7 +4,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: sinapsis-web
+    container_name: tlos-web
     ports:
       - "8080:80"
     volumes:
@@ -14,51 +14,52 @@ services:
       - db
     environment:
       - DB_HOST=db
-      - DB_NAME=sinapsis
-      - DB_USER=sinapsis
-      - DB_PASS=sinapsis_secret
+      - DB_NAME=tlos
+      - DB_USER=tlos
+      - DB_PASS=tlos_secret
       - APP_ENV=development
       - APP_DEBUG=true
     networks:
-      - sinapsis-network
+      - tlos-network
 
   # MySQL 8.0
   db:
     image: mysql:8.0
-    container_name: sinapsis-db
+    container_name: tlos-db
     ports:
       - "3306:3306"
     environment:
       MYSQL_ROOT_PASSWORD: root_secret
-      MYSQL_DATABASE: sinapsis
-      MYSQL_USER: sinapsis
-      MYSQL_PASSWORD: sinapsis_secret
+      MYSQL_DATABASE: tlos
+      MYSQL_USER: tlos
+      MYSQL_PASSWORD: tlos_secret
     volumes:
       - db_data:/var/lib/mysql
       - ./database/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql
       - ./database/seed.sql:/docker-entrypoint-initdb.d/02-seed.sql
+      - ./migrations/021_tlos_core_schema.sql:/docker-entrypoint-initdb.d/03-tlos-schema.sql
     command: --default-authentication-plugin=mysql_native_password
     networks:
-      - sinapsis-network
+      - tlos-network
 
   # phpMyAdmin (opcional, para gestionar la BD)
   phpmyadmin:
     image: phpmyadmin:latest
-    container_name: sinapsis-phpmyadmin
+    container_name: tlos-phpmyadmin
     ports:
       - "8081:80"
     environment:
       PMA_HOST: db
-      PMA_USER: sinapsis
-      PMA_PASSWORD: sinapsis_secret
+      PMA_USER: tlos
+      PMA_PASSWORD: tlos_secret
     depends_on:
       - db
     networks:
-      - sinapsis-network
+      - tlos-network
 
 volumes:
   db_data:
 
 networks:
-  sinapsis-network:
+  tlos-network:
     driver: bridge

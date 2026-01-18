@@ -1,0 +1,458 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Controllers\Admin;
+
+use App\Core\Controller;
+use App\Models\Company;
+use App\Models\Sponsor;
+use App\Helpers\Sanitizer;
+use App\Helpers\Slug;
+
+/**
+ * Companies Controller
+ * TLOS - The Last of SaaS
+ */
+class CompaniesController extends Controller
+{
+    private Company $companyModel;
+    private Sponsor $sponsorModel;
+
+    public function __construct()
+    {
+        parent::__construct();
+        $this->companyModel = new Company();
+        $this->sponsorModel = new Sponsor();
+    }
+
+    /**
+     * List all companies
+     */
+    public function index(): void
+    {
+        $this->requireAuth();
+
+        $page = (int) ($this->getQuery('page', 1));
+        $active = $this->getQuery('active');
+        $industry = $this->getQuery('industry');
+
+        $conditions = [];
+        if ($active !== null && $active !== '') {
+            $conditions['active'] = (int) $active;
+        }
+        if ($industry) {
+            $conditions['industry'] = $industry;
+        }
+
+        $result = $this->companyModel->paginate($page, 20, $conditions, ['name' => 'ASC']);
+
+        // Get unique industries for filter
+        $allCompanies = $this->companyModel->all();
+        $industries = array_unique(array_filter(array_column($allCompanies, 'industry')));
+        sort($industries);
+
+        $this->renderAdmin('companies/index', [
+            'title' => 'Empresas',
+            'companies' => $result['data'],
+            'pagination' => $result['pagination'],
+            'industries' => $industries,
+            'currentActive' => $active,
+            'currentIndustry' => $industry,
+            'sizeOptions' => Company::getSizeOptions(),
+            'flash' => $this->getFlash(),
+        ]);
+    }
+
+    /**
+     * Show create form
+     */
+    public function create(): void
+    {
+        $this->requireAuth();
+
+        $sponsors = $this->sponsorModel->getActive();
+
+        $this->renderAdmin('companies/form', [
+            'title' => 'Nueva Empresa',
+            'company' => null,
+            'saasUsage' => [],
+            'sponsors' => $sponsors,
+            'sizeOptions' => Company::getSizeOptions(),
+            'csrf_token' => $this->generateCsrf(),
+        ]);
+    }
+
+    /**
+     * Store new company
+     */
+    public function store(): void
+    {
+        $this->requireAuth();
+
+        if (!$this->validateCsrf()) {
+            $this->flash('error', 'Sesión expirada.');
+            $this->redirect('/admin/companies/create');
+        }
+
+        $data = $this->validateCompanyData();
+
+        if (isset($data['errors'])) {
+            $this->flash('error', implode('<br>', $data['errors']));
+            $this->redirect('/admin/companies/create');
+        }
+
+        // Generate slug and unique code
+        $data['slug'] = Slug::generate($data['name'], 'companies');
+        $data['unique_code'] = Company::generateUniqueCode();
+
+        try {
+            $companyId = $this->companyModel->create($data);
+
+            // Save SaaS usage
+            $saasIds = $this->getPost('saas_usage', []);
+            if (is_array($saasIds)) {
+                foreach ($saasIds as $sponsorId) {
+                    $this->companyModel->addSaasUsage($companyId, (int) $sponsorId);
+                }
+            }
+
+            $this->flash('success', 'Empresa creada correctamente.');
+            $this->redirect('/admin/companies/' . $companyId . '/edit');
+        } catch (\Exception $e) {
+            $this->flash('error', 'Error al crear la empresa: ' . $e->getMessage());
+            $this->redirect('/admin/companies/create');
+        }
+    }
+
+    /**
+     * Show edit form
+     */
+    public function edit(string $id): void
+    {
+        $this->requireAuth();
+
+        $company = $this->companyModel->find((int) $id);
+
+        if (!$company) {
+            $this->flash('error', 'Empresa no encontrada.');
+            $this->redirect('/admin/companies');
+        }
+
+        $saasUsage = $this->companyModel->getSaasUsage((int) $id);
+        $sponsors = $this->sponsorModel->getActive();
+
+        $this->renderAdmin('companies/form', [
+            'title' => 'Editar Empresa',
+            'company' => $company,
+            'saasUsage' => $saasUsage,
+            'saasUsageIds' => array_column($saasUsage, 'id'),
+            'sponsors' => $sponsors,
+            'sizeOptions' => Company::getSizeOptions(),
+            'csrf_token' => $this->generateCsrf(),
+        ]);
+    }
+
+    /**
+     * Update company
+     */
+    public function update(string $id): void
+    {
+        $this->requireAuth();
+
+        if (!$this->validateCsrf()) {
+            $this->flash('error', 'Sesión expirada.');
+            $this->redirect('/admin/companies/' . $id . '/edit');
+        }
+
+        $company = $this->companyModel->find((int) $id);
+
+        if (!$company) {
+            $this->flash('error', 'Empresa no encontrada.');
+            $this->redirect('/admin/companies');
+        }
+
+        $data = $this->validateCompanyData();
+
+        if (isset($data['errors'])) {
+            $this->flash('error', implode('<br>', $data['errors']));
+            $this->redirect('/admin/companies/' . $id . '/edit');
+        }
+
+        // Update slug if name changed
+        if ($data['name'] !== $company['name']) {
+            $data['slug'] = Slug::generate($data['name'], 'companies', (int) $id);
+        }
+
+        try {
+            $this->companyModel->update((int) $id, $data);
+
+            // Update SaaS usage
+            $currentUsage = $this->companyModel->getSaasUsage((int) $id);
+            $currentIds = array_column($currentUsage, 'id');
+            $newIds = $this->getPost('saas_usage', []);
+            if (!is_array($newIds)) $newIds = [];
+            $newIds = array_map('intval', $newIds);
+
+            // Remove old
+            foreach ($currentIds as $sponsorId) {
+                if (!in_array($sponsorId, $newIds)) {
+                    $this->companyModel->removeSaasUsage((int) $id, $sponsorId);
+                }
+            }
+
+            // Add new
+            foreach ($newIds as $sponsorId) {
+                if (!in_array($sponsorId, $currentIds)) {
+                    $this->companyModel->addSaasUsage((int) $id, $sponsorId);
+                }
+            }
+
+            $this->flash('success', 'Empresa actualizada correctamente.');
+            $this->redirect('/admin/companies/' . $id . '/edit');
+        } catch (\Exception $e) {
+            $this->flash('error', 'Error al actualizar la empresa: ' . $e->getMessage());
+            $this->redirect('/admin/companies/' . $id . '/edit');
+        }
+    }
+
+    /**
+     * Delete company
+     */
+    public function destroy(string $id): void
+    {
+        $this->requireAuth();
+
+        if (!$this->validateCsrf()) {
+            $this->flash('error', 'Sesión expirada.');
+            $this->redirect('/admin/companies');
+        }
+
+        $company = $this->companyModel->find((int) $id);
+
+        if (!$company) {
+            $this->flash('error', 'Empresa no encontrada.');
+            $this->redirect('/admin/companies');
+        }
+
+        try {
+            $this->companyModel->delete((int) $id);
+            $this->flash('success', 'Empresa eliminada correctamente.');
+        } catch (\Exception $e) {
+            $this->flash('error', 'Error al eliminar la empresa: ' . $e->getMessage());
+        }
+
+        $this->redirect('/admin/companies');
+    }
+
+    /**
+     * Import companies from CSV
+     */
+    public function import(): void
+    {
+        $this->requireAuth();
+
+        if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+            $this->renderAdmin('companies/import', [
+                'title' => 'Importar Empresas',
+                'csrf_token' => $this->generateCsrf(),
+            ]);
+            return;
+        }
+
+        if (!$this->validateCsrf()) {
+            $this->flash('error', 'Sesión expirada.');
+            $this->redirect('/admin/companies/import');
+        }
+
+        if (!isset($_FILES['csv_file']) || $_FILES['csv_file']['error'] !== UPLOAD_ERR_OK) {
+            $this->flash('error', 'Error al subir el archivo.');
+            $this->redirect('/admin/companies/import');
+        }
+
+        $file = $_FILES['csv_file']['tmp_name'];
+        $content = file_get_contents($file);
+        $lines = explode("\n", $content);
+
+        if (count($lines) < 2) {
+            $this->flash('error', 'El archivo está vacío o no tiene datos.');
+            $this->redirect('/admin/companies/import');
+        }
+
+        // Detect delimiter
+        $firstLine = $lines[0];
+        $delimiter = $this->detectDelimiter($firstLine);
+
+        $headers = str_getcsv($firstLine, $delimiter);
+        $headers = array_map('trim', $headers);
+        $headers = array_map('strtolower', $headers);
+
+        $imported = 0;
+        $errors = [];
+
+        for ($i = 1; $i < count($lines); $i++) {
+            $line = trim($lines[$i]);
+            if (empty($line)) continue;
+
+            $row = str_getcsv($line, $delimiter);
+            if (count($row) !== count($headers)) continue;
+
+            $data = array_combine($headers, $row);
+
+            if (empty($data['name'])) {
+                $errors[] = "Línea {$i}: nombre vacío";
+                continue;
+            }
+
+            try {
+                $companyData = [
+                    'name' => $data['name'],
+                    'slug' => Slug::generate($data['name'], 'companies'),
+                    'description' => $data['description'] ?? null,
+                    'website' => $data['website'] ?? null,
+                    'logo_url' => $data['logo_url'] ?? null,
+                    'contact_emails' => $data['contact_emails'] ?? null,
+                    'company_size' => $data['company_size'] ?? null,
+                    'industry' => $data['industry'] ?? null,
+                    'notes' => $data['notes'] ?? null,
+                    'unique_code' => Company::generateUniqueCode(),
+                    'active' => 1,
+                ];
+
+                $this->companyModel->create($companyData);
+                $imported++;
+            } catch (\Exception $e) {
+                $errors[] = "Línea {$i}: " . $e->getMessage();
+            }
+        }
+
+        $message = "Importadas {$imported} empresas.";
+        if (!empty($errors)) {
+            $message .= " Errores: " . count($errors);
+        }
+
+        $this->flash($imported > 0 ? 'success' : 'error', $message);
+        $this->redirect('/admin/companies');
+    }
+
+    /**
+     * Regenerate unique code
+     */
+    public function regenerateCode(string $id): void
+    {
+        $this->requireAuth();
+
+        if (!$this->validateCsrf()) {
+            $this->jsonError('Sesión expirada.');
+            return;
+        }
+
+        try {
+            $newCode = Company::generateUniqueCode();
+            $this->companyModel->update((int) $id, ['unique_code' => $newCode]);
+            $this->jsonSuccess(['code' => $newCode, 'message' => 'Código regenerado.']);
+        } catch (\Exception $e) {
+            $this->jsonError('Error al regenerar código: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Export companies to CSV
+     */
+    public function export(): void
+    {
+        $this->requireAuth();
+
+        $companies = $this->companyModel->all(['name' => 'ASC']);
+
+        $filename = 'empresas_' . date('Y-m-d') . '.csv';
+
+        header('Content-Type: text/csv; charset=utf-8');
+        header('Content-Disposition: attachment; filename="' . $filename . '"');
+
+        $output = fopen('php://output', 'w');
+        fprintf($output, chr(0xEF) . chr(0xBB) . chr(0xBF)); // BOM for Excel
+
+        // Headers
+        fputcsv($output, ['name', 'description', 'website', 'logo_url', 'contact_emails', 'company_size', 'industry', 'notes', 'unique_code', 'active'], ';');
+
+        foreach ($companies as $company) {
+            fputcsv($output, [
+                $company['name'],
+                $company['description'],
+                $company['website'],
+                $company['logo_url'],
+                $company['contact_emails'],
+                $company['company_size'],
+                $company['industry'],
+                $company['notes'],
+                $company['unique_code'],
+                $company['active'],
+            ], ';');
+        }
+
+        fclose($output);
+        exit;
+    }
+
+    /**
+     * Detect CSV delimiter
+     */
+    private function detectDelimiter(string $line): string
+    {
+        $delimiters = [';', ',', "\t"];
+        $counts = [];
+
+        foreach ($delimiters as $d) {
+            $counts[$d] = substr_count($line, $d);
+        }
+
+        return array_search(max($counts), $counts);
+    }
+
+    /**
+     * Validate company form data
+     */
+    private function validateCompanyData(): array
+    {
+        $errors = [];
+
+        $name = Sanitizer::string($this->getPost('name'));
+        $description = $this->getPost('description');
+        $shortDescription = Sanitizer::string($this->getPost('short_description'));
+        $website = Sanitizer::url($this->getPost('website'));
+        $logoUrl = Sanitizer::url($this->getPost('logo_url'));
+        $contactEmails = Sanitizer::string($this->getPost('contact_emails'));
+        $contactPhone = Sanitizer::string($this->getPost('contact_phone'));
+        $companySize = $this->getPost('company_size');
+        $industry = Sanitizer::string($this->getPost('industry'));
+        $notes = $this->getPost('notes');
+        $active = Sanitizer::bool($this->getPost('active'));
+
+        if (empty($name)) {
+            $errors[] = 'El nombre es obligatorio.';
+        }
+
+        if ($companySize && !array_key_exists($companySize, Company::getSizeOptions())) {
+            $errors[] = 'Tamaño de empresa no válido.';
+        }
+
+        if (!empty($errors)) {
+            return ['errors' => $errors];
+        }
+
+        return [
+            'name' => $name,
+            'description' => $description ?: null,
+            'short_description' => $shortDescription ?: null,
+            'website' => $website ?: null,
+            'logo_url' => $logoUrl ?: null,
+            'contact_emails' => $contactEmails ?: null,
+            'contact_phone' => $contactPhone ?: null,
+            'company_size' => $companySize ?: null,
+            'industry' => $industry ?: null,
+            'notes' => $notes ?: null,
+            'active' => $active ? 1 : 0,
+        ];
+    }
+}
