@@ -382,6 +382,16 @@ class SponsorsController extends Controller
             $errors[] = 'El nombre es obligatorio.';
         }
 
+        // Handle logo file upload
+        if (isset($_FILES['logo_file']) && $_FILES['logo_file']['error'] === UPLOAD_ERR_OK) {
+            $uploadResult = $this->handleLogoUpload($_FILES['logo_file'], 'sponsors');
+            if (isset($uploadResult['error'])) {
+                $errors[] = $uploadResult['error'];
+            } else {
+                $logoUrl = $uploadResult['url'];
+            }
+        }
+
         if (!empty($errors)) {
             return ['errors' => $errors];
         }
@@ -400,5 +410,53 @@ class SponsorsController extends Controller
             'linkedin_url' => $linkedinUrl ?: null,
             'twitter_url' => $twitterUrl ?: null,
         ];
+    }
+
+    /**
+     * Handle logo file upload
+     */
+    private function handleLogoUpload(array $file, string $type): array
+    {
+        $allowedTypes = ['image/png', 'image/jpeg', 'image/gif', 'image/svg+xml', 'image/webp'];
+        $maxSize = 2 * 1024 * 1024; // 2MB
+
+        // Validate file type
+        $finfo = new \finfo(FILEINFO_MIME_TYPE);
+        $mimeType = $finfo->file($file['tmp_name']);
+
+        if (!in_array($mimeType, $allowedTypes)) {
+            return ['error' => 'Tipo de archivo no permitido. Use PNG, JPG, GIF, SVG o WebP.'];
+        }
+
+        // Validate file size
+        if ($file['size'] > $maxSize) {
+            return ['error' => 'El archivo es demasiado grande. Maximo 2MB.'];
+        }
+
+        // Create upload directory if it doesn't exist
+        $uploadDir = dirname(__DIR__, 3) . '/public/uploads/logos/' . $type;
+        if (!is_dir($uploadDir)) {
+            mkdir($uploadDir, 0755, true);
+        }
+
+        // Generate unique filename
+        $extension = match($mimeType) {
+            'image/png' => 'png',
+            'image/jpeg' => 'jpg',
+            'image/gif' => 'gif',
+            'image/svg+xml' => 'svg',
+            'image/webp' => 'webp',
+            default => 'png'
+        };
+        $filename = uniqid($type . '_') . '.' . $extension;
+        $filepath = $uploadDir . '/' . $filename;
+
+        // Move uploaded file
+        if (!move_uploaded_file($file['tmp_name'], $filepath)) {
+            return ['error' => 'Error al guardar el archivo.'];
+        }
+
+        // Return the URL
+        return ['url' => '/uploads/logos/' . $type . '/' . $filename];
     }
 }

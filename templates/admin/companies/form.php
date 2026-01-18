@@ -20,7 +20,7 @@ $isEdit = isset($company) && $company;
     <div class="alert alert-<?= $flash['type'] ?>"><?= $flash['message'] ?></div>
 <?php endif; ?>
 
-<form method="POST" action="<?= $isEdit ? '/admin/companies/' . $company['id'] : '/admin/companies' ?>">
+<form method="POST" action="<?= $isEdit ? '/admin/companies/' . $company['id'] : '/admin/companies' ?>" enctype="multipart/form-data">
     <input type="hidden" name="_csrf_token" value="<?= $csrf_token ?>">
 
     <div class="form-grid">
@@ -129,11 +129,17 @@ $isEdit = isset($company) && $company;
             <?php endif; ?>
 
             <div class="form-group">
-                <label for="logo_url">URL del Logo</label>
-                <div class="input-with-button">
-                    <input type="text" id="logo_url" name="logo_url" class="form-control" value="<?= htmlspecialchars($company['logo_url'] ?? '') ?>">
-                    <button type="button" class="btn btn-outline" onclick="openMediaPicker('logo_url')"><i class="fas fa-image"></i></button>
-                </div>
+                <label for="logo_file">Logo</label>
+                <?php if (!empty($company['logo_url'])): ?>
+                    <div class="logo-preview" style="margin-bottom: 10px;">
+                        <img src="<?= htmlspecialchars($company['logo_url']) ?>" alt="Logo actual"
+                             style="max-width: 120px; max-height: 60px; border: 1px solid #ddd; border-radius: 4px; padding: 5px;">
+                    </div>
+                <?php endif; ?>
+                <input type="file" id="logo_file" name="logo_file" class="form-control"
+                       accept="image/png,image/jpeg,image/gif,image/svg+xml,image/webp">
+                <small class="form-help">PNG, JPG, GIF, SVG, WebP. Max: 2MB</small>
+                <input type="hidden" name="logo_url" value="<?= htmlspecialchars($company['logo_url'] ?? '') ?>">
             </div>
 
             <button type="submit" class="btn btn-primary btn-block"><i class="fas fa-save"></i> <?= $isEdit ? 'Guardar' : 'Crear' ?></button>

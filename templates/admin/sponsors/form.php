@@ -24,7 +24,7 @@ $isEdit = isset($sponsor) && $sponsor;
     </div>
 <?php endif; ?>
 
-<form method="POST" action="<?= $isEdit ? '/admin/sponsors/' . $sponsor['id'] : '/admin/sponsors' ?>">
+<form method="POST" action="<?= $isEdit ? '/admin/sponsors/' . $sponsor['id'] : '/admin/sponsors' ?>" enctype="multipart/form-data">
     <input type="hidden" name="_csrf_token" value="<?= $csrf_token ?>">
 
     <div class="form-grid">
@@ -60,14 +60,17 @@ $isEdit = isset($sponsor) && $sponsor;
                                    placeholder="https://...">
                         </div>
                         <div class="form-group">
-                            <label for="logo_url">URL del Logo</label>
-                            <div class="input-with-button">
-                                <input type="text" id="logo_url" name="logo_url" class="form-control"
-                                       value="<?= htmlspecialchars($sponsor['logo_url'] ?? '') ?>">
-                                <button type="button" class="btn btn-outline" onclick="openMediaPicker('logo_url')">
-                                    <i class="fas fa-image"></i>
-                                </button>
-                            </div>
+                            <label for="logo_file">Logo</label>
+                            <?php if (!empty($sponsor['logo_url'])): ?>
+                                <div class="logo-preview" style="margin-bottom: 10px;">
+                                    <img src="<?= htmlspecialchars($sponsor['logo_url']) ?>" alt="Logo actual"
+                                         style="max-width: 150px; max-height: 80px; border: 1px solid #ddd; border-radius: 4px; padding: 5px;">
+                                </div>
+                            <?php endif; ?>
+                            <input type="file" id="logo_file" name="logo_file" class="form-control"
+                                   accept="image/png,image/jpeg,image/gif,image/svg+xml,image/webp">
+                            <small class="form-help">Formatos: PNG, JPG, GIF, SVG, WebP. Max: 2MB</small>
+                            <input type="hidden" name="logo_url" value="<?= htmlspecialchars($sponsor['logo_url'] ?? '') ?>">
                         </div>
                     </div>
                 </div>
