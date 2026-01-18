@@ -92,6 +92,18 @@
                             Votaciones
                         </a>
                     </li>
+                    <li>
+                        <a href="/admin/activities" class="<?= strpos($_SERVER['REQUEST_URI'], '/admin/activities') !== false ? 'active' : '' ?>">
+                            <span class="nav-icon"><i class="fas fa-calendar-day"></i></span>
+                            Actividades
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/admin/rooms" class="<?= strpos($_SERVER['REQUEST_URI'], '/admin/rooms') !== false ? 'active' : '' ?>">
+                            <span class="nav-icon"><i class="fas fa-door-open"></i></span>
+                            Salas
+                        </a>
+                    </li>
 
                     <!-- Content -->
                     <li class="nav-section-title">Contenido</li>
