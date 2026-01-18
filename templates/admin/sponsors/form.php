@@ -176,10 +176,13 @@ $isEdit = isset($sponsor) && $sponsor;
                     <div class="form-group">
                         <input type="text" class="form-control" value="<?= htmlspecialchars($sponsor['code'] ?? '') ?>" readonly
                                style="font-family: monospace; font-size: 0.85rem;">
-                        <small class="form-help">URL de seleccion:</small>
+                        <small class="form-help">URL de acceso directo:</small>
                         <code style="font-size: 0.75rem; word-break: break-all;">
-                            /seleccion-sponsor?code=<?= htmlspecialchars($sponsor['code'] ?? '') ?>
+                            /sponsor/login?code=<?= htmlspecialchars($sponsor['code'] ?? '') ?>
                         </code>
+                        <button type="button" class="btn btn-outline btn-sm mt-2" onclick="copyToClipboard('/sponsor/login?code=<?= htmlspecialchars($sponsor['code'] ?? '') ?>')">
+                            <i class="fas fa-copy"></i> Copiar enlace
+                        </button>
                     </div>
                     <button type="button" class="btn btn-outline btn-sm btn-block" onclick="regenerateCode()">
                         <i class="fas fa-sync"></i> Regenerar Codigo
@@ -229,6 +232,15 @@ function regenerateCode() {
         } else {
             alert(data.error || 'Error');
         }
+    });
+}
+
+function copyToClipboard(path) {
+    const url = window.location.origin + path;
+    navigator.clipboard.writeText(url).then(() => {
+        alert('Enlace copiado al portapapeles');
+    }).catch(() => {
+        prompt('Copia este enlace:', url);
     });
 }
 </script>

@@ -121,9 +121,12 @@ $isEdit = isset($company) && $company;
                 <div class="card-header"><h3>Codigo de Acceso</h3></div>
                 <div class="card-body">
                     <input type="text" class="form-control" value="<?= htmlspecialchars($company['code'] ?? '') ?>" readonly style="font-family: monospace; font-size: 0.85rem;">
-                    <small class="form-help">URL de seleccion:</small>
-                    <code style="font-size: 0.75rem; word-break: break-all;">/seleccion-empresa?code=<?= htmlspecialchars($company['code'] ?? '') ?></code>
-                    <button type="button" class="btn btn-outline btn-sm btn-block" style="margin-top: 0.5rem;" onclick="regenerateCode()"><i class="fas fa-sync"></i> Regenerar</button>
+                    <small class="form-help">URL de acceso directo:</small>
+                    <code style="font-size: 0.75rem; word-break: break-all;">/empresa/login?code=<?= htmlspecialchars($company['code'] ?? '') ?></code>
+                    <div style="margin-top: 0.5rem; display: flex; gap: 0.5rem;">
+                        <button type="button" class="btn btn-outline btn-sm" onclick="copyToClipboard('/empresa/login?code=<?= htmlspecialchars($company['code'] ?? '') ?>')"><i class="fas fa-copy"></i> Copiar enlace</button>
+                        <button type="button" class="btn btn-outline btn-sm" onclick="regenerateCode()"><i class="fas fa-sync"></i> Regenerar</button>
+                    </div>
                 </div>
             </div>
             <?php endif; ?>
@@ -155,6 +158,15 @@ function regenerateCode() {
         method: 'POST',
         body: new URLSearchParams({_csrf_token: '<?= $csrf_token ?>'})
     }).then(r => r.json()).then(d => d.success ? location.reload() : alert(d.error));
+}
+
+function copyToClipboard(path) {
+    const url = window.location.origin + path;
+    navigator.clipboard.writeText(url).then(() => {
+        alert('Enlace copiado al portapapeles');
+    }).catch(() => {
+        prompt('Copia este enlace:', url);
+    });
 }
 </script>
 <?php endif; ?>

@@ -43,6 +43,23 @@ class SponsorPanelController extends Controller
         }
 
         $error = null;
+
+        // Check for code in URL (direct access link)
+        $urlCode = strtoupper(trim($_GET['code'] ?? ''));
+        if ($urlCode) {
+            $sponsor = $this->sponsorModel->findByCode($urlCode);
+            if ($sponsor && $sponsor['active']) {
+                // Store sponsor in session
+                $_SESSION['sponsor_id'] = $sponsor['id'];
+                $_SESSION['sponsor_code'] = $sponsor['code'];
+                $this->redirect('/sponsor/panel');
+                return;
+            } else {
+                $error = 'Código de acceso no válido';
+            }
+        }
+
+        // Handle form submission
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if (!$this->validateCsrf()) {
                 $error = 'Token de seguridad inválido';

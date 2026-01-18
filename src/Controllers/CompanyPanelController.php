@@ -43,6 +43,23 @@ class CompanyPanelController extends Controller
         }
 
         $error = null;
+
+        // Check for code in URL (direct access link)
+        $urlCode = strtoupper(trim($_GET['code'] ?? ''));
+        if ($urlCode) {
+            $company = $this->companyModel->findByCode($urlCode);
+            if ($company && $company['active']) {
+                // Store company in session
+                $_SESSION['company_id'] = $company['id'];
+                $_SESSION['company_code'] = $company['code'];
+                $this->redirect('/empresa/panel');
+                return;
+            } else {
+                $error = 'Código de acceso no válido';
+            }
+        }
+
+        // Handle form submission
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if (!$this->validateCsrf()) {
                 $error = 'Token de seguridad inválido';
