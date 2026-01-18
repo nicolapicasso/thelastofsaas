@@ -622,16 +622,16 @@
                     <div class="selections-list">
                         <?php foreach ($selections as $selection): ?>
                             <div class="selection-item">
-                                <?php if (!empty($selection['company_logo'])): ?>
-                                    <img src="<?= htmlspecialchars($selection['company_logo']) ?>" alt="" class="selection-logo">
+                                <?php if (!empty($selection['logo_url'])): ?>
+                                    <img src="<?= htmlspecialchars($selection['logo_url']) ?>" alt="" class="selection-logo">
                                 <?php else: ?>
                                     <div class="selection-logo-placeholder">
                                         <i class="fas fa-building"></i>
                                     </div>
                                 <?php endif; ?>
                                 <div class="selection-info">
-                                    <strong><?= htmlspecialchars($selection['company_name']) ?></strong>
-                                    <small><?= htmlspecialchars($selection['company_sector'] ?? 'SIN SECTOR') ?></small>
+                                    <strong><?= htmlspecialchars($selection['name'] ?? '') ?></strong>
+                                    <small><?= htmlspecialchars($selection['sector'] ?? 'SIN SECTOR') ?></small>
                                 </div>
                                 <div class="selection-status">
                                     <?php if (!empty($selection['is_mutual'])): ?>
@@ -640,7 +640,7 @@
                                         <span class="badge badge-secondary">PENDIENTE</span>
                                     <?php endif; ?>
                                 </div>
-                                <a href="/sponsor/empresas/<?= $currentEvent['id'] ?>/<?= $selection['company_id'] ?>" class="btn btn-sm btn-outline">
+                                <a href="/sponsor/empresas/<?= $currentEvent['id'] ?>/<?= $selection['company_id'] ?? $selection['id'] ?>" class="btn btn-sm btn-outline">
                                     <i class="fas fa-eye"></i>
                                 </a>
                             </div>

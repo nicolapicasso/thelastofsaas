@@ -4,395 +4,650 @@
  * TLOS - The Last of SaaS
  */
 ?>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><?= htmlspecialchars($company['name'] ?? 'Empresa') ?> - <?= htmlspecialchars($event['name'] ?? '') ?></title>
 
-<div class="panel-layout">
-    <!-- Sidebar -->
-    <aside class="panel-sidebar">
-        <div class="sidebar-header">
-            <?php if ($sponsor['logo_url']): ?>
-                <img src="<?= htmlspecialchars($sponsor['logo_url']) ?>" alt="" class="sponsor-logo">
-            <?php endif; ?>
-            <h2><?= htmlspecialchars($sponsor['name']) ?></h2>
-            <span class="badge badge-primary">Sponsor</span>
-        </div>
+    <!-- Fonts - TLOS Brand -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Prompt:wght@400;500;600;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
 
-        <nav class="sidebar-nav">
-            <a href="/sponsor/panel" class="nav-item">
-                <i class="fas fa-home"></i> Dashboard
-            </a>
-            <a href="/sponsor/empresas/<?= $event['id'] ?>" class="nav-item active">
-                <i class="fas fa-building"></i> Ver Empresas
-            </a>
-            <a href="/sponsor/matches/<?= $event['id'] ?>" class="nav-item">
-                <i class="fas fa-heart"></i> Mis Matches
-            </a>
-        </nav>
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
-        <div class="sidebar-footer">
-            <a href="/sponsor/logout" class="btn btn-outline btn-sm btn-block">
-                <i class="fas fa-sign-out-alt"></i> Cerrar sesion
-            </a>
-        </div>
-    </aside>
+    <style>
+        /* ============================================
+           TLOS SPONSOR PANEL - Brand Stylesheet
+           ============================================ */
+        :root {
+            --bg-dark: #000000;
+            --bg-card: #0a0a0a;
+            --text-light: #FFFFFF;
+            --text-grey: #86868B;
+            --border-color: rgba(255, 255, 255, 0.1);
+            --success-color: #10B981;
+            --error-color: #EF4444;
+            --font-heading: 'Montserrat', sans-serif;
+            --font-mono: 'Roboto Mono', monospace;
+            --font-accent: 'Prompt', sans-serif;
+            --transition: all 0.3s ease-in-out;
+        }
 
-    <!-- Main Content -->
-    <main class="panel-main">
-        <header class="panel-header">
-            <a href="/sponsor/empresas/<?= $event['id'] ?>" class="back-link">
-                <i class="fas fa-arrow-left"></i> Volver a empresas
-            </a>
-        </header>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
-        <div class="company-detail-card">
-            <?php if ($isMatch): ?>
-                <div class="detail-badge match"><i class="fas fa-heart"></i> Match mutuo</div>
-            <?php elseif ($isSelected): ?>
-                <div class="detail-badge selected"><i class="fas fa-check"></i> Seleccionada</div>
-            <?php endif; ?>
+        body {
+            font-family: var(--font-heading);
+            background: var(--bg-dark);
+            color: var(--text-light);
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+        }
 
-            <div class="detail-header">
-                <div class="detail-logo">
-                    <?php if ($company['logo_url']): ?>
-                        <img src="<?= htmlspecialchars($company['logo_url']) ?>" alt="<?= htmlspecialchars($company['name']) ?>">
-                    <?php else: ?>
-                        <div class="logo-placeholder"><i class="fas fa-building"></i></div>
-                    <?php endif; ?>
-                </div>
-                <div class="detail-info">
-                    <h1><?= htmlspecialchars($company['name']) ?></h1>
-                    <?php if ($company['sector']): ?>
-                        <span class="sector-badge"><?= htmlspecialchars($company['sector']) ?></span>
-                    <?php endif; ?>
-                    <?php if ($company['website']): ?>
-                        <a href="<?= htmlspecialchars($company['website']) ?>" target="_blank" class="website-link">
-                            <i class="fas fa-globe"></i> <?= htmlspecialchars(parse_url($company['website'], PHP_URL_HOST)) ?>
-                        </a>
-                    <?php endif; ?>
-                </div>
+        /* Layout */
+        .panel-layout {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .panel-sidebar {
+            background: var(--bg-card);
+            border-right: 1px solid var(--border-color);
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            width: 280px;
+            height: 100vh;
+            overflow-y: auto;
+        }
+
+        .sidebar-header {
+            text-align: center;
+            padding-bottom: 2rem;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 2rem;
+        }
+
+        .sponsor-logo {
+            width: 100px;
+            height: 100px;
+            object-fit: contain;
+            background: var(--text-light);
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .sidebar-header h2 {
+            font-size: 14px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 0.5rem;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            font-family: var(--font-mono);
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            background: var(--text-light);
+            color: var(--bg-dark);
+        }
+
+        .sidebar-nav {
+            flex: 1;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem 1.25rem;
+            color: var(--text-grey);
+            text-decoration: none;
+            font-family: var(--font-mono);
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            border: 1px solid transparent;
+            transition: var(--transition);
+            margin-bottom: 0.5rem;
+        }
+
+        .nav-item:hover {
+            color: var(--text-light);
+            border-color: var(--border-color);
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .nav-item.active {
+            color: var(--bg-dark);
+            background: var(--text-light);
+            border-color: var(--text-light);
+        }
+
+        .nav-item i { width: 20px; text-align: center; }
+
+        .sidebar-footer {
+            padding-top: 2rem;
+            border-top: 1px solid var(--border-color);
+        }
+
+        /* Main Content */
+        .panel-main {
+            padding: 2rem 3rem;
+            min-height: 100vh;
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.75rem;
+            color: var(--text-grey);
+            text-decoration: none;
+            font-family: var(--font-mono);
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 2rem;
+            transition: var(--transition);
+        }
+
+        .back-link:hover {
+            color: var(--text-light);
+        }
+
+        /* Company Detail Card */
+        .company-detail-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            padding: 3rem;
+            max-width: 900px;
+            position: relative;
+        }
+
+        .detail-badge {
+            position: absolute;
+            top: 2rem;
+            right: 2rem;
+            padding: 0.75rem 1.5rem;
+            font-family: var(--font-mono);
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .detail-badge.selected {
+            background: var(--text-light);
+            color: var(--bg-dark);
+        }
+
+        .detail-badge.match {
+            background: var(--success-color);
+            color: var(--bg-dark);
+        }
+
+        .detail-header {
+            display: flex;
+            gap: 2rem;
+            margin-bottom: 3rem;
+            padding-bottom: 3rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .detail-logo {
+            width: 120px;
+            height: 120px;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .detail-logo img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+
+        .detail-logo .logo-placeholder {
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            color: var(--text-grey);
+        }
+
+        .detail-info h1 {
+            font-size: clamp(24px, 4vw, 32px);
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.02em;
+            margin-bottom: 1rem;
+        }
+
+        .sector-badge {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-color);
+            padding: 0.5rem 1rem;
+            font-family: var(--font-mono);
+            font-size: 10px;
+            color: var(--text-grey);
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            margin-bottom: 1rem;
+        }
+
+        .website-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-light);
+            text-decoration: none;
+            font-family: var(--font-mono);
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            transition: var(--transition);
+        }
+
+        .website-link:hover {
+            color: var(--text-grey);
+        }
+
+        /* Detail Sections */
+        .detail-section {
+            margin-bottom: 2.5rem;
+        }
+
+        .detail-section h3 {
+            font-family: var(--font-mono);
+            font-size: 10px;
+            font-weight: 500;
+            color: var(--text-grey);
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            margin-bottom: 1rem;
+        }
+
+        .detail-section p {
+            font-size: 14px;
+            line-height: 1.8;
+            color: var(--text-light);
+        }
+
+        .data-grid {
+            display: flex;
+            gap: 3rem;
+        }
+
+        .data-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-family: var(--font-mono);
+            font-size: 12px;
+            color: var(--text-grey);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .data-item i {
+            color: var(--text-light);
+        }
+
+        .saas-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .saas-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border-color);
+            padding: 0.75rem 1.25rem;
+        }
+
+        .saas-item img {
+            width: 24px;
+            height: 24px;
+            object-fit: contain;
+        }
+
+        .saas-item span {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        /* Actions */
+        .detail-actions {
+            margin-top: 3rem;
+            padding-top: 3rem;
+            border-top: 1px solid var(--border-color);
+            text-align: center;
+        }
+
+        .match-message {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid var(--success-color);
+            padding: 2rem;
+            color: var(--success-color);
+        }
+
+        .match-message i {
+            font-size: 2.5rem;
+        }
+
+        .match-message p {
+            margin: 0;
+            text-align: left;
+            font-family: var(--font-mono);
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            line-height: 1.6;
+        }
+
+        /* Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            padding: 1.25rem 2.5rem;
+            font-family: var(--font-heading);
+            font-weight: 700;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            text-decoration: none;
+            border: 2px solid transparent;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .btn-primary {
+            background: var(--text-light);
+            color: var(--bg-dark);
+            border-color: var(--text-light);
+        }
+
+        .btn-primary:hover {
+            background: transparent;
+            color: var(--text-light);
+        }
+
+        .btn-outline {
+            background: transparent;
+            border-color: var(--text-light);
+            color: var(--text-light);
+        }
+
+        .btn-outline:hover {
+            background: var(--text-light);
+            color: var(--bg-dark);
+        }
+
+        .btn-danger {
+            background: var(--error-color);
+            color: var(--text-light);
+            border-color: var(--error-color);
+        }
+
+        .btn-danger:hover {
+            background: transparent;
+            color: var(--error-color);
+        }
+
+        .btn-lg {
+            padding: 1.5rem 3rem;
+            font-size: 16px;
+        }
+
+        .btn-block {
+            display: flex;
+            width: 100%;
+        }
+
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .panel-layout {
+                grid-template-columns: 1fr;
+            }
+
+            .panel-sidebar {
+                display: none;
+            }
+
+            .panel-main {
+                padding: 1.5rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .detail-header {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .detail-logo {
+                margin: 0 auto;
+            }
+
+            .detail-badge {
+                position: static;
+                margin-bottom: 2rem;
+                display: inline-flex;
+            }
+
+            .data-grid {
+                flex-direction: column;
+                gap: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="panel-layout">
+        <!-- Sidebar -->
+        <aside class="panel-sidebar">
+            <div class="sidebar-header">
+                <?php if (!empty($sponsor['logo_url'])): ?>
+                    <img src="<?= htmlspecialchars($sponsor['logo_url']) ?>" alt="" class="sponsor-logo">
+                <?php endif; ?>
+                <h2><?= htmlspecialchars($sponsor['name'] ?? '') ?></h2>
+                <span class="badge">SPONSOR</span>
             </div>
 
-            <?php if ($company['description']): ?>
-                <div class="detail-section">
-                    <h3>Sobre la empresa</h3>
-                    <p><?= nl2br(htmlspecialchars($company['description'])) ?></p>
-                </div>
-            <?php endif; ?>
+            <nav class="sidebar-nav">
+                <a href="/sponsor/panel" class="nav-item">
+                    <i class="fas fa-home"></i> Dashboard
+                </a>
+                <a href="/sponsor/empresas/<?= $event['id'] ?>" class="nav-item active">
+                    <i class="fas fa-building"></i> Ver Empresas
+                </a>
+                <a href="/sponsor/matches/<?= $event['id'] ?>" class="nav-item">
+                    <i class="fas fa-heart"></i> Mis Matches
+                </a>
+            </nav>
 
-            <?php if (!empty($company['employees']) || !empty($company['revenue'])): ?>
-                <div class="detail-section">
-                    <h3>Datos</h3>
-                    <div class="data-grid">
-                        <?php if ($company['employees']): ?>
-                            <div class="data-item">
-                                <i class="fas fa-users"></i>
-                                <span><?= htmlspecialchars($company['employees']) ?> empleados</span>
-                            </div>
+            <div class="sidebar-footer">
+                <a href="/sponsor/logout" class="btn btn-outline btn-block">
+                    <i class="fas fa-sign-out-alt"></i> CERRAR SESION
+                </a>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="panel-main">
+            <a href="/sponsor/empresas/<?= $event['id'] ?>" class="back-link">
+                <i class="fas fa-arrow-left"></i> VOLVER A EMPRESAS
+            </a>
+
+            <div class="company-detail-card">
+                <?php if ($isMatch): ?>
+                    <div class="detail-badge match"><i class="fas fa-heart"></i> MATCH MUTUO</div>
+                <?php elseif ($isSelected): ?>
+                    <div class="detail-badge selected"><i class="fas fa-check"></i> SELECCIONADA</div>
+                <?php endif; ?>
+
+                <div class="detail-header">
+                    <div class="detail-logo">
+                        <?php if (!empty($company['logo_url'])): ?>
+                            <img src="<?= htmlspecialchars($company['logo_url']) ?>" alt="<?= htmlspecialchars($company['name'] ?? '') ?>">
+                        <?php else: ?>
+                            <div class="logo-placeholder"><i class="fas fa-building"></i></div>
                         <?php endif; ?>
-                        <?php if ($company['revenue']): ?>
-                            <div class="data-item">
-                                <i class="fas fa-chart-line"></i>
-                                <span><?= htmlspecialchars($company['revenue']) ?></span>
-                            </div>
+                    </div>
+                    <div class="detail-info">
+                        <h1><?= htmlspecialchars($company['name'] ?? '') ?></h1>
+                        <?php if (!empty($company['sector'])): ?>
+                            <span class="sector-badge"><?= htmlspecialchars($company['sector']) ?></span>
+                        <?php endif; ?>
+                        <?php if (!empty($company['website'])): ?>
+                            <a href="<?= htmlspecialchars($company['website']) ?>" target="_blank" class="website-link">
+                                <i class="fas fa-globe"></i> <?= htmlspecialchars(parse_url($company['website'], PHP_URL_HOST) ?: $company['website']) ?>
+                            </a>
                         <?php endif; ?>
                     </div>
                 </div>
-            <?php endif; ?>
 
-            <?php if (!empty($saasUsage)): ?>
-                <div class="detail-section">
-                    <h3>Software que utilizan</h3>
-                    <div class="saas-grid">
-                        <?php foreach ($saasUsage as $saas): ?>
-                            <div class="saas-item">
-                                <?php if ($saas['logo_url']): ?>
-                                    <img src="<?= htmlspecialchars($saas['logo_url']) ?>" alt="<?= htmlspecialchars($saas['name']) ?>">
-                                <?php endif; ?>
-                                <span><?= htmlspecialchars($saas['name']) ?></span>
-                            </div>
-                        <?php endforeach; ?>
-                    </div>
-                </div>
-            <?php endif; ?>
-
-            <div class="detail-actions">
-                <?php if (!$isSelected): ?>
-                    <button type="button" class="btn btn-primary btn-lg btn-select" data-company="<?= $company['id'] ?>" data-event="<?= $event['id'] ?>">
-                        <i class="fas fa-plus"></i> Seleccionar empresa
-                    </button>
-                <?php elseif (!$isMatch): ?>
-                    <button type="button" class="btn btn-danger btn-lg btn-unselect" data-company="<?= $company['id'] ?>" data-event="<?= $event['id'] ?>">
-                        <i class="fas fa-minus"></i> Quitar seleccion
-                    </button>
-                <?php else: ?>
-                    <div class="match-message">
-                        <i class="fas fa-heart"></i>
-                        <p>Esta empresa tambien te ha seleccionado. Os pondremos en contacto pronto.</p>
+                <?php if (!empty($company['description'])): ?>
+                    <div class="detail-section">
+                        <h3>SOBRE LA EMPRESA</h3>
+                        <p><?= nl2br(htmlspecialchars($company['description'])) ?></p>
                     </div>
                 <?php endif; ?>
+
+                <?php if (!empty($company['employees']) || !empty($company['revenue'])): ?>
+                    <div class="detail-section">
+                        <h3>DATOS</h3>
+                        <div class="data-grid">
+                            <?php if (!empty($company['employees'])): ?>
+                                <div class="data-item">
+                                    <i class="fas fa-users"></i>
+                                    <span><?= htmlspecialchars($company['employees']) ?> EMPLEADOS</span>
+                                </div>
+                            <?php endif; ?>
+                            <?php if (!empty($company['revenue'])): ?>
+                                <div class="data-item">
+                                    <i class="fas fa-chart-line"></i>
+                                    <span><?= htmlspecialchars($company['revenue']) ?></span>
+                                </div>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                <?php endif; ?>
+
+                <?php if (!empty($saasUsage)): ?>
+                    <div class="detail-section">
+                        <h3>SOFTWARE QUE UTILIZAN</h3>
+                        <div class="saas-grid">
+                            <?php foreach ($saasUsage as $saas): ?>
+                                <div class="saas-item">
+                                    <?php if (!empty($saas['logo_url'])): ?>
+                                        <img src="<?= htmlspecialchars($saas['logo_url']) ?>" alt="<?= htmlspecialchars($saas['name'] ?? '') ?>">
+                                    <?php endif; ?>
+                                    <span><?= htmlspecialchars($saas['name'] ?? '') ?></span>
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
+                    </div>
+                <?php endif; ?>
+
+                <div class="detail-actions">
+                    <?php if (!$isSelected): ?>
+                        <button type="button" class="btn btn-primary btn-lg btn-select" data-company="<?= $company['id'] ?>" data-event="<?= $event['id'] ?>">
+                            <i class="fas fa-plus"></i> SELECCIONAR EMPRESA
+                        </button>
+                    <?php elseif (!$isMatch): ?>
+                        <button type="button" class="btn btn-danger btn-lg btn-unselect" data-company="<?= $company['id'] ?>" data-event="<?= $event['id'] ?>">
+                            <i class="fas fa-minus"></i> QUITAR SELECCION
+                        </button>
+                    <?php else: ?>
+                        <div class="match-message">
+                            <i class="fas fa-heart"></i>
+                            <p>ESTA EMPRESA TAMBIEN TE HA SELECCIONADO. OS PONDREMOS EN CONTACTO PRONTO.</p>
+                        </div>
+                    <?php endif; ?>
+                </div>
             </div>
-        </div>
-    </main>
-</div>
+        </main>
+    </div>
 
-<style>
-.panel-layout {
-    display: grid;
-    grid-template-columns: 280px 1fr;
-    min-height: 100vh;
-}
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const selectBtn = document.querySelector('.btn-select');
+        const unselectBtn = document.querySelector('.btn-unselect');
 
-.panel-sidebar {
-    background: var(--bg-dark, #1F2937);
-    color: white;
-    padding: 1.5rem;
-    display: flex;
-    flex-direction: column;
-}
-.sidebar-header {
-    text-align: center;
-    padding-bottom: 1.5rem;
-    border-bottom: 1px solid rgba(255,255,255,0.1);
-    margin-bottom: 1.5rem;
-}
-.sponsor-logo {
-    width: 80px;
-    height: 80px;
-    object-fit: contain;
-    background: white;
-    border-radius: 12px;
-    padding: 0.5rem;
-    margin-bottom: 1rem;
-}
-.sidebar-header h2 {
-    font-size: 1.1rem;
-    margin-bottom: 0.5rem;
-}
+        if (selectBtn) {
+            selectBtn.addEventListener('click', function() {
+                const companyId = this.dataset.company;
+                const eventId = this.dataset.event;
 
-.sidebar-nav { flex: 1; }
-.nav-item {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    padding: 0.75rem 1rem;
-    color: rgba(255,255,255,0.7);
-    text-decoration: none;
-    border-radius: 8px;
-    transition: all 0.2s;
-    margin-bottom: 0.25rem;
-}
-.nav-item:hover { background: rgba(255,255,255,0.1); color: white; }
-.nav-item.active { background: var(--primary-color); color: white; }
-.nav-item i { width: 20px; text-align: center; }
-.sidebar-footer {
-    padding-top: 1.5rem;
-    border-top: 1px solid rgba(255,255,255,0.1);
-}
-
-.panel-main {
-    background: var(--bg-secondary, #F3F4F6);
-    padding: 2rem;
-    overflow-y: auto;
-}
-
-.back-link {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    color: var(--text-secondary);
-    text-decoration: none;
-    margin-bottom: 1.5rem;
-}
-.back-link:hover { color: var(--primary-color); }
-
-.company-detail-card {
-    background: white;
-    border-radius: 16px;
-    padding: 2rem;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-    max-width: 800px;
-    position: relative;
-}
-
-.detail-badge {
-    position: absolute;
-    top: 1.5rem;
-    right: 1.5rem;
-    padding: 0.5rem 1rem;
-    border-radius: 20px;
-    font-size: 0.85rem;
-    font-weight: 600;
-}
-.detail-badge.selected { background: var(--primary-color); color: white; }
-.detail-badge.match { background: var(--success-color); color: white; }
-
-.detail-header {
-    display: flex;
-    gap: 1.5rem;
-    margin-bottom: 2rem;
-    padding-bottom: 2rem;
-    border-bottom: 1px solid var(--border-color);
-}
-.detail-logo {
-    width: 120px;
-    height: 120px;
-    flex-shrink: 0;
-}
-.detail-logo img {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-    border-radius: 12px;
-}
-.detail-logo .logo-placeholder {
-    width: 100%;
-    height: 100%;
-    background: var(--bg-secondary);
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 3rem;
-    color: var(--text-muted);
-}
-.detail-info h1 {
-    font-size: 1.75rem;
-    margin-bottom: 0.5rem;
-}
-.sector-badge {
-    display: inline-block;
-    background: var(--bg-secondary);
-    padding: 0.25rem 0.75rem;
-    border-radius: 20px;
-    font-size: 0.85rem;
-    margin-bottom: 0.5rem;
-}
-.website-link {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    color: var(--primary-color);
-    text-decoration: none;
-}
-
-.detail-section {
-    margin-bottom: 1.5rem;
-}
-.detail-section h3 {
-    font-size: 1rem;
-    color: var(--text-secondary);
-    margin-bottom: 0.75rem;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-}
-.detail-section p { line-height: 1.7; color: var(--text-primary); }
-
-.data-grid {
-    display: flex;
-    gap: 2rem;
-}
-.data-item {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    color: var(--text-secondary);
-}
-.data-item i { color: var(--primary-color); }
-
-.saas-grid {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.75rem;
-}
-.saas-item {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    background: var(--bg-secondary);
-    padding: 0.5rem 1rem;
-    border-radius: 8px;
-}
-.saas-item img {
-    width: 24px;
-    height: 24px;
-    object-fit: contain;
-}
-
-.detail-actions {
-    margin-top: 2rem;
-    padding-top: 2rem;
-    border-top: 1px solid var(--border-color);
-    text-align: center;
-}
-
-.match-message {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    background: var(--success-light, #D1FAE5);
-    padding: 1.5rem;
-    border-radius: 12px;
-    color: var(--success-color);
-}
-.match-message i { font-size: 2rem; }
-.match-message p { margin: 0; text-align: left; }
-
-@media (max-width: 992px) {
-    .panel-layout { grid-template-columns: 1fr; }
-    .panel-sidebar { display: none; }
-}
-@media (max-width: 600px) {
-    .detail-header { flex-direction: column; text-align: center; }
-    .detail-logo { margin: 0 auto; }
-}
-</style>
-
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const selectBtn = document.querySelector('.btn-select');
-    const unselectBtn = document.querySelector('.btn-unselect');
-
-    if (selectBtn) {
-        selectBtn.addEventListener('click', function() {
-            const companyId = this.dataset.company;
-            const eventId = this.dataset.event;
-
-            fetch('/sponsor/api/select', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                body: `company_id=${companyId}&event_id=${eventId}&csrf_token=<?= htmlspecialchars($_SESSION['csrf_token'] ?? '') ?>`
-            })
-            .then(res => res.json())
-            .then(data => {
-                if (data.success) {
-                    location.reload();
-                } else {
-                    alert(data.error || 'Error al seleccionar');
-                }
+                fetch('/sponsor/seleccionar', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: `company_id=${companyId}&event_id=${eventId}&_csrf_token=<?= htmlspecialchars($_SESSION['csrf_token'] ?? '') ?>`
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        location.reload();
+                    } else {
+                        alert(data.error || 'Error al seleccionar');
+                    }
+                });
             });
-        });
-    }
+        }
 
-    if (unselectBtn) {
-        unselectBtn.addEventListener('click', function() {
-            if (!confirm('Quitar seleccion?')) return;
+        if (unselectBtn) {
+            unselectBtn.addEventListener('click', function() {
+                if (!confirm('Quitar seleccion?')) return;
 
-            const companyId = this.dataset.company;
-            const eventId = this.dataset.event;
+                const companyId = this.dataset.company;
+                const eventId = this.dataset.event;
 
-            fetch('/sponsor/api/unselect', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                body: `company_id=${companyId}&event_id=${eventId}&csrf_token=<?= htmlspecialchars($_SESSION['csrf_token'] ?? '') ?>`
-            })
-            .then(res => res.json())
-            .then(data => {
-                if (data.success) {
-                    location.reload();
-                } else {
-                    alert(data.error || 'Error al quitar');
-                }
+                fetch('/sponsor/deseleccionar', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: `company_id=${companyId}&event_id=${eventId}&_csrf_token=<?= htmlspecialchars($_SESSION['csrf_token'] ?? '') ?>`
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        location.reload();
+                    } else {
+                        alert(data.error || 'Error al quitar');
+                    }
+                });
             });
-        });
-    }
-});
-</script>
+        }
+    });
+    </script>
+</body>
+</html>
