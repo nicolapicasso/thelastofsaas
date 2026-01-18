@@ -150,11 +150,11 @@ CREATE TABLE `pages` (
 CREATE TABLE `page_blocks` (
     `id` INT PRIMARY KEY AUTO_INCREMENT,
     `page_id` INT NOT NULL,
-    `block_type` VARCHAR(50) NOT NULL,
+    `type` VARCHAR(50) NOT NULL,
     `title` VARCHAR(255),
     `content` LONGTEXT,
     `settings` JSON,
-    `display_order` INT DEFAULT 0,
+    `sort_order` INT DEFAULT 0,
     `is_active` TINYINT(1) DEFAULT 1,
     `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
