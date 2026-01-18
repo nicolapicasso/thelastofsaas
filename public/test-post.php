@@ -13,11 +13,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <button type='submit'>Enviar POST aquí</button>
     </form>";
 
-    echo "<h2>Test 2: POST a /do-login (ruta correcta)</h2>";
-    echo "<form method='POST' action='/do-login'>
+    echo "<h2>Test 2: POST a /auth</h2>";
+    echo "<form method='POST' action='/auth'>
         <input type='email' name='email' value='admin@thelastofsaas.es'>
         <input type='password' name='password' value='admin123'>
         <input type='hidden' name='_csrf_token' value='test'>
-        <button type='submit'>Enviar POST a /do-login</button>
+        <button type='submit'>Enviar POST a /auth</button>
     </form>";
 }

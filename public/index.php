@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 // DEBUG - Ver si llega la petición POST
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && strpos($_SERVER['REQUEST_URI'], 'login') !== false) {
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && (strpos($_SERVER['REQUEST_URI'], 'login') !== false || strpos($_SERVER['REQUEST_URI'], '/auth') !== false)) {
     echo "<h1>DEBUG: POST recibido en index.php</h1>";
     echo "<pre>";
     echo "REQUEST_METHOD: " . $_SERVER['REQUEST_METHOD'] . "\n";

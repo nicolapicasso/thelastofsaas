@@ -73,7 +73,7 @@ $router->post('/search', 'Frontend\\SearchController', 'results');
 
 // Auth
 $router->get('/admin/login', 'Admin\\AuthController', 'loginForm');
-$router->post('/do-login', 'Admin\\AuthController', 'login');
+$router->post('/auth', 'Admin\\AuthController', 'login');
 $router->get('/admin/logout', 'Admin\\AuthController', 'logout');
 
 // Dashboard
