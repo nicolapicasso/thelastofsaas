@@ -51,6 +51,7 @@ class EventsController extends Controller
             'currentStatus' => $status,
             'statusOptions' => Event::getStatusOptions(),
             'flash' => $this->getFlash(),
+            'csrf_token' => $this->generateCsrf(),
         ]);
     }
 
@@ -375,6 +376,16 @@ class EventsController extends Controller
             $errors[] = 'Estado no válido.';
         }
 
+        // Handle featured image file upload
+        if (isset($_FILES['featured_image_file']) && $_FILES['featured_image_file']['error'] === UPLOAD_ERR_OK) {
+            $uploadResult = $this->handleImageUpload($_FILES['featured_image_file']);
+            if (isset($uploadResult['error'])) {
+                $errors[] = $uploadResult['error'];
+            } else {
+                $featuredImage = $uploadResult['url'];
+            }
+        }
+
         if (!empty($errors)) {
             return ['errors' => $errors];
         }
@@ -398,5 +409,52 @@ class EventsController extends Controller
             'matching_enabled' => $matchingEnabled ? 1 : 0,
             'meetings_enabled' => $meetingsEnabled ? 1 : 0,
         ];
+    }
+
+    /**
+     * Handle image file upload
+     */
+    private function handleImageUpload(array $file): array
+    {
+        $allowedTypes = ['image/png', 'image/jpeg', 'image/gif', 'image/webp'];
+        $maxSize = 2 * 1024 * 1024; // 2MB
+
+        // Validate file type
+        $finfo = new \finfo(FILEINFO_MIME_TYPE);
+        $mimeType = $finfo->file($file['tmp_name']);
+
+        if (!in_array($mimeType, $allowedTypes)) {
+            return ['error' => 'Tipo de archivo no permitido. Use PNG, JPG, GIF o WebP.'];
+        }
+
+        // Validate file size
+        if ($file['size'] > $maxSize) {
+            return ['error' => 'El archivo es demasiado grande. Maximo 2MB.'];
+        }
+
+        // Create upload directory if it doesn't exist
+        $uploadDir = dirname(__DIR__, 3) . '/public/uploads/events';
+        if (!is_dir($uploadDir)) {
+            mkdir($uploadDir, 0755, true);
+        }
+
+        // Generate unique filename
+        $extension = match($mimeType) {
+            'image/png' => 'png',
+            'image/jpeg' => 'jpg',
+            'image/gif' => 'gif',
+            'image/webp' => 'webp',
+            default => 'jpg'
+        };
+        $filename = 'event_' . uniqid() . '.' . $extension;
+        $filepath = $uploadDir . '/' . $filename;
+
+        // Move uploaded file
+        if (!move_uploaded_file($file['tmp_name'], $filepath)) {
+            return ['error' => 'Error al guardar el archivo.'];
+        }
+
+        // Return the URL
+        return ['url' => '/uploads/events/' . $filename];
     }
 }

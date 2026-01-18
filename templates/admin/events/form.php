@@ -51,7 +51,7 @@ $isEdit = isset($event) && $event;
 </div>
 <?php endif; ?>
 
-<form method="POST" action="<?= $isEdit ? '/admin/events/' . $event['id'] : '/admin/events' ?>">
+<form method="POST" action="<?= $isEdit ? '/admin/events/' . $event['id'] : '/admin/events' ?>" enctype="multipart/form-data">
     <input type="hidden" name="_csrf_token" value="<?= $csrf_token ?>">
 
     <div class="form-grid">
@@ -244,20 +244,17 @@ $isEdit = isset($event) && $event;
                     </div>
 
                     <div class="form-group">
-                        <label for="featured_image">Imagen Destacada</label>
-                        <div class="media-picker">
-                            <input type="hidden" id="featured_image" name="featured_image"
-                                   value="<?= htmlspecialchars($event['featured_image'] ?? '') ?>">
-                            <div class="media-preview" id="featured_image_preview">
-                                <?php if (!empty($event['featured_image'])): ?>
-                                    <img src="<?= htmlspecialchars($event['featured_image']) ?>" alt="">
-                                <?php endif; ?>
+                        <label for="featured_image_file">Imagen Destacada</label>
+                        <?php if (!empty($event['featured_image'])): ?>
+                            <div class="image-preview" style="margin-bottom: 10px;">
+                                <img src="<?= htmlspecialchars($event['featured_image']) ?>" alt="Imagen actual"
+                                     style="max-width: 200px; max-height: 120px; border: 1px solid #ddd; border-radius: 4px; padding: 5px;">
                             </div>
-                            <button type="button" class="btn btn-outline btn-sm"
-                                    onclick="openMediaPicker('featured_image')">
-                                <i class="fas fa-image"></i> Seleccionar
-                            </button>
-                        </div>
+                        <?php endif; ?>
+                        <input type="file" id="featured_image_file" name="featured_image_file" class="form-control"
+                               accept="image/png,image/jpeg,image/gif,image/webp">
+                        <small class="form-help">PNG, JPG, GIF, WebP. Max: 2MB</small>
+                        <input type="hidden" name="featured_image" value="<?= htmlspecialchars($event['featured_image'] ?? '') ?>">
                     </div>
                 </div>
             </div>
