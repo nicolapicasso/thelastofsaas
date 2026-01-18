@@ -180,6 +180,18 @@ abstract class Controller
     }
 
     /**
+     * Show 404 page
+     */
+    protected function notFound(): void
+    {
+        http_response_code(404);
+        $this->render('errors/404', [
+            'meta_title' => 'Pagina no encontrada'
+        ]);
+        exit;
+    }
+
+    /**
      * Check if user is authenticated
      */
     protected function isAuthenticated(): bool
