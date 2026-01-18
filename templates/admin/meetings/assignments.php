@@ -70,7 +70,7 @@
                     <?php foreach ($assignments as $a): ?>
                         <tr>
                             <td><?= date('d/m/Y', strtotime($a['event_date'])) ?></td>
-                            <td><strong><?= substr($a['slot_time'], 0, 5) ?></strong> <small class="text-muted">(<?= $a['meeting_duration'] ?>min)</small></td>
+                            <td><strong><?= substr($a['slot_time'], 0, 5) ?></strong> <small class="text-muted">(<?= $a['slot_duration'] ?? 30 ?>min)</small></td>
                             <td><?= $a['room_name'] ?? 'Mesa ' . $a['room_number'] ?></td>
                             <td><?= htmlspecialchars($a['sponsor_name']) ?></td>
                             <td><?= htmlspecialchars($a['company_name']) ?></td>
