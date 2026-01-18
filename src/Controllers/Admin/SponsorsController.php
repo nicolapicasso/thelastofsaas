@@ -35,30 +35,19 @@ class SponsorsController extends Controller
 
         $page = (int) ($this->getQuery('page', 1));
         $active = $this->getQuery('active');
-        $category = $this->getQuery('category');
 
         $conditions = [];
         if ($active !== null && $active !== '') {
             $conditions['active'] = (int) $active;
         }
-        if ($category) {
-            $conditions['category'] = $category;
-        }
 
         $result = $this->sponsorModel->paginate($page, 20, $conditions, ['name' => 'ASC']);
-
-        // Get unique categories for filter
-        $allSponsors = $this->sponsorModel->all();
-        $categories = array_unique(array_filter(array_column($allSponsors, 'category')));
-        sort($categories);
 
         $this->renderAdmin('sponsors/index', [
             'title' => 'Sponsors',
             'sponsors' => $result['data'],
             'pagination' => $result['pagination'],
-            'categories' => $categories,
             'currentActive' => $active,
-            'currentCategory' => $category,
             'flash' => $this->getFlash(),
         ]);
     }
@@ -99,7 +88,7 @@ class SponsorsController extends Controller
 
         // Generate slug and unique code
         $data['slug'] = Slug::generate($data['name'], 'sponsors');
-        $data['unique_code'] = Sponsor::generateUniqueCode();
+        $data['code'] = substr(strtoupper(bin2hex(random_bytes(5))), 0, 10);
 
         try {
             $sponsorId = $this->sponsorModel->create($data);
@@ -267,12 +256,14 @@ class SponsorsController extends Controller
                 $sponsorData = [
                     'name' => $data['name'],
                     'slug' => Slug::generate($data['name'], 'sponsors'),
-                    'category' => $data['category'] ?? null,
+                    'tagline' => $data['tagline'] ?? null,
                     'description' => $data['description'] ?? null,
                     'website' => $data['website'] ?? null,
                     'logo_url' => $data['logo_url'] ?? null,
-                    'contact_emails' => $data['contact_emails'] ?? null,
-                    'unique_code' => Sponsor::generateUniqueCode(),
+                    'contact_name' => $data['contact_name'] ?? null,
+                    'contact_email' => $data['contact_email'] ?? null,
+                    'contact_phone' => $data['contact_phone'] ?? null,
+                    'code' => substr(strtoupper(bin2hex(random_bytes(5))), 0, 10),
                     'active' => 1,
                 ];
 
@@ -305,8 +296,8 @@ class SponsorsController extends Controller
         }
 
         try {
-            $newCode = Sponsor::generateUniqueCode();
-            $this->sponsorModel->update((int) $id, ['unique_code' => $newCode]);
+            $newCode = substr(strtoupper(bin2hex(random_bytes(5))), 0, 10);
+            $this->sponsorModel->update((int) $id, ['code' => $newCode]);
             $this->jsonSuccess(['code' => $newCode, 'message' => 'Código regenerado.']);
         } catch (\Exception $e) {
             $this->jsonError('Error al regenerar código: ' . $e->getMessage());
@@ -331,17 +322,19 @@ class SponsorsController extends Controller
         fprintf($output, chr(0xEF) . chr(0xBB) . chr(0xBF)); // BOM for Excel
 
         // Headers
-        fputcsv($output, ['name', 'category', 'description', 'website', 'logo_url', 'contact_emails', 'unique_code', 'active'], ';');
+        fputcsv($output, ['name', 'tagline', 'description', 'website', 'logo_url', 'contact_name', 'contact_email', 'contact_phone', 'code', 'active'], ';');
 
         foreach ($sponsors as $sponsor) {
             fputcsv($output, [
                 $sponsor['name'],
-                $sponsor['category'],
-                $sponsor['description'],
-                $sponsor['website'],
-                $sponsor['logo_url'],
-                $sponsor['contact_emails'],
-                $sponsor['unique_code'],
+                $sponsor['tagline'] ?? '',
+                $sponsor['description'] ?? '',
+                $sponsor['website'] ?? '',
+                $sponsor['logo_url'] ?? '',
+                $sponsor['contact_name'] ?? '',
+                $sponsor['contact_email'] ?? '',
+                $sponsor['contact_phone'] ?? '',
+                $sponsor['code'] ?? '',
                 $sponsor['active'],
             ], ';');
         }
@@ -373,16 +366,15 @@ class SponsorsController extends Controller
         $errors = [];
 
         $name = Sanitizer::string($this->getPost('name'));
-        $category = Sanitizer::string($this->getPost('category'));
+        $tagline = Sanitizer::string($this->getPost('tagline'));
         $description = $this->getPost('description');
-        $shortDescription = Sanitizer::string($this->getPost('short_description'));
         $website = Sanitizer::url($this->getPost('website'));
         $logoUrl = Sanitizer::url($this->getPost('logo_url'));
-        $contactEmails = Sanitizer::string($this->getPost('contact_emails'));
+        $contactName = Sanitizer::string($this->getPost('contact_name'));
+        $contactEmail = Sanitizer::string($this->getPost('contact_email'));
         $contactPhone = Sanitizer::string($this->getPost('contact_phone'));
         $active = Sanitizer::bool($this->getPost('active'));
         $maxSimultaneousMeetings = Sanitizer::int($this->getPost('max_simultaneous_meetings')) ?: 1;
-        $canSendMessages = Sanitizer::bool($this->getPost('can_send_messages'));
         $linkedinUrl = Sanitizer::url($this->getPost('linkedin_url'));
         $twitterUrl = Sanitizer::url($this->getPost('twitter_url'));
 
@@ -396,16 +388,15 @@ class SponsorsController extends Controller
 
         return [
             'name' => $name,
-            'category' => $category ?: null,
+            'tagline' => $tagline ?: null,
             'description' => $description ?: null,
-            'short_description' => $shortDescription ?: null,
             'website' => $website ?: null,
             'logo_url' => $logoUrl ?: null,
-            'contact_emails' => $contactEmails ?: null,
+            'contact_name' => $contactName ?: null,
+            'contact_email' => $contactEmail ?: null,
             'contact_phone' => $contactPhone ?: null,
             'active' => $active ? 1 : 0,
             'max_simultaneous_meetings' => $maxSimultaneousMeetings,
-            'can_send_messages' => $canSendMessages ? 1 : 0,
             'linkedin_url' => $linkedinUrl ?: null,
             'twitter_url' => $twitterUrl ?: null,
         ];

@@ -342,14 +342,17 @@ class EventsController extends Controller
         $errors = [];
 
         $name = Sanitizer::string($this->getPost('name'));
+        $shortDescription = Sanitizer::string($this->getPost('short_description'));
         $description = $this->getPost('description');
-        $venueName = Sanitizer::string($this->getPost('venue_name'));
-        $venueAddress = Sanitizer::string($this->getPost('venue_address'));
-        $venueCity = Sanitizer::string($this->getPost('venue_city'));
-        $venueCoordinates = Sanitizer::string($this->getPost('venue_coordinates'));
-        $eventDate = $this->getPost('event_date');
-        $eventEndDate = $this->getPost('event_end_date');
-        $totalCapacity = Sanitizer::int($this->getPost('total_capacity'));
+        $location = Sanitizer::string($this->getPost('location'));
+        $address = Sanitizer::string($this->getPost('address'));
+        $city = Sanitizer::string($this->getPost('city'));
+        $coordinates = Sanitizer::string($this->getPost('coordinates'));
+        $startDate = $this->getPost('start_date');
+        $endDate = $this->getPost('end_date');
+        $startTime = $this->getPost('start_time');
+        $endTime = $this->getPost('end_time');
+        $maxAttendees = Sanitizer::int($this->getPost('max_attendees', 100));
         $status = $this->getPost('status', 'draft');
         $featuredImage = Sanitizer::url($this->getPost('featured_image'));
         $registrationOpen = Sanitizer::bool($this->getPost('registration_open'));
@@ -360,8 +363,12 @@ class EventsController extends Controller
             $errors[] = 'El nombre es obligatorio.';
         }
 
-        if ($totalCapacity < 1) {
-            $errors[] = 'El aforo debe ser mayor que 0.';
+        if (empty($startDate)) {
+            $errors[] = 'La fecha de inicio es obligatoria.';
+        }
+
+        if ($maxAttendees < 1) {
+            $maxAttendees = 100;
         }
 
         if (!in_array($status, array_keys(Event::getStatusOptions()))) {
@@ -374,14 +381,17 @@ class EventsController extends Controller
 
         return [
             'name' => $name,
+            'short_description' => $shortDescription ?: null,
             'description' => $description ?: null,
-            'venue_name' => $venueName ?: null,
-            'venue_address' => $venueAddress ?: null,
-            'venue_city' => $venueCity ?: null,
-            'venue_coordinates' => $venueCoordinates ?: null,
-            'event_date' => $eventDate ?: null,
-            'event_end_date' => $eventEndDate ?: null,
-            'total_capacity' => $totalCapacity,
+            'location' => $location ?: null,
+            'address' => $address ?: null,
+            'city' => $city ?: null,
+            'coordinates' => $coordinates ?: null,
+            'start_date' => $startDate,
+            'end_date' => $endDate ?: null,
+            'start_time' => $startTime ?: null,
+            'end_time' => $endTime ?: null,
+            'max_attendees' => $maxAttendees,
             'status' => $status,
             'featured_image' => $featuredImage ?: null,
             'registration_open' => $registrationOpen ? 1 : 0,

@@ -17,17 +17,16 @@ class Sponsor extends Model
     protected array $fillable = [
         'name',
         'slug',
-        'category',
+        'tagline',
         'description',
-        'short_description',
         'website',
         'logo_url',
-        'contact_emails',
+        'contact_name',
+        'contact_email',
         'contact_phone',
-        'unique_code',
+        'code',
         'active',
         'max_simultaneous_meetings',
-        'can_send_messages',
         'linkedin_url',
         'twitter_url',
     ];
@@ -37,7 +36,7 @@ class Sponsor extends Model
      */
     public function findByCode(string $code): ?array
     {
-        return $this->findBy('unique_code', $code);
+        return $this->findBy('code', $code);
     }
 
     /**
@@ -221,11 +220,11 @@ class Sponsor extends Model
      */
     public function getEmailsArray(array $sponsor): array
     {
-        if (empty($sponsor['contact_emails'])) {
+        if (empty($sponsor['contact_email'])) {
             return [];
         }
 
-        return array_map('trim', explode(',', $sponsor['contact_emails']));
+        return array_map('trim', explode(',', $sponsor['contact_email']));
     }
 
     /**

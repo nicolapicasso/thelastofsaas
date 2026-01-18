@@ -18,16 +18,16 @@ class Company extends Model
         'name',
         'slug',
         'description',
-        'short_description',
         'website',
         'logo_url',
-        'contact_emails',
+        'sector',
+        'employees',
+        'contact_name',
+        'contact_email',
         'contact_phone',
-        'company_size',
-        'industry',
-        'notes',
-        'unique_code',
+        'code',
         'active',
+        'notes',
     ];
 
     /**
@@ -35,7 +35,7 @@ class Company extends Model
      */
     public function findByCode(string $code): ?array
     {
-        return $this->findBy('unique_code', $code);
+        return $this->findBy('code', $code);
     }
 
     /**
@@ -184,11 +184,11 @@ class Company extends Model
      */
     public function getMaxSimultaneousMeetings(array $company): int
     {
-        if (empty($company['contact_emails'])) {
+        if (empty($company['contact_email'])) {
             return 1;
         }
 
-        $emails = array_filter(array_map('trim', explode(',', $company['contact_emails'])));
+        $emails = array_filter(array_map('trim', explode(',', $company['contact_email'])));
         return max(1, count($emails));
     }
 
@@ -251,11 +251,11 @@ class Company extends Model
      */
     public function getEmailsArray(array $company): array
     {
-        if (empty($company['contact_emails'])) {
+        if (empty($company['contact_email'])) {
             return [];
         }
 
-        return array_map('trim', explode(',', $company['contact_emails']));
+        return array_map('trim', explode(',', $company['contact_email']));
     }
 
     /**

@@ -35,30 +35,30 @@ class CompaniesController extends Controller
 
         $page = (int) ($this->getQuery('page', 1));
         $active = $this->getQuery('active');
-        $industry = $this->getQuery('industry');
+        $sector = $this->getQuery('sector');
 
         $conditions = [];
         if ($active !== null && $active !== '') {
             $conditions['active'] = (int) $active;
         }
-        if ($industry) {
-            $conditions['industry'] = $industry;
+        if ($sector) {
+            $conditions['sector'] = $sector;
         }
 
         $result = $this->companyModel->paginate($page, 20, $conditions, ['name' => 'ASC']);
 
-        // Get unique industries for filter
+        // Get unique sectors for filter
         $allCompanies = $this->companyModel->all();
-        $industries = array_unique(array_filter(array_column($allCompanies, 'industry')));
-        sort($industries);
+        $sectors = array_unique(array_filter(array_column($allCompanies, 'sector')));
+        sort($sectors);
 
         $this->renderAdmin('companies/index', [
             'title' => 'Empresas',
             'companies' => $result['data'],
             'pagination' => $result['pagination'],
-            'industries' => $industries,
+            'sectors' => $sectors,
             'currentActive' => $active,
-            'currentIndustry' => $industry,
+            'currentSector' => $sector,
             'sizeOptions' => Company::getSizeOptions(),
             'flash' => $this->getFlash(),
         ]);
@@ -104,7 +104,7 @@ class CompaniesController extends Controller
 
         // Generate slug and unique code
         $data['slug'] = Slug::generate($data['name'], 'companies');
-        $data['unique_code'] = Company::generateUniqueCode();
+        $data['code'] = substr(strtoupper(bin2hex(random_bytes(5))), 0, 10);
 
         try {
             $companyId = $this->companyModel->create($data);
@@ -311,11 +311,13 @@ class CompaniesController extends Controller
                     'description' => $data['description'] ?? null,
                     'website' => $data['website'] ?? null,
                     'logo_url' => $data['logo_url'] ?? null,
-                    'contact_emails' => $data['contact_emails'] ?? null,
-                    'company_size' => $data['company_size'] ?? null,
-                    'industry' => $data['industry'] ?? null,
+                    'sector' => $data['sector'] ?? null,
+                    'employees' => $data['employees'] ?? null,
+                    'contact_name' => $data['contact_name'] ?? null,
+                    'contact_email' => $data['contact_email'] ?? null,
+                    'contact_phone' => $data['contact_phone'] ?? null,
                     'notes' => $data['notes'] ?? null,
-                    'unique_code' => Company::generateUniqueCode(),
+                    'code' => substr(strtoupper(bin2hex(random_bytes(5))), 0, 10),
                     'active' => 1,
                 ];
 
@@ -348,8 +350,8 @@ class CompaniesController extends Controller
         }
 
         try {
-            $newCode = Company::generateUniqueCode();
-            $this->companyModel->update((int) $id, ['unique_code' => $newCode]);
+            $newCode = substr(strtoupper(bin2hex(random_bytes(5))), 0, 10);
+            $this->companyModel->update((int) $id, ['code' => $newCode]);
             $this->jsonSuccess(['code' => $newCode, 'message' => 'Código regenerado.']);
         } catch (\Exception $e) {
             $this->jsonError('Error al regenerar código: ' . $e->getMessage());
@@ -374,19 +376,21 @@ class CompaniesController extends Controller
         fprintf($output, chr(0xEF) . chr(0xBB) . chr(0xBF)); // BOM for Excel
 
         // Headers
-        fputcsv($output, ['name', 'description', 'website', 'logo_url', 'contact_emails', 'company_size', 'industry', 'notes', 'unique_code', 'active'], ';');
+        fputcsv($output, ['name', 'description', 'website', 'logo_url', 'sector', 'employees', 'contact_name', 'contact_email', 'contact_phone', 'notes', 'code', 'active'], ';');
 
         foreach ($companies as $company) {
             fputcsv($output, [
                 $company['name'],
-                $company['description'],
-                $company['website'],
-                $company['logo_url'],
-                $company['contact_emails'],
-                $company['company_size'],
-                $company['industry'],
-                $company['notes'],
-                $company['unique_code'],
+                $company['description'] ?? '',
+                $company['website'] ?? '',
+                $company['logo_url'] ?? '',
+                $company['sector'] ?? '',
+                $company['employees'] ?? '',
+                $company['contact_name'] ?? '',
+                $company['contact_email'] ?? '',
+                $company['contact_phone'] ?? '',
+                $company['notes'] ?? '',
+                $company['code'] ?? '',
                 $company['active'],
             ], ';');
         }
@@ -419,13 +423,13 @@ class CompaniesController extends Controller
 
         $name = Sanitizer::string($this->getPost('name'));
         $description = $this->getPost('description');
-        $shortDescription = Sanitizer::string($this->getPost('short_description'));
         $website = Sanitizer::url($this->getPost('website'));
         $logoUrl = Sanitizer::url($this->getPost('logo_url'));
-        $contactEmails = Sanitizer::string($this->getPost('contact_emails'));
+        $sector = Sanitizer::string($this->getPost('sector'));
+        $employees = $this->getPost('employees');
+        $contactName = Sanitizer::string($this->getPost('contact_name'));
+        $contactEmail = Sanitizer::string($this->getPost('contact_email'));
         $contactPhone = Sanitizer::string($this->getPost('contact_phone'));
-        $companySize = $this->getPost('company_size');
-        $industry = Sanitizer::string($this->getPost('industry'));
         $notes = $this->getPost('notes');
         $active = Sanitizer::bool($this->getPost('active'));
 
@@ -433,7 +437,7 @@ class CompaniesController extends Controller
             $errors[] = 'El nombre es obligatorio.';
         }
 
-        if ($companySize && !array_key_exists($companySize, Company::getSizeOptions())) {
+        if ($employees && !array_key_exists($employees, Company::getSizeOptions())) {
             $errors[] = 'Tamaño de empresa no válido.';
         }
 
@@ -444,13 +448,13 @@ class CompaniesController extends Controller
         return [
             'name' => $name,
             'description' => $description ?: null,
-            'short_description' => $shortDescription ?: null,
             'website' => $website ?: null,
             'logo_url' => $logoUrl ?: null,
-            'contact_emails' => $contactEmails ?: null,
+            'sector' => $sector ?: null,
+            'employees' => $employees ?: null,
+            'contact_name' => $contactName ?: null,
+            'contact_email' => $contactEmail ?: null,
             'contact_phone' => $contactPhone ?: null,
-            'company_size' => $companySize ?: null,
-            'industry' => $industry ?: null,
             'notes' => $notes ?: null,
             'active' => $active ? 1 : 0,
         ];
