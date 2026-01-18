@@ -21,7 +21,7 @@
             </div>
             <?php endif; ?>
 
-            <form method="POST" action="" class="login-form">
+            <form method="POST" action="/admin/do-login" class="login-form">
                 <input type="hidden" name="_csrf_token" value="<?= htmlspecialchars($csrf_token) ?>">
 
                 <div class="form-group">

@@ -27,14 +27,6 @@ class AuthController extends Controller
      */
     public function loginForm(): void
     {
-        // DEBUG: Handle POST here directly to test
-        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            echo "<h2>POST recibido en loginForm!</h2>";
-            echo "<pre>" . print_r($_POST, true) . "</pre>";
-            $this->login();
-            return;
-        }
-
         // Redirect if already logged in
         if ($this->isAuthenticated()) {
             $this->redirect('/admin/dashboard');
