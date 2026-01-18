@@ -43,41 +43,38 @@ class AuthController extends Controller
      */
     public function login(): void
     {
-        // DEBUG - Show what's happening
-        echo "<h2>DEBUG LOGIN</h2>";
-        echo "<pre>";
-        echo "Email recibido: " . htmlspecialchars($_POST['email'] ?? 'NO EMAIL') . "\n";
-        echo "Password recibido: " . (empty($_POST['password']) ? 'VACÍO' : 'TIENE VALOR') . "\n";
-
         $email = Sanitizer::email($this->getPost('email'));
         $password = $this->getPost('password', '');
 
-        echo "Email sanitizado: " . htmlspecialchars($email) . "\n";
+        // Validate inputs
+        if (empty($email) || empty($password)) {
+            $this->flash('error', 'Por favor, introduce tu email y contraseña.');
+            $this->redirect('/admin/login');
+            return;
+        }
 
         // Find user
         $user = $this->userModel->findByEmail($email);
 
         if (!$user) {
-            echo "Usuario NO encontrado en base de datos\n";
-            echo "</pre>";
-            exit;
+            $this->flash('error', 'Credenciales incorrectas.');
+            $this->redirect('/admin/login');
+            return;
         }
 
-        echo "Usuario encontrado: " . htmlspecialchars($user['name']) . "\n";
-        echo "is_active: " . ($user['is_active'] ?? 'NULL') . "\n";
-        echo "Hash en DB: " . htmlspecialchars(substr($user['password'], 0, 20)) . "...\n";
+        // Check if user is active
+        if (!$user['is_active']) {
+            $this->flash('error', 'Tu cuenta está desactivada. Contacta con el administrador.');
+            $this->redirect('/admin/login');
+            return;
+        }
 
         // Verify password
-        $passwordOk = $this->userModel->verifyPassword($password, $user['password']);
-        echo "Password verificado: " . ($passwordOk ? 'SÍ' : 'NO') . "\n";
-        echo "</pre>";
-
-        if (!$passwordOk) {
-            echo "<p style='color:red'>La contraseña no coincide</p>";
-            exit;
+        if (!$this->userModel->verifyPassword($password, $user['password'])) {
+            $this->flash('error', 'Credenciales incorrectas.');
+            $this->redirect('/admin/login');
+            return;
         }
-
-        echo "<p style='color:green'>TODO OK - Redirigiendo al dashboard...</p>";
 
         // Create session
         $_SESSION['user_id'] = $user['id'];
