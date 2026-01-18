@@ -238,6 +238,7 @@ class CompanyPanelController extends Controller
             'company' => $company,
             'event' => $event,
             'sponsors' => $filteredSponsors,
+            'selections' => $selections,
             'selectedIds' => $selectedIds,
             'matchedIds' => $matchedIds,
             'interestedIds' => $interestedIds,
@@ -247,6 +248,7 @@ class CompanyPanelController extends Controller
             'currentFilter' => $filter,
             'currentLevel' => $level,
             'currentSearch' => $search,
+            'csrf_token' => $this->generateCsrf(),
             'meta_title' => 'Sponsors - ' . $event['name']
         ]);
     }

@@ -435,12 +435,16 @@
             fetch('/empresa/seleccionar', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                body: `sponsor_id=${sponsorId}&event_id=<?= $event['id'] ?>&_csrf_token=<?= htmlspecialchars($_SESSION['csrf_token'] ?? '') ?>`
+                body: `sponsor_id=${sponsorId}&event_id=<?= $event['id'] ?>&_csrf_token=<?= htmlspecialchars($csrf_token ?? '') ?>`
             })
             .then(r => r.json())
             .then(data => {
                 if (data.success) location.reload();
-                else alert(data.error || 'Error');
+                else alert(data.error || 'Error al seleccionar: ' + (data.error || 'Error desconocido'));
+            })
+            .catch(err => {
+                console.error('Error:', err);
+                alert('Error de conexion');
             });
         });
     });
@@ -452,12 +456,16 @@
             fetch('/empresa/deseleccionar', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                body: `sponsor_id=${sponsorId}&event_id=<?= $event['id'] ?>&_csrf_token=<?= htmlspecialchars($_SESSION['csrf_token'] ?? '') ?>`
+                body: `sponsor_id=${sponsorId}&event_id=<?= $event['id'] ?>&_csrf_token=<?= htmlspecialchars($csrf_token ?? '') ?>`
             })
             .then(r => r.json())
             .then(data => {
                 if (data.success) location.reload();
-                else alert(data.error || 'Error');
+                else alert(data.error || 'Error al quitar seleccion');
+            })
+            .catch(err => {
+                console.error('Error:', err);
+                alert('Error de conexion');
             });
         });
     });
