@@ -267,6 +267,35 @@ class Event extends Model
     }
 
     /**
+     * Check if registration is open for event
+     */
+    public function isRegistrationOpen(int $eventId): bool
+    {
+        $event = $this->find($eventId);
+        if (!$event) {
+            return false;
+        }
+
+        // Check status
+        if (!in_array($event['status'], ['published', 'active'])) {
+            return false;
+        }
+
+        // Check registration_open flag
+        if (isset($event['registration_open']) && !$event['registration_open']) {
+            return false;
+        }
+
+        // Check if event date has passed
+        if (strtotime($event['start_date']) < strtotime('today')) {
+            return false;
+        }
+
+        // Check capacity
+        return $this->hasCapacity($eventId);
+    }
+
+    /**
      * Get all status options
      */
     public static function getStatusOptions(): array
