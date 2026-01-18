@@ -31,32 +31,24 @@ $isEdit = isset($sponsor) && $sponsor;
         <div class="form-main">
             <div class="card">
                 <div class="card-header">
-                    <h3>Información Básica</h3>
+                    <h3>Informacion Basica</h3>
                 </div>
                 <div class="card-body">
-                    <div class="form-row">
-                        <div class="form-group" style="flex: 2;">
-                            <label for="name">Nombre *</label>
-                            <input type="text" id="name" name="name" class="form-control"
-                                   value="<?= htmlspecialchars($sponsor['name'] ?? '') ?>" required>
-                        </div>
-                        <div class="form-group" style="flex: 1;">
-                            <label for="category">Categoría</label>
-                            <input type="text" id="category" name="category" class="form-control"
-                                   value="<?= htmlspecialchars($sponsor['category'] ?? '') ?>"
-                                   placeholder="CRM, ERP, Marketing...">
-                        </div>
+                    <div class="form-group">
+                        <label for="name">Nombre *</label>
+                        <input type="text" id="name" name="name" class="form-control"
+                               value="<?= htmlspecialchars($sponsor['name'] ?? '') ?>" required>
                     </div>
 
                     <div class="form-group">
-                        <label for="short_description">Descripción Corta</label>
-                        <input type="text" id="short_description" name="short_description" class="form-control"
-                               value="<?= htmlspecialchars($sponsor['short_description'] ?? '') ?>"
-                               maxlength="500">
+                        <label for="tagline">Tagline / Descripcion Corta</label>
+                        <input type="text" id="tagline" name="tagline" class="form-control"
+                               value="<?= htmlspecialchars($sponsor['tagline'] ?? '') ?>"
+                               maxlength="255" placeholder="Una frase que describe el servicio">
                     </div>
 
                     <div class="form-group">
-                        <label for="description">Descripción Completa</label>
+                        <label for="description">Descripcion Completa</label>
                         <textarea id="description" name="description" class="form-control" rows="4"><?= htmlspecialchars($sponsor['description'] ?? '') ?></textarea>
                     </div>
 
@@ -87,17 +79,23 @@ $isEdit = isset($sponsor) && $sponsor;
                 </div>
                 <div class="card-body">
                     <div class="form-group">
-                        <label for="contact_emails">Emails de Contacto</label>
-                        <input type="text" id="contact_emails" name="contact_emails" class="form-control"
-                               value="<?= htmlspecialchars($sponsor['contact_emails'] ?? '') ?>"
-                               placeholder="email1@empresa.com, email2@empresa.com">
-                        <small class="form-help">Separar múltiples emails con comas</small>
+                        <label for="contact_name">Nombre de Contacto</label>
+                        <input type="text" id="contact_name" name="contact_name" class="form-control"
+                               value="<?= htmlspecialchars($sponsor['contact_name'] ?? '') ?>">
                     </div>
 
-                    <div class="form-group">
-                        <label for="contact_phone">Teléfono</label>
-                        <input type="text" id="contact_phone" name="contact_phone" class="form-control"
-                               value="<?= htmlspecialchars($sponsor['contact_phone'] ?? '') ?>">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="contact_email">Email de Contacto</label>
+                            <input type="text" id="contact_email" name="contact_email" class="form-control"
+                                   value="<?= htmlspecialchars($sponsor['contact_email'] ?? '') ?>"
+                                   placeholder="email@empresa.com">
+                        </div>
+                        <div class="form-group">
+                            <label for="contact_phone">Telefono</label>
+                            <input type="text" id="contact_phone" name="contact_phone" class="form-control"
+                                   value="<?= htmlspecialchars($sponsor['contact_phone'] ?? '') ?>">
+                        </div>
                     </div>
 
                     <div class="form-row">
@@ -137,10 +135,10 @@ $isEdit = isset($sponsor) && $sponsor;
                                         <?= htmlspecialchars($evt['name']) ?>
                                     </a>
                                 </td>
-                                <td><?= $evt['event_date'] ? date('d/m/Y', strtotime($evt['event_date'])) : '-' ?></td>
+                                <td><?= ($evt['start_date'] ?? null) ? date('d/m/Y', strtotime($evt['start_date'])) : '-' ?></td>
                                 <td>
-                                    <span class="badge badge-<?= $evt['priority_level'] === 'platinum' ? 'warning' : 'secondary' ?>">
-                                        <?= ucfirst($evt['priority_level']) ?>
+                                    <span class="badge badge-<?= ($evt['level'] ?? '') === 'platinum' ? 'warning' : 'secondary' ?>">
+                                        <?= ucfirst($evt['level'] ?? 'bronze') ?>
                                     </span>
                                 </td>
                             </tr>
@@ -169,19 +167,19 @@ $isEdit = isset($sponsor) && $sponsor;
             <?php if ($isEdit): ?>
             <div class="card">
                 <div class="card-header">
-                    <h3>Código de Acceso</h3>
+                    <h3>Codigo de Acceso</h3>
                 </div>
                 <div class="card-body">
                     <div class="form-group">
-                        <input type="text" class="form-control" value="<?= htmlspecialchars($sponsor['unique_code']) ?>" readonly
+                        <input type="text" class="form-control" value="<?= htmlspecialchars($sponsor['code'] ?? '') ?>" readonly
                                style="font-family: monospace; font-size: 0.85rem;">
-                        <small class="form-help">URL de selección:</small>
+                        <small class="form-help">URL de seleccion:</small>
                         <code style="font-size: 0.75rem; word-break: break-all;">
-                            /seleccion-sponsor?code=<?= htmlspecialchars($sponsor['unique_code']) ?>
+                            /seleccion-sponsor?code=<?= htmlspecialchars($sponsor['code'] ?? '') ?>
                         </code>
                     </div>
                     <button type="button" class="btn btn-outline btn-sm btn-block" onclick="regenerateCode()">
-                        <i class="fas fa-sync"></i> Regenerar Código
+                        <i class="fas fa-sync"></i> Regenerar Codigo
                     </button>
                 </div>
             </div>
@@ -193,17 +191,11 @@ $isEdit = isset($sponsor) && $sponsor;
                 </div>
                 <div class="card-body">
                     <div class="form-group">
-                        <label for="max_simultaneous_meetings">Máx. Reuniones Simultáneas</label>
+                        <label for="max_simultaneous_meetings">Max. Reuniones Simultaneas</label>
                         <input type="number" id="max_simultaneous_meetings" name="max_simultaneous_meetings"
                                class="form-control" min="1" max="10"
                                value="<?= $sponsor['max_simultaneous_meetings'] ?? 1 ?>">
-                        <small class="form-help">Cuántas reuniones puede tener a la vez</small>
-                    </div>
-
-                    <div class="form-check">
-                        <input type="checkbox" id="can_send_messages" name="can_send_messages" value="1"
-                               <?= ($sponsor['can_send_messages'] ?? 0) ? 'checked' : '' ?>>
-                        <label for="can_send_messages">Puede enviar mensajes</label>
+                        <small class="form-help">Cuantas reuniones puede tener a la vez</small>
                     </div>
                 </div>
             </div>
@@ -218,7 +210,7 @@ $isEdit = isset($sponsor) && $sponsor;
 <?php if ($isEdit): ?>
 <script>
 function regenerateCode() {
-    if (!confirm('¿Regenerar el código? Los enlaces anteriores dejarán de funcionar.')) return;
+    if (!confirm('Regenerar el codigo? Los enlaces anteriores dejaran de funcionar.')) return;
 
     const formData = new FormData();
     formData.append('_csrf_token', '<?= $csrf_token ?>');
