@@ -43,11 +43,20 @@ class AuthController extends Controller
      */
     public function login(): void
     {
+        // Debug: Log login attempt
+        error_log("Login attempt - Session ID: " . session_id());
+        error_log("CSRF in session: " . ($_SESSION['csrf_token'] ?? 'NOT SET'));
+        error_log("CSRF from POST: " . ($_POST['_csrf_token'] ?? 'NOT SET'));
+
         // Validate CSRF
         if (!$this->validateCsrf()) {
+            error_log("CSRF validation FAILED");
             $this->flash('error', 'Sesión expirada. Por favor, inténtalo de nuevo.');
             $this->redirect('/admin/login');
+            return;
         }
+
+        error_log("CSRF validation PASSED");
 
         $email = Sanitizer::email($this->getPost('email'));
         $password = $this->getPost('password', '');
@@ -74,10 +83,14 @@ class AuthController extends Controller
         }
 
         // Verify password
+        error_log("Verifying password for user: " . $user['email']);
         if (!$this->userModel->verifyPassword($password, $user['password'])) {
+            error_log("Password verification FAILED");
             $this->flash('error', 'Credenciales incorrectas.');
             $this->redirect('/admin/login');
+            return;
         }
+        error_log("Password verification PASSED");
 
         // Create session
         $_SESSION['user_id'] = $user['id'];
