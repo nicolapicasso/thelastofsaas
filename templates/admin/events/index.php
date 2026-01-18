@@ -69,7 +69,7 @@
                             <td>
                                 <strong><?= htmlspecialchars($event['name']) ?></strong>
                                 <?php if ($event['slug']): ?>
-                                    <br><small class="text-muted">/evento/<?= htmlspecialchars($event['slug']) ?></small>
+                                    <br><small class="text-muted">/eventos/<?= htmlspecialchars($event['slug']) ?></small>
                                 <?php endif; ?>
                             </td>
                             <td>
@@ -113,6 +113,11 @@
                             </td>
                             <td>
                                 <div class="btn-group">
+                                    <?php if ($event['slug'] && $event['status'] === 'published'): ?>
+                                        <a href="/eventos/<?= htmlspecialchars($event['slug']) ?>" class="btn btn-sm btn-outline" title="Ver en web" target="_blank">
+                                            <i class="fas fa-external-link-alt"></i>
+                                        </a>
+                                    <?php endif; ?>
                                     <a href="/admin/events/<?= $event['id'] ?>/edit" class="btn btn-sm btn-outline" title="Editar">
                                         <i class="fas fa-edit"></i>
                                     </a>

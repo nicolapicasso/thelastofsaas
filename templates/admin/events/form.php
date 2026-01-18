@@ -12,6 +12,11 @@ $isEdit = isset($event) && $event;
         <p><?= $isEdit ? htmlspecialchars($event['name']) : 'Crear un nuevo evento' ?></p>
     </div>
     <div class="page-header-actions">
+        <?php if ($isEdit && !empty($event['slug'])): ?>
+            <a href="/eventos/<?= htmlspecialchars($event['slug']) ?>" class="btn btn-outline" target="_blank">
+                <i class="fas fa-external-link-alt"></i> Ver en web
+            </a>
+        <?php endif; ?>
         <a href="/admin/events" class="btn btn-outline">
             <i class="fas fa-arrow-left"></i> Volver
         </a>
