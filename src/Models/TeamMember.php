@@ -18,15 +18,17 @@ class TeamMember extends Model
     protected array $fillable = [
         'name',
         'slug',
-        'role',
+        'position',
+        'company',
         'bio',
         'photo',
-        'photo_hover',
         'email',
-        'linkedin',
-        'twitter',
+        'phone',
+        'linkedin_url',
+        'twitter_url',
+        'website_url',
         'sort_order',
-        'is_active',
+        'active',
     ];
 
     /**
@@ -34,7 +36,7 @@ class TeamMember extends Model
      */
     public function getActive(): array
     {
-        $sql = "SELECT * FROM `{$this->table}` WHERE is_active = 1 ORDER BY sort_order ASC, name ASC";
+        $sql = "SELECT * FROM `{$this->table}` WHERE active = 1 ORDER BY sort_order ASC, name ASC";
         return $this->db->fetchAll($sql);
     }
 
