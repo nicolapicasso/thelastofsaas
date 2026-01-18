@@ -7,6 +7,7 @@ namespace App\Controllers\Admin;
 use App\Core\Controller;
 use App\Models\Event;
 use App\Models\Sponsor;
+use App\Models\Company;
 use App\Models\TicketType;
 use App\Helpers\Sanitizer;
 use App\Helpers\Slug;
@@ -19,12 +20,14 @@ class EventsController extends Controller
 {
     private Event $eventModel;
     private Sponsor $sponsorModel;
+    private Company $companyModel;
 
     public function __construct()
     {
         parent::__construct();
         $this->eventModel = new Event();
         $this->sponsorModel = new Sponsor();
+        $this->companyModel = new Company();
     }
 
     /**
@@ -117,16 +120,20 @@ class EventsController extends Controller
         }
 
         $sponsors = $this->eventModel->getSponsors((int) $id);
+        $companies = $this->eventModel->getCompanies((int) $id);
         $features = $this->eventModel->getFeatures((int) $id);
         $allSponsors = $this->sponsorModel->getActive();
+        $allCompanies = $this->companyModel->getActive();
         $stats = $this->eventModel->getStats((int) $id);
 
         $this->renderAdmin('events/form', [
             'title' => 'Editar Evento',
             'event' => $event,
             'sponsors' => $sponsors,
+            'companies' => $companies,
             'features' => $features,
             'allSponsors' => $allSponsors,
+            'allCompanies' => $allCompanies,
             'stats' => $stats,
             'statusOptions' => Event::getStatusOptions(),
             'levelOptions' => Sponsor::getLevelOptions(),
@@ -288,6 +295,52 @@ class EventsController extends Controller
             $this->jsonSuccess(['message' => 'Nivel actualizado.']);
         } catch (\Exception $e) {
             $this->jsonError('Error al actualizar nivel: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Add company to event
+     */
+    public function addCompany(string $id): void
+    {
+        $this->requireAuth();
+
+        if (!$this->validateCsrf()) {
+            $this->jsonError('Sesión expirada.');
+            return;
+        }
+
+        $companyId = (int) $this->getPost('company_id');
+        if (!$companyId) {
+            $this->jsonError('Empresa no especificada.');
+            return;
+        }
+
+        try {
+            $this->eventModel->addCompany((int) $id, $companyId);
+            $this->jsonSuccess(['message' => 'Empresa añadida correctamente.']);
+        } catch (\Exception $e) {
+            $this->jsonError('Error al añadir empresa: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Remove company from event
+     */
+    public function removeCompany(string $id, string $companyId): void
+    {
+        $this->requireAuth();
+
+        if (!$this->validateCsrf()) {
+            $this->jsonError('Sesión expirada.');
+            return;
+        }
+
+        try {
+            $this->eventModel->removeCompany((int) $id, (int) $companyId);
+            $this->jsonSuccess(['message' => 'Empresa eliminada del evento.']);
+        } catch (\Exception $e) {
+            $this->jsonError('Error al eliminar empresa: ' . $e->getMessage());
         }
     }
 

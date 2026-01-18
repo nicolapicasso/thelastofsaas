@@ -304,6 +304,8 @@ $router->get('/admin/events/{id}/stats', 'Admin\\EventsController', 'stats');
 $router->post('/admin/events/{id}/sponsors', 'Admin\\EventsController', 'addSponsor');
 $router->post('/admin/events/{id}/sponsors/{sponsorId}/delete', 'Admin\\EventsController', 'removeSponsor');
 $router->post('/admin/events/{id}/sponsors/{sponsorId}/level', 'Admin\\EventsController', 'updateSponsorLevel');
+$router->post('/admin/events/{id}/companies', 'Admin\\EventsController', 'addCompany');
+$router->post('/admin/events/{id}/companies/{companyId}/delete', 'Admin\\EventsController', 'removeCompany');
 $router->post('/admin/events/{id}/features', 'Admin\\EventsController', 'addFeature');
 
 // Sponsors

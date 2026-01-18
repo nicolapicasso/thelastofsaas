@@ -217,6 +217,76 @@ $isEdit = isset($event) && $event;
                 </div>
             </div>
             <?php endif; ?>
+
+            <?php if ($isEdit): ?>
+            <div class="card">
+                <div class="card-header">
+                    <h3>Empresas del Evento</h3>
+                </div>
+                <div class="card-body">
+                    <?php if (!empty($companies)): ?>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Empresa</th>
+                                <th width="100">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($companies as $company): ?>
+                            <tr id="company-row-<?= $company['id'] ?>">
+                                <td>
+                                    <?php if ($company['logo_url'] ?? null): ?>
+                                        <img src="<?= htmlspecialchars($company['logo_url']) ?>" alt="" style="height: 30px; margin-right: 10px;">
+                                    <?php endif; ?>
+                                    <?= htmlspecialchars($company['name']) ?>
+                                </td>
+                                <td>
+                                    <a href="/admin/companies/<?= $company['id'] ?>/edit" class="btn btn-sm btn-outline" title="Ver">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <button type="button" class="btn btn-sm btn-outline btn-danger" onclick="removeCompany(<?= $company['id'] ?>)" title="Quitar">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                    <?php else: ?>
+                    <p class="text-muted">No hay empresas asignadas a este evento.</p>
+                    <?php endif; ?>
+
+                    <?php if (!empty($allCompanies)): ?>
+                    <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border);">
+                        <div class="form-row" style="align-items: end;">
+                            <div class="form-group" style="flex: 2;">
+                                <label>Anadir Empresa</label>
+                                <select id="new_company_id" class="form-control">
+                                    <option value="">Seleccionar...</option>
+                                    <?php
+                                    $existingCompanyIds = array_column($companies ?? [], 'id');
+                                    foreach ($allCompanies as $c):
+                                        if (!in_array($c['id'], $existingCompanyIds)):
+                                    ?>
+                                        <option value="<?= $c['id'] ?>"><?= htmlspecialchars($c['name']) ?></option>
+                                    <?php
+                                        endif;
+                                    endforeach;
+                                    ?>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <button type="button" class="btn btn-outline" onclick="addCompany()">
+                                    <i class="fas fa-plus"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <?php endif; ?>
+                </div>
+            </div>
+            <?php endif; ?>
         </div>
 
         <!-- Sidebar -->
@@ -317,6 +387,52 @@ function addSponsor() {
             location.reload();
         } else {
             alert(data.error || 'Error al anadir sponsor');
+        }
+    });
+}
+
+function addCompany() {
+    const companyId = document.getElementById('new_company_id').value;
+
+    if (!companyId) {
+        alert('Selecciona una empresa');
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append('_csrf_token', '<?= $csrf_token ?>');
+    formData.append('company_id', companyId);
+
+    fetch('/admin/events/<?= $event['id'] ?>/companies', {
+        method: 'POST',
+        body: formData
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        } else {
+            alert(data.error || 'Error al anadir empresa');
+        }
+    });
+}
+
+function removeCompany(companyId) {
+    if (!confirm('¿Quitar esta empresa del evento?')) return;
+
+    const formData = new FormData();
+    formData.append('_csrf_token', '<?= $csrf_token ?>');
+
+    fetch('/admin/events/<?= $event['id'] ?>/companies/' + companyId + '/delete', {
+        method: 'POST',
+        body: formData
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            document.getElementById('company-row-' + companyId).remove();
+        } else {
+            alert(data.error || 'Error al quitar empresa');
         }
     });
 }

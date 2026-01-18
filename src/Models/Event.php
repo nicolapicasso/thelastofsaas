@@ -143,6 +143,40 @@ class Event extends Model
     }
 
     /**
+     * Get event companies
+     */
+    public function getCompanies(int $eventId): array
+    {
+        $sql = "SELECT c.*
+                FROM companies c
+                INNER JOIN event_companies ec ON c.id = ec.company_id
+                WHERE ec.event_id = ?
+                ORDER BY c.name ASC";
+
+        return $this->db->fetchAll($sql, [$eventId]);
+    }
+
+    /**
+     * Associate company with event
+     */
+    public function addCompany(int $eventId, int $companyId): bool
+    {
+        $sql = "INSERT IGNORE INTO event_companies (event_id, company_id) VALUES (?, ?)";
+        $this->db->query($sql, [$eventId, $companyId]);
+        return true;
+    }
+
+    /**
+     * Remove company from event
+     */
+    public function removeCompany(int $eventId, int $companyId): bool
+    {
+        $sql = "DELETE FROM event_companies WHERE event_id = ? AND company_id = ?";
+        $this->db->query($sql, [$eventId, $companyId]);
+        return true;
+    }
+
+    /**
      * Get event features
      */
     public function getFeatures(int $eventId): array
