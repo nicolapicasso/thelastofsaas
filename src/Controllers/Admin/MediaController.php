@@ -80,16 +80,25 @@ class MediaController extends Controller
      */
     public function upload(): void
     {
+        // Suppress PHP errors from being output, capture them instead
+        ob_start();
         header('Content-Type: application/json');
 
-        if (!isset($_FILES['file'])) {
-            echo json_encode(['success' => false, 'error' => 'No se recibió ningún archivo']);
-            return;
+        try {
+            if (!isset($_FILES['file'])) {
+                ob_end_clean();
+                echo json_encode(['success' => false, 'error' => 'No se recibió ningún archivo']);
+                return;
+            }
+
+            $result = $this->mediaService->upload($_FILES['file']);
+            ob_end_clean();
+            echo json_encode($result);
+        } catch (\Throwable $e) {
+            ob_end_clean();
+            error_log('Media upload error: ' . $e->getMessage());
+            echo json_encode(['success' => false, 'error' => 'Error al subir archivo: ' . $e->getMessage()]);
         }
-
-        $result = $this->mediaService->upload($_FILES['file']);
-
-        echo json_encode($result);
     }
 
     /**

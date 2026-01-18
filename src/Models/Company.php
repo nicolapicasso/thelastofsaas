@@ -318,13 +318,18 @@ class Company extends Model
      */
     public function getReceivedMessages(int $companyId, int $eventId): array
     {
-        $sql = "SELECT sm.*, s.name as sponsor_name, s.logo_url as sponsor_logo
-                FROM sponsor_messages sm
-                INNER JOIN sponsors s ON sm.sponsor_id = s.id
-                WHERE sm.company_id = ? AND sm.event_id = ?
-                ORDER BY sm.sent_at DESC";
+        try {
+            $sql = "SELECT sm.*, s.name as sponsor_name, s.logo_url as sponsor_logo
+                    FROM sponsor_messages sm
+                    INNER JOIN sponsors s ON sm.sponsor_id = s.id
+                    WHERE sm.company_id = ? AND sm.event_id = ?
+                    ORDER BY sm.created_at DESC";
 
-        return $this->db->fetchAll($sql, [$companyId, $eventId]);
+            return $this->db->fetchAll($sql, [$companyId, $eventId]);
+        } catch (\PDOException $e) {
+            // Table might not exist yet
+            return [];
+        }
     }
 
     /**
