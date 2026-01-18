@@ -26,7 +26,7 @@ $isEdit = isset($company) && $company;
     <div class="form-grid">
         <div class="form-main">
             <div class="card">
-                <div class="card-header"><h3>Información Básica</h3></div>
+                <div class="card-header"><h3>Informacion Basica</h3></div>
                 <div class="card-body">
                     <div class="form-row">
                         <div class="form-group" style="flex: 2;">
@@ -34,18 +34,13 @@ $isEdit = isset($company) && $company;
                             <input type="text" id="name" name="name" class="form-control" value="<?= htmlspecialchars($company['name'] ?? '') ?>" required>
                         </div>
                         <div class="form-group" style="flex: 1;">
-                            <label for="industry">Industria</label>
-                            <input type="text" id="industry" name="industry" class="form-control" value="<?= htmlspecialchars($company['industry'] ?? '') ?>">
+                            <label for="sector">Sector</label>
+                            <input type="text" id="sector" name="sector" class="form-control" value="<?= htmlspecialchars($company['sector'] ?? '') ?>">
                         </div>
                     </div>
 
                     <div class="form-group">
-                        <label for="short_description">Descripción Corta</label>
-                        <input type="text" id="short_description" name="short_description" class="form-control" value="<?= htmlspecialchars($company['short_description'] ?? '') ?>">
-                    </div>
-
-                    <div class="form-group">
-                        <label for="description">Descripción</label>
+                        <label for="description">Descripcion</label>
                         <textarea id="description" name="description" class="form-control" rows="3"><?= htmlspecialchars($company['description'] ?? '') ?></textarea>
                     </div>
 
@@ -55,11 +50,11 @@ $isEdit = isset($company) && $company;
                             <input type="url" id="website" name="website" class="form-control" value="<?= htmlspecialchars($company['website'] ?? '') ?>">
                         </div>
                         <div class="form-group">
-                            <label for="company_size">Tamaño</label>
-                            <select id="company_size" name="company_size" class="form-control">
+                            <label for="employees">Tamano</label>
+                            <select id="employees" name="employees" class="form-control">
                                 <option value="">Seleccionar...</option>
                                 <?php foreach ($sizeOptions as $val => $lbl): ?>
-                                    <option value="<?= $val ?>" <?= ($company['company_size'] ?? '') === $val ? 'selected' : '' ?>><?= $lbl ?></option>
+                                    <option value="<?= $val ?>" <?= ($company['employees'] ?? '') === $val ? 'selected' : '' ?>><?= $lbl ?></option>
                                 <?php endforeach; ?>
                             </select>
                         </div>
@@ -71,13 +66,18 @@ $isEdit = isset($company) && $company;
                 <div class="card-header"><h3>Contacto</h3></div>
                 <div class="card-body">
                     <div class="form-group">
-                        <label for="contact_emails">Emails de Contacto</label>
-                        <input type="text" id="contact_emails" name="contact_emails" class="form-control" value="<?= htmlspecialchars($company['contact_emails'] ?? '') ?>" placeholder="email1@empresa.com, email2@empresa.com">
-                        <small class="form-help">Separar con comas. El número de emails determina cuántas reuniones simultáneas puede tener.</small>
+                        <label for="contact_name">Nombre de Contacto</label>
+                        <input type="text" id="contact_name" name="contact_name" class="form-control" value="<?= htmlspecialchars($company['contact_name'] ?? '') ?>">
                     </div>
-                    <div class="form-group">
-                        <label for="contact_phone">Teléfono</label>
-                        <input type="text" id="contact_phone" name="contact_phone" class="form-control" value="<?= htmlspecialchars($company['contact_phone'] ?? '') ?>">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="contact_email">Email de Contacto</label>
+                            <input type="text" id="contact_email" name="contact_email" class="form-control" value="<?= htmlspecialchars($company['contact_email'] ?? '') ?>" placeholder="email@empresa.com">
+                        </div>
+                        <div class="form-group">
+                            <label for="contact_phone">Telefono</label>
+                            <input type="text" id="contact_phone" name="contact_phone" class="form-control" value="<?= htmlspecialchars($company['contact_phone'] ?? '') ?>">
+                        </div>
                     </div>
                 </div>
             </div>
@@ -118,11 +118,11 @@ $isEdit = isset($company) && $company;
 
             <?php if ($isEdit): ?>
             <div class="card">
-                <div class="card-header"><h3>Código de Acceso</h3></div>
+                <div class="card-header"><h3>Codigo de Acceso</h3></div>
                 <div class="card-body">
-                    <input type="text" class="form-control" value="<?= htmlspecialchars($company['unique_code']) ?>" readonly style="font-family: monospace; font-size: 0.85rem;">
-                    <small class="form-help">URL de selección:</small>
-                    <code style="font-size: 0.75rem; word-break: break-all;">/seleccion-empresa?code=<?= htmlspecialchars($company['unique_code']) ?></code>
+                    <input type="text" class="form-control" value="<?= htmlspecialchars($company['code'] ?? '') ?>" readonly style="font-family: monospace; font-size: 0.85rem;">
+                    <small class="form-help">URL de seleccion:</small>
+                    <code style="font-size: 0.75rem; word-break: break-all;">/seleccion-empresa?code=<?= htmlspecialchars($company['code'] ?? '') ?></code>
                     <button type="button" class="btn btn-outline btn-sm btn-block" style="margin-top: 0.5rem;" onclick="regenerateCode()"><i class="fas fa-sync"></i> Regenerar</button>
                 </div>
             </div>
@@ -144,7 +144,7 @@ $isEdit = isset($company) && $company;
 <?php if ($isEdit): ?>
 <script>
 function regenerateCode() {
-    if (!confirm('¿Regenerar el código?')) return;
+    if (!confirm('¿Regenerar el codigo?')) return;
     fetch('/admin/companies/<?= $company['id'] ?>/regenerate-code', {
         method: 'POST',
         body: new URLSearchParams({_csrf_token: '<?= $csrf_token ?>'})

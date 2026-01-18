@@ -32,15 +32,15 @@
             </select>
         </div>
         <div class="filter-group">
-            <label>Industria</label>
-            <select name="industry" onchange="this.form.submit()">
-                <option value="">Todas</option>
-                <?php foreach ($industries as $ind): ?>
-                    <option value="<?= htmlspecialchars($ind) ?>" <?= $currentIndustry === $ind ? 'selected' : '' ?>><?= htmlspecialchars($ind) ?></option>
+            <label>Sector</label>
+            <select name="sector" onchange="this.form.submit()">
+                <option value="">Todos</option>
+                <?php foreach ($sectors ?? [] as $sec): ?>
+                    <option value="<?= htmlspecialchars($sec) ?>" <?= ($currentSector ?? '') === $sec ? 'selected' : '' ?>><?= htmlspecialchars($sec) ?></option>
                 <?php endforeach; ?>
             </select>
         </div>
-        <?php if ($currentActive !== null || $currentIndustry): ?>
+        <?php if ($currentActive !== null || ($currentSector ?? '')): ?>
             <a href="/admin/companies" class="btn btn-outline btn-sm">Limpiar</a>
         <?php endif; ?>
     </form>
@@ -61,7 +61,7 @@
                     <tr>
                         <th width="50"></th>
                         <th>Nombre</th>
-                        <th>Industria</th>
+                        <th>Sector</th>
                         <th>Tamaño</th>
                         <th>Estado</th>
                         <th width="120">Acciones</th>
@@ -71,7 +71,7 @@
                     <?php foreach ($companies as $company): ?>
                         <tr>
                             <td>
-                                <?php if ($company['logo_url']): ?>
+                                <?php if ($company['logo_url'] ?? null): ?>
                                     <img src="<?= htmlspecialchars($company['logo_url']) ?>" alt="" class="table-thumbnail">
                                 <?php else: ?>
                                     <div class="table-thumbnail-placeholder"><i class="fas fa-building"></i></div>
@@ -79,18 +79,18 @@
                             </td>
                             <td>
                                 <strong><?= htmlspecialchars($company['name']) ?></strong>
-                                <?php if ($company['contact_emails']): ?>
-                                    <br><small class="text-muted"><?= htmlspecialchars(explode(',', $company['contact_emails'])[0]) ?></small>
+                                <?php if ($company['contact_email'] ?? null): ?>
+                                    <br><small class="text-muted"><?= htmlspecialchars(explode(',', $company['contact_email'])[0]) ?></small>
                                 <?php endif; ?>
                             </td>
-                            <td><?= $company['industry'] ? htmlspecialchars($company['industry']) : '<span class="text-muted">-</span>' ?></td>
-                            <td><?= $company['company_size'] ? '<span class="badge badge-info">' . $company['company_size'] . '</span>' : '-' ?></td>
+                            <td><?= ($company['sector'] ?? null) ? htmlspecialchars($company['sector']) : '<span class="text-muted">-</span>' ?></td>
+                            <td><?= ($company['employees'] ?? null) ? '<span class="badge badge-info">' . htmlspecialchars($company['employees']) . '</span>' : '-' ?></td>
                             <td><span class="badge badge-<?= $company['active'] ? 'success' : 'secondary' ?>"><?= $company['active'] ? 'Activo' : 'Inactivo' ?></span></td>
                             <td>
                                 <div class="btn-group">
                                     <a href="/admin/companies/<?= $company['id'] ?>/edit" class="btn btn-sm btn-outline" title="Editar"><i class="fas fa-edit"></i></a>
                                     <form method="POST" action="/admin/companies/<?= $company['id'] ?>/delete" class="inline-form" onsubmit="return confirm('¿Eliminar?')">
-                                        <input type="hidden" name="_csrf_token" value="<?= $csrf_token ?>">
+                                        <input type="hidden" name="_csrf_token" value="<?= $csrf_token ?? '' ?>">
                                         <button type="submit" class="btn btn-sm btn-outline btn-danger"><i class="fas fa-trash"></i></button>
                                     </form>
                                 </div>
@@ -100,7 +100,7 @@
                 </tbody>
             </table>
         </div>
-        <?php if ($pagination['total_pages'] > 1): ?>
+        <?php if (($pagination['total_pages'] ?? 0) > 1): ?>
             <div class="card-footer">
                 <div class="pagination">
                     <?php if ($pagination['current_page'] > 1): ?><a href="?page=<?= $pagination['current_page'] - 1 ?>" class="btn btn-sm btn-outline"><i class="fas fa-chevron-left"></i></a><?php endif; ?>

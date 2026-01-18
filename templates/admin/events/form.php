@@ -54,7 +54,7 @@ $isEdit = isset($event) && $event;
         <div class="form-main">
             <div class="card">
                 <div class="card-header">
-                    <h3>Información del Evento</h3>
+                    <h3>Informacion del Evento</h3>
                 </div>
                 <div class="card-body">
                     <div class="form-group">
@@ -64,20 +64,39 @@ $isEdit = isset($event) && $event;
                     </div>
 
                     <div class="form-group">
-                        <label for="description">Descripción</label>
+                        <label for="short_description">Descripcion Corta</label>
+                        <input type="text" id="short_description" name="short_description" class="form-control"
+                               value="<?= htmlspecialchars($event['short_description'] ?? '') ?>">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="description">Descripcion</label>
                         <textarea id="description" name="description" class="form-control" rows="4"><?= htmlspecialchars($event['description'] ?? '') ?></textarea>
                     </div>
 
                     <div class="form-row">
                         <div class="form-group">
-                            <label for="event_date">Fecha Inicio</label>
-                            <input type="date" id="event_date" name="event_date" class="form-control"
-                                   value="<?= $event['event_date'] ?? '' ?>">
+                            <label for="start_date">Fecha Inicio *</label>
+                            <input type="date" id="start_date" name="start_date" class="form-control"
+                                   value="<?= $event['start_date'] ?? '' ?>" required>
                         </div>
                         <div class="form-group">
-                            <label for="event_end_date">Fecha Fin</label>
-                            <input type="date" id="event_end_date" name="event_end_date" class="form-control"
-                                   value="<?= $event['event_end_date'] ?? '' ?>">
+                            <label for="end_date">Fecha Fin</label>
+                            <input type="date" id="end_date" name="end_date" class="form-control"
+                                   value="<?= $event['end_date'] ?? '' ?>">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="start_time">Hora Inicio</label>
+                            <input type="time" id="start_time" name="start_time" class="form-control"
+                                   value="<?= $event['start_time'] ?? '' ?>">
+                        </div>
+                        <div class="form-group">
+                            <label for="end_time">Hora Fin</label>
+                            <input type="time" id="end_time" name="end_time" class="form-control"
+                                   value="<?= $event['end_time'] ?? '' ?>">
                         </div>
                     </div>
                 </div>
@@ -85,33 +104,33 @@ $isEdit = isset($event) && $event;
 
             <div class="card">
                 <div class="card-header">
-                    <h3>Ubicación</h3>
+                    <h3>Ubicacion</h3>
                 </div>
                 <div class="card-body">
                     <div class="form-group">
-                        <label for="venue_name">Nombre del Lugar</label>
-                        <input type="text" id="venue_name" name="venue_name" class="form-control"
-                               value="<?= htmlspecialchars($event['venue_name'] ?? '') ?>"
+                        <label for="location">Nombre del Lugar</label>
+                        <input type="text" id="location" name="location" class="form-control"
+                               value="<?= htmlspecialchars($event['location'] ?? '') ?>"
                                placeholder="Ej: Palacio de Congresos">
                     </div>
 
                     <div class="form-row">
                         <div class="form-group">
-                            <label for="venue_address">Dirección</label>
-                            <input type="text" id="venue_address" name="venue_address" class="form-control"
-                                   value="<?= htmlspecialchars($event['venue_address'] ?? '') ?>">
+                            <label for="address">Direccion</label>
+                            <input type="text" id="address" name="address" class="form-control"
+                                   value="<?= htmlspecialchars($event['address'] ?? '') ?>">
                         </div>
                         <div class="form-group">
-                            <label for="venue_city">Ciudad</label>
-                            <input type="text" id="venue_city" name="venue_city" class="form-control"
-                                   value="<?= htmlspecialchars($event['venue_city'] ?? '') ?>">
+                            <label for="city">Ciudad</label>
+                            <input type="text" id="city" name="city" class="form-control"
+                                   value="<?= htmlspecialchars($event['city'] ?? '') ?>">
                         </div>
                     </div>
 
                     <div class="form-group">
-                        <label for="venue_coordinates">Coordenadas (opcional)</label>
-                        <input type="text" id="venue_coordinates" name="venue_coordinates" class="form-control"
-                               value="<?= htmlspecialchars($event['venue_coordinates'] ?? '') ?>"
+                        <label for="coordinates">Coordenadas (opcional)</label>
+                        <input type="text" id="coordinates" name="coordinates" class="form-control"
+                               value="<?= htmlspecialchars($event['coordinates'] ?? '') ?>"
                                placeholder="41.3851, 2.1734">
                     </div>
                 </div>
@@ -135,14 +154,14 @@ $isEdit = isset($event) && $event;
                             <?php foreach ($sponsors as $sponsor): ?>
                             <tr>
                                 <td>
-                                    <?php if ($sponsor['logo_url']): ?>
+                                    <?php if ($sponsor['logo_url'] ?? null): ?>
                                         <img src="<?= htmlspecialchars($sponsor['logo_url']) ?>" alt="" style="height: 30px; margin-right: 10px;">
                                     <?php endif; ?>
                                     <?= htmlspecialchars($sponsor['name']) ?>
                                 </td>
                                 <td>
-                                    <span class="badge badge-<?= $sponsor['priority_level'] === 'platinum' ? 'warning' : ($sponsor['priority_level'] === 'gold' ? 'warning' : 'secondary') ?>">
-                                        <?= ucfirst($sponsor['priority_level']) ?>
+                                    <span class="badge badge-<?= ($sponsor['level'] ?? '') === 'platinum' ? 'warning' : (($sponsor['level'] ?? '') === 'gold' ? 'warning' : 'secondary') ?>">
+                                        <?= ucfirst($sponsor['level'] ?? 'bronze') ?>
                                     </span>
                                 </td>
                                 <td>
@@ -159,7 +178,7 @@ $isEdit = isset($event) && $event;
                     <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border);">
                         <div class="form-row" style="align-items: end;">
                             <div class="form-group" style="flex: 2;">
-                                <label>Añadir Sponsor</label>
+                                <label>Anadir Sponsor</label>
                                 <select id="new_sponsor_id" class="form-control">
                                     <option value="">Seleccionar...</option>
                                     <?php
@@ -199,7 +218,7 @@ $isEdit = isset($event) && $event;
         <div class="form-sidebar">
             <div class="card">
                 <div class="card-header">
-                    <h3>Publicación</h3>
+                    <h3>Publicacion</h3>
                 </div>
                 <div class="card-body">
                     <div class="form-group">
@@ -214,9 +233,9 @@ $isEdit = isset($event) && $event;
                     </div>
 
                     <div class="form-group">
-                        <label for="total_capacity">Aforo Total *</label>
-                        <input type="number" id="total_capacity" name="total_capacity" class="form-control"
-                               value="<?= $event['total_capacity'] ?? 100 ?>" min="1" required>
+                        <label for="max_attendees">Aforo Total</label>
+                        <input type="number" id="max_attendees" name="max_attendees" class="form-control"
+                               value="<?= $event['max_attendees'] ?? 100 ?>" min="1">
                     </div>
 
                     <div class="form-group">
@@ -295,7 +314,7 @@ function addSponsor() {
         if (data.success) {
             location.reload();
         } else {
-            alert(data.error || 'Error al añadir sponsor');
+            alert(data.error || 'Error al anadir sponsor');
         }
     });
 }

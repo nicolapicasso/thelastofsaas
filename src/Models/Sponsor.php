@@ -60,11 +60,11 @@ class Sponsor extends Model
      */
     public function getByEvent(int $eventId): array
     {
-        $sql = "SELECT s.*, es.priority_level, es.display_order
+        $sql = "SELECT s.*, es.level, es.display_order
                 FROM sponsors s
                 INNER JOIN event_sponsors es ON s.id = es.sponsor_id
                 WHERE es.event_id = ? AND s.active = 1
-                ORDER BY FIELD(es.priority_level, 'platinum', 'gold', 'silver', 'bronze'), es.display_order ASC";
+                ORDER BY FIELD(es.level, 'platinum', 'gold', 'silver', 'bronze'), es.display_order ASC";
 
         return $this->db->fetchAll($sql, [$eventId]);
     }
@@ -74,7 +74,7 @@ class Sponsor extends Model
      */
     public function getEvents(int $sponsorId): array
     {
-        $sql = "SELECT e.*, es.priority_level
+        $sql = "SELECT e.*, es.level
                 FROM events e
                 INNER JOIN event_sponsors es ON e.id = es.event_id
                 WHERE es.sponsor_id = ?
