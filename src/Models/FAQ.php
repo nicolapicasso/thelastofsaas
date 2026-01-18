@@ -20,7 +20,7 @@ class FAQ extends Model
         'category_id',
         'faq_group',
         'is_active',
-        'sort_order',
+        'display_order',
         'views',
     ];
 
@@ -33,7 +33,7 @@ class FAQ extends Model
                 FROM `{$this->table}` f
                 LEFT JOIN categories c ON f.category_id = c.id
                 WHERE f.is_active = 1
-                ORDER BY f.sort_order ASC
+                ORDER BY f.display_order ASC
                 LIMIT ?";
         return $this->db->fetchAll($sql, [$limit]);
     }
@@ -43,7 +43,7 @@ class FAQ extends Model
      */
     public function getByCategory(int $categoryId): array
     {
-        $sql = "SELECT * FROM `{$this->table}` WHERE category_id = ? AND is_active = 1 ORDER BY sort_order ASC";
+        $sql = "SELECT * FROM `{$this->table}` WHERE category_id = ? AND is_active = 1 ORDER BY display_order ASC";
         return $this->db->fetchAll($sql, [$categoryId]);
     }
 
@@ -69,7 +69,7 @@ class FAQ extends Model
     public function reorder(array $ids): void
     {
         foreach ($ids as $order => $id) {
-            $this->update((int) $id, ['sort_order' => $order]);
+            $this->update((int) $id, ['display_order' => $order]);
         }
     }
 
@@ -114,7 +114,7 @@ class FAQ extends Model
                     FROM `{$this->table}` f
                     LEFT JOIN categories c ON f.category_id = c.id
                     WHERE f.is_active = 1 AND f.faq_group = ?
-                    ORDER BY f.sort_order ASC
+                    ORDER BY f.display_order ASC
                     LIMIT ?";
             return $this->db->fetchAll($sql, [$group, $limit]);
         } catch (\Exception $e) {
@@ -131,7 +131,7 @@ class FAQ extends Model
         $sql = "SELECT * FROM `{$this->table}`
                 WHERE is_active = 1
                 AND (question LIKE ? OR answer LIKE ?)
-                ORDER BY sort_order ASC";
+                ORDER BY display_order ASC";
 
         $searchTerm = '%' . $query . '%';
 

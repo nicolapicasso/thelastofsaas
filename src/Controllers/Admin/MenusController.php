@@ -207,7 +207,7 @@ class MenusController extends Controller
             'item_type' => Sanitizer::string($this->getPost('item_type', 'link')),
             'button_style' => Sanitizer::string($this->getPost('button_style', 'primary')),
             'translations' => $translations,
-            'sort_order' => (int)$this->getPost('sort_order', 0),
+            'display_order' => (int)$this->getPost('display_order', 0),
             'is_active' => $this->getPost('is_active') ? 1 : 1,
         ];
 
@@ -251,7 +251,7 @@ class MenusController extends Controller
             'item_type' => Sanitizer::string($this->getPost('item_type', 'link')),
             'button_style' => Sanitizer::string($this->getPost('button_style', 'primary')),
             'translations' => $translations,
-            'sort_order' => (int)$this->getPost('sort_order', 0),
+            'display_order' => (int)$this->getPost('display_order', 0),
             'is_active' => $this->getPost('is_active') ? 1 : 0,
             'parent_id' => $this->getPost('parent_id') ?: null,
         ];

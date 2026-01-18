@@ -197,7 +197,7 @@ class FAQController extends Controller
         $answer = $this->getPost('answer'); // Allow HTML
         $categoryId = Sanitizer::int($this->getPost('category_id'));
         $faqGroup = Sanitizer::string($this->getPost('faq_group'));
-        $sortOrder = Sanitizer::int($this->getPost('sort_order', 0));
+        $displayOrder = Sanitizer::int($this->getPost('display_order', 0));
         $isActive = Sanitizer::bool($this->getPost('is_active', true));
 
         if (empty($question)) {
@@ -217,7 +217,7 @@ class FAQController extends Controller
             'answer' => $answer,
             'category_id' => $categoryId ?: null,
             'faq_group' => $faqGroup ?: null,
-            'sort_order' => $sortOrder,
+            'display_order' => $displayOrder,
             'is_active' => $isActive ? 1 : 0,
         ];
     }
