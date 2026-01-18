@@ -144,7 +144,6 @@
 
         /* Main Content */
         .panel-main {
-            margin-left: 280px;
             padding: 2rem 3rem;
             min-height: 100vh;
         }
@@ -625,12 +624,12 @@
                 const companyId = this.dataset.company;
                 const eventId = this.dataset.event;
 
-                fetch('/sponsor/api/select', {
+                fetch('/sponsor/seleccionar', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/x-www-form-urlencoded',
                     },
-                    body: `company_id=${companyId}&event_id=${eventId}&csrf_token=<?= htmlspecialchars($_SESSION['csrf_token'] ?? '') ?>`
+                    body: `company_id=${companyId}&event_id=${eventId}&_csrf_token=<?= htmlspecialchars($_SESSION['csrf_token'] ?? '') ?>`
                 })
                 .then(res => res.json())
                 .then(data => {
@@ -651,12 +650,12 @@
 
                 if (!confirm('Quitar seleccion?')) return;
 
-                fetch('/sponsor/api/unselect', {
+                fetch('/sponsor/deseleccionar', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/x-www-form-urlencoded',
                     },
-                    body: `company_id=${companyId}&event_id=${eventId}&csrf_token=<?= htmlspecialchars($_SESSION['csrf_token'] ?? '') ?>`
+                    body: `company_id=${companyId}&event_id=${eventId}&_csrf_token=<?= htmlspecialchars($_SESSION['csrf_token'] ?? '') ?>`
                 })
                 .then(res => res.json())
                 .then(data => {
