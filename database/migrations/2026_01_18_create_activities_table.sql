@@ -1,5 +1,6 @@
 -- Migration: Create activities table
 -- TLOS - The Last of SaaS
+-- Note: Foreign keys removed for compatibility - relationships enforced at application level
 
 CREATE TABLE IF NOT EXISTS `activities` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
@@ -31,11 +32,7 @@ CREATE TABLE IF NOT EXISTS `activities` (
   KEY `idx_activities_category` (`category_id`),
   KEY `idx_activities_date` (`activity_date`),
   KEY `idx_activities_active` (`active`),
-  KEY `idx_activities_event_date` (`event_id`, `activity_date`),
-  CONSTRAINT `fk_activities_event` FOREIGN KEY (`event_id`) REFERENCES `events` (`id`) ON DELETE CASCADE,
-  CONSTRAINT `fk_activities_room` FOREIGN KEY (`room_id`) REFERENCES `rooms` (`id`) ON DELETE SET NULL,
-  CONSTRAINT `fk_activities_speaker` FOREIGN KEY (`speaker_id`) REFERENCES `team_members` (`id`) ON DELETE SET NULL,
-  CONSTRAINT `fk_activities_category` FOREIGN KEY (`category_id`) REFERENCES `categories` (`id`) ON DELETE SET NULL
+  KEY `idx_activities_event_date` (`event_id`, `activity_date`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Activity types reference:
