@@ -48,6 +48,11 @@ class Block extends Model
         'landings' => 'Landing Pages',
         'contact_form' => 'Formulario de Contacto',
         'custom_html' => 'HTML Personalizado',
+        // TLOS Blocks
+        'sponsors' => 'Sponsors (TLOS)',
+        'companies' => 'Empresas (TLOS)',
+        'agenda' => 'Agenda de Evento (TLOS)',
+        'tickets' => 'Tickets de Evento (TLOS)',
     ];
 
     /**
@@ -350,6 +355,24 @@ class Block extends Model
                     ],
                 ],
             ],
+            // TLOS Blocks
+            'sponsors' => [
+                'title' => 'Nuestros Sponsors',
+                'subtitle' => '',
+            ],
+            'companies' => [
+                'title' => 'Empresas Participantes',
+                'subtitle' => '',
+            ],
+            'agenda' => [
+                'title' => 'Agenda del Evento',
+                'subtitle' => '',
+            ],
+            'tickets' => [
+                'title' => 'Consigue tu entrada',
+                'subtitle' => '',
+                'cta_text' => 'Comprar entrada',
+            ],
         ];
 
         return $defaults[$type] ?? [];
@@ -536,6 +559,66 @@ class Block extends Model
                 'animation' => 'fade-up',
                 'animation_duration' => 'normal',
                 'animation_delay' => '0',
+            ],
+            // TLOS Blocks
+            'sponsors' => [
+                'display_mode' => 'grid',          // grid or carousel
+                'columns' => 4,                    // 3, 4, 5, 6
+                'visible_items' => 5,              // for carousel mode
+                'selection_mode' => 'all',         // all, event, level, manual
+                'event_id' => '',                  // event ID for event filtering
+                'level_filter' => '',              // sponsor level for filtering
+                'selected_sponsors' => [],         // array of sponsor IDs for manual selection
+                'limit' => 12,
+                'logo_height' => 80,
+                'show_name' => true,
+                'show_level' => true,
+                'grayscale' => false,
+                'autoplay' => true,
+                'autoplay_speed' => 'normal',
+                'background_color' => '#ffffff',
+            ],
+            'companies' => [
+                'display_mode' => 'grid',          // grid or carousel
+                'columns' => 4,                    // 3, 4, 5, 6
+                'visible_items' => 5,              // for carousel mode
+                'selection_mode' => 'all',         // all, event, sector, manual
+                'event_id' => '',                  // event ID for event filtering
+                'sector_filter' => '',             // sector for filtering
+                'selected_companies' => [],        // array of company IDs for manual selection
+                'limit' => 12,
+                'logo_height' => 80,
+                'show_name' => true,
+                'show_sector' => true,
+                'grayscale' => false,
+                'autoplay' => true,
+                'autoplay_speed' => 'normal',
+                'background_color' => '#f8f9fa',
+            ],
+            'agenda' => [
+                'event_id' => '',                  // required: event ID
+                'display_mode' => 'timeline',      // timeline, cards, compact
+                'group_by' => 'date',              // date, room, type
+                'show_room' => true,
+                'show_speaker' => true,
+                'show_description' => true,
+                'show_time' => true,
+                'filter_by_date' => '',            // optional: specific date
+                'filter_by_room' => '',            // optional: room ID
+                'filter_by_type' => '',            // optional: activity type
+                'background_color' => '#ffffff',
+            ],
+            'tickets' => [
+                'event_id' => '',                  // required: event ID
+                'sponsor_id' => '',                // optional: sponsor offering this ticket
+                'ticket_type_id' => '',            // optional: specific ticket type
+                'display_mode' => 'card',          // card, inline, minimal
+                'show_price' => true,
+                'show_remaining' => true,
+                'show_description' => true,
+                'custom_price' => '',              // override ticket price display
+                'custom_limit' => '',              // override availability display
+                'background_color' => '#f8f9fa',
             ],
         ];
 

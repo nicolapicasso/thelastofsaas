@@ -380,6 +380,26 @@ $router->post('/admin/tlos-settings/set', 'Admin\\TlosSettingsController', 'set'
 $router->post('/admin/tlos-settings/test-email', 'Admin\\TlosSettingsController', 'testEmail');
 $router->post('/admin/tlos-settings/test-stripe', 'Admin\\TlosSettingsController', 'testStripe');
 
+// Rooms
+$router->get('/admin/rooms', 'Admin\\RoomsController', 'index');
+$router->get('/admin/rooms/create', 'Admin\\RoomsController', 'create');
+$router->post('/admin/rooms', 'Admin\\RoomsController', 'store');
+$router->post('/admin/rooms/reorder', 'Admin\\RoomsController', 'reorder');
+$router->get('/admin/rooms/{id}/edit', 'Admin\\RoomsController', 'edit');
+$router->post('/admin/rooms/{id}', 'Admin\\RoomsController', 'update');
+$router->post('/admin/rooms/{id}/delete', 'Admin\\RoomsController', 'destroy');
+
+// Activities
+$router->get('/admin/activities', 'Admin\\ActivitiesController', 'index');
+$router->get('/admin/activities/create', 'Admin\\ActivitiesController', 'create');
+$router->post('/admin/activities', 'Admin\\ActivitiesController', 'store');
+$router->post('/admin/activities/reorder', 'Admin\\ActivitiesController', 'reorder');
+$router->get('/admin/activities/{id}/edit', 'Admin\\ActivitiesController', 'edit');
+$router->post('/admin/activities/{id}', 'Admin\\ActivitiesController', 'update');
+$router->post('/admin/activities/{id}/delete', 'Admin\\ActivitiesController', 'destroy');
+$router->post('/admin/activities/{id}/duplicate', 'Admin\\ActivitiesController', 'duplicate');
+$router->get('/admin/activities/event/{eventId}', 'Admin\\ActivitiesController', 'getByEvent');
+
 // ============================================
 // TLOS Frontend Routes
 // ============================================

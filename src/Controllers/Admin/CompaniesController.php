@@ -61,6 +61,7 @@ class CompaniesController extends Controller
             'currentSector' => $sector,
             'sizeOptions' => Company::getSizeOptions(),
             'flash' => $this->getFlash(),
+            'csrf_token' => $this->generateCsrf(),
         ]);
     }
 

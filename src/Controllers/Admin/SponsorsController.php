@@ -49,6 +49,7 @@ class SponsorsController extends Controller
             'pagination' => $result['pagination'],
             'currentActive' => $active,
             'flash' => $this->getFlash(),
+            'csrf_token' => $this->generateCsrf(),
         ]);
     }
 
