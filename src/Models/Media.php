@@ -44,14 +44,14 @@ class Media extends Model
 
         if ($type) {
             if ($type === 'image') {
-                $sql .= " AND mime_type LIKE 'image/%'";
-                $countSql .= " AND mime_type LIKE 'image/%'";
+                $sql .= " AND filetype LIKE 'image/%'";
+                $countSql .= " AND filetype LIKE 'image/%'";
             } elseif ($type === 'video') {
-                $sql .= " AND mime_type LIKE 'video/%'";
-                $countSql .= " AND mime_type LIKE 'video/%'";
+                $sql .= " AND filetype LIKE 'video/%'";
+                $countSql .= " AND filetype LIKE 'video/%'";
             } elseif ($type === 'document') {
-                $sql .= " AND mime_type = 'application/pdf'";
-                $countSql .= " AND mime_type = 'application/pdf'";
+                $sql .= " AND filetype = 'application/pdf'";
+                $countSql .= " AND filetype = 'application/pdf'";
             }
         }
 
@@ -101,7 +101,7 @@ class Media extends Model
     {
         $stmt = $this->db->prepare("
             SELECT * FROM {$this->table}
-            WHERE mime_type LIKE 'image/%'
+            WHERE filetype LIKE 'image/%'
             ORDER BY created_at DESC
             LIMIT ?
         ");
@@ -133,10 +133,10 @@ class Media extends Model
         $stmt = $this->db->query("
             SELECT
                 COUNT(*) as total_files,
-                SUM(file_size) as total_size,
-                SUM(CASE WHEN mime_type LIKE 'image/%' THEN 1 ELSE 0 END) as images,
-                SUM(CASE WHEN mime_type LIKE 'video/%' THEN 1 ELSE 0 END) as videos,
-                SUM(CASE WHEN mime_type = 'application/pdf' THEN 1 ELSE 0 END) as documents
+                SUM(filesize) as total_size,
+                SUM(CASE WHEN filetype LIKE 'image/%' THEN 1 ELSE 0 END) as images,
+                SUM(CASE WHEN filetype LIKE 'video/%' THEN 1 ELSE 0 END) as videos,
+                SUM(CASE WHEN filetype = 'application/pdf' THEN 1 ELSE 0 END) as documents
             FROM {$this->table}
         ");
 
@@ -174,17 +174,17 @@ class Media extends Model
      */
     public function getThumbnailUrl(array $media): string
     {
-        if (strpos($media['mime_type'], 'image/') === 0) {
+        if (strpos($media['filetype'], 'image/') === 0) {
             // For images, use the image itself or a thumbnail version
             return $media['url'];
         }
 
         // For other types, return a placeholder based on type
-        if (strpos($media['mime_type'], 'video/') === 0) {
+        if (strpos($media['filetype'], 'video/') === 0) {
             return '/assets/images/placeholders/video.png';
         }
 
-        if ($media['mime_type'] === 'application/pdf') {
+        if ($media['filetype'] === 'application/pdf') {
             return '/assets/images/placeholders/pdf.png';
         }
 

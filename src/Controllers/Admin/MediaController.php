@@ -46,7 +46,7 @@ class MediaController extends Controller
             echo json_encode([
                 'success' => true,
                 'media' => array_map(function($item) {
-                    $item['formatted_size'] = Media::formatSize($item['file_size']);
+                    $item['formatted_size'] = Media::formatSize($item['filesize'] ?? 0);
                     return $item;
                 }, $result['items']),
                 'pagination' => [
@@ -151,7 +151,7 @@ class MediaController extends Controller
             return;
         }
 
-        $media['formatted_size'] = Media::formatSize($media['file_size']);
+        $media['formatted_size'] = Media::formatSize($media['filesize'] ?? 0);
 
         echo json_encode(['success' => true, 'media' => $media]);
     }
@@ -187,7 +187,7 @@ class MediaController extends Controller
         echo json_encode([
             'success' => true,
             'items' => array_map(function($item) {
-                $item['formatted_size'] = Media::formatSize($item['file_size']);
+                $item['formatted_size'] = Media::formatSize($item['filesize'] ?? 0);
                 return $item;
             }, $result['items']),
             'pagination' => [
