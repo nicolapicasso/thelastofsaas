@@ -25,7 +25,7 @@ $title = $isEdit ? 'Editar Votación' : 'Nueva Votación';
     <div class="alert alert-<?= $flash['type'] ?>"><?= $flash['message'] ?></div>
 <?php endif; ?>
 
-<form method="POST" action="<?= $isEdit ? "/admin/votings/{$voting['id']}/edit" : '/admin/votings/create' ?>" enctype="multipart/form-data">
+<form method="POST" action="<?= $isEdit ? "/admin/votings/{$voting['id']}" : '/admin/votings' ?>" enctype="multipart/form-data">
     <input type="hidden" name="_csrf_token" value="<?= $csrf_token ?>">
 
     <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 1.5rem;">

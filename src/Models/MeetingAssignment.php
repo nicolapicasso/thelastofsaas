@@ -183,8 +183,8 @@ class MeetingAssignment extends Model
         $sql = "SELECT
                     s.id as sponsor_id, s.name as sponsor_name, s.logo_url as sponsor_logo,
                     c.id as company_id, c.name as company_name, c.logo_url as company_logo,
-                    ss.selected_at as sponsor_selected_at,
-                    cs.selected_at as company_selected_at
+                    ss.created_at as sponsor_selected_at,
+                    cs.created_at as company_selected_at
                 FROM sponsor_selections ss
                 INNER JOIN company_selections cs
                     ON ss.sponsor_id = cs.sponsor_id

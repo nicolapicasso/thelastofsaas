@@ -39,101 +39,28 @@
 <div class="stats-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1.5rem;">
     <div class="card">
         <div class="card-body" style="text-align: center;">
-            <div style="font-size: 2rem; font-weight: bold; color: var(--primary-color);"><?= $matchStats['total_matches'] ?? 0 ?></div>
+            <div style="font-size: 2rem; font-weight: bold; color: var(--primary-color);"><?= $stats['total'] ?? 0 ?></div>
             <div class="text-muted">Matches Mutuos</div>
         </div>
     </div>
     <div class="card">
         <div class="card-body" style="text-align: center;">
-            <div style="font-size: 2rem; font-weight: bold; color: var(--success-color);"><?= $matchStats['with_meeting'] ?? 0 ?></div>
-            <div class="text-muted">Con Reunión</div>
+            <div style="font-size: 2rem; font-weight: bold; color: var(--success-color);"><?= $stats['with_meeting'] ?? 0 ?></div>
+            <div class="text-muted">Con Reunion</div>
         </div>
     </div>
     <div class="card">
         <div class="card-body" style="text-align: center;">
-            <div style="font-size: 2rem; font-weight: bold; color: var(--warning-color);"><?= $matchStats['without_meeting'] ?? 0 ?></div>
-            <div class="text-muted">Sin Reunión</div>
+            <div style="font-size: 2rem; font-weight: bold; color: var(--warning-color);"><?= $stats['without_meeting'] ?? 0 ?></div>
+            <div class="text-muted">Sin Reunion</div>
         </div>
     </div>
     <div class="card">
         <div class="card-body" style="text-align: center;">
             <div style="font-size: 2rem; font-weight: bold;">
-                <?= $matchStats['total_matches'] > 0 ? round(($matchStats['with_meeting'] / $matchStats['total_matches']) * 100) : 0 ?>%
+                <?= ($stats['total'] ?? 0) > 0 ? round((($stats['with_meeting'] ?? 0) / $stats['total']) * 100) : 0 ?>%
             </div>
             <div class="text-muted">Cobertura</div>
-        </div>
-    </div>
-</div>
-
-<!-- Selection Statistics -->
-<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 1.5rem; margin-bottom: 1.5rem;">
-    <!-- Sponsor Selections -->
-    <div class="card">
-        <div class="card-header">
-            <h3>Selecciones de Sponsors</h3>
-        </div>
-        <div class="card-body">
-            <?php if (empty($sponsorStats)): ?>
-                <p class="text-muted">No hay datos de selecciones</p>
-            <?php else: ?>
-                <table class="table table-sm">
-                    <thead>
-                        <tr>
-                            <th>Sponsor</th>
-                            <th class="text-center">Seleccionadas</th>
-                            <th class="text-center">Matches</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php foreach ($sponsorStats as $stat): ?>
-                            <tr>
-                                <td><?= htmlspecialchars($stat['name']) ?></td>
-                                <td class="text-center"><?= $stat['selections'] ?></td>
-                                <td class="text-center">
-                                    <span class="badge badge-<?= $stat['matches'] > 0 ? 'success' : 'secondary' ?>">
-                                        <?= $stat['matches'] ?>
-                                    </span>
-                                </td>
-                            </tr>
-                        <?php endforeach; ?>
-                    </tbody>
-                </table>
-            <?php endif; ?>
-        </div>
-    </div>
-
-    <!-- Company Selections -->
-    <div class="card">
-        <div class="card-header">
-            <h3>Selecciones de Empresas</h3>
-        </div>
-        <div class="card-body">
-            <?php if (empty($companyStats)): ?>
-                <p class="text-muted">No hay datos de selecciones</p>
-            <?php else: ?>
-                <table class="table table-sm">
-                    <thead>
-                        <tr>
-                            <th>Empresa</th>
-                            <th class="text-center">Seleccionados</th>
-                            <th class="text-center">Matches</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php foreach ($companyStats as $stat): ?>
-                            <tr>
-                                <td><?= htmlspecialchars($stat['name']) ?></td>
-                                <td class="text-center"><?= $stat['selections'] ?></td>
-                                <td class="text-center">
-                                    <span class="badge badge-<?= $stat['matches'] > 0 ? 'success' : 'secondary' ?>">
-                                        <?= $stat['matches'] ?>
-                                    </span>
-                                </td>
-                            </tr>
-                        <?php endforeach; ?>
-                    </tbody>
-                </table>
-            <?php endif; ?>
         </div>
     </div>
 </div>
@@ -143,7 +70,7 @@
     <div class="card-header">
         <h3>Todos los Matches</h3>
     </div>
-    <?php if (empty($allMatches)): ?>
+    <?php if (empty($matches)): ?>
         <div class="empty-state">
             <i class="fas fa-heart"></i>
             <h3>No hay matches</h3>
@@ -161,7 +88,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <?php foreach ($allMatches as $match): ?>
+                    <?php foreach ($matches as $match): ?>
                         <tr>
                             <td><strong><?= htmlspecialchars($match['sponsor_name']) ?></strong></td>
                             <td><?= htmlspecialchars($match['company_name']) ?></td>

@@ -83,12 +83,12 @@ class Company extends Model
      */
     public function getSelectedSponsors(int $companyId, int $eventId): array
     {
-        $sql = "SELECT s.*, cs.selected_at, cs.priority, es.level
+        $sql = "SELECT s.*, cs.created_at, cs.priority, es.level
                 FROM sponsors s
                 INNER JOIN company_selections cs ON s.id = cs.sponsor_id
                 LEFT JOIN event_sponsors es ON s.id = es.sponsor_id AND es.event_id = cs.event_id
                 WHERE cs.company_id = ? AND cs.event_id = ? AND s.active = 1
-                ORDER BY cs.priority DESC, cs.selected_at ASC";
+                ORDER BY cs.priority DESC, cs.created_at ASC";
 
         return $this->db->fetchAll($sql, [$companyId, $eventId]);
     }
@@ -98,12 +98,12 @@ class Company extends Model
      */
     public function getInterestedSponsors(int $companyId, int $eventId): array
     {
-        $sql = "SELECT s.*, ss.selected_at, es.level
+        $sql = "SELECT s.*, ss.created_at, es.level
                 FROM sponsors s
                 INNER JOIN sponsor_selections ss ON s.id = ss.sponsor_id
                 LEFT JOIN event_sponsors es ON s.id = es.sponsor_id AND es.event_id = ss.event_id
                 WHERE ss.company_id = ? AND ss.event_id = ? AND s.active = 1
-                ORDER BY FIELD(es.level, 'platinum', 'gold', 'silver', 'bronze'), ss.selected_at ASC";
+                ORDER BY FIELD(es.level, 'platinum', 'gold', 'silver', 'bronze'), ss.created_at ASC";
 
         return $this->db->fetchAll($sql, [$companyId, $eventId]);
     }
@@ -114,8 +114,8 @@ class Company extends Model
     public function getMutualMatches(int $companyId, int $eventId): array
     {
         $sql = "SELECT s.*,
-                       cs.selected_at as company_selected_at,
-                       ss.selected_at as sponsor_selected_at,
+                       cs.created_at as company_selected_at,
+                       ss.created_at as sponsor_selected_at,
                        es.level
                 FROM sponsors s
                 INNER JOIN company_selections cs ON s.id = cs.sponsor_id
