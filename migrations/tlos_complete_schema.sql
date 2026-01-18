@@ -90,7 +90,7 @@ CREATE TABLE `users` (
     `password` VARCHAR(255) NOT NULL,
     `role` ENUM('admin', 'editor', 'user') DEFAULT 'user',
     `avatar` VARCHAR(500),
-    `active` TINYINT(1) DEFAULT 1,
+    `is_active` TINYINT(1) DEFAULT 1,
     `last_login` DATETIME,
     `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
@@ -631,8 +631,8 @@ CREATE TABLE `tlos_settings` (
 -- ============================================
 
 -- Default admin user (password: admin123)
-INSERT INTO `users` (`name`, `email`, `password`, `role`, `active`) VALUES
-('Admin', 'admin@thelastofsaas.es', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'admin', 1);
+INSERT INTO `users` (`name`, `email`, `password`, `role`, `is_active`) VALUES
+('Admin', 'admin@thelastofsaas.es', '$2y$12$AQd9IkkPRgVgQ0FOlPRXkuNtF2Cvu0eqvJl1f3IomeX/Hh.Du8Asq', 'admin', 1);
 
 -- Default settings
 INSERT INTO `settings` (`setting_key`, `setting_value`, `setting_group`) VALUES
