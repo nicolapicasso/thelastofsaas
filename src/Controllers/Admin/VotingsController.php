@@ -46,7 +46,7 @@ class VotingsController extends Controller
         }
 
         $result = $this->votingModel->paginate($page, 20, $conditions, ['created_at' => 'DESC']);
-        $events = $this->eventModel->all(['event_date' => 'DESC']);
+        $events = $this->eventModel->all(['start_date' => 'DESC']);
 
         $this->renderAdmin('votings/index', [
             'title' => 'Votaciones',
@@ -67,7 +67,7 @@ class VotingsController extends Controller
     {
         $this->requireAuth();
 
-        $events = $this->eventModel->all(['event_date' => 'DESC']);
+        $events = $this->eventModel->all(['start_date' => 'DESC']);
 
         $this->renderAdmin('votings/form', [
             'title' => 'Nueva Votación',
@@ -126,7 +126,7 @@ class VotingsController extends Controller
         }
 
         $candidates = $this->votingModel->getCandidates((int) $id);
-        $events = $this->eventModel->all(['event_date' => 'DESC']);
+        $events = $this->eventModel->all(['start_date' => 'DESC']);
         $totalVotes = $this->votingModel->getTotalVotes((int) $id);
 
         $this->renderAdmin('votings/form', [

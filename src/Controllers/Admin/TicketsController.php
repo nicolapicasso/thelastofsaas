@@ -42,7 +42,7 @@ class TicketsController extends Controller
         $status = $this->getQuery('status');
         $page = (int) ($this->getQuery('page', 1));
 
-        $events = $this->eventModel->all(['event_date' => 'DESC']);
+        $events = $this->eventModel->all(['start_date' => 'DESC']);
 
         if (!$eventId && !empty($events)) {
             $eventId = $events[0]['id'];
@@ -240,7 +240,7 @@ class TicketsController extends Controller
         $this->requireAuth();
 
         $eventId = (int) $this->getQuery('event_id');
-        $events = $this->eventModel->all(['event_date' => 'DESC']);
+        $events = $this->eventModel->all(['start_date' => 'DESC']);
 
         if (!$eventId && !empty($events)) {
             $eventId = $events[0]['id'];

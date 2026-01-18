@@ -79,7 +79,7 @@ class Sponsor extends Model
                 FROM events e
                 INNER JOIN event_sponsors es ON e.id = es.event_id
                 WHERE es.sponsor_id = ?
-                ORDER BY e.event_date DESC";
+                ORDER BY e.start_date DESC";
 
         return $this->db->fetchAll($sql, [$sponsorId]);
     }
