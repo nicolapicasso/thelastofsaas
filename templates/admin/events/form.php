@@ -149,81 +149,64 @@ $isEdit = isset($event) && $event;
             <div class="card">
                 <div class="card-header">
                     <h3>Sponsors del Evento</h3>
+                    <span class="badge" id="sponsors-count"><?= count($sponsors ?? []) ?> seleccionados</span>
                 </div>
                 <div class="card-body">
-                    <?php if (!empty($sponsors)): ?>
-                    <table class="table">
-                        <thead>
-                            <tr>
-                                <th>Sponsor</th>
-                                <th>Nivel</th>
-                                <th width="100">Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php foreach ($sponsors as $sponsor): ?>
-                            <tr id="sponsor-row-<?= $sponsor['id'] ?>">
-                                <td>
-                                    <?php if ($sponsor['logo_url'] ?? null): ?>
-                                        <img src="<?= htmlspecialchars($sponsor['logo_url']) ?>" alt="" style="height: 30px; margin-right: 10px;">
-                                    <?php endif; ?>
-                                    <?= htmlspecialchars($sponsor['name']) ?>
-                                </td>
-                                <td>
-                                    <span class="badge badge-<?= ($sponsor['level'] ?? '') === 'platinum' ? 'warning' : (($sponsor['level'] ?? '') === 'gold' ? 'warning' : 'secondary') ?>">
-                                        <?= ucfirst($sponsor['level'] ?? 'bronze') ?>
-                                    </span>
-                                </td>
-                                <td>
-                                    <a href="/admin/sponsors/<?= $sponsor['id'] ?>/edit" class="btn btn-sm btn-outline" title="Ver">
-                                        <i class="fas fa-eye"></i>
-                                    </a>
-                                    <button type="button" class="btn btn-sm btn-outline btn-danger" onclick="removeSponsor(<?= $sponsor['id'] ?>)" title="Quitar">
-                                        <i class="fas fa-times"></i>
-                                    </button>
-                                </td>
-                            </tr>
-                            <?php endforeach; ?>
-                        </tbody>
-                    </table>
-                    <?php else: ?>
-                    <p class="text-muted">No hay sponsors asignados a este evento.</p>
-                    <?php endif; ?>
-
                     <?php if (!empty($allSponsors)): ?>
-                    <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border);">
-                        <div class="form-row" style="align-items: end;">
-                            <div class="form-group" style="flex: 2;">
-                                <label>Anadir Sponsor</label>
-                                <select id="new_sponsor_id" class="form-control">
-                                    <option value="">Seleccionar...</option>
-                                    <?php
-                                    $existingSponsorIds = array_column($sponsors ?? [], 'id');
-                                    foreach ($allSponsors as $s):
-                                        if (!in_array($s['id'], $existingSponsorIds)):
-                                    ?>
-                                        <option value="<?= $s['id'] ?>"><?= htmlspecialchars($s['name']) ?></option>
-                                    <?php
-                                        endif;
-                                    endforeach;
-                                    ?>
-                                </select>
-                            </div>
-                            <div class="form-group" style="flex: 1;">
-                                <label>Nivel</label>
-                                <select id="new_sponsor_level" class="form-control">
-                                    <?php foreach ($levelOptions as $val => $lbl): ?>
-                                        <option value="<?= $val ?>"><?= $lbl ?></option>
-                                    <?php endforeach; ?>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <button type="button" class="btn btn-outline" onclick="addSponsor()">
-                                    <i class="fas fa-plus"></i>
-                                </button>
-                            </div>
-                        </div>
+                    <div class="checkbox-list-header">
+                        <input type="text" id="sponsors-search" class="form-control" placeholder="Buscar sponsors..." style="margin-bottom: 1rem;">
                     </div>
+                    <div class="checkbox-list" id="sponsors-list" style="max-height: 400px; overflow-y: auto; border: 1px solid var(--border); border-radius: 4px;">
+                        <?php
+                        $existingSponsorIds = array_column($sponsors ?? [], 'id');
+                        $sponsorLevels = [];
+                        foreach ($sponsors ?? [] as $s) {
+                            $sponsorLevels[$s['id']] = $s['level'] ?? 'bronze';
+                        }
+                        foreach ($allSponsors as $s):
+                            $isChecked = in_array($s['id'], $existingSponsorIds);
+                            $currentLevel = $sponsorLevels[$s['id']] ?? 'bronze';
+                        ?>
+                        <div class="checkbox-item" data-name="<?= strtolower(htmlspecialchars($s['name'])) ?>" style="display: flex; align-items: center; padding: 0.75rem 1rem; border-bottom: 1px solid var(--border); gap: 1rem;">
+                            <input type="checkbox"
+                                   id="sponsor-<?= $s['id'] ?>"
+                                   name="sponsors[]"
+                                   value="<?= $s['id'] ?>"
+                                   <?= $isChecked ? 'checked' : '' ?>
+                                   onchange="updateSponsor(<?= $s['id'] ?>, this.checked)"
+                                   style="width: 20px; height: 20px;">
+                            <?php if (!empty($s['logo_url'])): ?>
+                                <img src="<?= htmlspecialchars($s['logo_url']) ?>" alt="" style="height: 32px; width: 60px; object-fit: contain; background: #f5f5f5; border-radius: 4px;">
+                            <?php else: ?>
+                                <div style="height: 32px; width: 60px; background: var(--bg-secondary); border-radius: 4px; display: flex; align-items: center; justify-content: center;">
+                                    <i class="fas fa-building" style="color: var(--text-muted);"></i>
+                                </div>
+                            <?php endif; ?>
+                            <label for="sponsor-<?= $s['id'] ?>" style="flex: 1; cursor: pointer; margin: 0; font-weight: 500;">
+                                <?= htmlspecialchars($s['name']) ?>
+                            </label>
+                            <select id="sponsor-level-<?= $s['id'] ?>"
+                                    onchange="updateSponsorLevel(<?= $s['id'] ?>, this.value)"
+                                    class="form-control"
+                                    style="width: 120px; <?= !$isChecked ? 'opacity: 0.5;' : '' ?>"
+                                    <?= !$isChecked ? 'disabled' : '' ?>>
+                                <?php foreach ($levelOptions as $val => $lbl): ?>
+                                    <option value="<?= $val ?>" <?= $currentLevel === $val ? 'selected' : '' ?>><?= $lbl ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                        <?php endforeach; ?>
+                    </div>
+                    <div style="margin-top: 0.5rem; display: flex; gap: 1rem;">
+                        <button type="button" class="btn btn-sm btn-outline" onclick="selectAllSponsors(true)">
+                            <i class="fas fa-check-double"></i> Seleccionar todos
+                        </button>
+                        <button type="button" class="btn btn-sm btn-outline" onclick="selectAllSponsors(false)">
+                            <i class="fas fa-times"></i> Deseleccionar todos
+                        </button>
+                    </div>
+                    <?php else: ?>
+                    <p class="text-muted">No hay sponsors disponibles. <a href="/admin/sponsors/create">Crear uno nuevo</a></p>
                     <?php endif; ?>
                 </div>
             </div>
@@ -233,67 +216,53 @@ $isEdit = isset($event) && $event;
             <div class="card">
                 <div class="card-header">
                     <h3>Empresas del Evento</h3>
+                    <span class="badge" id="companies-count"><?= count($companies ?? []) ?> seleccionadas</span>
                 </div>
                 <div class="card-body">
-                    <?php if (!empty($companies)): ?>
-                    <table class="table">
-                        <thead>
-                            <tr>
-                                <th>Empresa</th>
-                                <th width="100">Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php foreach ($companies as $company): ?>
-                            <tr id="company-row-<?= $company['id'] ?>">
-                                <td>
-                                    <?php if ($company['logo_url'] ?? null): ?>
-                                        <img src="<?= htmlspecialchars($company['logo_url']) ?>" alt="" style="height: 30px; margin-right: 10px;">
-                                    <?php endif; ?>
-                                    <?= htmlspecialchars($company['name']) ?>
-                                </td>
-                                <td>
-                                    <a href="/admin/companies/<?= $company['id'] ?>/edit" class="btn btn-sm btn-outline" title="Ver">
-                                        <i class="fas fa-eye"></i>
-                                    </a>
-                                    <button type="button" class="btn btn-sm btn-outline btn-danger" onclick="removeCompany(<?= $company['id'] ?>)" title="Quitar">
-                                        <i class="fas fa-times"></i>
-                                    </button>
-                                </td>
-                            </tr>
-                            <?php endforeach; ?>
-                        </tbody>
-                    </table>
-                    <?php else: ?>
-                    <p class="text-muted">No hay empresas asignadas a este evento.</p>
-                    <?php endif; ?>
-
                     <?php if (!empty($allCompanies)): ?>
-                    <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border);">
-                        <div class="form-row" style="align-items: end;">
-                            <div class="form-group" style="flex: 2;">
-                                <label>Anadir Empresa</label>
-                                <select id="new_company_id" class="form-control">
-                                    <option value="">Seleccionar...</option>
-                                    <?php
-                                    $existingCompanyIds = array_column($companies ?? [], 'id');
-                                    foreach ($allCompanies as $c):
-                                        if (!in_array($c['id'], $existingCompanyIds)):
-                                    ?>
-                                        <option value="<?= $c['id'] ?>"><?= htmlspecialchars($c['name']) ?></option>
-                                    <?php
-                                        endif;
-                                    endforeach;
-                                    ?>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <button type="button" class="btn btn-outline" onclick="addCompany()">
-                                    <i class="fas fa-plus"></i>
-                                </button>
-                            </div>
-                        </div>
+                    <div class="checkbox-list-header">
+                        <input type="text" id="companies-search" class="form-control" placeholder="Buscar empresas..." style="margin-bottom: 1rem;">
                     </div>
+                    <div class="checkbox-list" id="companies-list" style="max-height: 400px; overflow-y: auto; border: 1px solid var(--border); border-radius: 4px;">
+                        <?php
+                        $existingCompanyIds = array_column($companies ?? [], 'id');
+                        foreach ($allCompanies as $c):
+                            $isChecked = in_array($c['id'], $existingCompanyIds);
+                        ?>
+                        <div class="checkbox-item" data-name="<?= strtolower(htmlspecialchars($c['name'])) ?>" style="display: flex; align-items: center; padding: 0.75rem 1rem; border-bottom: 1px solid var(--border); gap: 1rem;">
+                            <input type="checkbox"
+                                   id="company-<?= $c['id'] ?>"
+                                   name="companies[]"
+                                   value="<?= $c['id'] ?>"
+                                   <?= $isChecked ? 'checked' : '' ?>
+                                   onchange="updateCompany(<?= $c['id'] ?>, this.checked)"
+                                   style="width: 20px; height: 20px;">
+                            <?php if (!empty($c['logo_url'])): ?>
+                                <img src="<?= htmlspecialchars($c['logo_url']) ?>" alt="" style="height: 32px; width: 60px; object-fit: contain; background: #f5f5f5; border-radius: 4px;">
+                            <?php else: ?>
+                                <div style="height: 32px; width: 60px; background: var(--bg-secondary); border-radius: 4px; display: flex; align-items: center; justify-content: center;">
+                                    <i class="fas fa-building" style="color: var(--text-muted);"></i>
+                                </div>
+                            <?php endif; ?>
+                            <label for="company-<?= $c['id'] ?>" style="flex: 1; cursor: pointer; margin: 0; font-weight: 500;">
+                                <?= htmlspecialchars($c['name']) ?>
+                            </label>
+                            <span style="color: var(--text-muted); font-size: 0.85rem;">
+                                <?= htmlspecialchars($c['sector'] ?? '') ?>
+                            </span>
+                        </div>
+                        <?php endforeach; ?>
+                    </div>
+                    <div style="margin-top: 0.5rem; display: flex; gap: 1rem;">
+                        <button type="button" class="btn btn-sm btn-outline" onclick="selectAllCompanies(true)">
+                            <i class="fas fa-check-double"></i> Seleccionar todas
+                        </button>
+                        <button type="button" class="btn btn-sm btn-outline" onclick="selectAllCompanies(false)">
+                            <i class="fas fa-times"></i> Deseleccionar todas
+                        </button>
+                    </div>
+                    <?php else: ?>
+                    <p class="text-muted">No hay empresas disponibles. <a href="/admin/companies/create">Crear una nueva</a></p>
                     <?php endif; ?>
                 </div>
             </div>
@@ -374,98 +343,157 @@ $isEdit = isset($event) && $event;
 
 <?php if ($isEdit): ?>
 <script>
-function addSponsor() {
-    const sponsorId = document.getElementById('new_sponsor_id').value;
-    const level = document.getElementById('new_sponsor_level').value;
+const csrfToken = '<?= $csrf_token ?>';
+const eventId = <?= $event['id'] ?>;
 
-    if (!sponsorId) {
-        alert('Selecciona un sponsor');
-        return;
+// === SPONSORS ===
+function updateSponsor(sponsorId, isChecked) {
+    const levelSelect = document.getElementById('sponsor-level-' + sponsorId);
+    const formData = new FormData();
+    formData.append('_csrf_token', csrfToken);
+
+    if (isChecked) {
+        // Add sponsor
+        formData.append('sponsor_id', sponsorId);
+        formData.append('level', levelSelect.value);
+        levelSelect.disabled = false;
+        levelSelect.style.opacity = '1';
+
+        fetch('/admin/events/' + eventId + '/sponsors', {
+            method: 'POST',
+            body: formData
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (!data.success) {
+                document.getElementById('sponsor-' + sponsorId).checked = false;
+                alert(data.error || 'Error al anadir sponsor');
+            }
+            updateSponsorsCount();
+        });
+    } else {
+        // Remove sponsor
+        levelSelect.disabled = true;
+        levelSelect.style.opacity = '0.5';
+
+        fetch('/admin/events/' + eventId + '/sponsors/' + sponsorId + '/delete', {
+            method: 'POST',
+            body: formData
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (!data.success) {
+                document.getElementById('sponsor-' + sponsorId).checked = true;
+                alert(data.error || 'Error al quitar sponsor');
+            }
+            updateSponsorsCount();
+        });
     }
+}
+
+function updateSponsorLevel(sponsorId, level) {
+    const checkbox = document.getElementById('sponsor-' + sponsorId);
+    if (!checkbox.checked) return;
 
     const formData = new FormData();
-    formData.append('_csrf_token', '<?= $csrf_token ?>');
-    formData.append('sponsor_id', sponsorId);
+    formData.append('_csrf_token', csrfToken);
     formData.append('level', level);
 
-    fetch('/admin/events/<?= $event['id'] ?>/sponsors', {
+    fetch('/admin/events/' + eventId + '/sponsors/' + sponsorId + '/level', {
         method: 'POST',
         body: formData
     })
     .then(r => r.json())
     .then(data => {
-        if (data.success) {
-            location.reload();
-        } else {
-            alert(data.error || 'Error al anadir sponsor');
+        if (!data.success) {
+            alert(data.error || 'Error al actualizar nivel');
         }
     });
 }
 
-function removeSponsor(sponsorId) {
-    if (!confirm('¿Quitar este sponsor del evento?')) return;
+function selectAllSponsors(select) {
+    const checkboxes = document.querySelectorAll('#sponsors-list input[type="checkbox"]');
+    checkboxes.forEach(cb => {
+        if (cb.checked !== select) {
+            cb.checked = select;
+            updateSponsor(cb.value, select);
+        }
+    });
+}
 
+function updateSponsorsCount() {
+    const count = document.querySelectorAll('#sponsors-list input[type="checkbox"]:checked').length;
+    document.getElementById('sponsors-count').textContent = count + ' seleccionados';
+}
+
+// === COMPANIES ===
+function updateCompany(companyId, isChecked) {
     const formData = new FormData();
-    formData.append('_csrf_token', '<?= $csrf_token ?>');
+    formData.append('_csrf_token', csrfToken);
 
-    fetch('/admin/events/<?= $event['id'] ?>/sponsors/' + sponsorId + '/delete', {
-        method: 'POST',
-        body: formData
-    })
-    .then(r => r.json())
-    .then(data => {
-        if (data.success) {
-            document.getElementById('sponsor-row-' + sponsorId).remove();
-        } else {
-            alert(data.error || 'Error al quitar sponsor');
-        }
-    });
-}
+    if (isChecked) {
+        // Add company
+        formData.append('company_id', companyId);
 
-function addCompany() {
-    const companyId = document.getElementById('new_company_id').value;
-
-    if (!companyId) {
-        alert('Selecciona una empresa');
-        return;
+        fetch('/admin/events/' + eventId + '/companies', {
+            method: 'POST',
+            body: formData
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (!data.success) {
+                document.getElementById('company-' + companyId).checked = false;
+                alert(data.error || 'Error al anadir empresa');
+            }
+            updateCompaniesCount();
+        });
+    } else {
+        // Remove company
+        fetch('/admin/events/' + eventId + '/companies/' + companyId + '/delete', {
+            method: 'POST',
+            body: formData
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (!data.success) {
+                document.getElementById('company-' + companyId).checked = true;
+                alert(data.error || 'Error al quitar empresa');
+            }
+            updateCompaniesCount();
+        });
     }
+}
 
-    const formData = new FormData();
-    formData.append('_csrf_token', '<?= $csrf_token ?>');
-    formData.append('company_id', companyId);
-
-    fetch('/admin/events/<?= $event['id'] ?>/companies', {
-        method: 'POST',
-        body: formData
-    })
-    .then(r => r.json())
-    .then(data => {
-        if (data.success) {
-            location.reload();
-        } else {
-            alert(data.error || 'Error al anadir empresa');
+function selectAllCompanies(select) {
+    const checkboxes = document.querySelectorAll('#companies-list input[type="checkbox"]');
+    checkboxes.forEach(cb => {
+        if (cb.checked !== select) {
+            cb.checked = select;
+            updateCompany(cb.value, select);
         }
     });
 }
 
-function removeCompany(companyId) {
-    if (!confirm('¿Quitar esta empresa del evento?')) return;
-
-    const formData = new FormData();
-    formData.append('_csrf_token', '<?= $csrf_token ?>');
-
-    fetch('/admin/events/<?= $event['id'] ?>/companies/' + companyId + '/delete', {
-        method: 'POST',
-        body: formData
-    })
-    .then(r => r.json())
-    .then(data => {
-        if (data.success) {
-            document.getElementById('company-row-' + companyId).remove();
-        } else {
-            alert(data.error || 'Error al quitar empresa');
-        }
-    });
+function updateCompaniesCount() {
+    const count = document.querySelectorAll('#companies-list input[type="checkbox"]:checked').length;
+    document.getElementById('companies-count').textContent = count + ' seleccionadas';
 }
+
+// === SEARCH FILTERS ===
+document.getElementById('sponsors-search')?.addEventListener('input', function(e) {
+    const query = e.target.value.toLowerCase();
+    document.querySelectorAll('#sponsors-list .checkbox-item').forEach(item => {
+        const name = item.dataset.name || '';
+        item.style.display = name.includes(query) ? 'flex' : 'none';
+    });
+});
+
+document.getElementById('companies-search')?.addEventListener('input', function(e) {
+    const query = e.target.value.toLowerCase();
+    document.querySelectorAll('#companies-list .checkbox-item').forEach(item => {
+        const name = item.dataset.name || '';
+        item.style.display = name.includes(query) ? 'flex' : 'none';
+    });
+});
 </script>
 <?php endif; ?>
