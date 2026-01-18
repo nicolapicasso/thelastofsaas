@@ -5,6 +5,8 @@ namespace App\Controllers;
 use App\Core\Controller;
 use App\Models\Event;
 use App\Models\TicketType;
+use App\Models\Activity;
+use App\Models\TeamMember;
 
 /**
  * Frontend Events Controller
@@ -16,12 +18,14 @@ class EventsController extends Controller
 {
     private Event $eventModel;
     private TicketType $ticketTypeModel;
+    private Activity $activityModel;
 
     public function __construct()
     {
         parent::__construct();
         $this->eventModel = new Event();
         $this->ticketTypeModel = new TicketType();
+        $this->activityModel = new Activity();
     }
 
     /**
@@ -67,6 +71,32 @@ class EventsController extends Controller
         // Get event statistics
         $stats = $this->eventModel->getStats($event['id']);
 
+        // Get event companies
+        $companies = $this->eventModel->getCompanies($event['id']);
+
+        // Get event activities/agenda
+        $activities = $this->activityModel->getByEvent($event['id']);
+
+        // Group activities by date
+        $activitiesByDate = [];
+        foreach ($activities as $activity) {
+            $date = $activity['activity_date'] ?? $event['start_date'];
+            $activitiesByDate[$date][] = $activity;
+        }
+
+        // Get speakers (team members with activities in this event)
+        $speakerIds = array_unique(array_filter(array_column($activities, 'speaker_id')));
+        $speakers = [];
+        if (!empty($speakerIds)) {
+            $teamMemberModel = new TeamMember();
+            foreach ($speakerIds as $speakerId) {
+                $speaker = $teamMemberModel->find((int)$speakerId);
+                if ($speaker && $speaker['active']) {
+                    $speakers[] = $speaker;
+                }
+            }
+        }
+
         $this->view->setLayout('layouts/event');
         $this->render('events/show', [
             'event' => $event,
@@ -74,6 +104,10 @@ class EventsController extends Controller
             'features' => $features,
             'ticketTypes' => $ticketTypes,
             'stats' => $stats,
+            'companies' => $companies,
+            'activities' => $activities,
+            'activitiesByDate' => $activitiesByDate,
+            'speakers' => $speakers,
             'meta_title' => $event['meta_title'] ?: $event['name'] . ' - The Last of SaaS',
             'meta_description' => $event['meta_description'] ?: $event['short_description'],
             'meta_image' => $event['featured_image']
