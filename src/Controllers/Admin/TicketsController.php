@@ -275,9 +275,11 @@ class TicketsController extends Controller
         $name = Sanitizer::string($this->getPost('name'));
         $description = $this->getPost('description');
         $price = (float) $this->getPost('price', 0);
-        $quantityAvailable = $this->getPost('quantity_available');
-        $saleStartDate = $this->getPost('sale_start_date');
-        $saleEndDate = $this->getPost('sale_end_date');
+        $maxTickets = $this->getPost('max_tickets');
+        $saleStart = $this->getPost('sale_start');
+        $saleEnd = $this->getPost('sale_end');
+        $active = $this->getPost('active') ? 1 : 0;
+        $requiresApproval = $this->getPost('requires_approval') ? 1 : 0;
 
         if (!$eventId || empty($name)) {
             $this->flash('error', 'Evento y nombre son obligatorios.');
@@ -290,11 +292,12 @@ class TicketsController extends Controller
                 'name' => $name,
                 'description' => $description ?: null,
                 'price' => $price,
-                'is_free' => $price == 0 ? 1 : 0,
-                'quantity_available' => $quantityAvailable ?: null,
-                'sale_start_date' => $saleStartDate ?: null,
-                'sale_end_date' => $saleEndDate ?: null,
-                'status' => 'active',
+                'max_tickets' => $maxTickets ?: 100,
+                'tickets_sold' => 0,
+                'sale_start' => $saleStart ?: null,
+                'sale_end' => $saleEnd ?: null,
+                'active' => $active,
+                'requires_approval' => $requiresApproval,
             ]);
 
             $this->flash('success', 'Tipo de entrada creado.');
@@ -313,35 +316,39 @@ class TicketsController extends Controller
         $this->requireAuth();
 
         if (!$this->validateCsrf()) {
-            $this->jsonError('Sesión expirada.');
+            $this->flash('error', 'Sesión expirada.');
+            $this->redirect('/admin/tickets/types');
             return;
         }
 
         $ticketType = $this->ticketTypeModel->find((int) $id);
 
         if (!$ticketType) {
-            $this->jsonError('Tipo de entrada no encontrado.');
+            $this->flash('error', 'Tipo de entrada no encontrado.');
+            $this->redirect('/admin/tickets/types');
             return;
         }
 
+        $eventId = $ticketType['event_id'];
         $data = [
             'name' => Sanitizer::string($this->getPost('name')),
             'description' => $this->getPost('description'),
             'price' => (float) $this->getPost('price', 0),
-            'quantity_available' => $this->getPost('quantity_available') ?: null,
-            'sale_start_date' => $this->getPost('sale_start_date') ?: null,
-            'sale_end_date' => $this->getPost('sale_end_date') ?: null,
-            'status' => $this->getPost('status', 'active'),
+            'max_tickets' => $this->getPost('max_tickets') ?: 100,
+            'sale_start' => $this->getPost('sale_start') ?: null,
+            'sale_end' => $this->getPost('sale_end') ?: null,
+            'active' => $this->getPost('active') ? 1 : 0,
+            'requires_approval' => $this->getPost('requires_approval') ? 1 : 0,
         ];
-
-        $data['is_free'] = $data['price'] == 0 ? 1 : 0;
 
         try {
             $this->ticketTypeModel->update((int) $id, $data);
-            $this->jsonSuccess(['message' => 'Tipo de entrada actualizado.']);
+            $this->flash('success', 'Tipo de entrada actualizado.');
         } catch (\Exception $e) {
-            $this->jsonError('Error: ' . $e->getMessage());
+            $this->flash('error', 'Error: ' . $e->getMessage());
         }
+
+        $this->redirect('/admin/tickets/types?event_id=' . $eventId);
     }
 
     /**

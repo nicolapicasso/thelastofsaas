@@ -19,15 +19,12 @@ class TicketType extends Model
         'name',
         'description',
         'price',
-        'is_free',
-        'sponsor_id',
-        'quantity_available',
-        'quantity_sold',
-        'sale_start_date',
-        'sale_end_date',
-        'status',
+        'max_tickets',
+        'tickets_sold',
+        'sale_start',
+        'sale_end',
+        'active',
         'requires_approval',
-        'max_per_purchase',
     ];
 
     /**
@@ -43,12 +40,11 @@ class TicketType extends Model
      */
     public function getActiveByEvent(int $eventId): array
     {
-        $sql = "SELECT tt.*, s.name as sponsor_name, s.logo_url as sponsor_logo
+        $sql = "SELECT tt.*
                 FROM ticket_types tt
-                LEFT JOIN sponsors s ON tt.sponsor_id = s.id
-                WHERE tt.event_id = ? AND tt.status = 'active'
-                AND (tt.sale_start_date IS NULL OR tt.sale_start_date <= NOW())
-                AND (tt.sale_end_date IS NULL OR tt.sale_end_date >= NOW())
+                WHERE tt.event_id = ? AND tt.active = 1
+                AND (tt.sale_start IS NULL OR tt.sale_start <= NOW())
+                AND (tt.sale_end IS NULL OR tt.sale_end >= NOW())
                 ORDER BY tt.price ASC";
 
         return $this->db->fetchAll($sql, [$eventId]);
@@ -59,44 +55,17 @@ class TicketType extends Model
      */
     public function getAvailableForEvent(int $eventId): array
     {
-        $sql = "SELECT tt.*, s.name as sponsor_name, s.logo_url as sponsor_logo,
-                       COALESCE(tt.quantity_available, 0) as total_quantity,
-                       COALESCE(tt.quantity_sold, 0) as sold_quantity
+        $sql = "SELECT tt.*,
+                       COALESCE(tt.max_tickets, 0) as total_quantity,
+                       COALESCE(tt.tickets_sold, 0) as sold_quantity
                 FROM ticket_types tt
-                LEFT JOIN sponsors s ON tt.sponsor_id = s.id
-                WHERE tt.event_id = ? AND tt.status = 'active'
-                AND tt.sponsor_id IS NULL
-                AND (tt.sale_start_date IS NULL OR tt.sale_start_date <= NOW())
-                AND (tt.sale_end_date IS NULL OR tt.sale_end_date >= NOW())
-                AND (tt.quantity_available IS NULL OR tt.quantity_available = 0 OR tt.quantity_sold < tt.quantity_available)
+                WHERE tt.event_id = ? AND tt.active = 1
+                AND (tt.sale_start IS NULL OR tt.sale_start <= NOW())
+                AND (tt.sale_end IS NULL OR tt.sale_end >= NOW())
+                AND (tt.max_tickets IS NULL OR tt.max_tickets = 0 OR tt.tickets_sold < tt.max_tickets)
                 ORDER BY tt.price ASC";
 
         return $this->db->fetchAll($sql, [$eventId]);
-    }
-
-    /**
-     * Get ticket type for a sponsor in an event
-     */
-    public function getBySponsor(int $eventId, int $sponsorId): ?array
-    {
-        $sql = "SELECT * FROM ticket_types WHERE event_id = ? AND sponsor_id = ? LIMIT 1";
-        return $this->db->fetch($sql, [$eventId, $sponsorId]);
-    }
-
-    /**
-     * Create free ticket type for sponsor
-     */
-    public function createForSponsor(int $eventId, int $sponsorId, string $sponsorName): int
-    {
-        return $this->create([
-            'event_id' => $eventId,
-            'name' => "Entrada {$sponsorName}",
-            'description' => "Entrada gratuita invitación de {$sponsorName}",
-            'price' => 0.00,
-            'is_free' => 1,
-            'sponsor_id' => $sponsorId,
-            'status' => 'active',
-        ]);
     }
 
     /**
@@ -109,16 +78,16 @@ class TicketType extends Model
             return false;
         }
 
-        if ($ticketType['status'] !== 'active') {
+        if (!$ticketType['active']) {
             return false;
         }
 
         // Unlimited
-        if ($ticketType['quantity_available'] === null) {
+        if ($ticketType['max_tickets'] === null || $ticketType['max_tickets'] == 0) {
             return true;
         }
 
-        return $ticketType['quantity_sold'] < $ticketType['quantity_available'];
+        return ($ticketType['tickets_sold'] ?? 0) < $ticketType['max_tickets'];
     }
 
     /**
@@ -126,15 +95,15 @@ class TicketType extends Model
      */
     public function incrementSold(int $ticketTypeId, int $amount = 1): bool
     {
-        $sql = "UPDATE ticket_types SET quantity_sold = quantity_sold + ? WHERE id = ?";
+        $sql = "UPDATE ticket_types SET tickets_sold = tickets_sold + ? WHERE id = ?";
         $this->db->query($sql, [$amount, $ticketTypeId]);
         $result = true;
 
         // Check if sold out
         $ticketType = $this->find($ticketTypeId);
-        if ($ticketType && $ticketType['quantity_available'] !== null) {
-            if ($ticketType['quantity_sold'] >= $ticketType['quantity_available']) {
-                $this->update($ticketTypeId, ['status' => 'sold_out']);
+        if ($ticketType && $ticketType['max_tickets'] !== null && $ticketType['max_tickets'] > 0) {
+            if (($ticketType['tickets_sold'] ?? 0) >= $ticketType['max_tickets']) {
+                $this->update($ticketTypeId, ['active' => 0]);
             }
         }
 
@@ -146,15 +115,15 @@ class TicketType extends Model
      */
     public function decrementSold(int $ticketTypeId, int $amount = 1): bool
     {
-        $sql = "UPDATE ticket_types SET quantity_sold = GREATEST(0, quantity_sold - ?) WHERE id = ?";
+        $sql = "UPDATE ticket_types SET tickets_sold = GREATEST(0, tickets_sold - ?) WHERE id = ?";
         $this->db->query($sql, [$amount, $ticketTypeId]);
         $result = true;
 
         // Reactivate if was sold out
         $ticketType = $this->find($ticketTypeId);
-        if ($ticketType && $ticketType['status'] === 'sold_out') {
-            if ($ticketType['quantity_available'] === null || $ticketType['quantity_sold'] < $ticketType['quantity_available']) {
-                $this->update($ticketTypeId, ['status' => 'active']);
+        if ($ticketType && !$ticketType['active']) {
+            if ($ticketType['max_tickets'] === null || $ticketType['max_tickets'] == 0 || ($ticketType['tickets_sold'] ?? 0) < $ticketType['max_tickets']) {
+                $this->update($ticketTypeId, ['active' => 1]);
             }
         }
 
@@ -171,11 +140,11 @@ class TicketType extends Model
             return null;
         }
 
-        if ($ticketType['quantity_available'] === null) {
+        if ($ticketType['max_tickets'] === null || $ticketType['max_tickets'] == 0) {
             return null; // Unlimited
         }
 
-        return max(0, $ticketType['quantity_available'] - $ticketType['quantity_sold']);
+        return max(0, $ticketType['max_tickets'] - ($ticketType['tickets_sold'] ?? 0));
     }
 
     /**
@@ -184,9 +153,8 @@ class TicketType extends Model
     public static function getStatusOptions(): array
     {
         return [
-            'active' => 'Activo',
-            'inactive' => 'Inactivo',
-            'sold_out' => 'Agotado',
+            1 => 'Activo',
+            0 => 'Inactivo',
         ];
     }
 }

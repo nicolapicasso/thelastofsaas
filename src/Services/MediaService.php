@@ -72,10 +72,9 @@ class MediaService
         $mediaId = $this->mediaModel->create([
             'filename' => $filename,
             'original_filename' => $file['name'],
-            'path' => $relativePath,
-            'url' => $this->baseUrl . '/' . $relativePath,
-            'mime_type' => $file['type'],
-            'file_size' => $file['size'],
+            'filepath' => $relativePath,
+            'filetype' => $file['type'],
+            'filesize' => $file['size'],
             'width' => $width,
             'height' => $height
         ]);
@@ -106,7 +105,7 @@ class MediaService
         }
 
         // Delete physical file
-        $filePath = $this->uploadDir . '/' . $media['path'];
+        $filePath = $this->uploadDir . '/' . ($media['filepath'] ?? '');
         if (file_exists($filePath)) {
             @unlink($filePath);
         }

@@ -239,7 +239,7 @@
 <script>
 function openAddModal() {
     document.getElementById('modalTitle').textContent = 'Nuevo Tipo de Ticket';
-    document.getElementById('typeForm').action = '/admin/tickets/types/create';
+    document.getElementById('typeForm').action = '/admin/tickets/types';
     document.getElementById('typeId').value = '';
     document.getElementById('typeName').value = '';
     document.getElementById('typeDescription').value = '';
@@ -254,7 +254,7 @@ function openAddModal() {
 
 function editType(type) {
     document.getElementById('modalTitle').textContent = 'Editar Tipo de Ticket';
-    document.getElementById('typeForm').action = '/admin/tickets/types/' + type.id + '/edit';
+    document.getElementById('typeForm').action = '/admin/tickets/types/' + type.id;
     document.getElementById('typeId').value = type.id;
     document.getElementById('typeName').value = type.name;
     document.getElementById('typeDescription').value = type.description || '';

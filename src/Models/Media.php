@@ -170,21 +170,29 @@ class Media extends Model
     }
 
     /**
+     * Get URL for a media item
+     */
+    public static function getUrl(array $media): string
+    {
+        return '/uploads/' . ($media['filepath'] ?? '');
+    }
+
+    /**
      * Get thumbnail URL
      */
     public function getThumbnailUrl(array $media): string
     {
-        if (strpos($media['filetype'], 'image/') === 0) {
+        if (strpos($media['filetype'] ?? '', 'image/') === 0) {
             // For images, use the image itself or a thumbnail version
-            return $media['url'];
+            return self::getUrl($media);
         }
 
         // For other types, return a placeholder based on type
-        if (strpos($media['filetype'], 'video/') === 0) {
+        if (strpos($media['filetype'] ?? '', 'video/') === 0) {
             return '/assets/images/placeholders/video.png';
         }
 
-        if ($media['filetype'] === 'application/pdf') {
+        if (($media['filetype'] ?? '') === 'application/pdf') {
             return '/assets/images/placeholders/pdf.png';
         }
 
