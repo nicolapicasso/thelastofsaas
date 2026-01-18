@@ -268,12 +268,19 @@ class Event extends Model
 
     /**
      * Check if registration is open for event
+     * @param int|array $eventOrId Event ID or event array
      */
-    public function isRegistrationOpen(int $eventId): bool
+    public function isRegistrationOpen(int|array $eventOrId): bool
     {
-        $event = $this->find($eventId);
-        if (!$event) {
-            return false;
+        if (is_array($eventOrId)) {
+            $event = $eventOrId;
+            $eventId = (int) $event['id'];
+        } else {
+            $eventId = $eventOrId;
+            $event = $this->find($eventId);
+            if (!$event) {
+                return false;
+            }
         }
 
         // Check status
