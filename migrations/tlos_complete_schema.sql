@@ -7,8 +7,32 @@ SET NAMES utf8mb4;
 SET FOREIGN_KEY_CHECKS = 0;
 
 -- ============================================
--- DROP EXISTING TABLES (clean start)
+-- DROP ALL EXISTING TABLES (clean start)
+-- This includes tables from previous CMS installations
 -- ============================================
+
+-- Drop old CMS tables (from Sinapsis or other)
+DROP TABLE IF EXISTS `Nueva`;
+DROP TABLE IF EXISTS `blocks`;
+DROP TABLE IF EXISTS `email_templates`;
+DROP TABLE IF EXISTS `features`;
+DROP TABLE IF EXISTS `knowledge_articles`;
+DROP TABLE IF EXISTS `knowledge_topics`;
+DROP TABLE IF EXISTS `languages`;
+DROP TABLE IF EXISTS `live_activity_log`;
+DROP TABLE IF EXISTS `success_cases`;
+DROP TABLE IF EXISTS `team_members`;
+DROP TABLE IF EXISTS `translation_queue`;
+DROP TABLE IF EXISTS `chatbot_logs`;
+DROP TABLE IF EXISTS `chatbot_context`;
+DROP TABLE IF EXISTS `admin_logs`;
+DROP TABLE IF EXISTS `sessions`;
+DROP TABLE IF EXISTS `migrations`;
+DROP TABLE IF EXISTS `cache`;
+DROP TABLE IF EXISTS `jobs`;
+DROP TABLE IF EXISTS `failed_jobs`;
+
+-- Drop TLOS tables
 DROP TABLE IF EXISTS `votes`;
 DROP TABLE IF EXISTS `voting_candidates`;
 DROP TABLE IF EXISTS `votings`;
