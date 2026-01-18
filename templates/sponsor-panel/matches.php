@@ -45,8 +45,7 @@
         }
 
         .panel-layout {
-            display: grid;
-            grid-template-columns: 280px 1fr;
+            display: flex;
             min-height: 100vh;
         }
 
@@ -57,9 +56,12 @@
             display: flex;
             flex-direction: column;
             position: fixed;
+            left: 0;
+            top: 0;
             width: 280px;
             height: 100vh;
             overflow-y: auto;
+            z-index: 100;
         }
 
         .sidebar-header {
@@ -147,6 +149,8 @@
             margin-left: 280px;
             padding: 3rem;
             min-height: 100vh;
+            width: calc(100% - 280px);
+            max-width: calc(100% - 280px);
         }
 
         .panel-header {
@@ -421,9 +425,13 @@
         }
 
         @media (max-width: 1200px) {
-            .panel-layout { grid-template-columns: 1fr; }
             .panel-sidebar { display: none; }
-            .panel-main { margin-left: 0; padding: 1.5rem; }
+            .panel-main {
+                margin-left: 0;
+                padding: 1.5rem;
+                width: 100%;
+                max-width: 100%;
+            }
         }
 
         @media (max-width: 768px) {

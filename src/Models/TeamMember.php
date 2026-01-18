@@ -30,6 +30,15 @@ class TeamMember extends Model
     ];
 
     /**
+     * Get active team members (for speakers dropdown)
+     */
+    public function getActive(): array
+    {
+        $sql = "SELECT * FROM `{$this->table}` WHERE is_active = 1 ORDER BY sort_order ASC, name ASC";
+        return $this->db->fetchAll($sql);
+    }
+
+    /**
      * Get all team members (random order)
      */
     public function getAll(int $limit = 100): array
