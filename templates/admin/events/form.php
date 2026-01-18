@@ -31,10 +31,14 @@ $isEdit = isset($event) && $event;
 
 <?php if ($isEdit && !empty($stats)): ?>
 <!-- Stats Cards -->
-<div class="stats-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; margin-bottom: 1.5rem;">
+<div class="stats-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 1rem; margin-bottom: 1.5rem;">
     <div class="card" style="padding: 1rem; text-align: center;">
         <div style="font-size: 2rem; font-weight: bold; color: var(--primary);"><?= $stats['sponsors_count'] ?? 0 ?></div>
         <div style="color: var(--text-muted); font-size: 0.85rem;">Sponsors</div>
+    </div>
+    <div class="card" style="padding: 1rem; text-align: center;">
+        <div style="font-size: 2rem; font-weight: bold; color: #059669;"><?= $stats['companies_count'] ?? 0 ?></div>
+        <div style="color: var(--text-muted); font-size: 0.85rem;">Empresas</div>
     </div>
     <div class="card" style="padding: 1rem; text-align: center;">
         <div style="font-size: 2rem; font-weight: bold; color: var(--success);"><?= $stats['tickets_confirmed'] ?? 0 ?></div>
@@ -141,12 +145,13 @@ $isEdit = isset($event) && $event;
                 </div>
             </div>
 
-            <?php if ($isEdit && !empty($sponsors)): ?>
+            <?php if ($isEdit): ?>
             <div class="card">
                 <div class="card-header">
                     <h3>Sponsors del Evento</h3>
                 </div>
                 <div class="card-body">
+                    <?php if (!empty($sponsors)): ?>
                     <table class="table">
                         <thead>
                             <tr>
@@ -157,7 +162,7 @@ $isEdit = isset($event) && $event;
                         </thead>
                         <tbody>
                             <?php foreach ($sponsors as $sponsor): ?>
-                            <tr>
+                            <tr id="sponsor-row-<?= $sponsor['id'] ?>">
                                 <td>
                                     <?php if ($sponsor['logo_url'] ?? null): ?>
                                         <img src="<?= htmlspecialchars($sponsor['logo_url']) ?>" alt="" style="height: 30px; margin-right: 10px;">
@@ -173,11 +178,17 @@ $isEdit = isset($event) && $event;
                                     <a href="/admin/sponsors/<?= $sponsor['id'] ?>/edit" class="btn btn-sm btn-outline" title="Ver">
                                         <i class="fas fa-eye"></i>
                                     </a>
+                                    <button type="button" class="btn btn-sm btn-outline btn-danger" onclick="removeSponsor(<?= $sponsor['id'] ?>)" title="Quitar">
+                                        <i class="fas fa-times"></i>
+                                    </button>
                                 </td>
                             </tr>
                             <?php endforeach; ?>
                         </tbody>
                     </table>
+                    <?php else: ?>
+                    <p class="text-muted">No hay sponsors asignados a este evento.</p>
+                    <?php endif; ?>
 
                     <?php if (!empty($allSponsors)): ?>
                     <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border);">
@@ -187,9 +198,9 @@ $isEdit = isset($event) && $event;
                                 <select id="new_sponsor_id" class="form-control">
                                     <option value="">Seleccionar...</option>
                                     <?php
-                                    $existingIds = array_column($sponsors, 'id');
+                                    $existingSponsorIds = array_column($sponsors ?? [], 'id');
                                     foreach ($allSponsors as $s):
-                                        if (!in_array($s['id'], $existingIds)):
+                                        if (!in_array($s['id'], $existingSponsorIds)):
                                     ?>
                                         <option value="<?= $s['id'] ?>"><?= htmlspecialchars($s['name']) ?></option>
                                     <?php
@@ -387,6 +398,26 @@ function addSponsor() {
             location.reload();
         } else {
             alert(data.error || 'Error al anadir sponsor');
+        }
+    });
+}
+
+function removeSponsor(sponsorId) {
+    if (!confirm('¿Quitar este sponsor del evento?')) return;
+
+    const formData = new FormData();
+    formData.append('_csrf_token', '<?= $csrf_token ?>');
+
+    fetch('/admin/events/<?= $event['id'] ?>/sponsors/' + sponsorId + '/delete', {
+        method: 'POST',
+        body: formData
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            document.getElementById('sponsor-row-' + sponsorId).remove();
+        } else {
+            alert(data.error || 'Error al quitar sponsor');
         }
     });
 }

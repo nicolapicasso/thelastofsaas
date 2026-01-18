@@ -60,15 +60,15 @@ class TicketType extends Model
     public function getAvailableForEvent(int $eventId): array
     {
         $sql = "SELECT tt.*, s.name as sponsor_name, s.logo_url as sponsor_logo,
-                       COALESCE(tt.quantity, 0) as total_quantity,
-                       COALESCE((SELECT COUNT(*) FROM tickets WHERE ticket_type_id = tt.id AND status != 'cancelled'), 0) as sold_quantity
+                       COALESCE(tt.quantity_available, 0) as total_quantity,
+                       COALESCE(tt.quantity_sold, 0) as sold_quantity
                 FROM ticket_types tt
                 LEFT JOIN sponsors s ON tt.sponsor_id = s.id
                 WHERE tt.event_id = ? AND tt.status = 'active'
                 AND tt.sponsor_id IS NULL
                 AND (tt.sale_start_date IS NULL OR tt.sale_start_date <= NOW())
                 AND (tt.sale_end_date IS NULL OR tt.sale_end_date >= NOW())
-                HAVING total_quantity = 0 OR sold_quantity < total_quantity
+                AND (tt.quantity_available IS NULL OR tt.quantity_available = 0 OR tt.quantity_sold < tt.quantity_available)
                 ORDER BY tt.price ASC";
 
         return $this->db->fetchAll($sql, [$eventId]);
