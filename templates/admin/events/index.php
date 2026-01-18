@@ -73,28 +73,28 @@
                                 <?php endif; ?>
                             </td>
                             <td>
-                                <?php if ($event['event_date']): ?>
+                                <?php if ($event['start_date'] ?? null): ?>
                                     <i class="fas fa-calendar"></i>
-                                    <?= date('d/m/Y', strtotime($event['event_date'])) ?>
-                                    <?php if ($event['event_end_date'] && $event['event_end_date'] !== $event['event_date']): ?>
-                                        <br><small class="text-muted">al <?= date('d/m/Y', strtotime($event['event_end_date'])) ?></small>
+                                    <?= date('d/m/Y', strtotime($event['start_date'])) ?>
+                                    <?php if (($event['end_date'] ?? null) && $event['end_date'] !== $event['start_date']): ?>
+                                        <br><small class="text-muted">al <?= date('d/m/Y', strtotime($event['end_date'])) ?></small>
                                     <?php endif; ?>
                                 <?php else: ?>
                                     <span class="text-muted">Sin fecha</span>
                                 <?php endif; ?>
                             </td>
                             <td>
-                                <?php if ($event['venue_name']): ?>
-                                    <?= htmlspecialchars($event['venue_name']) ?>
-                                    <?php if ($event['venue_city']): ?>
-                                        <br><small class="text-muted"><?= htmlspecialchars($event['venue_city']) ?></small>
+                                <?php if ($event['location'] ?? null): ?>
+                                    <?= htmlspecialchars($event['location']) ?>
+                                    <?php if ($event['city'] ?? null): ?>
+                                        <br><small class="text-muted"><?= htmlspecialchars($event['city']) ?></small>
                                     <?php endif; ?>
                                 <?php else: ?>
                                     <span class="text-muted">Sin definir</span>
                                 <?php endif; ?>
                             </td>
                             <td>
-                                <span class="badge badge-info"><?= (int)$event['total_capacity'] ?></span>
+                                <span class="badge badge-info"><?= (int)($event['max_attendees'] ?? 0) ?></span>
                             </td>
                             <td>
                                 <?php
