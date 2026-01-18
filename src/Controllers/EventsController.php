@@ -31,6 +31,7 @@ class EventsController extends Controller
     {
         $events = $this->eventModel->getUpcoming(12);
 
+        $this->view->setLayout('layouts/event');
         $this->render('events/index', [
             'events' => $events,
             'meta_title' => 'Próximos Eventos - The Last of SaaS',
@@ -66,6 +67,7 @@ class EventsController extends Controller
         // Get event statistics
         $stats = $this->eventModel->getStats($event['id']);
 
+        $this->view->setLayout('layouts/event');
         $this->render('events/show', [
             'event' => $event,
             'sponsorsByLevel' => $sponsorsByLevel,
@@ -90,6 +92,7 @@ class EventsController extends Controller
             return;
         }
 
+        $this->view->setLayout('layouts/event');
         $this->render('events/agenda', [
             'event' => $event,
             'meta_title' => 'Agenda - ' . $event['name']
@@ -114,6 +117,7 @@ class EventsController extends Controller
             $sponsorsByLevel[$sponsor['level']][] = $sponsor;
         }
 
+        $this->view->setLayout('layouts/event');
         $this->render('events/sponsors', [
             'event' => $event,
             'sponsorsByLevel' => $sponsorsByLevel,
