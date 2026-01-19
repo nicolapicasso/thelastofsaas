@@ -46,6 +46,7 @@ CREATE TABLE IF NOT EXISTS messages (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Migrate existing data from sponsor_messages to messages
+-- Note: sponsor_messages uses 'created_at' column for timestamp
 INSERT INTO messages (event_id, sender_type, sender_id, recipient_type, recipient_id, message, sent_at, read_at)
 SELECT
     event_id,
@@ -54,7 +55,7 @@ SELECT
     'company' as recipient_type,
     company_id as recipient_id,
     message,
-    COALESCE(sent_at, NOW()) as sent_at,
+    COALESCE(created_at, NOW()) as sent_at,
     read_at
 FROM sponsor_messages
 WHERE 1=1
