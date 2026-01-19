@@ -136,6 +136,12 @@ $_siteLogo = $_settingModel->get('logo_header', '');
                         </a>
                     </li>
                     <li>
+                        <a href="/admin/team" class="<?= strpos($_SERVER['REQUEST_URI'], '/admin/team') !== false ? 'active' : '' ?>">
+                            <span class="nav-icon"><i class="fas fa-users"></i></span>
+                            Equipo
+                        </a>
+                    </li>
+                    <li>
                         <a href="/admin/media" class="<?= strpos($_SERVER['REQUEST_URI'], '/admin/media') !== false ? 'active' : '' ?>">
                             <span class="nav-icon"><i class="fas fa-images"></i></span>
                             Media
