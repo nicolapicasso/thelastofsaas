@@ -423,6 +423,9 @@ $router->get('/eventos/{slug}', 'EventsController', 'show');
 $router->get('/eventos/{slug}/agenda', 'EventsController', 'agenda');
 $router->get('/eventos/{slug}/sponsors', 'EventsController', 'sponsors');
 
+// Public Sponsor Pages
+$router->get('/sponsors/{slug}', 'EventsController', 'sponsorPage');
+
 // Tickets
 $router->get('/eventos/{slug}/registro', 'TicketsController', 'register');
 $router->post('/eventos/{slug}/registro', 'TicketsController', 'store');

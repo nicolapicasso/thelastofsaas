@@ -86,7 +86,7 @@ $endDate = $event['end_date'] ? new DateTime($event['end_date']) : null;
 <?php if (!empty($companies)): ?>
 <section class="event-companies">
     <div class="container-wide">
-        <h2>EMPRESAS PARTICIPANTES</h2>
+        <h2>NOS ACOMPAÑARAN</h2>
         <div class="participants-grid">
             <?php foreach ($companies as $company): ?>
                 <a href="/empresas/<?= $company['slug'] ?? $company['id'] ?>" class="participant-card">
@@ -162,10 +162,21 @@ $endDate = $event['end_date'] ? new DateTime($event['end_date']) : null;
         <h2>SPEAKERS</h2>
         <div class="speakers-grid">
             <?php foreach ($speakers as $speaker): ?>
-                <div class="speaker-card">
+                <a href="/speakers/<?= $speaker['slug'] ?? $speaker['id'] ?>" class="speaker-card">
                     <div class="speaker-photo">
                         <?php if (!empty($speaker['photo'])): ?>
-                            <img src="<?= htmlspecialchars($speaker['photo']) ?>" alt="<?= htmlspecialchars($speaker['name'] ?? '') ?>">
+                            <?php
+                            // Check if there's an animated version (gif)
+                            $hasAnimated = !empty($speaker['photo_animated']);
+                            $staticPhoto = $speaker['photo'];
+                            $animatedPhoto = $speaker['photo_animated'] ?? $speaker['photo'];
+                            ?>
+                            <?php if ($hasAnimated): ?>
+                                <img src="<?= htmlspecialchars($staticPhoto) ?>" alt="<?= htmlspecialchars($speaker['name'] ?? '') ?>" class="photo-static">
+                                <img src="<?= htmlspecialchars($animatedPhoto) ?>" alt="<?= htmlspecialchars($speaker['name'] ?? '') ?>" class="photo-animated">
+                            <?php else: ?>
+                                <img src="<?= htmlspecialchars($staticPhoto) ?>" alt="<?= htmlspecialchars($speaker['name'] ?? '') ?>">
+                            <?php endif; ?>
                         <?php else: ?>
                             <div class="speaker-placeholder">
                                 <i class="fas fa-user"></i>
@@ -181,14 +192,48 @@ $endDate = $event['end_date'] ? new DateTime($event['end_date']) : null;
                             <span class="speaker-company"><?= htmlspecialchars($speaker['company']) ?></span>
                         <?php endif; ?>
                     </div>
-                </div>
+                </a>
             <?php endforeach; ?>
         </div>
     </div>
 </section>
 <?php endif; ?>
 
-<!-- SECTION H: Event Details (White on Black) -->
+<!-- SECTION H: Sponsors by Level (Black on White) -->
+<?php if (!empty($sponsorsByLevel)): ?>
+<section class="event-sponsors-section">
+    <div class="container-wide">
+        <h2>SPONSORS</h2>
+        <?php
+        $levelNames = [
+            'platinum' => 'Platinum',
+            'gold' => 'Gold',
+            'silver' => 'Silver',
+            'bronze' => 'Bronze'
+        ];
+        foreach ($levelNames as $levelKey => $levelName):
+            if (!isset($sponsorsByLevel[$levelKey])) continue;
+        ?>
+            <div class="sponsors-level sponsors-level--<?= $levelKey ?>">
+                <h3><?= strtoupper($levelName) ?></h3>
+                <div class="sponsors-grid">
+                    <?php foreach ($sponsorsByLevel[$levelKey] as $sponsor): ?>
+                        <a href="/sponsors/<?= $sponsor['slug'] ?? $sponsor['id'] ?>" class="sponsor-card">
+                            <?php if ($sponsor['logo_url']): ?>
+                                <img src="<?= htmlspecialchars($sponsor['logo_url']) ?>" alt="<?= htmlspecialchars($sponsor['name']) ?>">
+                            <?php else: ?>
+                                <span class="sponsor-name"><?= htmlspecialchars($sponsor['name']) ?></span>
+                            <?php endif; ?>
+                        </a>
+                    <?php endforeach; ?>
+                </div>
+            </div>
+        <?php endforeach; ?>
+    </div>
+</section>
+<?php endif; ?>
+
+<!-- SECTION I: Event Details (White on Black) -->
 <section class="event-details">
     <div class="container-wide">
         <h2>DETALLES DEL EVENTO</h2>
@@ -249,40 +294,6 @@ $endDate = $event['end_date'] ? new DateTime($event['end_date']) : null;
         </div>
     </div>
 </section>
-
-<!-- SECTION I: Sponsors by Level (Black on White) -->
-<?php if (!empty($sponsorsByLevel)): ?>
-<section class="event-sponsors-section">
-    <div class="container-wide">
-        <h2>SPONSORS</h2>
-        <?php
-        $levelNames = [
-            'platinum' => 'Platinum',
-            'gold' => 'Gold',
-            'silver' => 'Silver',
-            'bronze' => 'Bronze'
-        ];
-        foreach ($levelNames as $levelKey => $levelName):
-            if (!isset($sponsorsByLevel[$levelKey])) continue;
-        ?>
-            <div class="sponsors-level sponsors-level--<?= $levelKey ?>">
-                <h3><?= strtoupper($levelName) ?></h3>
-                <div class="sponsors-grid">
-                    <?php foreach ($sponsorsByLevel[$levelKey] as $sponsor): ?>
-                        <a href="/sponsors/<?= $sponsor['slug'] ?? $sponsor['id'] ?>" class="sponsor-card">
-                            <?php if ($sponsor['logo_url']): ?>
-                                <img src="<?= htmlspecialchars($sponsor['logo_url']) ?>" alt="<?= htmlspecialchars($sponsor['name']) ?>">
-                            <?php else: ?>
-                                <span class="sponsor-name"><?= htmlspecialchars($sponsor['name']) ?></span>
-                            <?php endif; ?>
-                        </a>
-                    <?php endforeach; ?>
-                </div>
-            </div>
-        <?php endforeach; ?>
-    </div>
-</section>
-<?php endif; ?>
 
 <!-- SECTION J: Final CTA (White on Black) -->
 <section class="event-cta event-cta--dark">

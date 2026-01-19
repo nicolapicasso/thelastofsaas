@@ -127,7 +127,7 @@
             z-index: 1000;
             background: rgba(0, 0, 0, 0.95);
             backdrop-filter: blur(10px);
-            padding: 1.5rem 0;
+            padding: 1rem 0;
             border-bottom: 1px solid var(--border-light);
         }
 
@@ -147,13 +147,25 @@
             letter-spacing: 0.15em;
         }
 
-        .site-header nav {
+        .site-header .logo-img {
+            display: flex;
+            align-items: center;
+        }
+
+        .site-header .logo-img img {
+            height: 40px;
+            width: auto;
+            max-width: 180px;
+            object-fit: contain;
+        }
+
+        .site-header .main-nav-menu {
             display: flex;
             align-items: center;
             gap: 2.5rem;
         }
 
-        .site-header nav a {
+        .site-header .main-nav-menu a {
             font-family: var(--font-mono);
             font-size: 12px;
             color: var(--text-grey);
@@ -163,8 +175,48 @@
             transition: var(--transition);
         }
 
-        .site-header nav a:hover {
+        .site-header .main-nav-menu a:hover {
             color: var(--text-light);
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .btn-header {
+            background: var(--text-light);
+            color: var(--bg-dark);
+            padding: 0.6rem 1.25rem;
+            font-size: 12px;
+        }
+
+        .btn-header:hover {
+            background: transparent;
+            color: var(--text-light);
+            border-color: var(--text-light);
+        }
+
+        .mobile-menu-toggle {
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            gap: 5px;
+            width: 30px;
+            height: 30px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 0;
+        }
+
+        .mobile-menu-toggle span {
+            display: block;
+            width: 100%;
+            height: 2px;
+            background: var(--text-light);
+            transition: var(--transition);
         }
 
         /* ============================================
@@ -221,7 +273,7 @@
         }
 
         .event-title-block h1 {
-            font-size: clamp(40px, 6vw, 72px);
+            font-size: clamp(32px, 5vw, 56px);
             margin-bottom: 1.5rem;
             color: var(--text-dark);
         }
@@ -254,10 +306,9 @@
         }
 
         .intro-text {
-            font-size: clamp(24px, 3vw, 36px);
-            line-height: 1.5;
+            font-size: 16px;
+            line-height: 1.7;
             font-weight: 400;
-            max-width: 1000px;
         }
 
         /* ============================================
@@ -328,7 +379,6 @@
             font-size: 18px;
             line-height: 1.9;
             color: var(--text-grey);
-            max-width: 900px;
         }
 
         .description-content p {
@@ -367,15 +417,15 @@
 
         .participants-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-            gap: 1rem;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 1.5rem;
         }
 
         .participant-card {
-            background: var(--bg-dark);
-            border: 1px solid var(--bg-dark);
-            padding: 1.5rem 2rem;
-            min-height: 80px;
+            background: var(--bg-light);
+            border: 2px solid var(--border-dark);
+            padding: 2rem;
+            min-height: 100px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -384,31 +434,28 @@
         }
 
         .participant-card:hover {
-            background: transparent;
+            border-color: var(--bg-dark);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
         }
 
         .participant-card img {
             max-width: 100%;
-            max-height: 50px;
+            max-height: 60px;
             object-fit: contain;
-            filter: brightness(0) invert(1);
             transition: var(--transition);
         }
 
         .participant-card:hover img {
-            filter: none;
+            transform: scale(1.05);
         }
 
         .participant-name {
             font-family: var(--font-mono);
-            font-size: 11px;
+            font-size: 12px;
             text-transform: uppercase;
             letter-spacing: 0.1em;
-            color: var(--text-light);
-        }
-
-        .participant-card:hover .participant-name {
             color: var(--text-dark);
+            font-weight: 600;
         }
 
         /* ============================================
@@ -600,6 +647,13 @@
 
         .speaker-card {
             text-align: center;
+            text-decoration: none;
+            display: block;
+            transition: var(--transition);
+        }
+
+        .speaker-card:hover {
+            transform: translateY(-5px);
         }
 
         .speaker-photo {
@@ -608,12 +662,35 @@
             margin: 0 auto 1.25rem;
             overflow: hidden;
             border: 3px solid var(--bg-dark);
+            position: relative;
         }
 
         .speaker-photo img {
             width: 100%;
             height: 100%;
             object-fit: cover;
+            transition: var(--transition);
+        }
+
+        .speaker-photo .photo-static {
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+
+        .speaker-photo .photo-animated {
+            position: absolute;
+            top: 0;
+            left: 0;
+            opacity: 0;
+        }
+
+        .speaker-card:hover .photo-static {
+            opacity: 0;
+        }
+
+        .speaker-card:hover .photo-animated {
+            opacity: 1;
         }
 
         .speaker-placeholder {
@@ -766,7 +843,8 @@
         }
 
         .sponsor-card {
-            background: var(--bg-dark);
+            background: var(--bg-light);
+            border: 2px solid var(--border-dark);
             padding: 1.5rem 2rem;
             display: flex;
             align-items: center;
@@ -776,7 +854,8 @@
         }
 
         .sponsor-card:hover {
-            background: rgba(0, 0, 0, 0.8);
+            border-color: var(--bg-dark);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
         }
 
         .sponsors-level--platinum .sponsor-card {
@@ -799,12 +878,13 @@
             max-width: 100%;
             max-height: 60px;
             object-fit: contain;
-            filter: brightness(0) invert(1);
-            opacity: 0.9;
+            filter: grayscale(100%);
+            opacity: 0.7;
             transition: var(--transition);
         }
 
         .sponsor-card:hover img {
+            filter: grayscale(0%);
             opacity: 1;
         }
 
@@ -813,7 +893,8 @@
             font-size: 12px;
             text-transform: uppercase;
             letter-spacing: 0.1em;
-            color: var(--text-light);
+            color: var(--text-dark);
+            font-weight: 600;
         }
 
         /* ============================================
@@ -868,6 +949,30 @@
             text-decoration: none;
             text-transform: uppercase;
             letter-spacing: 0.15em;
+        }
+
+        .footer-logo-img img {
+            height: 32px;
+            width: auto;
+            max-width: 150px;
+            object-fit: contain;
+        }
+
+        .footer-social {
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .footer-social a {
+            color: var(--text-grey);
+            font-size: 18px;
+            transition: var(--transition);
+        }
+
+        .footer-social a:hover {
+            color: var(--text-light);
         }
 
         .footer-links {
@@ -935,8 +1040,28 @@
         }
 
         @media (max-width: 768px) {
-            .site-header nav {
+            .site-header .main-nav-menu {
                 display: none;
+                position: absolute;
+                top: 100%;
+                left: 0;
+                right: 0;
+                background: rgba(0, 0, 0, 0.98);
+                flex-direction: column;
+                padding: 1.5rem;
+                gap: 1rem;
+            }
+
+            .site-header .main-nav-menu.active {
+                display: flex;
+            }
+
+            .header-actions {
+                display: none;
+            }
+
+            .mobile-menu-toggle {
+                display: flex;
             }
 
             .event-hero-minimal {
@@ -998,13 +1123,39 @@
     <!-- Header -->
     <header class="site-header">
         <div class="container-wide">
-            <a href="/" class="logo">THE LAST OF SAAS</a>
-            <nav>
-                <a href="/">Inicio</a>
-                <a href="/eventos">Eventos</a>
-                <a href="/sponsor/login">Sponsors</a>
-                <a href="/empresa/login">Empresas</a>
+            <?php if (!empty($logoHeader) && file_exists(PUBLIC_PATH . $logoHeader)): ?>
+                <a href="/" class="logo logo-img">
+                    <img src="<?= htmlspecialchars($logoHeader) ?>" alt="The Last of SaaS" height="40">
+                </a>
+            <?php else: ?>
+                <a href="/" class="logo">THE LAST OF SAAS</a>
+            <?php endif; ?>
+            <nav class="main-nav-menu">
+                <?php if (!empty($mainNav)): ?>
+                    <?php foreach ($mainNav as $item): ?>
+                        <a href="<?= $item['url'] ?>"><?= htmlspecialchars($item['label']) ?></a>
+                    <?php endforeach; ?>
+                <?php else: ?>
+                    <a href="/">Inicio</a>
+                    <a href="/eventos">Eventos</a>
+                    <a href="/sponsor/login">Sponsors</a>
+                    <a href="/empresa/login">Empresas</a>
+                <?php endif; ?>
             </nav>
+            <?php if (!empty($headerButtons)): ?>
+                <div class="header-actions">
+                    <?php foreach ($headerButtons as $btn): ?>
+                        <a href="<?= $btn['url'] ?>" class="btn btn-header"<?= ($btn['target'] ?? '_self') === '_blank' ? ' target="_blank" rel="noopener"' : '' ?>>
+                            <?= htmlspecialchars($btn['title']) ?>
+                        </a>
+                    <?php endforeach; ?>
+                </div>
+            <?php endif; ?>
+            <button class="mobile-menu-toggle" id="mobileMenuToggle" aria-label="Menu">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
         </div>
     </header>
 
@@ -1017,18 +1168,54 @@
     <footer class="site-footer">
         <div class="container-wide">
             <div class="footer-content">
-                <a href="/" class="footer-logo">THE LAST OF SAAS</a>
+                <?php if (!empty($logoHeader)): ?>
+                    <a href="/" class="footer-logo footer-logo-img">
+                        <img src="<?= htmlspecialchars($logoHeader) ?>" alt="The Last of SaaS" height="32">
+                    </a>
+                <?php else: ?>
+                    <a href="/" class="footer-logo">THE LAST OF SAAS</a>
+                <?php endif; ?>
                 <div class="footer-links">
-                    <a href="/eventos">Eventos</a>
-                    <a href="/sponsor/login">Sponsors</a>
-                    <a href="/empresa/login">Empresas</a>
-                    <a href="/privacidad">Privacidad</a>
+                    <?php if (!empty($mainNav)): ?>
+                        <?php foreach (array_slice($mainNav, 0, 5) as $item): ?>
+                            <a href="<?= $item['url'] ?>"><?= htmlspecialchars($item['label']) ?></a>
+                        <?php endforeach; ?>
+                    <?php else: ?>
+                        <a href="/eventos">Eventos</a>
+                        <a href="/sponsor/login">Sponsors</a>
+                        <a href="/empresa/login">Empresas</a>
+                        <a href="/privacidad">Privacidad</a>
+                    <?php endif; ?>
                 </div>
             </div>
+            <?php if (!empty($socialLinks)): ?>
+            <div class="footer-social">
+                <?php foreach ($socialLinks as $social): ?>
+                    <a href="<?= htmlspecialchars($social['url']) ?>" target="_blank" rel="noopener" aria-label="<?= htmlspecialchars($social['title'] ?? '') ?>">
+                        <i class="<?= htmlspecialchars($social['icon'] ?? 'fas fa-link') ?>"></i>
+                    </a>
+                <?php endforeach; ?>
+            </div>
+            <?php endif; ?>
             <div class="footer-bottom">
-                <p>&copy; <?= date('Y') ?> The Last of SaaS. Todos los derechos reservados.</p>
+                <p><?= !empty($footerCopyright) ? str_replace('{year}', date('Y'), htmlspecialchars($footerCopyright)) : '&copy; ' . date('Y') . ' The Last of SaaS. Todos los derechos reservados.' ?></p>
             </div>
         </div>
     </footer>
+
+    <!-- Mobile Menu Script -->
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const mobileToggle = document.getElementById('mobileMenuToggle');
+        const navMenu = document.querySelector('.main-nav-menu');
+
+        if (mobileToggle && navMenu) {
+            mobileToggle.addEventListener('click', function() {
+                navMenu.classList.toggle('active');
+                mobileToggle.classList.toggle('active');
+            });
+        }
+    });
+    </script>
 </body>
 </html>
