@@ -449,6 +449,10 @@ $router->post('/sponsor/deseleccionar', 'SponsorPanelController', 'unselectCompa
 $router->get('/sponsor/matches/{eventId}', 'SponsorPanelController', 'matches');
 $router->get('/sponsor/codigos/{eventId}', 'SponsorPanelController', 'inviteCodes');
 $router->get('/sponsor/invitados/{eventId}', 'SponsorPanelController', 'invitedGuests');
+$router->get('/sponsor/mensajes/{eventId}', 'SponsorPanelController', 'messages');
+$router->get('/sponsor/mensajes/{eventId}/{companyId}', 'SponsorPanelController', 'conversation');
+$router->post('/sponsor/mensaje/enviar', 'SponsorPanelController', 'sendMessage');
+$router->post('/sponsor/mensaje/responder', 'SponsorPanelController', 'replyMessage');
 
 // Company Panel
 $router->get('/empresa/login', 'CompanyPanelController', 'login');
@@ -461,6 +465,10 @@ $router->post('/empresa/seleccionar', 'CompanyPanelController', 'selectSponsor')
 $router->post('/empresa/deseleccionar', 'CompanyPanelController', 'unselectSponsor');
 $router->get('/empresa/matches/{eventId}', 'CompanyPanelController', 'matches');
 $router->post('/empresa/perfil', 'CompanyPanelController', 'updateProfile');
+$router->get('/empresa/mensajes/{eventId}', 'CompanyPanelController', 'messages');
+$router->get('/empresa/mensajes/{eventId}/{sponsorId}', 'CompanyPanelController', 'conversation');
+$router->post('/empresa/mensaje/enviar', 'CompanyPanelController', 'sendMessage');
+$router->post('/empresa/mensaje/responder', 'CompanyPanelController', 'replyMessage');
 
 // Voting
 $router->get('/votar/{slug}', 'VotingController', 'show');

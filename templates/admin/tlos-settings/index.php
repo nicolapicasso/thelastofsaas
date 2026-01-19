@@ -65,9 +65,9 @@
             <div class="form-group">
                 <label class="form-check">
                     <input type="checkbox" name="settings[allow_sponsor_messages]" value="1" <?= ($settings['allow_sponsor_messages'] ?? true) ? 'checked' : '' ?>>
-                    <span>Permitir mensajes de Sponsors</span>
+                    <span>Sistema de mensajería activo</span>
                 </label>
-                <small class="text-muted">Los sponsors pueden enviar mensajes personalizados con sus selecciones</small>
+                <small class="text-muted">Permite el envío de mensajes entre sponsors y empresas</small>
             </div>
 
             <div class="form-group">

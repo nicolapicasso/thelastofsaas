@@ -30,11 +30,13 @@ class TlosSettingsController extends Controller
         $this->requireAuth();
 
         $settingsGrouped = $this->settingsModel->getAllGrouped();
+        $settings = $this->settingsModel->getAll();
         $groups = TlosSetting::getGroups();
 
         $this->renderAdmin('tlos-settings/index', [
             'title' => 'Configuración TLOS',
             'settingsGrouped' => $settingsGrouped,
+            'settings' => $settings,
             'groups' => $groups,
             'csrf_token' => $this->generateCsrf(),
             'flash' => $this->getFlash(),
@@ -61,6 +63,18 @@ class TlosSettingsController extends Controller
         }
 
         try {
+            // Handle unchecked checkboxes: get all boolean settings and set to '0' if not in POST
+            $allSettings = $this->settingsModel->getAllGrouped();
+            foreach ($allSettings as $group => $groupSettings) {
+                foreach ($groupSettings as $setting) {
+                    if ($setting['setting_type'] === 'boolean' && !isset($settings[$setting['setting_key']])) {
+                        // Checkbox is unchecked (not sent in POST), set to '0'
+                        $this->settingsModel->set($setting['setting_key'], '0');
+                    }
+                }
+            }
+
+            // Process settings that were sent in POST
             foreach ($settings as $key => $value) {
                 // Sanitize based on setting type
                 $setting = $this->settingsModel->findBy('setting_key', $key);

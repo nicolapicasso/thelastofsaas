@@ -204,6 +204,46 @@ class EmailService
     }
 
     /**
+     * Send message notification
+     */
+    public function sendMessageNotification(string $recipientType, array $recipient, array $sender, array $event, string $message): bool
+    {
+        if ($recipientType === 'company') {
+            $subject = "Nuevo mensaje de {$sender['name']} - {$event['name']}";
+            $recipientEmail = $recipient['contact_email'];
+            $panelUrl = url('/empresa/login');
+        } else {
+            $subject = "Nuevo mensaje de {$sender['name']} - {$event['name']}";
+            $recipientEmail = $recipient['contact_email'];
+            $panelUrl = url('/sponsor/login');
+        }
+
+        if (!$recipientEmail) {
+            return false;
+        }
+
+        $variables = [
+            'recipient_name' => $recipient['name'],
+            'sender_name' => $sender['name'],
+            'sender_logo' => $sender['logo_url'] ?? '',
+            'event_name' => $event['name'],
+            'message_preview' => mb_substr($message, 0, 200) . (mb_strlen($message) > 200 ? '...' : ''),
+            'panel_url' => $panelUrl
+        ];
+
+        $html = $this->renderTemplate('message_notification', $variables);
+
+        $sent = $this->send($recipientEmail, $subject, $html);
+
+        $this->logNotification($event['id'], 'message_notification', $recipientEmail, $sent, [
+            'sender_id' => $sender['id'],
+            'sender_type' => $recipientType === 'company' ? 'sponsor' : 'company'
+        ]);
+
+        return $sent;
+    }
+
+    /**
      * Send event reminder
      */
     public function sendEventReminder(array $ticket, array $event): bool
@@ -450,6 +490,19 @@ class EmailService
                 <p>Tu código de entrada: <strong style="font-size: 20px; letter-spacing: 2px;">{{ticket_code}}</strong></p>
                 <p style="margin-top: 30px;">
                     <a href="{{{ticket_url}}}" style="background: #4F46E5; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px;">Ver mi entrada</a>
+                </p>
+            ',
+
+            'message_notification' => '
+                <h2>Nuevo mensaje de {{sender_name}}</h2>
+                <p>Hola {{recipient_name}},</p>
+                <p>Has recibido un nuevo mensaje de <strong>{{sender_name}}</strong> en el evento <strong>{{event_name}}</strong>.</p>
+                <div style="background: #f3f4f6; padding: 20px; border-radius: 6px; margin: 20px 0; border-left: 4px solid #4F46E5;">
+                    <p style="font-style: italic; margin: 0;">{{message_preview}}</p>
+                </div>
+                <p>Accede a tu panel para ver el mensaje completo y responder.</p>
+                <p style="margin-top: 30px;">
+                    <a href="{{{panel_url}}}" style="background: #4F46E5; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px;">Ver mensaje</a>
                 </p>
             '
         ];
