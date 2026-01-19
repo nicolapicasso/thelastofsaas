@@ -57,9 +57,7 @@ SELECT
     message,
     COALESCE(created_at, NOW()) as sent_at,
     read_at
-FROM sponsor_messages
-WHERE 1=1
-ON DUPLICATE KEY UPDATE id = id;
+FROM sponsor_messages;
 
 -- Drop old table (optional - commented out for safety)
 -- DROP TABLE IF EXISTS sponsor_messages;
