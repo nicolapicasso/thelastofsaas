@@ -223,6 +223,14 @@ class SponsorsController extends Controller
 
         $file = $_FILES['csv_file']['tmp_name'];
         $content = file_get_contents($file);
+
+        // Remove UTF-8 BOM if present
+        $content = preg_replace('/^\xEF\xBB\xBF/', '', $content);
+
+        // Normalize line endings
+        $content = str_replace("\r\n", "\n", $content);
+        $content = str_replace("\r", "\n", $content);
+
         $lines = explode("\n", $content);
 
         if (count($lines) < 2) {
