@@ -177,7 +177,7 @@ class TeamController extends Controller
         $linkedinUrl = Sanitizer::url($this->getPost('linkedin_url') ?? $this->getPost('linkedin'));
         $twitter = Sanitizer::url($this->getPost('twitter'));
         $sortOrder = (int) $this->getPost('sort_order', 0);
-        $isActive = $this->getPost('is_active') !== null ? 1 : 0;
+        $isActive = $this->getPost('is_active') !== null ? 1 : 1; // Default to active
 
         if (empty($name)) {
             $errors[] = 'El nombre es obligatorio.';

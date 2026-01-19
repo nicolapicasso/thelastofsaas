@@ -709,15 +709,19 @@
             font-family: var(--font-mono);
             text-transform: uppercase;
             letter-spacing: 0.1em;
-            color: var(--text-light);
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid var(--border-light);
+            color: var(--text-dark);
+            background: var(--text-light);
+            border: 1px solid var(--text-light);
             padding: 0.75rem 1.5rem;
             margin-bottom: 1.5rem;
         }
 
+        .agenda-date i {
+            color: var(--text-dark);
+        }
+
         .agenda-timeline {
-            border-left: 2px solid var(--border-light);
+            border-left: 2px solid var(--text-light);
             padding-left: 2rem;
             margin-left: 1rem;
         }
@@ -726,7 +730,7 @@
             display: flex;
             gap: 1.5rem;
             padding: 1.5rem 0;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
             position: relative;
         }
 
@@ -738,7 +742,7 @@
             width: 12px;
             height: 12px;
             background: var(--bg-dark);
-            border: 2px solid rgba(255, 255, 255, 0.3);
+            border: 2px solid var(--text-light);
             margin-left: -6px;
         }
 
@@ -764,7 +768,7 @@
             display: block;
             font-family: var(--font-mono);
             font-size: 11px;
-            color: var(--text-grey);
+            color: var(--text-light);
         }
 
         .agenda-content { flex: 1; }
@@ -776,7 +780,8 @@
             text-transform: uppercase;
             letter-spacing: 0.1em;
             padding: 0.25rem 0.75rem;
-            background: rgba(255, 255, 255, 0.1);
+            background: var(--text-light);
+            color: var(--text-dark);
             margin-bottom: 0.5rem;
         }
 
@@ -789,7 +794,7 @@
 
         .agenda-content p {
             font-size: 14px;
-            color: var(--text-grey);
+            color: var(--text-light);
             line-height: 1.6;
             margin-bottom: 0.75rem;
         }
@@ -806,7 +811,7 @@
             gap: 0.5rem;
             font-family: var(--font-mono);
             font-size: 11px;
-            color: var(--text-grey);
+            color: var(--text-light);
         }
 
         .agenda-speaker img {
@@ -821,9 +826,9 @@
             gap: 0.5rem;
             font-family: var(--font-mono);
             font-size: 11px;
-            color: var(--text-grey);
+            color: var(--text-light);
             padding-left: 0.75rem;
-            border-left: 3px solid rgba(255, 255, 255, 0.3);
+            border-left: 3px solid var(--text-light);
         }
 
         /* Agenda Layout with Room Images */
