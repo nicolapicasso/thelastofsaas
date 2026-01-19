@@ -356,7 +356,7 @@
 
         <!-- Message Form -->
         <div class="message-form-container">
-            <?php if (!$canSend['can_send'] && !$canSend['is_reply']): ?>
+            <?php if (!$canSend['can_send'] && !($canSend['is_reply'] ?? false)): ?>
                 <div class="warning-message">
                     <i class="fas fa-info-circle"></i> Ya has enviado un mensaje a este sponsor. Podras responder cuando el te responda.
                 </div>
