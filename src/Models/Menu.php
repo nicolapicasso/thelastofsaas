@@ -150,13 +150,8 @@ class Menu extends Model
      */
     public function createItem(array $data): int
     {
-        $sql = "INSERT INTO menu_items (menu_id, parent_id, title, url, target, icon, css_class, item_type, button_style, translations, display_order, is_active)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-
-        $translations = $data['translations'] ?? null;
-        if (is_array($translations)) {
-            $translations = json_encode($translations);
-        }
+        $sql = "INSERT INTO menu_items (menu_id, parent_id, title, url, target, icon, css_class, display_order, is_active)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         $this->db->query($sql, [
             $data['menu_id'],
@@ -166,9 +161,6 @@ class Menu extends Model
             $data['target'] ?? '_self',
             $data['icon'] ?? null,
             $data['css_class'] ?? null,
-            $data['item_type'] ?? 'link',
-            $data['button_style'] ?? 'primary',
-            $translations,
             $data['display_order'] ?? 0,
             $data['is_active'] ?? 1,
         ]);
@@ -187,18 +179,10 @@ class Menu extends Model
                 target = ?,
                 icon = ?,
                 css_class = ?,
-                item_type = ?,
-                button_style = ?,
-                translations = ?,
                 display_order = ?,
                 is_active = ?,
                 parent_id = ?
                 WHERE id = ?";
-
-        $translations = $data['translations'] ?? null;
-        if (is_array($translations)) {
-            $translations = json_encode($translations);
-        }
 
         return $this->db->query($sql, [
             $data['title'],
@@ -206,9 +190,6 @@ class Menu extends Model
             $data['target'] ?? '_self',
             $data['icon'] ?? null,
             $data['css_class'] ?? null,
-            $data['item_type'] ?? 'link',
-            $data['button_style'] ?? 'primary',
-            $translations,
             $data['display_order'] ?? 0,
             $data['is_active'] ?? 1,
             $data['parent_id'] ?: null,
