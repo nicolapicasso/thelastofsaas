@@ -173,6 +173,9 @@ class SponsorPanelController extends Controller
             return;
         }
 
+        // Get all events for this sponsor (for event selector)
+        $events = $this->sponsorModel->getEvents($sponsor['id']);
+
         // Get all companies for this event
         $companies = $this->companyModel->getByEvent($event['id']);
 
@@ -228,6 +231,7 @@ class SponsorPanelController extends Controller
         $this->render('sponsor-panel/companies', [
             'sponsor' => $sponsor,
             'event' => $event,
+            'events' => $events,
             'companies' => $filteredCompanies,
             'selectedIds' => $selectedIds,
             'matchedIds' => $matchedIds,
@@ -237,6 +241,7 @@ class SponsorPanelController extends Controller
             'currentFilter' => $filter,
             'currentSector' => $sector,
             'currentSearch' => $search,
+            'csrf_token' => $this->generateCsrf(),
             'meta_title' => 'Empresas - ' . $event['name']
         ]);
     }

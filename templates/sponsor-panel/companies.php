@@ -201,6 +201,24 @@
             letter-spacing: 0.15em;
         }
 
+        .event-selector {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            color: var(--text-light);
+            font-family: var(--font-mono);
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            margin-top: 0.5rem;
+        }
+
+        .event-selector:focus {
+            outline: none;
+            border-color: var(--text-light);
+        }
+
         .selection-counter {
             background: var(--bg-card);
             border: 1px solid var(--border-color);
@@ -554,7 +572,17 @@
                 <div class="header-top">
                     <div>
                         <h1>EMPRESAS</h1>
+                        <?php if (count($events ?? []) > 1): ?>
+                        <select class="event-selector" onchange="window.location.href='/sponsor/empresas/' + this.value">
+                            <?php foreach ($events as $evt): ?>
+                            <option value="<?= $evt['id'] ?>" <?= $evt['id'] == $event['id'] ? 'selected' : '' ?>>
+                                <?= htmlspecialchars($evt['name']) ?>
+                            </option>
+                            <?php endforeach; ?>
+                        </select>
+                        <?php else: ?>
                         <p><?= htmlspecialchars($event['name']) ?></p>
+                        <?php endif; ?>
                     </div>
                     <div class="selection-counter">
                         <span class="counter-value"><?= $currentSelections ?? 0 ?> / <?= $maxSelections ?? 10 ?></span>
@@ -662,7 +690,7 @@
                     headers: {
                         'Content-Type': 'application/x-www-form-urlencoded',
                     },
-                    body: `company_id=${companyId}&event_id=${eventId}&_csrf_token=<?= htmlspecialchars($_SESSION['csrf_token'] ?? '') ?>`
+                    body: `company_id=${companyId}&event_id=${eventId}&_csrf_token=<?= htmlspecialchars($csrf_token ?? '') ?>`
                 })
                 .then(res => res.json())
                 .then(data => {
@@ -688,7 +716,7 @@
                     headers: {
                         'Content-Type': 'application/x-www-form-urlencoded',
                     },
-                    body: `company_id=${companyId}&event_id=${eventId}&_csrf_token=<?= htmlspecialchars($_SESSION['csrf_token'] ?? '') ?>`
+                    body: `company_id=${companyId}&event_id=${eventId}&_csrf_token=<?= htmlspecialchars($csrf_token ?? '') ?>`
                 })
                 .then(res => res.json())
                 .then(data => {

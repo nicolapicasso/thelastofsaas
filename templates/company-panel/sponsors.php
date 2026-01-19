@@ -224,6 +224,24 @@
             letter-spacing: 0.05em;
         }
 
+        .event-selector {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            color: var(--text-light);
+            font-family: var(--font-mono);
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            margin-top: 0.5rem;
+        }
+
+        .event-selector:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+
         .counter-box {
             background: var(--bg-card);
             border: 1px solid var(--border-color);
@@ -393,7 +411,18 @@
         <!-- Main Content -->
         <main class="panel-main">
             <div class="page-header">
-                <h1>SAAS DISPONIBLES</h1>
+                <div>
+                    <h1>SAAS DISPONIBLES</h1>
+                    <?php if (count($events ?? []) > 1): ?>
+                    <select class="event-selector" onchange="window.location.href='/empresa/sponsors/' + this.value">
+                        <?php foreach ($events as $evt): ?>
+                        <option value="<?= $evt['id'] ?>" <?= $evt['id'] == $event['id'] ? 'selected' : '' ?>>
+                            <?= htmlspecialchars($evt['name']) ?>
+                        </option>
+                        <?php endforeach; ?>
+                    </select>
+                    <?php endif; ?>
+                </div>
                 <div class="counter-box">
                     <div class="number"><?= count($selections ?? []) ?> / <?= $maxSelections ?? 10 ?></div>
                     <div class="label">SELECCIONADOS</div>

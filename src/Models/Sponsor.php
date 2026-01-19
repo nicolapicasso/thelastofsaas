@@ -132,11 +132,11 @@ class Sponsor extends Model
      */
     public function getSelectedCompanies(int $sponsorId, int $eventId): array
     {
-        $sql = "SELECT c.*, ss.created_at, ss.priority
+        $sql = "SELECT c.*, ss.selected_at, ss.priority
                 FROM companies c
                 INNER JOIN sponsor_selections ss ON c.id = ss.company_id
                 WHERE ss.sponsor_id = ? AND ss.event_id = ? AND c.active = 1
-                ORDER BY ss.priority DESC, ss.created_at ASC";
+                ORDER BY ss.priority DESC, ss.selected_at ASC";
 
         return $this->db->fetchAll($sql, [$sponsorId, $eventId]);
     }
@@ -146,11 +146,11 @@ class Sponsor extends Model
      */
     public function getInterestedCompanies(int $sponsorId, int $eventId): array
     {
-        $sql = "SELECT c.*, cs.created_at
+        $sql = "SELECT c.*, cs.selected_at
                 FROM companies c
                 INNER JOIN company_selections cs ON c.id = cs.company_id
                 WHERE cs.sponsor_id = ? AND cs.event_id = ? AND c.active = 1
-                ORDER BY cs.created_at ASC";
+                ORDER BY cs.selected_at ASC";
 
         return $this->db->fetchAll($sql, [$sponsorId, $eventId]);
     }
@@ -161,13 +161,13 @@ class Sponsor extends Model
     public function getMutualMatches(int $sponsorId, int $eventId): array
     {
         $sql = "SELECT c.*,
-                       ss.created_at as sponsor_selected_at,
-                       cs.created_at as company_selected_at
+                       ss.selected_at as sponsor_selected_at,
+                       cs.selected_at as company_selected_at
                 FROM companies c
                 INNER JOIN sponsor_selections ss ON c.id = ss.company_id
                 INNER JOIN company_selections cs ON c.id = cs.company_id AND cs.sponsor_id = ss.sponsor_id AND cs.event_id = ss.event_id
                 WHERE ss.sponsor_id = ? AND ss.event_id = ? AND c.active = 1
-                ORDER BY ss.created_at ASC";
+                ORDER BY ss.selected_at ASC";
 
         return $this->db->fetchAll($sql, [$sponsorId, $eventId]);
     }
@@ -208,11 +208,11 @@ class Sponsor extends Model
      */
     public function getSelections(int $sponsorId, int $eventId): array
     {
-        $sql = "SELECT c.*, ss.created_at, ss.priority, c.id as company_id
+        $sql = "SELECT c.*, ss.selected_at, ss.priority, c.id as company_id
                 FROM companies c
                 INNER JOIN sponsor_selections ss ON c.id = ss.company_id
                 WHERE ss.sponsor_id = ? AND ss.event_id = ? AND c.active = 1
-                ORDER BY ss.priority DESC, ss.created_at ASC";
+                ORDER BY ss.priority DESC, ss.selected_at ASC";
 
         return $this->db->fetchAll($sql, [$sponsorId, $eventId]);
     }

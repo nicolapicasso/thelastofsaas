@@ -178,6 +178,9 @@ class CompanyPanelController extends Controller
             return;
         }
 
+        // Get all events for this company (for event selector)
+        $events = $this->companyModel->getEvents($company['id']);
+
         // Get all sponsors for this event
         $sponsors = $this->eventModel->getSponsors($event['id']);
 
@@ -238,6 +241,7 @@ class CompanyPanelController extends Controller
         $this->render('company-panel/sponsors', [
             'company' => $company,
             'event' => $event,
+            'events' => $events,
             'sponsors' => $filteredSponsors,
             'selections' => $selections,
             'selectedIds' => $selectedIds,
