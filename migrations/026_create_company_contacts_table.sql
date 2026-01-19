@@ -2,8 +2,8 @@
 -- TLOS - The Last of SaaS
 
 CREATE TABLE IF NOT EXISTS `company_contacts` (
-    `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
-    `company_id` INT UNSIGNED NOT NULL,
+    `id` INT NOT NULL AUTO_INCREMENT,
+    `company_id` INT NOT NULL,
     `name` VARCHAR(255) NOT NULL,
     `position` VARCHAR(255) NULL COMMENT 'Job title/position',
     `email` VARCHAR(255) NULL,
