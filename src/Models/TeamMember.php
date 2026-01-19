@@ -22,6 +22,7 @@ class TeamMember extends Model
         'company',
         'bio',
         'photo',
+        'photo_animated',
         'email',
         'phone',
         'linkedin_url',
