@@ -284,19 +284,35 @@ class CompaniesController extends Controller
         $firstLine = $lines[0];
         $delimiter = $this->detectDelimiter($firstLine);
 
-        $headers = str_getcsv($firstLine, $delimiter);
+        $headers = str_getcsv($firstLine, $delimiter, '"', '');
         $headers = array_map('trim', $headers);
         $headers = array_map('strtolower', $headers);
+        $headerCount = count($headers);
+
+        // Pre-load all sponsors for SaaS matching (by name, case-insensitive)
+        $allSponsors = $this->sponsorModel->all();
+        $sponsorsByName = [];
+        foreach ($allSponsors as $sponsor) {
+            $normalizedName = mb_strtolower(trim($sponsor['name']));
+            $sponsorsByName[$normalizedName] = $sponsor['id'];
+        }
 
         $imported = 0;
+        $saasLinked = 0;
         $errors = [];
 
         for ($i = 1; $i < count($lines); $i++) {
             $line = trim($lines[$i]);
             if (empty($line)) continue;
 
-            $row = str_getcsv($line, $delimiter);
-            if (count($row) !== count($headers)) continue;
+            $row = str_getcsv($line, $delimiter, '"', '');
+
+            // Ensure row has same number of elements as headers
+            if (count($row) < $headerCount) {
+                $row = array_pad($row, $headerCount, '');
+            } elseif (count($row) > $headerCount) {
+                $row = array_slice($row, 0, $headerCount);
+            }
 
             $data = array_combine($headers, $row);
 
@@ -322,14 +338,34 @@ class CompaniesController extends Controller
                     'active' => 1,
                 ];
 
-                $this->companyModel->create($companyData);
+                $companyId = $this->companyModel->create($companyData);
                 $imported++;
+
+                // Process SaaS usage if column exists
+                $saasField = $data['saas'] ?? $data['saas_usage'] ?? $data['saas que utiliza'] ?? $data['herramientas'] ?? null;
+                if (!empty($saasField)) {
+                    // Split by comma and try to match each SaaS
+                    $saasNames = array_map('trim', explode(',', $saasField));
+                    foreach ($saasNames as $saasName) {
+                        if (empty($saasName)) continue;
+                        $normalizedSaas = mb_strtolower(trim($saasName));
+
+                        // Try to find matching sponsor
+                        if (isset($sponsorsByName[$normalizedSaas])) {
+                            $this->companyModel->addSaasUsage($companyId, $sponsorsByName[$normalizedSaas]);
+                            $saasLinked++;
+                        }
+                    }
+                }
             } catch (\Exception $e) {
                 $errors[] = "Línea {$i}: " . $e->getMessage();
             }
         }
 
         $message = "Importadas {$imported} empresas.";
+        if ($saasLinked > 0) {
+            $message .= " {$saasLinked} relaciones SaaS creadas.";
+        }
         if (!empty($errors)) {
             $message .= " Errores: " . count($errors);
         }
