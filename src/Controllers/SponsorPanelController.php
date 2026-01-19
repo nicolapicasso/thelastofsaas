@@ -557,8 +557,9 @@ class SponsorPanelController extends Controller
             return;
         }
 
-        // Check if messaging is enabled
-        if (!$this->settingModel->get('allow_sponsor_messages', true)) {
+        // Check if messaging is enabled (default to true if setting doesn't exist)
+        $messagingEnabled = $this->settingModel->get('allow_sponsor_messages', '1');
+        if ($messagingEnabled === '0' || $messagingEnabled === false) {
             $this->redirect('/sponsor/panel');
             return;
         }
@@ -605,8 +606,9 @@ class SponsorPanelController extends Controller
             return;
         }
 
-        // Check if messaging is enabled
-        if (!$this->settingModel->get('allow_sponsor_messages', true)) {
+        // Check if messaging is enabled (default to true if setting doesn't exist)
+        $messagingEnabled = $this->settingModel->get('allow_sponsor_messages', '1');
+        if ($messagingEnabled === '0' || $messagingEnabled === false) {
             $this->redirect('/sponsor/panel');
             return;
         }
