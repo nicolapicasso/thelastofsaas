@@ -9,7 +9,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ver Sponsors - <?= htmlspecialchars($event['name'] ?? '') ?></title>
+    <title>Ver SaaS - <?= htmlspecialchars($event['name'] ?? '') ?></title>
 
     <!-- Fonts - TLOS Brand -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -351,7 +351,7 @@
                     <i class="fas fa-home"></i> Dashboard
                 </a>
                 <a href="/empresa/sponsors/<?= $event['id'] ?>" class="nav-item active">
-                    <i class="fas fa-rocket"></i> Ver Sponsors
+                    <i class="fas fa-rocket"></i> Ver SaaS
                 </a>
                 <a href="/empresa/matches/<?= $event['id'] ?>" class="nav-item">
                     <i class="fas fa-heart"></i> Mis Matches
@@ -368,7 +368,7 @@
         <!-- Main Content -->
         <main class="panel-main">
             <div class="page-header">
-                <h1>SPONSORS DISPONIBLES</h1>
+                <h1>SAAS DISPONIBLES</h1>
                 <div class="counter-box">
                     <div class="number"><?= count($selections ?? []) ?> / <?= $maxSelections ?? 10 ?></div>
                     <div class="label">SELECCIONADOS</div>
@@ -378,8 +378,8 @@
             <?php if (empty($sponsors)): ?>
                 <div class="empty-state">
                     <i class="fas fa-rocket"></i>
-                    <h2>NO HAY SPONSORS DISPONIBLES</h2>
-                    <p>Actualmente no hay sponsors participando en este evento.</p>
+                    <h2>NO HAY SAAS DISPONIBLES</h2>
+                    <p>Actualmente no hay SaaS participando en este evento.</p>
                 </div>
             <?php else: ?>
                 <div class="sponsors-grid">
@@ -430,43 +430,67 @@
 
     <script>
     document.querySelectorAll('.btn-select').forEach(btn => {
-        btn.addEventListener('click', function() {
+        btn.addEventListener('click', async function() {
             const sponsorId = this.dataset.sponsor;
-            fetch('/empresa/seleccionar', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                body: `sponsor_id=${sponsorId}&event_id=<?= $event['id'] ?>&_csrf_token=<?= htmlspecialchars($csrf_token ?? '') ?>`
-            })
-            .then(r => r.json())
-            .then(data => {
-                if (data.success) location.reload();
-                else alert(data.error || 'Error al seleccionar: ' + (data.error || 'Error desconocido'));
-            })
-            .catch(err => {
+            try {
+                const response = await fetch('/empresa/seleccionar', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: `sponsor_id=${sponsorId}&event_id=<?= $event['id'] ?>&_csrf_token=<?= htmlspecialchars($csrf_token ?? '') ?>`
+                });
+
+                const text = await response.text();
+                let data;
+                try {
+                    data = JSON.parse(text);
+                } catch (e) {
+                    console.error('Response not JSON:', text);
+                    alert('Error del servidor. Revisa la consola para mas detalles.');
+                    return;
+                }
+
+                if (data.success) {
+                    location.reload();
+                } else {
+                    alert(data.error || 'Error al seleccionar');
+                }
+            } catch (err) {
                 console.error('Error:', err);
                 alert('Error de conexion');
-            });
+            }
         });
     });
 
     document.querySelectorAll('.btn-unselect').forEach(btn => {
-        btn.addEventListener('click', function() {
+        btn.addEventListener('click', async function() {
             if (!confirm('Quitar seleccion?')) return;
             const sponsorId = this.dataset.sponsor;
-            fetch('/empresa/deseleccionar', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                body: `sponsor_id=${sponsorId}&event_id=<?= $event['id'] ?>&_csrf_token=<?= htmlspecialchars($csrf_token ?? '') ?>`
-            })
-            .then(r => r.json())
-            .then(data => {
-                if (data.success) location.reload();
-                else alert(data.error || 'Error al quitar seleccion');
-            })
-            .catch(err => {
+            try {
+                const response = await fetch('/empresa/deseleccionar', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: `sponsor_id=${sponsorId}&event_id=<?= $event['id'] ?>&_csrf_token=<?= htmlspecialchars($csrf_token ?? '') ?>`
+                });
+
+                const text = await response.text();
+                let data;
+                try {
+                    data = JSON.parse(text);
+                } catch (e) {
+                    console.error('Response not JSON:', text);
+                    alert('Error del servidor. Revisa la consola para mas detalles.');
+                    return;
+                }
+
+                if (data.success) {
+                    location.reload();
+                } else {
+                    alert(data.error || 'Error al quitar seleccion');
+                }
+            } catch (err) {
                 console.error('Error:', err);
                 alert('Error de conexion');
-            });
+            }
         });
     });
     </script>

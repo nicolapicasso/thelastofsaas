@@ -87,6 +87,7 @@ class CompanyPanelController extends Controller
 
         $this->render('company-panel/login', [
             'error' => $error,
+            'csrf_token' => $this->generateCsrf(),
             'meta_title' => 'Acceso Empresas - The Last of SaaS'
         ]);
     }

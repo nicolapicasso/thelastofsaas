@@ -506,7 +506,7 @@
                 </a>
                 <?php if ($currentEvent): ?>
                 <a href="/empresa/sponsors/<?= $currentEvent['id'] ?>" class="nav-item">
-                    <i class="fas fa-rocket"></i> Ver Sponsors
+                    <i class="fas fa-rocket"></i> Ver SaaS
                 </a>
                 <a href="/empresa/matches/<?= $currentEvent['id'] ?>" class="nav-item">
                     <i class="fas fa-heart"></i> Mis Matches
@@ -548,7 +548,7 @@
                         </div>
                         <div class="stat-info">
                             <span class="stat-value"><?= $stats['total_selections'] ?? 0 ?> / <?= $stats['max_selections'] ?? 5 ?></span>
-                            <span class="stat-label">SPONSORS SELECCIONADOS</span>
+                            <span class="stat-label">SAAS SELECCIONADOS</span>
                         </div>
                     </div>
                     <div class="stat-card">
@@ -638,7 +638,7 @@
                 <!-- CTA -->
                 <section class="panel-cta">
                     <a href="/empresa/sponsors/<?= $currentEvent['id'] ?>" class="btn btn-primary btn-lg">
-                        <i class="fas fa-search"></i> EXPLORAR SPONSORS
+                        <i class="fas fa-search"></i> EXPLORAR SAAS
                     </a>
                 </section>
             <?php endif; ?>

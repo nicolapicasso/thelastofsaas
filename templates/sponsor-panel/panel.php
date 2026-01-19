@@ -612,7 +612,7 @@
                                     </div>
                                 <?php endif; ?>
                                 <div class="match-info">
-                                    <strong><?= htmlspecialchars($match['company_name']) ?></strong>
+                                    <strong><?= htmlspecialchars($match['company_name'] ?? '') ?></strong>
                                     <small><?= htmlspecialchars($match['company_sector'] ?? 'SIN SECTOR') ?></small>
                                 </div>
                             </div>

@@ -457,7 +457,7 @@
                     <i class="fas fa-home"></i> Dashboard
                 </a>
                 <a href="/empresa/sponsors/<?= $event['id'] ?>" class="nav-item">
-                    <i class="fas fa-rocket"></i> Ver Sponsors
+                    <i class="fas fa-rocket"></i> Ver SaaS
                 </a>
                 <a href="/empresa/matches/<?= $event['id'] ?>" class="nav-item active">
                     <i class="fas fa-heart"></i> Mis Matches
@@ -485,9 +485,9 @@
                 <div class="empty-state">
                     <i class="fas fa-heart-broken"></i>
                     <h2>AUN NO TIENES MATCHES</h2>
-                    <p>Cuando un sponsor que has seleccionado tambien te seleccione, aparecera aqui como match mutuo.</p>
+                    <p>Cuando un SaaS que has seleccionado tambien te seleccione, aparecera aqui como match mutuo.</p>
                     <a href="/empresa/sponsors/<?= $event['id'] ?>" class="btn btn-primary">
-                        <i class="fas fa-search"></i> EXPLORAR SPONSORS
+                        <i class="fas fa-search"></i> EXPLORAR SAAS
                     </a>
                 </div>
             <?php else: ?>
