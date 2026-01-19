@@ -624,6 +624,10 @@
                             <p>ESTE SAAS TAMBIEN TE HA SELECCIONADO. OS PONDREMOS EN CONTACTO PRONTO.</p>
                         </div>
                     <?php endif; ?>
+
+                    <a href="/empresa/mensajes/<?= $event['id'] ?>/<?= $sponsor['id'] ?>" class="btn btn-outline btn-lg" style="margin-top: 1rem;">
+                        <i class="fas fa-envelope"></i> ENVIAR MENSAJE
+                    </a>
                 </div>
             </div>
         </main>

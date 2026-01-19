@@ -601,6 +601,10 @@
                             <p>ESTA EMPRESA TAMBIEN TE HA SELECCIONADO. OS PONDREMOS EN CONTACTO PRONTO.</p>
                         </div>
                     <?php endif; ?>
+
+                    <a href="/sponsor/mensajes/<?= $event['id'] ?>/<?= $company['id'] ?>" class="btn btn-outline btn-lg" style="margin-top: 1rem;">
+                        <i class="fas fa-envelope"></i> ENVIAR MENSAJE
+                    </a>
                 </div>
             </div>
         </main>
