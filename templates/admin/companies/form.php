@@ -65,9 +65,15 @@ $isEdit = isset($company) && $company;
             <div class="card">
                 <div class="card-header"><h3>Contacto</h3></div>
                 <div class="card-body">
-                    <div class="form-group">
-                        <label for="contact_name">Nombre de Contacto</label>
-                        <input type="text" id="contact_name" name="contact_name" class="form-control" value="<?= htmlspecialchars($company['contact_name'] ?? '') ?>">
+                    <div class="form-row">
+                        <div class="form-group" style="flex: 2;">
+                            <label for="contact_name">Nombre de Contacto</label>
+                            <input type="text" id="contact_name" name="contact_name" class="form-control" value="<?= htmlspecialchars($company['contact_name'] ?? '') ?>">
+                        </div>
+                        <div class="form-group" style="flex: 1;">
+                            <label for="contact_position">Cargo</label>
+                            <input type="text" id="contact_position" name="contact_position" class="form-control" value="<?= htmlspecialchars($company['contact_position'] ?? '') ?>" placeholder="Ej: CEO, CTO, Director...">
+                        </div>
                     </div>
                     <div class="form-row">
                         <div class="form-group">

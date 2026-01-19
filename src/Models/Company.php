@@ -23,6 +23,7 @@ class Company extends Model
         'sector',
         'employees',
         'contact_name',
+        'contact_position',
         'contact_email',
         'contact_phone',
         'code',

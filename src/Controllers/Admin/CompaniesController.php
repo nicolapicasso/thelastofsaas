@@ -473,6 +473,7 @@ class CompaniesController extends Controller
         $sector = Sanitizer::string($this->getPost('sector'));
         $employees = $this->getPost('employees');
         $contactName = Sanitizer::string($this->getPost('contact_name'));
+        $contactPosition = Sanitizer::string($this->getPost('contact_position'));
         $contactEmail = Sanitizer::string($this->getPost('contact_email'));
         $contactPhone = Sanitizer::string($this->getPost('contact_phone'));
         $notes = $this->getPost('notes');
@@ -508,6 +509,7 @@ class CompaniesController extends Controller
             'sector' => $sector ?: null,
             'employees' => $employees ?: null,
             'contact_name' => $contactName ?: null,
+            'contact_position' => $contactPosition ?: null,
             'contact_email' => $contactEmail ?: null,
             'contact_phone' => $contactPhone ?: null,
             'notes' => $notes ?: null,
