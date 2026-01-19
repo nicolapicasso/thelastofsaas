@@ -440,9 +440,13 @@ class CompanyPanelController extends Controller
         // Get scheduled meetings
         $meetings = $this->companyModel->getScheduledMeetings($company['id'], $event['id']);
 
+        // Get all events for event selector
+        $events = $this->companyModel->getEvents($company['id']);
+
         $this->render('company-panel/matches', [
             'company' => $company,
             'event' => $event,
+            'events' => $events,
             'matches' => $matches,
             'meetings' => $meetings,
             'meta_title' => 'Tus Matches - ' . $event['name']

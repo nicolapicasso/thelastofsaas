@@ -490,6 +490,9 @@
                         <span class="nav-badge"><?= count($matches) ?></span>
                     <?php endif; ?>
                 </a>
+                <a href="/empresa/mensajes/<?= $event['id'] ?>" class="nav-item">
+                    <i class="fas fa-envelope"></i> Mensajes
+                </a>
             </nav>
 
             <div class="sidebar-footer">
@@ -503,7 +506,17 @@
         <main class="panel-main">
             <header class="panel-header">
                 <h1><i class="fas fa-heart"></i> TUS MATCHES</h1>
+                <?php if (count($events ?? []) > 1): ?>
+                <select class="event-selector" onchange="window.location.href='/empresa/matches/' + this.value" style="background: #0a0a0a; border: 1px solid rgba(255,255,255,0.1); color: #fff; font-family: 'Roboto Mono', monospace; font-size: 12px; text-transform: uppercase; letter-spacing: 0.1em; padding: 0.5rem 1rem; cursor: pointer; margin-top: 0.5rem;">
+                    <?php foreach ($events as $evt): ?>
+                    <option value="<?= $evt['id'] ?>" <?= $evt['id'] == $event['id'] ? 'selected' : '' ?>>
+                        <?= htmlspecialchars($evt['name']) ?>
+                    </option>
+                    <?php endforeach; ?>
+                </select>
+                <?php else: ?>
                 <p><?= htmlspecialchars(strtoupper($event['name'])) ?></p>
+                <?php endif; ?>
             </header>
 
             <?php if (empty($matches ?? [])): ?>

@@ -557,6 +557,9 @@
                 <a href="/sponsor/invitados/<?= $event['id'] ?>" class="nav-item">
                     <i class="fas fa-users"></i> Mis Invitados
                 </a>
+                <a href="/sponsor/mensajes/<?= $event['id'] ?>" class="nav-item">
+                    <i class="fas fa-envelope"></i> Mensajes
+                </a>
             </nav>
 
             <div class="sidebar-footer">

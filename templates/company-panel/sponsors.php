@@ -399,6 +399,9 @@
                 <a href="/empresa/matches/<?= $event['id'] ?>" class="nav-item">
                     <i class="fas fa-heart"></i> Mis Matches
                 </a>
+                <a href="/empresa/mensajes/<?= $event['id'] ?>" class="nav-item">
+                    <i class="fas fa-envelope"></i> Mensajes
+                </a>
             </nav>
 
             <div class="sidebar-footer">

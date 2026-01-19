@@ -430,9 +430,13 @@ class SponsorPanelController extends Controller
         // Get scheduled meetings
         $meetings = $this->sponsorModel->getScheduledMeetings($sponsor['id'], $event['id']);
 
+        // Get all events for event selector
+        $events = $this->sponsorModel->getEvents($sponsor['id']);
+
         $this->render('sponsor-panel/matches', [
             'sponsor' => $sponsor,
             'event' => $event,
+            'events' => $events,
             'matches' => $matches,
             'meetings' => $meetings,
             'meta_title' => 'Tus Matches - ' . $event['name']
@@ -470,9 +474,13 @@ class SponsorPanelController extends Controller
         // Get overall stats
         $overallStats = $this->inviteCodeModel->getSponsorStats($sponsor['id'], (int) $eventId);
 
+        // Get all events for event selector
+        $events = $this->sponsorModel->getEvents($sponsor['id']);
+
         $this->render('sponsor-panel/invite-codes', [
             'sponsor' => $sponsor,
             'event' => $event,
+            'events' => $events,
             'codes' => $codes,
             'overallStats' => $overallStats,
             'meta_title' => 'Mis Codigos de Invitacion - ' . $event['name']
@@ -517,9 +525,13 @@ class SponsorPanelController extends Controller
             return strtotime($b['created_at']) - strtotime($a['created_at']);
         });
 
+        // Get all events for event selector
+        $events = $this->sponsorModel->getEvents($sponsor['id']);
+
         $this->render('sponsor-panel/invited-guests', [
             'sponsor' => $sponsor,
             'event' => $event,
+            'events' => $events,
             'tickets' => $allTickets,
             'meta_title' => 'Mis Invitados - ' . $event['name']
         ]);
