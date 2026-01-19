@@ -234,9 +234,10 @@ class SponsorsController extends Controller
         $firstLine = $lines[0];
         $delimiter = $this->detectDelimiter($firstLine);
 
-        $headers = str_getcsv($firstLine, $delimiter);
+        $headers = str_getcsv($firstLine, $delimiter, '"', '');
         $headers = array_map('trim', $headers);
         $headers = array_map('strtolower', $headers);
+        $headerCount = count($headers);
 
         $imported = 0;
         $errors = [];
@@ -245,7 +246,15 @@ class SponsorsController extends Controller
             $line = trim($lines[$i]);
             if (empty($line)) continue;
 
-            $row = str_getcsv($line, $delimiter);
+            $row = str_getcsv($line, $delimiter, '"', '');
+
+            // Ensure row has same number of elements as headers
+            if (count($row) < $headerCount) {
+                $row = array_pad($row, $headerCount, '');
+            } elseif (count($row) > $headerCount) {
+                $row = array_slice($row, 0, $headerCount);
+            }
+
             $data = array_combine($headers, $row);
 
             if (empty($data['name'])) {
