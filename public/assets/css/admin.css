@@ -930,7 +930,7 @@ code {
 
 .page-header-actions {
     display: flex;
-    gap: var(--spacing-sm);
+    gap: 12px;
 }
 
 /* Card Component */
