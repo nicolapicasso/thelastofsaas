@@ -119,7 +119,7 @@ class RoomsController extends Controller
     {
         $this->requireAuth();
 
-        $room = $this->roomModel->find($id);
+        $room = $this->roomModel->find((int) $id);
 
         if (!$room) {
             $this->flash('error', 'Sala no encontrada.');
@@ -148,7 +148,7 @@ class RoomsController extends Controller
             return;
         }
 
-        $room = $this->roomModel->find($id);
+        $room = $this->roomModel->find((int) $id);
 
         if (!$room) {
             $this->flash('error', 'Sala no encontrada.');
@@ -201,7 +201,7 @@ class RoomsController extends Controller
             return;
         }
 
-        $room = $this->roomModel->find($id);
+        $room = $this->roomModel->find((int) $id);
 
         if (!$room) {
             $this->flash('error', 'Sala no encontrada.');

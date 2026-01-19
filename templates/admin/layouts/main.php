@@ -1,10 +1,16 @@
+<?php
+// Load site settings for admin layout
+$_settingModel = new \App\Models\Setting();
+$_siteName = $_settingModel->get('site_name', 'The Last of SaaS');
+$_siteLogo = $_settingModel->get('logo_header', '');
+?>
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="robots" content="noindex, nofollow">
-    <title><?= htmlspecialchars($title ?? 'Admin') ?> - The Last of SaaS</title>
+    <title><?= htmlspecialchars($title ?? 'Admin') ?> - <?= htmlspecialchars($_siteName) ?></title>
     <meta name="csrf-token" content="<?= $_csrf_token ?? '' ?>">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link rel="stylesheet" href="/assets/css/admin.css">
@@ -18,10 +24,14 @@
         <aside class="admin-sidebar">
             <div class="sidebar-header">
                 <a href="/admin" class="sidebar-logo">
-                    <span class="logo-text">Conectoma</span>
+                    <?php if (!empty($_siteLogo)): ?>
+                        <img src="<?= htmlspecialchars($_siteLogo) ?>" alt="<?= htmlspecialchars($_siteName) ?>" class="logo-img" style="max-height: 32px;">
+                    <?php else: ?>
+                        <span class="logo-text">Conectoma</span>
+                    <?php endif; ?>
                     <span class="logo-badge">CMS</span>
                 </a>
-                <div class="sidebar-site-name">The Last of SaaS</div>
+                <div class="sidebar-site-name"><?= htmlspecialchars($_siteName) ?></div>
             </div>
 
             <nav class="sidebar-nav">

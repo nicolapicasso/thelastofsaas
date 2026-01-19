@@ -46,7 +46,9 @@ class MediaController extends Controller
             echo json_encode([
                 'success' => true,
                 'media' => array_map(function($item) {
-                    $item['formatted_size'] = Media::formatSize($item['filesize'] ?? 0);
+                    $item['url'] = '/uploads/' . ($item['filepath'] ?? '');
+                    $item['mime_type'] = $item['filetype'] ?? '';
+                    $item['formatted_size'] = Media::formatSize((int) ($item['filesize'] ?? 0));
                     return $item;
                 }, $result['items']),
                 'pagination' => [
@@ -160,7 +162,11 @@ class MediaController extends Controller
             return;
         }
 
-        $media['formatted_size'] = Media::formatSize($media['filesize'] ?? 0);
+        // Add computed fields for frontend compatibility
+        $media['url'] = '/uploads/' . ($media['filepath'] ?? '');
+        $media['mime_type'] = $media['filetype'] ?? '';
+        $media['file_size'] = $media['filesize'] ?? 0;
+        $media['formatted_size'] = Media::formatSize((int) ($media['filesize'] ?? 0));
 
         echo json_encode(['success' => true, 'media' => $media]);
     }
@@ -196,7 +202,9 @@ class MediaController extends Controller
         echo json_encode([
             'success' => true,
             'items' => array_map(function($item) {
-                $item['formatted_size'] = Media::formatSize($item['filesize'] ?? 0);
+                $item['url'] = '/uploads/' . ($item['filepath'] ?? '');
+                $item['mime_type'] = $item['filetype'] ?? '';
+                $item['formatted_size'] = Media::formatSize((int) ($item['filesize'] ?? 0));
                 return $item;
             }, $result['items']),
             'pagination' => [

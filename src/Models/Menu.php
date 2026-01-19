@@ -19,7 +19,6 @@ class Menu extends Model
         'slug',
         'location',
         'description',
-        'is_active',
     ];
 
     /**
@@ -64,7 +63,7 @@ class Menu extends Model
      */
     public function getByLocation(string $location): ?array
     {
-        return $this->first(['location' => $location, 'is_active' => 1]);
+        return $this->first(['location' => $location]);
     }
 
     /**
