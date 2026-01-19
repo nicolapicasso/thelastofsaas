@@ -22,68 +22,44 @@
     <!-- Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
-    <!-- TLOS Brand Styles -->
     <style>
         /* ============================================
-           THE LAST OF SAAS - Brand Stylesheet
+           THE LAST OF SAAS - Event Page Styles
+           Black/White Alternating Design
            ============================================ */
 
         :root {
-            /* Colors */
             --bg-dark: #000000;
-            --bg-navy: #030925;
+            --bg-light: #FFFFFF;
             --text-light: #FFFFFF;
             --text-dark: #000000;
             --text-grey: #86868B;
-            --accent-dot: #222222;
-
-            /* Semantic */
-            --primary-color: #000000;
-            --primary-hover: #030925;
-            --success-color: #10B981;
-            --error-color: #EF4444;
-            --warning-color: #F59E0B;
-            --border-color: rgba(255, 255, 255, 0.1);
-
-            /* Typography */
+            --text-grey-dark: #555555;
+            --border-light: rgba(255, 255, 255, 0.1);
+            --border-dark: rgba(0, 0, 0, 0.1);
             --font-heading: 'Montserrat', sans-serif;
             --font-accent: 'Prompt', sans-serif;
             --font-display: 'Big Shoulders Text', sans-serif;
             --font-mono: 'Roboto Mono', monospace;
             --font-body: 'Montserrat', sans-serif;
-
-            /* Transitions */
-            --transition-standard: all 0.3s ease-in-out;
-
-            /* Spacing */
-            --section-padding: 100px;
-            --container-max: 1200px;
+            --transition: all 0.3s ease-in-out;
         }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        html {
-            scroll-behavior: smooth;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
 
         body {
             font-family: var(--font-body);
-            color: var(--text-light);
             line-height: 1.6;
-            background: var(--bg-dark);
             -webkit-font-smoothing: antialiased;
         }
 
-        /* Container */
-        .container {
+        /* Container - Full width with padding */
+        .container-wide {
             width: 100%;
-            max-width: var(--container-max);
+            max-width: 1400px;
             margin: 0 auto;
-            padding: 0 2rem;
+            padding: 0 4rem;
         }
 
         /* Typography */
@@ -95,37 +71,7 @@
             line-height: 1.1;
         }
 
-        h1 {
-            font-size: clamp(50px, 10vw, 100px);
-        }
-
-        h2 {
-            font-size: clamp(36px, 6vw, 60px);
-        }
-
-        h3 {
-            font-size: clamp(24px, 4vw, 36px);
-        }
-
-        .text-accent {
-            font-family: var(--font-accent);
-        }
-
-        .text-display {
-            font-family: var(--font-display);
-        }
-
-        .text-mono {
-            font-family: var(--font-mono);
-            font-size: 14px;
-            color: var(--text-grey);
-        }
-
-        .text-grey {
-            color: var(--text-grey);
-        }
-
-        /* Buttons - TLOS Style */
+        /* Buttons - No border radius */
         .btn {
             display: inline-flex;
             align-items: center;
@@ -140,7 +86,8 @@
             text-decoration: none;
             border: 2px solid transparent;
             cursor: pointer;
-            transition: var(--transition-standard);
+            transition: var(--transition);
+            border-radius: 0;
         }
 
         .btn-primary {
@@ -153,34 +100,20 @@
             color: var(--text-light);
         }
 
-        .btn-outline {
-            background: transparent;
-            border: 2px solid var(--text-light);
-            color: var(--text-light);
-        }
-        .btn-outline:hover {
-            background: var(--text-light);
-            color: var(--bg-dark);
-        }
-
         .btn-dark {
             background: var(--bg-dark);
             color: var(--text-light);
             border-color: var(--bg-dark);
         }
         .btn-dark:hover {
-            background: var(--bg-navy);
-            border-color: var(--bg-navy);
+            background: transparent;
+            color: var(--bg-dark);
+            border-color: var(--bg-dark);
         }
 
         .btn-lg {
             padding: 1.25rem 3rem;
             font-size: 16px;
-        }
-
-        .btn-block {
-            display: flex;
-            width: 100%;
         }
 
         /* ============================================
@@ -192,13 +125,13 @@
             left: 0;
             right: 0;
             z-index: 1000;
-            background: rgba(0, 0, 0, 0.9);
+            background: rgba(0, 0, 0, 0.95);
             backdrop-filter: blur(10px);
             padding: 1.5rem 0;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            border-bottom: 1px solid var(--border-light);
         }
 
-        .site-header .container {
+        .site-header .container-wide {
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -207,16 +140,11 @@
         .site-header .logo {
             font-family: var(--font-heading);
             font-weight: 800;
-            font-size: 18px;
+            font-size: 16px;
             color: var(--text-light);
             text-decoration: none;
             text-transform: uppercase;
-            letter-spacing: 0.1em;
-        }
-
-        .site-header .logo img {
-            height: 40px;
-            filter: brightness(0) invert(1);
+            letter-spacing: 0.15em;
         }
 
         .site-header nav {
@@ -232,7 +160,7 @@
             text-decoration: none;
             text-transform: uppercase;
             letter-spacing: 0.15em;
-            transition: var(--transition-standard);
+            transition: var(--transition);
         }
 
         .site-header nav a:hover {
@@ -240,561 +168,277 @@
         }
 
         /* ============================================
-           HERO SECTION
+           SECTION A: Hero Minimal (White bg)
            ============================================ */
-        .event-hero {
-            min-height: 100vh;
-            display: grid;
-            place-items: center;
-            position: relative;
-            background-size: cover;
-            background-position: center;
-            padding-top: 80px;
+        .event-hero-minimal {
+            background: var(--bg-light);
+            color: var(--text-dark);
+            padding: 140px 0 80px;
         }
 
-        .event-hero__overlay {
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(180deg, rgba(0, 0, 0, 0.7) 0%, rgba(0, 0, 0, 0.9) 100%);
+        .event-hero-grid {
+            display: flex;
+            align-items: flex-start;
+            gap: 4rem;
         }
 
-        .event-hero__content {
-            position: relative;
-            z-index: 1;
+        .event-date-block {
+            background: var(--bg-dark);
+            color: var(--text-light);
+            padding: 2rem 2.5rem;
             text-align: center;
-            padding: 4rem 2rem;
+            flex-shrink: 0;
         }
 
-        .event-hero__date {
-            display: inline-block;
-            margin-bottom: 2rem;
-        }
-
-        .event-hero__date-inner {
-            background: var(--text-light);
-            color: var(--bg-dark);
-            padding: 1.5rem 2rem;
-            text-align: center;
-        }
-
-        .event-hero__date .day {
+        .event-date-block .day {
             display: block;
             font-family: var(--font-accent);
-            font-size: 64px;
+            font-size: 72px;
             font-weight: 700;
             line-height: 1;
         }
 
-        .event-hero__date .month {
+        .event-date-block .month {
             display: block;
             font-family: var(--font-heading);
-            font-size: 16px;
+            font-size: 18px;
             font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 0.2em;
+            margin-top: 0.25rem;
         }
 
-        .event-hero__date .year {
+        .event-date-block .year {
             display: block;
             font-family: var(--font-mono);
             font-size: 14px;
             color: var(--text-grey);
-            margin-top: 0.25rem;
+            margin-top: 0.5rem;
         }
 
-        .event-hero__info h1 {
+        .event-title-block {
+            flex: 1;
+        }
+
+        .event-title-block h1 {
+            font-size: clamp(40px, 6vw, 72px);
             margin-bottom: 1.5rem;
+            color: var(--text-dark);
         }
 
-        .event-hero__info .lead {
-            font-size: clamp(18px, 2vw, 24px);
-            color: var(--text-grey);
-            max-width: 600px;
-            margin: 0 auto 2rem;
-            font-weight: 400;
-        }
-
-        .event-hero__meta {
+        .event-meta-inline {
             display: flex;
-            justify-content: center;
             gap: 3rem;
-            margin-bottom: 3rem;
             font-family: var(--font-mono);
             font-size: 14px;
-            color: var(--text-grey);
+            color: var(--text-grey-dark);
         }
 
-        .event-hero__meta span {
+        .event-meta-inline span {
             display: flex;
             align-items: center;
             gap: 0.5rem;
         }
 
-        .event-hero__meta i {
-            color: var(--text-light);
+        .event-meta-inline i {
+            color: var(--text-dark);
         }
 
         /* ============================================
-           EVENT CONTENT
+           SECTION B: Intro (Black bg)
            ============================================ */
-        .event-content {
-            padding: var(--section-padding) 0;
+        .event-intro {
             background: var(--bg-dark);
+            color: var(--text-light);
+            padding: 80px 0;
         }
 
-        .event-layout {
-            display: grid;
-            grid-template-columns: 1fr 380px;
-            gap: 4rem;
+        .intro-text {
+            font-size: clamp(24px, 3vw, 36px);
+            line-height: 1.5;
+            font-weight: 400;
+            max-width: 1000px;
         }
 
-        .event-section {
-            margin-bottom: 4rem;
+        /* ============================================
+           SECTION C: CTA (Light version)
+           ============================================ */
+        .event-cta--light {
+            background: var(--bg-light);
+            color: var(--text-dark);
+            padding: 60px 0;
+            border-top: 1px solid var(--border-dark);
+            border-bottom: 1px solid var(--border-dark);
         }
 
-        .event-section h2 {
+        .cta-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .cta-info {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .cta-price {
+            font-family: var(--font-accent);
+            font-size: 32px;
+            font-weight: 700;
+        }
+
+        .cta-label {
+            font-family: var(--font-mono);
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            color: var(--text-grey-dark);
+        }
+
+        /* ============================================
+           SECTION D: Description (Black bg)
+           ============================================ */
+        .event-description {
+            background: var(--bg-dark);
+            color: var(--text-light);
+            padding: 100px 0;
+        }
+
+        .event-description h2 {
             font-size: clamp(28px, 4vw, 40px);
-            margin-bottom: 2rem;
+            margin-bottom: 3rem;
             position: relative;
             display: inline-block;
         }
 
-        .event-section h2::after {
+        .event-description h2::after {
             content: '';
             position: absolute;
-            bottom: -10px;
+            bottom: -15px;
             left: 0;
             width: 60px;
             height: 3px;
             background: var(--text-light);
         }
 
-        .prose {
+        .description-content {
+            font-size: 18px;
+            line-height: 1.9;
             color: var(--text-grey);
-            font-size: 16px;
-            line-height: 1.8;
+            max-width: 900px;
         }
 
-        .prose p {
+        .description-content p {
             margin-bottom: 1.5rem;
         }
 
-        /* Features List */
-        .features-list {
-            list-style: none;
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 1rem;
-        }
-
-        .features-list li {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            padding: 1.25rem 1.5rem;
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            transition: var(--transition-standard);
-        }
-
-        .features-list li:hover {
-            background: rgba(255, 255, 255, 0.05);
-            border-color: rgba(255, 255, 255, 0.2);
-        }
-
-        .features-list i {
+        .description-content strong {
             color: var(--text-light);
-            font-size: 1.25rem;
         }
 
-        .features-list span {
-            font-family: var(--font-mono);
-            font-size: 14px;
-            color: var(--text-grey);
+        /* ============================================
+           SECTION E: Companies (White bg)
+           ============================================ */
+        .event-companies {
+            background: var(--bg-light);
+            color: var(--text-dark);
+            padding: 100px 0;
         }
 
-        /* Sponsors */
-        .sponsors-level {
-            margin-bottom: 2.5rem;
+        .event-companies h2 {
+            font-size: clamp(28px, 4vw, 40px);
+            margin-bottom: 3rem;
+            position: relative;
+            display: inline-block;
         }
 
-        .sponsors-level h3 {
-            font-family: var(--font-mono);
-            font-size: 12px;
-            text-transform: uppercase;
-            letter-spacing: 0.2em;
-            color: var(--text-grey);
-            margin-bottom: 1rem;
+        .event-companies h2::after {
+            content: '';
+            position: absolute;
+            bottom: -15px;
+            left: 0;
+            width: 60px;
+            height: 3px;
+            background: var(--text-dark);
         }
 
-        .sponsors-grid {
-            display: flex;
-            flex-wrap: wrap;
+        .participants-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
             gap: 1rem;
         }
 
-        .sponsor-card {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            padding: 1.5rem;
+        .participant-card {
+            background: var(--bg-dark);
+            border: 1px solid var(--bg-dark);
+            padding: 1.5rem 2rem;
+            min-height: 80px;
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: var(--transition-standard);
+            transition: var(--transition);
+            text-decoration: none;
         }
 
-        .sponsor-card:hover {
-            background: rgba(255, 255, 255, 0.1);
-            border-color: rgba(255, 255, 255, 0.2);
+        .participant-card:hover {
+            background: transparent;
         }
 
-        .sponsors-level--platinum .sponsor-card {
-            min-width: 200px;
-            min-height: 100px;
-        }
-
-        .sponsors-level--gold .sponsor-card {
-            min-width: 160px;
-            min-height: 80px;
-        }
-
-        .sponsors-level--silver .sponsor-card,
-        .sponsors-level--bronze .sponsor-card {
-            min-width: 130px;
-            min-height: 70px;
-        }
-
-        .sponsor-card img {
+        .participant-card img {
             max-width: 100%;
-            max-height: 60px;
+            max-height: 50px;
             object-fit: contain;
             filter: brightness(0) invert(1);
-            opacity: 0.8;
-            transition: var(--transition-standard);
+            transition: var(--transition);
         }
 
-        .sponsor-card:hover img {
-            opacity: 1;
+        .participant-card:hover img {
+            filter: none;
         }
 
-        /* ============================================
-           SIDEBAR
-           ============================================ */
-        .event-sidebar {
-            position: sticky;
-            top: 120px;
-            height: fit-content;
-        }
-
-        .sidebar-card {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            padding: 2rem;
-            margin-bottom: 1.5rem;
-        }
-
-        .sidebar-card h3 {
-            font-size: 14px;
-            font-family: var(--font-mono);
-            text-transform: uppercase;
-            letter-spacing: 0.15em;
-            margin-bottom: 1.5rem;
-            padding-bottom: 1rem;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        /* Ticket Types */
-        .ticket-type {
-            padding: 1.25rem 0;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .ticket-type:last-of-type {
-            border-bottom: none;
-            margin-bottom: 1.5rem;
-        }
-
-        .ticket-type__info {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 0.5rem;
-        }
-
-        .ticket-type__info strong {
-            font-family: var(--font-heading);
-            font-weight: 600;
-            text-transform: uppercase;
-            font-size: 14px;
-        }
-
-        .ticket-type .price {
-            font-family: var(--font-accent);
-            font-weight: 700;
-            font-size: 20px;
-        }
-
-        .ticket-type__desc {
-            font-family: var(--font-mono);
-            font-size: 12px;
-            color: var(--text-grey);
-            margin: 0;
-        }
-
-        /* Info List */
-        .info-list {
-            list-style: none;
-        }
-
-        .info-list li {
-            display: flex;
-            gap: 1rem;
-            padding: 1rem 0;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .info-list li:last-child {
-            border-bottom: none;
-        }
-
-        .info-list i {
-            width: 20px;
-            text-align: center;
-            color: var(--text-light);
-            margin-top: 0.25rem;
-        }
-
-        .info-list strong {
-            display: block;
-            font-family: var(--font-mono);
-            font-size: 10px;
-            text-transform: uppercase;
-            letter-spacing: 0.15em;
-            color: var(--text-grey);
-            margin-bottom: 0.25rem;
-        }
-
-        .info-list span {
-            font-size: 14px;
-        }
-
-        /* Share Buttons */
-        .share-buttons {
-            display: flex;
-            gap: 0.75rem;
-        }
-
-        .share-btn {
-            width: 44px;
-            height: 44px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            color: var(--text-light);
-            text-decoration: none;
-            transition: var(--transition-standard);
-        }
-
-        .share-btn:hover {
-            background: var(--text-light);
-            color: var(--bg-dark);
-        }
-
-        /* ============================================
-           FOOTER
-           ============================================ */
-        .site-footer {
-            background: var(--bg-dark);
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-            padding: 4rem 0 2rem;
-            margin-top: 0;
-        }
-
-        .footer-content {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 2rem;
-        }
-
-        .footer-logo {
-            font-family: var(--font-heading);
-            font-weight: 800;
-            font-size: 16px;
-            color: var(--text-light);
-            text-decoration: none;
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-        }
-
-        .footer-logo img {
-            height: 30px;
-            filter: brightness(0) invert(1);
-        }
-
-        .footer-links {
-            display: flex;
-            gap: 2rem;
-        }
-
-        .footer-links a {
-            font-family: var(--font-mono);
-            font-size: 12px;
-            color: var(--text-grey);
-            text-decoration: none;
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-            transition: var(--transition-standard);
-        }
-
-        .footer-links a:hover {
-            color: var(--text-light);
-        }
-
-        .footer-bottom {
-            margin-top: 3rem;
-            padding-top: 2rem;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-            text-align: center;
-        }
-
-        .footer-bottom p {
-            font-family: var(--font-mono);
-            font-size: 12px;
-            color: var(--text-grey);
-        }
-
-        /* ============================================
-           UTILITIES
-           ============================================ */
-        .text-muted {
-            color: var(--text-grey);
-        }
-
-        .text-center {
-            text-align: center;
-        }
-
-        .uppercase {
-            text-transform: uppercase;
-        }
-
-        /* ============================================
-           RESPONSIVE
-           ============================================ */
-        @media (max-width: 992px) {
-            .event-layout {
-                grid-template-columns: 1fr;
-            }
-
-            .event-sidebar {
-                position: static;
-            }
-
-            .event-hero__content {
-                padding: 2rem 1rem;
-            }
-
-            .event-hero__meta {
-                flex-direction: column;
-                gap: 1rem;
-            }
-        }
-
-        @media (max-width: 768px) {
-            :root {
-                --section-padding: 60px;
-            }
-
-            .site-header nav {
-                display: none;
-            }
-
-            .event-hero__date .day {
-                font-size: 48px;
-            }
-
-            .footer-content {
-                flex-direction: column;
-                text-align: center;
-            }
-
-            .footer-links {
-                flex-wrap: wrap;
-                justify-content: center;
-            }
-        }
-
-        /* ============================================
-           SPEAKERS SECTION
-           ============================================ */
-        .speakers-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-            gap: 2rem;
-        }
-
-        .speaker-card {
-            text-align: center;
-        }
-
-        .speaker-photo {
-            width: 120px;
-            height: 120px;
-            margin: 0 auto 1rem;
-            border-radius: 0;
-            overflow: hidden;
-            border: 2px solid rgba(255, 255, 255, 0.2);
-        }
-
-        .speaker-photo img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .speaker-placeholder {
-            width: 100%;
-            height: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: rgba(255, 255, 255, 0.05);
-            color: var(--text-grey);
-            font-size: 2.5rem;
-        }
-
-        .speaker-info strong {
-            display: block;
-            font-size: 14px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            margin-bottom: 0.25rem;
-        }
-
-        .speaker-position,
-        .speaker-company {
-            display: block;
+        .participant-name {
             font-family: var(--font-mono);
             font-size: 11px;
-            color: var(--text-grey);
             text-transform: uppercase;
             letter-spacing: 0.1em;
+            color: var(--text-light);
+        }
+
+        .participant-card:hover .participant-name {
+            color: var(--text-dark);
         }
 
         /* ============================================
-           AGENDA SECTION
+           SECTION F: Agenda (Black bg)
            ============================================ */
-        .agenda-day {
-            margin-bottom: 3rem;
+        .event-agenda {
+            background: var(--bg-dark);
+            color: var(--text-light);
+            padding: 100px 0;
         }
 
-        .agenda-day:last-child {
-            margin-bottom: 0;
+        .event-agenda h2 {
+            font-size: clamp(28px, 4vw, 40px);
+            margin-bottom: 3rem;
+            position: relative;
+            display: inline-block;
+        }
+
+        .event-agenda h2::after {
+            content: '';
+            position: absolute;
+            bottom: -15px;
+            left: 0;
+            width: 60px;
+            height: 3px;
+            background: var(--text-light);
+        }
+
+        .agenda-day {
+            margin-bottom: 3rem;
         }
 
         .agenda-date {
@@ -807,13 +451,13 @@
             letter-spacing: 0.1em;
             color: var(--text-light);
             background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--border-light);
             padding: 0.75rem 1.5rem;
             margin-bottom: 1.5rem;
         }
 
         .agenda-timeline {
-            border-left: 2px solid rgba(255, 255, 255, 0.1);
+            border-left: 2px solid var(--border-light);
             padding-left: 2rem;
             margin-left: 1rem;
         }
@@ -843,10 +487,6 @@
             border-color: var(--text-light);
         }
 
-        .agenda-item:last-child {
-            border-bottom: none;
-        }
-
         .agenda-time {
             flex-shrink: 0;
             width: 60px;
@@ -867,9 +507,7 @@
             color: var(--text-grey);
         }
 
-        .agenda-content {
-            flex: 1;
-        }
+        .agenda-content { flex: 1; }
 
         .agenda-type {
             display: inline-block;
@@ -886,7 +524,6 @@
             font-size: 16px;
             font-weight: 700;
             text-transform: uppercase;
-            letter-spacing: 0.02em;
             margin-bottom: 0.5rem;
         }
 
@@ -915,7 +552,6 @@
         .agenda-speaker img {
             width: 24px;
             height: 24px;
-            border-radius: 0;
             object-fit: cover;
         }
 
@@ -931,67 +567,399 @@
         }
 
         /* ============================================
-           COMPANIES SECTION
+           SECTION G: Speakers (White bg)
            ============================================ */
-        .companies-grid {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 1rem;
-            justify-content: center;
+        .event-speakers {
+            background: var(--bg-light);
+            color: var(--text-dark);
+            padding: 100px 0;
         }
 
-        .company-card {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            padding: 1rem 1.5rem;
-            min-width: 100px;
-            min-height: 60px;
+        .event-speakers h2 {
+            font-size: clamp(28px, 4vw, 40px);
+            margin-bottom: 3rem;
+            position: relative;
+            display: inline-block;
+        }
+
+        .event-speakers h2::after {
+            content: '';
+            position: absolute;
+            bottom: -15px;
+            left: 0;
+            width: 60px;
+            height: 3px;
+            background: var(--text-dark);
+        }
+
+        .speakers-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 2.5rem;
+        }
+
+        .speaker-card {
+            text-align: center;
+        }
+
+        .speaker-photo {
+            width: 140px;
+            height: 140px;
+            margin: 0 auto 1.25rem;
+            overflow: hidden;
+            border: 3px solid var(--bg-dark);
+        }
+
+        .speaker-photo img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .speaker-placeholder {
+            width: 100%;
+            height: 100%;
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: var(--transition-standard);
+            background: rgba(0, 0, 0, 0.05);
+            color: var(--text-grey-dark);
+            font-size: 3rem;
         }
 
-        .company-card:hover {
-            background: rgba(255, 255, 255, 0.05);
-            border-color: rgba(255, 255, 255, 0.2);
+        .speaker-info strong {
+            display: block;
+            font-size: 14px;
+            font-weight: 700;
+            text-transform: uppercase;
+            margin-bottom: 0.25rem;
+            color: var(--text-dark);
         }
 
-        .company-card img {
+        .speaker-position,
+        .speaker-company {
+            display: block;
+            font-family: var(--font-mono);
+            font-size: 11px;
+            color: var(--text-grey-dark);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        /* ============================================
+           SECTION H: Details (Black bg)
+           ============================================ */
+        .event-details {
+            background: var(--bg-dark);
+            color: var(--text-light);
+            padding: 100px 0;
+        }
+
+        .event-details h2 {
+            font-size: clamp(28px, 4vw, 40px);
+            margin-bottom: 3rem;
+            position: relative;
+            display: inline-block;
+        }
+
+        .event-details h2::after {
+            content: '';
+            position: absolute;
+            bottom: -15px;
+            left: 0;
+            width: 60px;
+            height: 3px;
+            background: var(--text-light);
+        }
+
+        .details-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+        }
+
+        .detail-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 1.5rem;
+            padding: 2rem;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border-light);
+        }
+
+        .detail-icon {
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--text-light);
+            color: var(--bg-dark);
+            font-size: 1.25rem;
+            flex-shrink: 0;
+        }
+
+        .detail-content {
+            flex: 1;
+        }
+
+        .detail-label {
+            display: block;
+            font-family: var(--font-mono);
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            color: var(--text-grey);
+            margin-bottom: 0.5rem;
+        }
+
+        .detail-value {
+            font-size: 18px;
+            font-weight: 500;
+        }
+
+        /* ============================================
+           SECTION I: Sponsors (White bg)
+           ============================================ */
+        .event-sponsors-section {
+            background: var(--bg-light);
+            color: var(--text-dark);
+            padding: 100px 0;
+        }
+
+        .event-sponsors-section h2 {
+            font-size: clamp(28px, 4vw, 40px);
+            margin-bottom: 3rem;
+            position: relative;
+            display: inline-block;
+        }
+
+        .event-sponsors-section h2::after {
+            content: '';
+            position: absolute;
+            bottom: -15px;
+            left: 0;
+            width: 60px;
+            height: 3px;
+            background: var(--text-dark);
+        }
+
+        .sponsors-level {
+            margin-bottom: 3rem;
+        }
+
+        .sponsors-level h3 {
+            font-family: var(--font-mono);
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.2em;
+            color: var(--text-grey-dark);
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid var(--border-dark);
+        }
+
+        .sponsors-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .sponsor-card {
+            background: var(--bg-dark);
+            padding: 1.5rem 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+            text-decoration: none;
+        }
+
+        .sponsor-card:hover {
+            background: rgba(0, 0, 0, 0.8);
+        }
+
+        .sponsors-level--platinum .sponsor-card {
+            min-width: 220px;
+            min-height: 110px;
+        }
+
+        .sponsors-level--gold .sponsor-card {
+            min-width: 180px;
+            min-height: 90px;
+        }
+
+        .sponsors-level--silver .sponsor-card,
+        .sponsors-level--bronze .sponsor-card {
+            min-width: 140px;
+            min-height: 70px;
+        }
+
+        .sponsor-card img {
             max-width: 100%;
-            max-height: 40px;
+            max-height: 60px;
             object-fit: contain;
             filter: brightness(0) invert(1);
-            opacity: 0.7;
-            transition: var(--transition-standard);
+            opacity: 0.9;
+            transition: var(--transition);
         }
 
-        .company-card:hover img {
+        .sponsor-card:hover img {
             opacity: 1;
         }
 
-        .company-name {
+        .sponsor-name {
             font-family: var(--font-mono);
-            font-size: 11px;
+            font-size: 12px;
             text-transform: uppercase;
             letter-spacing: 0.1em;
+            color: var(--text-light);
+        }
+
+        /* ============================================
+           SECTION J: Final CTA (Black bg)
+           ============================================ */
+        .event-cta--dark {
+            background: var(--bg-dark);
+            color: var(--text-light);
+            padding: 100px 0;
+        }
+
+        .cta-final {
+            text-align: center;
+        }
+
+        .cta-final h2 {
+            font-size: clamp(32px, 5vw, 56px);
+            margin-bottom: 1rem;
+        }
+
+        .cta-final p {
+            font-family: var(--font-mono);
+            font-size: 14px;
+            color: var(--text-grey);
+            margin-bottom: 2.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        /* ============================================
+           FOOTER
+           ============================================ */
+        .site-footer {
+            background: var(--bg-dark);
+            border-top: 1px solid var(--border-light);
+            padding: 4rem 0 2rem;
+        }
+
+        .footer-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 2rem;
+        }
+
+        .footer-logo {
+            font-family: var(--font-heading);
+            font-weight: 800;
+            font-size: 14px;
+            color: var(--text-light);
+            text-decoration: none;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+        }
+
+        .footer-links {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .footer-links a {
+            font-family: var(--font-mono);
+            font-size: 12px;
+            color: var(--text-grey);
+            text-decoration: none;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            transition: var(--transition);
+        }
+
+        .footer-links a:hover {
+            color: var(--text-light);
+        }
+
+        .footer-bottom {
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 1px solid var(--border-light);
+            text-align: center;
+        }
+
+        .footer-bottom p {
+            font-family: var(--font-mono);
+            font-size: 12px;
             color: var(--text-grey);
         }
 
-        /* Responsive adjustments for new sections */
+        /* ============================================
+           RESPONSIVE
+           ============================================ */
+        @media (max-width: 992px) {
+            .container-wide {
+                padding: 0 2rem;
+            }
+
+            .event-hero-grid {
+                flex-direction: column;
+                gap: 2rem;
+            }
+
+            .event-date-block {
+                align-self: flex-start;
+            }
+
+            .cta-content {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .cta-info {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+
+            .details-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
         @media (max-width: 768px) {
-            .speakers-grid {
-                grid-template-columns: repeat(2, 1fr);
-                gap: 1.5rem;
+            .site-header nav {
+                display: none;
             }
 
-            .speaker-photo {
-                width: 100px;
-                height: 100px;
+            .event-hero-minimal {
+                padding: 120px 0 60px;
             }
 
-            .agenda-timeline {
-                padding-left: 1rem;
+            .event-date-block .day {
+                font-size: 56px;
+            }
+
+            .intro-text {
+                font-size: 20px;
+            }
+
+            .event-intro,
+            .event-description,
+            .event-companies,
+            .event-agenda,
+            .event-speakers,
+            .event-details,
+            .event-sponsors-section,
+            .event-cta--dark {
+                padding: 60px 0;
             }
 
             .agenda-item {
@@ -1003,18 +971,39 @@
                 text-align: left;
                 width: auto;
             }
+
+            .speakers-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 1.5rem;
+            }
+
+            .speaker-photo {
+                width: 100px;
+                height: 100px;
+            }
+
+            .footer-content {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .footer-links {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
         }
     </style>
 </head>
 <body>
     <!-- Header -->
     <header class="site-header">
-        <div class="container">
+        <div class="container-wide">
             <a href="/" class="logo">THE LAST OF SAAS</a>
             <nav>
                 <a href="/">Inicio</a>
                 <a href="/eventos">Eventos</a>
                 <a href="/sponsor/login">Sponsors</a>
+                <a href="/empresa/login">Empresas</a>
             </nav>
         </div>
     </header>
@@ -1026,12 +1015,13 @@
 
     <!-- Footer -->
     <footer class="site-footer">
-        <div class="container">
+        <div class="container-wide">
             <div class="footer-content">
                 <a href="/" class="footer-logo">THE LAST OF SAAS</a>
                 <div class="footer-links">
                     <a href="/eventos">Eventos</a>
                     <a href="/sponsor/login">Sponsors</a>
+                    <a href="/empresa/login">Empresas</a>
                     <a href="/privacidad">Privacidad</a>
                 </div>
             </div>

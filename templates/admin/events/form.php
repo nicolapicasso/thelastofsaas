@@ -79,8 +79,9 @@ $isEdit = isset($event) && $event;
                     </div>
 
                     <div class="form-group">
-                        <label for="description">Descripcion</label>
-                        <textarea id="description" name="description" class="form-control" rows="4"><?= htmlspecialchars($event['description'] ?? '') ?></textarea>
+                        <label for="description">Descripcion Larga (HTML)</label>
+                        <textarea id="description" name="description" class="form-control wysiwyg" rows="10"><?= htmlspecialchars($event['description'] ?? '') ?></textarea>
+                        <small class="form-text">Editor de texto enriquecido para la descripcion completa del evento</small>
                     </div>
 
                     <div class="form-row">
@@ -497,3 +498,24 @@ document.getElementById('companies-search')?.addEventListener('input', function(
 });
 </script>
 <?php endif; ?>
+
+<!-- TinyMCE WYSIWYG Editor (Self-hosted via jsDelivr - no API key needed) -->
+<script src="https://cdn.jsdelivr.net/npm/tinymce@6.8.2/tinymce.min.js"></script>
+<script>
+tinymce.init({
+    selector: 'textarea.wysiwyg',
+    plugins: 'lists link autolink',
+    toolbar: 'undo redo | bold italic underline | bullist numlist | link | removeformat',
+    menubar: false,
+    statusbar: false,
+    height: 300,
+    branding: false,
+    promotion: false,
+    content_style: 'body { font-family: Montserrat, sans-serif; font-size: 14px; }',
+    setup: function(editor) {
+        editor.on('change', function() {
+            tinymce.triggerSave();
+        });
+    }
+});
+</script>

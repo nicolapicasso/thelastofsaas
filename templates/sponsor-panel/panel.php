@@ -78,6 +78,27 @@
             margin-bottom: 2rem;
         }
 
+        .brand-logo {
+            font-family: var(--font-heading);
+            font-weight: 800;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            color: var(--text-grey);
+            margin-bottom: 2rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .brand-logo a {
+            color: inherit;
+            text-decoration: none;
+        }
+
+        .brand-logo a:hover {
+            color: var(--text-light);
+        }
+
         .sponsor-logo {
             width: 100px;
             height: 100px;
@@ -508,6 +529,9 @@
     <div class="panel-layout">
         <!-- Sidebar -->
         <aside class="panel-sidebar">
+            <div class="brand-logo">
+                <a href="/">THE LAST OF SAAS</a>
+            </div>
             <div class="sidebar-header">
                 <?php if (!empty($sponsor['logo_url'])): ?>
                     <img src="<?= htmlspecialchars($sponsor['logo_url']) ?>" alt="" class="sponsor-logo">
