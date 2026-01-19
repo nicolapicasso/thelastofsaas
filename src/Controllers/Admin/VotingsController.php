@@ -211,6 +211,34 @@ class VotingsController extends Controller
     }
 
     /**
+     * Show candidates management page
+     */
+    public function candidates(string $id): void
+    {
+        $this->requireAuth();
+
+        $voting = $this->votingModel->find((int) $id);
+
+        if (!$voting) {
+            $this->flash('error', 'Votación no encontrada.');
+            $this->redirect('/admin/votings');
+            return;
+        }
+
+        $candidates = $this->votingModel->getCandidates((int) $id);
+        $totalVotes = $this->votingModel->getTotalVotes((int) $id);
+
+        $this->renderAdmin('votings/candidates', [
+            'title' => 'Candidatos: ' . $voting['title'],
+            'voting' => $voting,
+            'candidates' => $candidates,
+            'totalVotes' => $totalVotes,
+            'csrf_token' => $this->generateCsrf(),
+            'flash' => $this->getFlash(),
+        ]);
+    }
+
+    /**
      * Add candidate
      */
     public function addCandidate(string $id): void

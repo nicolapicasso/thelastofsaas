@@ -87,6 +87,11 @@ class MediaService
 
         $media = $this->mediaModel->find($mediaId);
 
+        // Add URL to media object for frontend
+        if ($media) {
+            $media['url'] = $this->baseUrl . '/' . ($media['filepath'] ?? '');
+        }
+
         return [
             'success' => true,
             'media' => $media

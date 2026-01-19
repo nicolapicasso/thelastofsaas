@@ -368,6 +368,7 @@ $router->post('/admin/votings/{id}', 'Admin\\VotingsController', 'update');
 $router->post('/admin/votings/{id}/delete', 'Admin\\VotingsController', 'destroy');
 $router->get('/admin/votings/{id}/results', 'Admin\\VotingsController', 'results');
 $router->post('/admin/votings/{id}/reset-votes', 'Admin\\VotingsController', 'resetVotes');
+$router->get('/admin/votings/{id}/candidates', 'Admin\\VotingsController', 'candidates');
 $router->post('/admin/votings/{id}/candidates', 'Admin\\VotingsController', 'addCandidate');
 $router->post('/admin/votings/{id}/candidates/{candidateId}', 'Admin\\VotingsController', 'updateCandidate');
 $router->post('/admin/votings/{id}/candidates/{candidateId}/delete', 'Admin\\VotingsController', 'deleteCandidate');
