@@ -122,6 +122,9 @@ class EventsController extends BaseController
         $roomModel = new Room();
         $eventRooms = $roomModel->getWithImagesByEvent($event['id']);
 
+        // Get content activities (charlas and talleres)
+        $contentActivities = $this->activityModel->getByEventAndTypes($event['id'], ['charla', 'taller']);
+
         $this->view->setLayout('layouts/event');
         $this->render('events/show', $this->getEventData([
             'event' => $event,
@@ -134,6 +137,7 @@ class EventsController extends BaseController
             'activities' => $activities,
             'activitiesByDate' => $activitiesByDate,
             'speakers' => $speakers,
+            'contentActivities' => $contentActivities,
             'meta_title' => $event['meta_title'] ?: $event['name'] . ' - The Last of SaaS',
             'meta_description' => $event['meta_description'] ?: $event['short_description'],
             'meta_image' => $event['featured_image']

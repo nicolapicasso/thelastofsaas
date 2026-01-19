@@ -172,7 +172,7 @@ class TeamController extends Controller
         $position = Sanitizer::string($this->getPost('position') ?? $this->getPost('role'));
         $description = $this->getPost('description') ?? $this->getPost('bio');
         $photo = Sanitizer::url($this->getPost('photo'));
-        $photoHover = Sanitizer::url($this->getPost('photo_hover'));
+        $photoAnimated = Sanitizer::url($this->getPost('photo_animated'));
         $email = Sanitizer::email($this->getPost('email'));
         $linkedinUrl = Sanitizer::url($this->getPost('linkedin_url') ?? $this->getPost('linkedin'));
         $twitter = Sanitizer::url($this->getPost('twitter'));
@@ -190,15 +190,15 @@ class TeamController extends Controller
         return [
             'name' => $name,
             'slug' => $slug ?: null,
-            'role' => $position ?: null,
+            'position' => $position ?: null,
             'bio' => $description ?: null,
             'photo' => $photo ?: null,
-            'photo_hover' => $photoHover ?: null,
+            'photo_animated' => $photoAnimated ?: null,
             'email' => $email ?: null,
-            'linkedin' => $linkedinUrl ?: null,
-            'twitter' => $twitter ?: null,
+            'linkedin_url' => $linkedinUrl ?: null,
+            'twitter_url' => $twitter ?: null,
             'sort_order' => $sortOrder,
-            'is_active' => $isActive,
+            'active' => $isActive,
         ];
     }
 }

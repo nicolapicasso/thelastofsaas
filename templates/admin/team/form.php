@@ -8,7 +8,7 @@ include_once TEMPLATES_PATH . '/admin/partials/image-picker.php';
 $isEdit = isset($member) && $member;
 $action = $isEdit ? "/admin/team/{$member['id']}" : "/admin/team";
 $memberPhoto = $member['photo'] ?? '';
-$memberPhotoHover = $member['photo_hover'] ?? '';
+$memberPhotoHover = $member['photo_animated'] ?? '';
 $hasPhoto = !empty($memberPhoto);
 $hasPhotoHover = !empty($memberPhotoHover);
 ?>
@@ -53,7 +53,7 @@ $hasPhotoHover = !empty($memberPhotoHover);
                     <div class="form-group">
                         <label for="position">Puesto / Cargo</label>
                         <input type="text" id="position" name="position"
-                               value="<?= htmlspecialchars($member['role'] ?? '') ?>"
+                               value="<?= htmlspecialchars($member['position'] ?? '') ?>"
                                placeholder="Ej: Director de Tecnologia, Desarrollador Senior...">
                     </div>
 
@@ -103,7 +103,7 @@ $hasPhotoHover = !empty($memberPhotoHover);
                         <div class="form-group">
                             <label>Foto al Pasar el Cursor (Hover)</label>
                             <div class="image-picker-field" id="photo-hover-picker">
-                                <input type="hidden" name="photo_hover" value="<?= htmlspecialchars($memberPhotoHover) ?>">
+                                <input type="hidden" name="photo_animated" value="<?= htmlspecialchars($memberPhotoHover) ?>">
                                 <div class="image-picker-preview <?= $hasPhotoHover ? 'has-image' : '' ?>">
                                     <?php if ($hasPhotoHover): ?>
                                         <img src="<?= htmlspecialchars($memberPhotoHover) ?>" alt="Preview">
@@ -173,7 +173,7 @@ $hasPhotoHover = !empty($memberPhotoHover);
                         <div class="input-with-icon">
                             <i class="fab fa-linkedin"></i>
                             <input type="url" id="linkedin_url" name="linkedin_url"
-                                   value="<?= htmlspecialchars($member['linkedin'] ?? '') ?>"
+                                   value="<?= htmlspecialchars($member['linkedin_url'] ?? '') ?>"
                                    placeholder="https://linkedin.com/in/usuario">
                         </div>
                     </div>

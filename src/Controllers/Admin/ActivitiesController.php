@@ -176,7 +176,7 @@ class ActivitiesController extends Controller
     {
         $this->requireAuth();
 
-        $activity = $this->activityModel->find($id);
+        $activity = $this->activityModel->find((int) $id);
 
         if (!$activity) {
             $this->flash('error', 'Actividad no encontrada.');
@@ -210,7 +210,7 @@ class ActivitiesController extends Controller
             return;
         }
 
-        $activity = $this->activityModel->find($id);
+        $activity = $this->activityModel->find((int) $id);
 
         if (!$activity) {
             $this->flash('error', 'Actividad no encontrada.');
@@ -284,7 +284,7 @@ class ActivitiesController extends Controller
             return;
         }
 
-        $activity = $this->activityModel->find($id);
+        $activity = $this->activityModel->find((int) $id);
 
         if (!$activity) {
             $this->flash('error', 'Actividad no encontrada.');
@@ -312,7 +312,7 @@ class ActivitiesController extends Controller
             return;
         }
 
-        $activity = $this->activityModel->find($id);
+        $activity = $this->activityModel->find((int) $id);
 
         if (!$activity) {
             $this->flash('error', 'Actividad no encontrada.');

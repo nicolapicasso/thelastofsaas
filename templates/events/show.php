@@ -80,6 +80,64 @@ $featuredImage = $event['featured_image'] ?? null;
 </section>
 <?php endif; ?>
 
+<!-- SECTION: Content / Talks & Workshops -->
+<?php if (!empty($contentActivities)): ?>
+<section class="event-content-section">
+    <div class="container-wide">
+        <h2>CONTENIDO</h2>
+        <div class="content-grid">
+            <?php foreach ($contentActivities as $activity): ?>
+                <div class="content-card">
+                    <?php if (!empty($activity['image_url'])): ?>
+                        <div class="content-image">
+                            <img src="<?= htmlspecialchars($activity['image_url']) ?>" alt="<?= htmlspecialchars($activity['title']) ?>">
+                        </div>
+                    <?php endif; ?>
+                    <div class="content-body">
+                        <span class="content-type" style="<?= !empty($activity['category_color']) ? 'background-color:' . $activity['category_color'] : '' ?>">
+                            <?= htmlspecialchars($activity['category_name'] ?? ($activity['activity_type'] === 'charla' ? 'Charla' : 'Taller')) ?>
+                        </span>
+                        <h3><?= htmlspecialchars($activity['title']) ?></h3>
+                        <?php if (!empty($activity['description'])): ?>
+                            <p><?= htmlspecialchars($activity['description']) ?></p>
+                        <?php endif; ?>
+                        <?php if (!empty($activity['speaker_name'])): ?>
+                            <div class="content-speaker">
+                                <?php if (!empty($activity['speaker_photo'])): ?>
+                                    <img src="<?= htmlspecialchars($activity['speaker_photo']) ?>" alt="">
+                                <?php endif; ?>
+                                <div class="speaker-details">
+                                    <a href="/equipo/<?= $activity['speaker_slug'] ?? $activity['speaker_id'] ?>" class="speaker-name">
+                                        <?= htmlspecialchars($activity['speaker_name']) ?>
+                                    </a>
+                                    <?php if (!empty($activity['speaker_position'])): ?>
+                                        <span class="speaker-title"><?= htmlspecialchars($activity['speaker_position']) ?></span>
+                                    <?php endif; ?>
+                                </div>
+                            </div>
+                        <?php endif; ?>
+                        <div class="content-meta">
+                            <span class="meta-time">
+                                <i class="fas fa-clock"></i>
+                                <?= substr($activity['start_time'] ?? '00:00', 0, 5) ?>
+                                <?php if (!empty($activity['end_time'])): ?>
+                                    - <?= substr($activity['end_time'], 0, 5) ?>
+                                <?php endif; ?>
+                            </span>
+                            <?php if (!empty($activity['room_name'])): ?>
+                                <span class="meta-room">
+                                    <i class="fas fa-door-open"></i> <?= htmlspecialchars($activity['room_name']) ?>
+                                </span>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                </div>
+            <?php endforeach; ?>
+        </div>
+    </div>
+</section>
+<?php endif; ?>
+
 <!-- SECTION D: Participating Companies (Black on White) -->
 <?php if (!empty($companies)): ?>
 <section class="event-companies">
@@ -187,7 +245,7 @@ $featuredImage = $event['featured_image'] ?? null;
         <div class="speakers-carousel-wrapper">
             <div class="speakers-carousel">
                 <?php foreach ($speakers as $speaker): ?>
-                    <a href="/speakers/<?= $speaker['slug'] ?? $speaker['id'] ?>" class="speaker-card">
+                    <a href="/equipo/<?= $speaker['slug'] ?? $speaker['id'] ?>" class="speaker-card">
                         <div class="speaker-photo">
                             <?php if (!empty($speaker['photo'])): ?>
                                 <?php

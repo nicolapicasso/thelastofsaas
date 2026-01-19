@@ -326,6 +326,31 @@ class Activity extends Model
     }
 
     /**
+     * Get activities by types for an event (e.g., charlas and talleres)
+     */
+    public function getByEventAndTypes(int $eventId, array $types): array
+    {
+        if (empty($types)) {
+            return [];
+        }
+
+        $placeholders = implode(',', array_fill(0, count($types), '?'));
+        $sql = "SELECT a.*,
+                       r.name as room_name, r.color as room_color,
+                       t.name as speaker_name, t.position as speaker_position, t.photo as speaker_photo, t.slug as speaker_slug,
+                       c.name as category_name, c.color as category_color
+                FROM {$this->table} a
+                LEFT JOIN rooms r ON a.room_id = r.id
+                LEFT JOIN team_members t ON a.speaker_id = t.id
+                LEFT JOIN categories c ON a.category_id = c.id
+                WHERE a.event_id = ? AND a.active = 1 AND a.activity_type IN ({$placeholders})
+                ORDER BY a.activity_date ASC, a.start_time ASC, a.sort_order ASC";
+
+        $params = array_merge([$eventId], $types);
+        return $this->db->fetchAll($sql, $params);
+    }
+
+    /**
      * Get activity duration in minutes
      */
     public function getDuration(array $activity): int

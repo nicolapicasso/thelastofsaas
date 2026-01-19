@@ -309,7 +309,7 @@
             gap: 3rem;
             font-family: var(--font-mono);
             font-size: 14px;
-            color: var(--text-grey);
+            color: #fff;
         }
 
         .event-meta-inline span {
@@ -326,8 +326,9 @@
             margin-top: 2rem;
             font-size: 18px;
             line-height: 1.8;
-            color: var(--text-grey);
-            max-width: 700px;
+            background-color: #fff;
+            padding: 10px;
+            color: #000;
         }
 
         /* Legacy hero minimal support */
@@ -446,6 +447,159 @@
 
         .description-content li {
             margin-bottom: 0.5rem;
+        }
+
+        /* ============================================
+           SECTION: Content / Talks & Workshops
+           ============================================ */
+        .event-content-section {
+            background: var(--bg-light);
+            color: var(--text-dark);
+            padding: 100px 0;
+        }
+
+        .event-content-section h2 {
+            font-size: clamp(28px, 4vw, 40px);
+            margin-bottom: 3rem;
+            position: relative;
+            display: inline-block;
+        }
+
+        .event-content-section h2::after {
+            content: '';
+            position: absolute;
+            bottom: -15px;
+            left: 0;
+            width: 60px;
+            height: 3px;
+            background: var(--text-dark);
+        }
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 2rem;
+        }
+
+        .content-card {
+            background: var(--bg-light);
+            border: 2px solid var(--border-dark);
+            overflow: hidden;
+            transition: var(--transition);
+        }
+
+        .content-card:hover {
+            border-color: var(--bg-dark);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .content-image {
+            width: 100%;
+            height: 200px;
+            overflow: hidden;
+        }
+
+        .content-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+
+        .content-card:hover .content-image img {
+            transform: scale(1.05);
+        }
+
+        .content-body {
+            padding: 1.5rem;
+        }
+
+        .content-type {
+            display: inline-block;
+            font-family: var(--font-mono);
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            padding: 0.3rem 0.75rem;
+            background: rgba(0, 0, 0, 0.1);
+            color: var(--text-dark);
+            margin-bottom: 1rem;
+        }
+
+        .content-body h3 {
+            font-size: 18px;
+            font-weight: 700;
+            text-transform: uppercase;
+            margin-bottom: 0.75rem;
+            line-height: 1.3;
+        }
+
+        .content-body p {
+            font-size: 14px;
+            color: var(--text-grey-dark);
+            line-height: 1.6;
+            margin-bottom: 1rem;
+        }
+
+        .content-speaker {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 1rem 0;
+            border-top: 1px solid var(--border-dark);
+            margin-top: 1rem;
+        }
+
+        .content-speaker img {
+            width: 48px;
+            height: 48px;
+            object-fit: cover;
+            border-radius: 0;
+        }
+
+        .content-speaker .speaker-details {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .content-speaker .speaker-name {
+            font-family: var(--font-heading);
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--text-dark);
+            text-decoration: none;
+            text-transform: uppercase;
+        }
+
+        .content-speaker .speaker-name:hover {
+            text-decoration: underline;
+        }
+
+        .content-speaker .speaker-title {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            color: var(--text-grey-dark);
+        }
+
+        .content-meta {
+            display: flex;
+            gap: 1.5rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border-dark);
+            margin-top: 1rem;
+        }
+
+        .content-meta span {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-family: var(--font-mono);
+            font-size: 12px;
+            color: var(--text-grey-dark);
+        }
+
+        .content-meta i {
+            color: var(--text-dark);
         }
 
         /* ============================================
