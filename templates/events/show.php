@@ -6,25 +6,32 @@
  */
 $startDate = new DateTime($event['start_date']);
 $endDate = $event['end_date'] ? new DateTime($event['end_date']) : null;
+$featuredImage = $event['featured_image'] ?? null;
 ?>
 
-<!-- SECTION A: Hero with Title (Black on White) -->
-<section class="event-hero-minimal">
-    <div class="container-wide">
-        <div class="event-hero-grid">
-            <div class="event-date-block">
-                <span class="day"><?= $startDate->format('d') ?></span>
-                <span class="month"><?= strtoupper($startDate->format('M')) ?></span>
-                <span class="year"><?= $startDate->format('Y') ?></span>
-            </div>
-            <div class="event-title-block">
-                <h1><?= htmlspecialchars($event['name']) ?></h1>
-                <div class="event-meta-inline">
-                    <?php if ($event['location']): ?>
-                        <span><i class="fas fa-map-marker-alt"></i> <?= htmlspecialchars($event['location']) ?></span>
-                    <?php endif; ?>
-                    <?php if ($event['start_time']): ?>
-                        <span><i class="fas fa-clock"></i> <?= substr($event['start_time'], 0, 5) ?></span>
+<!-- SECTION A: Hero with Featured Image and Parallax -->
+<section class="event-hero-parallax" <?php if ($featuredImage): ?>style="background-image: url('<?= htmlspecialchars($featuredImage) ?>');"<?php endif; ?>>
+    <div class="hero-overlay"></div>
+    <div class="hero-content">
+        <div class="container-wide">
+            <div class="event-hero-grid">
+                <div class="event-date-block">
+                    <span class="day"><?= $startDate->format('d') ?></span>
+                    <span class="month"><?= strtoupper($startDate->format('M')) ?></span>
+                    <span class="year"><?= $startDate->format('Y') ?></span>
+                </div>
+                <div class="event-title-block">
+                    <h1><?= htmlspecialchars($event['name']) ?></h1>
+                    <div class="event-meta-inline">
+                        <?php if ($event['location']): ?>
+                            <span><i class="fas fa-map-marker-alt"></i> <?= htmlspecialchars($event['location']) ?></span>
+                        <?php endif; ?>
+                        <?php if ($event['start_time']): ?>
+                            <span><i class="fas fa-clock"></i> <?= substr($event['start_time'], 0, 5) ?></span>
+                        <?php endif; ?>
+                    </div>
+                    <?php if ($event['short_description']): ?>
+                        <p class="intro-text"><?= htmlspecialchars($event['short_description']) ?></p>
                     <?php endif; ?>
                 </div>
             </div>
@@ -32,16 +39,7 @@ $endDate = $event['end_date'] ? new DateTime($event['end_date']) : null;
     </div>
 </section>
 
-<!-- SECTION B: Short Description (White on Black) -->
-<?php if ($event['short_description']): ?>
-<section class="event-intro">
-    <div class="container-wide">
-        <p class="intro-text"><?= htmlspecialchars($event['short_description']) ?></p>
-    </div>
-</section>
-<?php endif; ?>
-
-<!-- SECTION C: Get Ticket CTA (Black on White) -->
+<!-- SECTION B: Get Ticket CTA (Black on White) -->
 <section class="event-cta event-cta--light">
     <div class="container-wide">
         <div class="cta-content">
@@ -70,7 +68,7 @@ $endDate = $event['end_date'] ? new DateTime($event['end_date']) : null;
     </div>
 </section>
 
-<!-- SECTION D: Long Description (White on Black) -->
+<!-- SECTION C: Long Description (White on Black) -->
 <?php if ($event['description']): ?>
 <section class="event-description">
     <div class="container-wide">
@@ -82,7 +80,7 @@ $endDate = $event['end_date'] ? new DateTime($event['end_date']) : null;
 </section>
 <?php endif; ?>
 
-<!-- SECTION E: Participating Companies (Black on White) -->
+<!-- SECTION D: Participating Companies (Black on White) -->
 <?php if (!empty($companies)): ?>
 <section class="event-companies">
     <div class="container-wide">
@@ -102,55 +100,81 @@ $endDate = $event['end_date'] ? new DateTime($event['end_date']) : null;
 </section>
 <?php endif; ?>
 
-<!-- SECTION F: Agenda (White on Black) -->
+<!-- SECTION E: Agenda with Room Images (White on Black) -->
 <?php if (!empty($activitiesByDate)): ?>
 <section class="event-agenda">
     <div class="container-wide">
-        <h2>AGENDA</h2>
-        <?php foreach ($activitiesByDate as $date => $dateActivities): ?>
-            <div class="agenda-day">
-                <h3 class="agenda-date">
-                    <i class="fas fa-calendar-day"></i>
-                    <?= date('d M Y', strtotime($date)) ?>
-                </h3>
-                <div class="agenda-timeline">
-                    <?php foreach ($dateActivities as $activity): ?>
-                        <div class="agenda-item <?= $activity['is_featured'] ? 'featured' : '' ?>">
-                            <div class="agenda-time">
-                                <span class="time-start"><?= substr($activity['start_time'] ?? '00:00', 0, 5) ?></span>
-                                <?php if (!empty($activity['end_time'])): ?>
-                                    <span class="time-end"><?= substr($activity['end_time'], 0, 5) ?></span>
-                                <?php endif; ?>
-                            </div>
-                            <div class="agenda-content">
-                                <span class="agenda-type" style="<?= !empty($activity['category_color']) ? 'background-color:' . $activity['category_color'] : '' ?>">
-                                    <?= htmlspecialchars($activity['category_name'] ?? $activity['activity_type'] ?? 'Actividad') ?>
-                                </span>
-                                <h4><?= htmlspecialchars($activity['title'] ?? '') ?></h4>
-                                <?php if (!empty($activity['description'])): ?>
-                                    <p><?= htmlspecialchars($activity['description']) ?></p>
-                                <?php endif; ?>
-                                <div class="agenda-meta">
-                                    <?php if (!empty($activity['speaker_name'])): ?>
-                                        <span class="agenda-speaker">
-                                            <?php if (!empty($activity['speaker_photo'])): ?>
-                                                <img src="<?= htmlspecialchars($activity['speaker_photo']) ?>" alt="">
+        <div class="agenda-layout">
+            <div class="agenda-main">
+                <h2>AGENDA</h2>
+                <?php foreach ($activitiesByDate as $date => $dateActivities): ?>
+                    <div class="agenda-day">
+                        <h3 class="agenda-date">
+                            <i class="fas fa-calendar-day"></i>
+                            <?= date('d M Y', strtotime($date)) ?>
+                        </h3>
+                        <div class="agenda-timeline">
+                            <?php foreach ($dateActivities as $activity): ?>
+                                <div class="agenda-item <?= $activity['is_featured'] ? 'featured' : '' ?>">
+                                    <div class="agenda-time">
+                                        <span class="time-start"><?= substr($activity['start_time'] ?? '00:00', 0, 5) ?></span>
+                                        <?php if (!empty($activity['end_time'])): ?>
+                                            <span class="time-end"><?= substr($activity['end_time'], 0, 5) ?></span>
+                                        <?php endif; ?>
+                                    </div>
+                                    <div class="agenda-content">
+                                        <span class="agenda-type" style="<?= !empty($activity['category_color']) ? 'background-color:' . $activity['category_color'] : '' ?>">
+                                            <?= htmlspecialchars($activity['category_name'] ?? $activity['activity_type'] ?? 'Actividad') ?>
+                                        </span>
+                                        <h4><?= htmlspecialchars($activity['title'] ?? '') ?></h4>
+                                        <?php if (!empty($activity['description'])): ?>
+                                            <p><?= htmlspecialchars($activity['description']) ?></p>
+                                        <?php endif; ?>
+                                        <div class="agenda-meta">
+                                            <?php if (!empty($activity['speaker_name'])): ?>
+                                                <span class="agenda-speaker">
+                                                    <?php if (!empty($activity['speaker_photo'])): ?>
+                                                        <img src="<?= htmlspecialchars($activity['speaker_photo']) ?>" alt="">
+                                                    <?php endif; ?>
+                                                    <?= htmlspecialchars($activity['speaker_name']) ?>
+                                                </span>
                                             <?php endif; ?>
-                                            <?= htmlspecialchars($activity['speaker_name']) ?>
-                                        </span>
-                                    <?php endif; ?>
-                                    <?php if (!empty($activity['room_name'])): ?>
-                                        <span class="agenda-room">
-                                            <i class="fas fa-door-open"></i> <?= htmlspecialchars($activity['room_name']) ?>
-                                        </span>
-                                    <?php endif; ?>
+                                            <?php if (!empty($activity['room_name'])): ?>
+                                                <span class="agenda-room">
+                                                    <i class="fas fa-door-open"></i> <?= htmlspecialchars($activity['room_name']) ?>
+                                                </span>
+                                            <?php endif; ?>
+                                        </div>
+                                    </div>
                                 </div>
+                            <?php endforeach; ?>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+            <?php if (!empty($eventRooms)): ?>
+            <div class="agenda-sidebar">
+                <h3>NUESTROS ESPACIOS</h3>
+                <div class="rooms-gallery">
+                    <?php foreach ($eventRooms as $room): ?>
+                        <?php if (!empty($room['image_url'])): ?>
+                        <div class="room-card">
+                            <div class="room-image">
+                                <img src="<?= htmlspecialchars($room['image_url']) ?>" alt="<?= htmlspecialchars($room['name']) ?>">
+                            </div>
+                            <div class="room-info">
+                                <span class="room-name"><?= htmlspecialchars($room['name']) ?></span>
+                                <?php if (!empty($room['capacity'])): ?>
+                                    <span class="room-capacity"><i class="fas fa-users"></i> <?= $room['capacity'] ?></span>
+                                <?php endif; ?>
                             </div>
                         </div>
+                        <?php endif; ?>
                     <?php endforeach; ?>
                 </div>
             </div>
-        <?php endforeach; ?>
+            <?php endif; ?>
+        </div>
     </div>
 </section>
 <?php endif; ?>

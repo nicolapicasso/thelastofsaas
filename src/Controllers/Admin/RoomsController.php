@@ -6,6 +6,7 @@ namespace App\Controllers\Admin;
 
 use App\Core\Controller;
 use App\Models\Room;
+use App\Models\Event;
 use App\Helpers\Slug;
 
 /**
@@ -58,9 +59,13 @@ class RoomsController extends Controller
     {
         $this->requireAuth();
 
+        $eventModel = new Event();
+        $events = $eventModel->where(['status' => 'active'], ['start_date' => 'DESC']);
+
         $this->renderAdmin('rooms/form', [
             'title' => 'Nueva Sala',
             'room' => null,
+            'events' => $events,
             'colorOptions' => Room::getColorOptions(),
             'csrf_token' => $this->generateCsrf(),
         ]);
@@ -87,6 +92,7 @@ class RoomsController extends Controller
             return;
         }
 
+        $eventId = $this->getPost('event_id', '');
         $data = [
             'name' => $name,
             'slug' => Slug::unique($name, 'rooms'),
@@ -99,6 +105,7 @@ class RoomsController extends Controller
             'color' => $this->getPost('color', '#3B82F6'),
             'active' => (int) $this->getPost('active', 1),
             'sort_order' => (int) $this->getPost('sort_order', 0),
+            'event_id' => $eventId !== '' ? (int) $eventId : null,
         ];
 
         $id = $this->roomModel->create($data);
@@ -127,9 +134,13 @@ class RoomsController extends Controller
             return;
         }
 
+        $eventModel = new Event();
+        $events = $eventModel->where(['status' => 'active'], ['start_date' => 'DESC']);
+
         $this->renderAdmin('rooms/form', [
             'title' => 'Editar Sala',
             'room' => $room,
+            'events' => $events,
             'colorOptions' => Room::getColorOptions(),
             'csrf_token' => $this->generateCsrf(),
         ]);
@@ -164,6 +175,7 @@ class RoomsController extends Controller
             return;
         }
 
+        $eventId = $this->getPost('event_id', '');
         $data = [
             'name' => $name,
             'description' => trim($this->getPost('description', '')),
@@ -175,6 +187,7 @@ class RoomsController extends Controller
             'color' => $this->getPost('color', '#3B82F6'),
             'active' => (int) $this->getPost('active', 1),
             'sort_order' => (int) $this->getPost('sort_order', 0),
+            'event_id' => $eventId !== '' ? (int) $eventId : null,
         ];
 
         // Update slug only if name changed

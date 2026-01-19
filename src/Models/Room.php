@@ -27,7 +27,8 @@ class Room extends Model
         'image_url',
         'color',
         'active',
-        'sort_order'
+        'sort_order',
+        'event_id'
     ];
 
     /**
@@ -37,6 +38,26 @@ class Room extends Model
     {
         $sql = "SELECT * FROM {$this->table} WHERE active = 1 ORDER BY sort_order ASC, name ASC";
         return $this->db->fetchAll($sql);
+    }
+
+    /**
+     * Get rooms by event
+     */
+    public function getByEvent(int $eventId): array
+    {
+        $sql = "SELECT * FROM {$this->table} WHERE event_id = ? AND active = 1 ORDER BY sort_order ASC, name ASC";
+        return $this->db->fetchAll($sql, [$eventId]);
+    }
+
+    /**
+     * Get rooms with images by event (for event page display)
+     */
+    public function getWithImagesByEvent(int $eventId): array
+    {
+        $sql = "SELECT * FROM {$this->table}
+                WHERE event_id = ? AND active = 1 AND image_url IS NOT NULL AND image_url != ''
+                ORDER BY sort_order ASC, name ASC";
+        return $this->db->fetchAll($sql, [$eventId]);
     }
 
     /**

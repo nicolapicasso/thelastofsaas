@@ -220,12 +220,35 @@
         }
 
         /* ============================================
-           SECTION A: Hero Minimal (White bg)
+           SECTION A: Hero with Parallax
            ============================================ */
-        .event-hero-minimal {
-            background: var(--bg-light);
-            color: var(--text-dark);
+        .event-hero-parallax {
+            position: relative;
+            min-height: 80vh;
+            display: flex;
+            align-items: center;
+            background-color: var(--bg-dark);
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            color: var(--text-light);
             padding: 140px 0 80px;
+        }
+
+        .event-hero-parallax .hero-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 1;
+        }
+
+        .event-hero-parallax .hero-content {
+            position: relative;
+            z-index: 2;
+            width: 100%;
         }
 
         .event-hero-grid {
@@ -235,7 +258,9 @@
         }
 
         .event-date-block {
-            background: var(--bg-dark);
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
             color: var(--text-light);
             padding: 2rem 2.5rem;
             text-align: center;
@@ -275,7 +300,8 @@
         .event-title-block h1 {
             font-size: clamp(32px, 5vw, 56px);
             margin-bottom: 1.5rem;
-            color: var(--text-dark);
+            color: var(--text-light);
+            text-shadow: 0 2px 20px rgba(0, 0, 0, 0.5);
         }
 
         .event-meta-inline {
@@ -283,7 +309,7 @@
             gap: 3rem;
             font-family: var(--font-mono);
             font-size: 14px;
-            color: var(--text-grey-dark);
+            color: var(--text-grey);
         }
 
         .event-meta-inline span {
@@ -293,22 +319,39 @@
         }
 
         .event-meta-inline i {
-            color: var(--text-dark);
-        }
-
-        /* ============================================
-           SECTION B: Intro (Black bg)
-           ============================================ */
-        .event-intro {
-            background: var(--bg-dark);
             color: var(--text-light);
-            padding: 80px 0;
         }
 
-        .intro-text {
-            font-size: 16px;
-            line-height: 1.7;
-            font-weight: 400;
+        .event-title-block .intro-text {
+            margin-top: 2rem;
+            font-size: 18px;
+            line-height: 1.8;
+            color: var(--text-grey);
+            max-width: 700px;
+        }
+
+        /* Legacy hero minimal support */
+        .event-hero-minimal {
+            background: var(--bg-light);
+            color: var(--text-dark);
+            padding: 140px 0 80px;
+        }
+
+        .event-hero-minimal .event-date-block {
+            background: var(--bg-dark);
+        }
+
+        .event-hero-minimal .event-title-block h1 {
+            color: var(--text-dark);
+            text-shadow: none;
+        }
+
+        .event-hero-minimal .event-meta-inline {
+            color: var(--text-grey-dark);
+        }
+
+        .event-hero-minimal .event-meta-inline i {
+            color: var(--text-dark);
         }
 
         /* ============================================
@@ -378,7 +421,7 @@
         .description-content {
             font-size: 18px;
             line-height: 1.9;
-            color: var(--text-grey);
+            color: var(--text-light);
         }
 
         .description-content p {
@@ -387,6 +430,22 @@
 
         .description-content strong {
             color: var(--text-light);
+            font-weight: 700;
+        }
+
+        .description-content a {
+            color: var(--text-light);
+            text-decoration: underline;
+        }
+
+        .description-content ul,
+        .description-content ol {
+            margin-bottom: 1.5rem;
+            padding-left: 1.5rem;
+        }
+
+        .description-content li {
+            margin-bottom: 0.5rem;
         }
 
         /* ============================================
@@ -611,6 +670,86 @@
             color: var(--text-grey);
             padding-left: 0.75rem;
             border-left: 3px solid rgba(255, 255, 255, 0.3);
+        }
+
+        /* Agenda Layout with Room Images */
+        .agenda-layout {
+            display: grid;
+            grid-template-columns: 1fr 350px;
+            gap: 4rem;
+        }
+
+        .agenda-main {
+            flex: 1;
+        }
+
+        .agenda-sidebar {
+            position: sticky;
+            top: 120px;
+            align-self: start;
+        }
+
+        .agenda-sidebar h3 {
+            font-size: 14px;
+            font-family: var(--font-mono);
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            margin-bottom: 2rem;
+            color: var(--text-grey);
+        }
+
+        .rooms-gallery {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .room-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border-light);
+            overflow: hidden;
+        }
+
+        .room-image {
+            width: 100%;
+            height: 200px;
+            overflow: hidden;
+        }
+
+        .room-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+
+        .room-card:hover .room-image img {
+            transform: scale(1.05);
+        }
+
+        .room-info {
+            padding: 1rem 1.25rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .room-name {
+            font-family: var(--font-heading);
+            font-size: 14px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .room-capacity {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            color: var(--text-grey);
+        }
+
+        .room-capacity i {
+            margin-right: 0.3rem;
         }
 
         /* ============================================
@@ -1064,8 +1203,24 @@
                 display: flex;
             }
 
-            .event-hero-minimal {
+            .event-hero-minimal,
+            .event-hero-parallax {
                 padding: 120px 0 60px;
+                min-height: auto;
+                background-attachment: scroll;
+            }
+
+            .event-hero-parallax .hero-content {
+                padding: 0 1rem;
+            }
+
+            .event-hero-grid {
+                flex-direction: column;
+                gap: 2rem;
+            }
+
+            .event-date-block {
+                align-self: flex-start;
             }
 
             .event-date-block .day {
@@ -1073,7 +1228,7 @@
             }
 
             .intro-text {
-                font-size: 20px;
+                font-size: 16px;
             }
 
             .event-intro,
@@ -1085,6 +1240,32 @@
             .event-sponsors-section,
             .event-cta--dark {
                 padding: 60px 0;
+            }
+
+            .agenda-layout {
+                grid-template-columns: 1fr;
+                gap: 3rem;
+            }
+
+            .agenda-sidebar {
+                position: static;
+                order: -1;
+            }
+
+            .rooms-gallery {
+                flex-direction: row;
+                overflow-x: auto;
+                gap: 1rem;
+                padding-bottom: 1rem;
+            }
+
+            .room-card {
+                min-width: 250px;
+                flex-shrink: 0;
+            }
+
+            .room-image {
+                height: 150px;
             }
 
             .agenda-item {

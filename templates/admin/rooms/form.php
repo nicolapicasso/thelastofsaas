@@ -93,7 +93,7 @@ $isEdit = isset($room) && $room;
 
             <div class="card">
                 <div class="card-header">
-                    <h3>Equipamiento</h3>
+                    <h3>Equipamiento e Imagen</h3>
                 </div>
                 <div class="card-body">
                     <div class="form-group">
@@ -104,22 +104,55 @@ $isEdit = isset($room) && $room;
                     </div>
 
                     <div class="form-group">
-                        <label for="image_url">URL de Imagen</label>
+                        <label for="image_url">Imagen de la Sala</label>
                         <?php if (!empty($room['image_url'])): ?>
                             <div class="image-preview" style="margin-bottom: 10px;">
-                                <img src="<?= htmlspecialchars($room['image_url']) ?>" alt="Imagen actual"
-                                     style="max-width: 200px; max-height: 150px; border: 1px solid #ddd; border-radius: 4px;">
+                                <img src="<?= htmlspecialchars($room['image_url']) ?>" alt="Imagen actual" id="image-preview-img"
+                                     style="max-width: 100%; max-height: 200px; border: 1px solid #ddd; border-radius: 4px;">
+                            </div>
+                        <?php else: ?>
+                            <div class="image-preview" id="image-preview-container" style="margin-bottom: 10px; display: none;">
+                                <img src="" alt="Vista previa" id="image-preview-img"
+                                     style="max-width: 100%; max-height: 200px; border: 1px solid #ddd; border-radius: 4px;">
                             </div>
                         <?php endif; ?>
-                        <input type="url" id="image_url" name="image_url" class="form-control"
-                               value="<?= htmlspecialchars($room['image_url'] ?? '') ?>"
-                               placeholder="https://...">
+                        <div class="input-group">
+                            <input type="text" id="image_url" name="image_url" class="form-control"
+                                   value="<?= htmlspecialchars($room['image_url'] ?? '') ?>"
+                                   placeholder="https://... o usa el selector de medios">
+                            <button type="button" class="btn btn-outline" onclick="openMediaPicker('image_url')">
+                                <i class="fas fa-images"></i> Seleccionar
+                            </button>
+                        </div>
+                        <small class="form-help">Imagen de la sala para mostrar en la pagina del evento</small>
                     </div>
                 </div>
             </div>
         </div>
 
         <div class="form-sidebar">
+            <div class="card">
+                <div class="card-header">
+                    <h3>Evento</h3>
+                </div>
+                <div class="card-body">
+                    <div class="form-group">
+                        <label for="event_id">Asociar a Evento</label>
+                        <select id="event_id" name="event_id" class="form-control">
+                            <option value="">-- Sin evento asignado --</option>
+                            <?php if (!empty($events)): ?>
+                                <?php foreach ($events as $event): ?>
+                                    <option value="<?= $event['id'] ?>" <?= ($room['event_id'] ?? '') == $event['id'] ? 'selected' : '' ?>>
+                                        <?= htmlspecialchars($event['name']) ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
+                        </select>
+                        <small class="form-help">Asigna esta sala a un evento para mostrarla en la pagina del evento</small>
+                    </div>
+                </div>
+            </div>
+
             <div class="card">
                 <div class="card-header">
                     <h3>Opciones</h3>
@@ -183,4 +216,32 @@ document.getElementById('color').addEventListener('change', function() {
         preview.style.backgroundColor = this.value;
     }
 });
+
+// Image URL preview
+document.getElementById('image_url').addEventListener('change', function() {
+    const url = this.value;
+    const previewContainer = document.getElementById('image-preview-container');
+    const previewImg = document.getElementById('image-preview-img');
+
+    if (url && previewImg) {
+        previewImg.src = url;
+        if (previewContainer) {
+            previewContainer.style.display = 'block';
+        }
+    }
+});
+
+// Media picker integration
+function openMediaPicker(targetField) {
+    const picker = window.open('/admin/media/picker?target=' + targetField, 'mediaPicker',
+        'width=1000,height=700,scrollbars=yes,resizable=yes');
+}
+
+window.selectMedia = function(url, targetField) {
+    const input = document.getElementById(targetField);
+    if (input) {
+        input.value = url;
+        input.dispatchEvent(new Event('change'));
+    }
+};
 </script>

@@ -8,6 +8,8 @@ use App\Models\TicketType;
 use App\Models\Activity;
 use App\Models\TeamMember;
 use App\Models\Sponsor;
+use App\Models\Company;
+use App\Models\Room;
 
 /**
  * Frontend Events Controller
@@ -116,10 +118,15 @@ class EventsController extends BaseController
             }
         }
 
+        // Get event rooms with images
+        $roomModel = new Room();
+        $eventRooms = $roomModel->getWithImagesByEvent($event['id']);
+
         $this->view->setLayout('layouts/event');
         $this->render('events/show', $this->getEventData([
             'event' => $event,
             'sponsorsByLevel' => $sponsorsByLevel,
+            'eventRooms' => $eventRooms,
             'features' => $features,
             'ticketTypes' => $ticketTypes,
             'stats' => $stats,
@@ -200,6 +207,31 @@ class EventsController extends BaseController
             'events' => $events,
             'meta_title' => $sponsor['name'] . ' - The Last of SaaS',
             'meta_description' => $sponsor['description'] ?? ''
+        ]));
+    }
+
+    /**
+     * Show company public page
+     */
+    public function companyPage(string $slug): void
+    {
+        $companyModel = new Company();
+        $company = $companyModel->findBySlug($slug);
+
+        if (!$company) {
+            $this->notFound();
+            return;
+        }
+
+        // Get events this company participates in
+        $events = $companyModel->getEvents($company['id']);
+
+        $this->view->setLayout('layouts/event');
+        $this->render('companies/show', $this->getEventData([
+            'company' => $company,
+            'events' => $events,
+            'meta_title' => $company['name'] . ' - The Last of SaaS',
+            'meta_description' => $company['description'] ?? ''
         ]));
     }
 }

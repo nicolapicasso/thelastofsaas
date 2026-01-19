@@ -426,6 +426,9 @@ $router->get('/eventos/{slug}/sponsors', 'EventsController', 'sponsors');
 // Public Sponsor Pages
 $router->get('/sponsors/{slug}', 'EventsController', 'sponsorPage');
 
+// Public Company Pages
+$router->get('/empresas/{slug}', 'EventsController', 'companyPage');
+
 // Tickets
 $router->get('/eventos/{slug}/registro', 'TicketsController', 'register');
 $router->post('/eventos/{slug}/registro', 'TicketsController', 'store');
