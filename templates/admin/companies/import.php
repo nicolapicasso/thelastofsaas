@@ -102,11 +102,17 @@
                     <td>No</td>
                     <td>1 = activo, 0 = inactivo (por defecto: 1)</td>
                 </tr>
+                <tr>
+                    <td><code>saas</code></td>
+                    <td>No</td>
+                    <td>SaaS que utiliza la empresa, separados por comas. Se vincularan automaticamente con los sponsors existentes. Ejemplo: <code>Slack, HubSpot, Notion</code></td>
+                </tr>
             </tbody>
         </table>
+        <p class="mt-3"><strong>Nota:</strong> Tambien se aceptan las columnas <code>saas_usage</code>, <code>saas que utiliza</code> o <code>herramientas</code> como alternativas a <code>saas</code>.</p>
         <p class="mt-3"><strong>Ejemplo:</strong></p>
-        <pre class="bg-light p-3"><code>name,code,sector,employees,website,contact_email
-"Tech Solutions","tech-sol","Tecnologia","51-200","https://techsol.com","info@techsol.com"
-"Innovate Corp","innovate","Servicios","11-50","https://innovate.io","contacto@innovate.io"</code></pre>
+        <pre class="bg-light p-3"><code>name;sector;employees;contact_email;saas
+"Tech Solutions";"Tecnologia";"51-200";"info@techsol.com";"Slack, HubSpot, Salesforce"
+"Innovate Corp";"Servicios";"11-50";"contacto@innovate.io";"Notion, Figma"</code></pre>
     </div>
 </div>
