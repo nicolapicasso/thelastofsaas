@@ -69,6 +69,12 @@ $_siteLogo = $_settingModel->get('logo_header', '');
                             Tickets
                         </a>
                     </li>
+                    <li>
+                        <a href="/admin/sponsor-invite-codes" class="<?= strpos($_SERVER['REQUEST_URI'], '/admin/sponsor-invite-codes') !== false ? 'active' : '' ?>">
+                            <span class="nav-icon"><i class="fas fa-gift"></i></span>
+                            Codigos Invitacion
+                        </a>
+                    </li>
                     <li class="has-submenu <?= strpos($_SERVER['REQUEST_URI'], '/admin/meetings') !== false ? 'open' : '' ?>">
                         <a href="#" class="submenu-toggle" onclick="this.parentElement.classList.toggle('open'); return false;">
                             <span class="nav-icon"><i class="fas fa-users"></i></span>

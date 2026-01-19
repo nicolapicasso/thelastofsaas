@@ -6,6 +6,7 @@ use App\Core\Controller;
 use App\Models\Event;
 use App\Models\Sponsor;
 use App\Models\Company;
+use App\Models\SponsorInviteCode;
 use App\Models\TlosSetting;
 use App\Services\EmailService;
 
@@ -20,6 +21,7 @@ class SponsorPanelController extends Controller
     private Event $eventModel;
     private Sponsor $sponsorModel;
     private Company $companyModel;
+    private SponsorInviteCode $inviteCodeModel;
     private TlosSetting $settingModel;
 
     public function __construct()
@@ -28,6 +30,7 @@ class SponsorPanelController extends Controller
         $this->eventModel = new Event();
         $this->sponsorModel = new Sponsor();
         $this->companyModel = new Company();
+        $this->inviteCodeModel = new SponsorInviteCode();
         $this->settingModel = new TlosSetting();
     }
 
@@ -425,6 +428,92 @@ class SponsorPanelController extends Controller
             'matches' => $matches,
             'meetings' => $meetings,
             'meta_title' => 'Tus Matches - ' . $event['name']
+        ]);
+    }
+
+    /**
+     * View sponsor's invite codes
+     */
+    public function inviteCodes(string $eventId): void
+    {
+        $sponsor = $this->requireSponsorAuth();
+        if (!$sponsor) return;
+
+        $event = $this->eventModel->find($eventId);
+        if (!$event) {
+            $this->notFound();
+            return;
+        }
+
+        // Verify sponsor participates in this event
+        if (!$this->sponsorModel->participatesInEvent($sponsor['id'], $event['id'])) {
+            $this->redirect('/sponsor/panel');
+            return;
+        }
+
+        // Get sponsor's invite codes for this event
+        $codes = $this->inviteCodeModel->getBySponsor($sponsor['id'], (int) $eventId);
+
+        // Get stats for each code
+        foreach ($codes as &$code) {
+            $code['stats'] = $this->inviteCodeModel->getUsageStats($code['id']);
+        }
+
+        // Get overall stats
+        $overallStats = $this->inviteCodeModel->getSponsorStats($sponsor['id'], (int) $eventId);
+
+        $this->render('sponsor-panel/invite-codes', [
+            'sponsor' => $sponsor,
+            'event' => $event,
+            'codes' => $codes,
+            'overallStats' => $overallStats,
+            'meta_title' => 'Mis Codigos de Invitacion - ' . $event['name']
+        ]);
+    }
+
+    /**
+     * View tickets registered with sponsor's codes
+     */
+    public function invitedGuests(string $eventId): void
+    {
+        $sponsor = $this->requireSponsorAuth();
+        if (!$sponsor) return;
+
+        $event = $this->eventModel->find($eventId);
+        if (!$event) {
+            $this->notFound();
+            return;
+        }
+
+        // Verify sponsor participates in this event
+        if (!$this->sponsorModel->participatesInEvent($sponsor['id'], $event['id'])) {
+            $this->redirect('/sponsor/panel');
+            return;
+        }
+
+        // Get all invite codes for this sponsor/event
+        $codes = $this->inviteCodeModel->getBySponsor($sponsor['id'], (int) $eventId);
+
+        // Get all tickets for each code
+        $allTickets = [];
+        foreach ($codes as $code) {
+            $tickets = $this->inviteCodeModel->getTickets($code['id']);
+            foreach ($tickets as $ticket) {
+                $ticket['invite_code'] = $code['code'];
+                $allTickets[] = $ticket;
+            }
+        }
+
+        // Sort by creation date
+        usort($allTickets, function($a, $b) {
+            return strtotime($b['created_at']) - strtotime($a['created_at']);
+        });
+
+        $this->render('sponsor-panel/invited-guests', [
+            'sponsor' => $sponsor,
+            'event' => $event,
+            'tickets' => $allTickets,
+            'meta_title' => 'Mis Invitados - ' . $event['name']
         ]);
     }
 

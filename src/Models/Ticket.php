@@ -18,6 +18,7 @@ class Ticket extends Model
         'event_id',
         'ticket_type_id',
         'sponsor_id',
+        'invite_code_id',
         'code',
         'attendee_name',
         'attendee_email',

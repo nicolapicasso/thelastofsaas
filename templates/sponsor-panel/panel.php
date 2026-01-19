@@ -530,6 +530,12 @@
                         <span class="nav-badge"><?= count($matches) ?></span>
                     <?php endif; ?>
                 </a>
+                <a href="/sponsor/codigos/<?= $currentEvent['id'] ?>" class="nav-item">
+                    <i class="fas fa-ticket-alt"></i> Mis Codigos
+                </a>
+                <a href="/sponsor/invitados/<?= $currentEvent['id'] ?>" class="nav-item">
+                    <i class="fas fa-users"></i> Mis Invitados
+                </a>
                 <?php endif; ?>
             </nav>
 

@@ -373,6 +373,18 @@ $router->post('/admin/votings/{id}/candidates', 'Admin\\VotingsController', 'add
 $router->post('/admin/votings/{id}/candidates/{candidateId}', 'Admin\\VotingsController', 'updateCandidate');
 $router->post('/admin/votings/{id}/candidates/{candidateId}/delete', 'Admin\\VotingsController', 'deleteCandidate');
 
+// Sponsor Invite Codes
+$router->get('/admin/sponsor-invite-codes', 'Admin\\SponsorInviteCodesController', 'index');
+$router->get('/admin/sponsor-invite-codes/create', 'Admin\\SponsorInviteCodesController', 'create');
+$router->post('/admin/sponsor-invite-codes', 'Admin\\SponsorInviteCodesController', 'store');
+$router->get('/admin/sponsor-invite-codes/bulk', 'Admin\\SponsorInviteCodesController', 'bulkCreate');
+$router->post('/admin/sponsor-invite-codes/bulk', 'Admin\\SponsorInviteCodesController', 'bulkCreate');
+$router->get('/admin/sponsor-invite-codes/export', 'Admin\\SponsorInviteCodesController', 'export');
+$router->get('/admin/sponsor-invite-codes/{id}/edit', 'Admin\\SponsorInviteCodesController', 'edit');
+$router->post('/admin/sponsor-invite-codes/{id}', 'Admin\\SponsorInviteCodesController', 'update');
+$router->post('/admin/sponsor-invite-codes/{id}/delete', 'Admin\\SponsorInviteCodesController', 'destroy');
+$router->post('/admin/sponsor-invite-codes/{id}/toggle-active', 'Admin\\SponsorInviteCodesController', 'toggleActive');
+
 // TLOS Settings
 $router->get('/admin/tlos-settings', 'Admin\\TlosSettingsController', 'index');
 $router->post('/admin/tlos-settings', 'Admin\\TlosSettingsController', 'update');
@@ -429,6 +441,8 @@ $router->get('/sponsor/empresas/{eventId}/{companyId}', 'SponsorPanelController'
 $router->post('/sponsor/seleccionar', 'SponsorPanelController', 'selectCompany');
 $router->post('/sponsor/deseleccionar', 'SponsorPanelController', 'unselectCompany');
 $router->get('/sponsor/matches/{eventId}', 'SponsorPanelController', 'matches');
+$router->get('/sponsor/codigos/{eventId}', 'SponsorPanelController', 'inviteCodes');
+$router->get('/sponsor/invitados/{eventId}', 'SponsorPanelController', 'invitedGuests');
 
 // Company Panel
 $router->get('/empresa/login', 'CompanyPanelController', 'login');
