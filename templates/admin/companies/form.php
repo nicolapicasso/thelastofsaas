@@ -63,30 +63,111 @@ $isEdit = isset($company) && $company;
             </div>
 
             <div class="card">
-                <div class="card-header"><h3>Contacto</h3></div>
+                <div class="card-header">
+                    <h3>Contactos</h3>
+                    <button type="button" class="btn btn-sm btn-outline" onclick="addContact()">
+                        <i class="fas fa-plus"></i> Anadir Contacto
+                    </button>
+                </div>
                 <div class="card-body">
-                    <div class="form-row">
-                        <div class="form-group" style="flex: 2;">
-                            <label for="contact_name">Nombre de Contacto</label>
-                            <input type="text" id="contact_name" name="contact_name" class="form-control" value="<?= htmlspecialchars($company['contact_name'] ?? '') ?>">
+                    <div id="contacts-container">
+                        <?php
+                        $contacts = $contacts ?? [];
+                        if (empty($contacts)) {
+                            // Show one empty contact form for new companies
+                            $contacts = [['id' => '', 'name' => '', 'position' => '', 'email' => '', 'phone' => '', 'is_primary' => 1]];
+                        }
+                        foreach ($contacts as $idx => $contact):
+                        ?>
+                        <div class="contact-item" data-index="<?= $idx ?>">
+                            <div class="contact-header">
+                                <span class="contact-number">Contacto <?= $idx + 1 ?></span>
+                                <div class="contact-actions">
+                                    <label class="primary-label">
+                                        <input type="radio" name="primary_contact" value="<?= $idx ?>" <?= ($contact['is_primary'] ?? 0) ? 'checked' : '' ?>>
+                                        Principal
+                                    </label>
+                                    <?php if ($idx > 0 || count($contacts) > 1): ?>
+                                    <button type="button" class="btn btn-sm btn-danger" onclick="removeContact(this)" title="Eliminar contacto">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                    <?php endif; ?>
+                                </div>
+                            </div>
+                            <input type="hidden" name="contacts[<?= $idx ?>][id]" value="<?= $contact['id'] ?? '' ?>">
+                            <div class="form-row">
+                                <div class="form-group" style="flex: 2;">
+                                    <label>Nombre</label>
+                                    <input type="text" name="contacts[<?= $idx ?>][name]" class="form-control" value="<?= htmlspecialchars($contact['name'] ?? '') ?>" placeholder="Nombre completo">
+                                </div>
+                                <div class="form-group" style="flex: 1;">
+                                    <label>Cargo</label>
+                                    <input type="text" name="contacts[<?= $idx ?>][position]" class="form-control" value="<?= htmlspecialchars($contact['position'] ?? '') ?>" placeholder="Ej: CEO, CTO...">
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Email</label>
+                                    <input type="email" name="contacts[<?= $idx ?>][email]" class="form-control" value="<?= htmlspecialchars($contact['email'] ?? '') ?>" placeholder="email@empresa.com">
+                                </div>
+                                <div class="form-group">
+                                    <label>Telefono</label>
+                                    <input type="text" name="contacts[<?= $idx ?>][phone]" class="form-control" value="<?= htmlspecialchars($contact['phone'] ?? '') ?>" placeholder="+34...">
+                                </div>
+                            </div>
                         </div>
-                        <div class="form-group" style="flex: 1;">
-                            <label for="contact_position">Cargo</label>
-                            <input type="text" id="contact_position" name="contact_position" class="form-control" value="<?= htmlspecialchars($company['contact_position'] ?? '') ?>" placeholder="Ej: CEO, CTO, Director...">
-                        </div>
-                    </div>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="contact_email">Email de Contacto</label>
-                            <input type="text" id="contact_email" name="contact_email" class="form-control" value="<?= htmlspecialchars($company['contact_email'] ?? '') ?>" placeholder="email@empresa.com">
-                        </div>
-                        <div class="form-group">
-                            <label for="contact_phone">Telefono</label>
-                            <input type="text" id="contact_phone" name="contact_phone" class="form-control" value="<?= htmlspecialchars($company['contact_phone'] ?? '') ?>">
-                        </div>
+                        <?php endforeach; ?>
                     </div>
                 </div>
             </div>
+
+            <template id="contact-template">
+                <div class="contact-item" data-index="__INDEX__">
+                    <div class="contact-header">
+                        <span class="contact-number">Contacto __NUM__</span>
+                        <div class="contact-actions">
+                            <label class="primary-label">
+                                <input type="radio" name="primary_contact" value="__INDEX__">
+                                Principal
+                            </label>
+                            <button type="button" class="btn btn-sm btn-danger" onclick="removeContact(this)" title="Eliminar contacto">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <input type="hidden" name="contacts[__INDEX__][id]" value="">
+                    <div class="form-row">
+                        <div class="form-group" style="flex: 2;">
+                            <label>Nombre</label>
+                            <input type="text" name="contacts[__INDEX__][name]" class="form-control" placeholder="Nombre completo">
+                        </div>
+                        <div class="form-group" style="flex: 1;">
+                            <label>Cargo</label>
+                            <input type="text" name="contacts[__INDEX__][position]" class="form-control" placeholder="Ej: CEO, CTO...">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Email</label>
+                            <input type="email" name="contacts[__INDEX__][email]" class="form-control" placeholder="email@empresa.com">
+                        </div>
+                        <div class="form-group">
+                            <label>Telefono</label>
+                            <input type="text" name="contacts[__INDEX__][phone]" class="form-control" placeholder="+34...">
+                        </div>
+                    </div>
+                </div>
+            </template>
+
+            <style>
+                .card-header { display: flex; justify-content: space-between; align-items: center; }
+                .contact-item { background: #f8f9fa; border: 1px solid #dee2e6; padding: 1rem; margin-bottom: 1rem; border-radius: 4px; }
+                .contact-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid #dee2e6; }
+                .contact-number { font-weight: 600; font-size: 0.9rem; }
+                .contact-actions { display: flex; gap: 1rem; align-items: center; }
+                .primary-label { display: flex; align-items: center; gap: 0.25rem; font-size: 0.85rem; cursor: pointer; }
+                .primary-label input { margin: 0; }
+            </style>
 
             <?php if (!empty($sponsors)): ?>
             <div class="card">
@@ -156,8 +237,40 @@ $isEdit = isset($company) && $company;
     </div>
 </form>
 
-<?php if ($isEdit): ?>
 <script>
+let contactIndex = <?= count($contacts ?? []) ?>;
+
+function addContact() {
+    const container = document.getElementById('contacts-container');
+    const template = document.getElementById('contact-template');
+    const html = template.innerHTML
+        .replace(/__INDEX__/g, contactIndex)
+        .replace(/__NUM__/g, contactIndex + 1);
+
+    const div = document.createElement('div');
+    div.innerHTML = html;
+    container.appendChild(div.firstElementChild);
+    contactIndex++;
+    updateContactNumbers();
+}
+
+function removeContact(btn) {
+    const item = btn.closest('.contact-item');
+    if (document.querySelectorAll('.contact-item').length > 1) {
+        item.remove();
+        updateContactNumbers();
+    } else {
+        alert('Debe haber al menos un contacto.');
+    }
+}
+
+function updateContactNumbers() {
+    document.querySelectorAll('.contact-item').forEach((item, idx) => {
+        item.querySelector('.contact-number').textContent = 'Contacto ' + (idx + 1);
+    });
+}
+
+<?php if ($isEdit): ?>
 function regenerateCode() {
     if (!confirm('¿Regenerar el codigo?')) return;
     fetch('/admin/companies/<?= $company['id'] ?>/regenerate-code', {
@@ -174,5 +287,5 @@ function copyToClipboard(path) {
         prompt('Copia este enlace:', url);
     });
 }
-</script>
 <?php endif; ?>
+</script>

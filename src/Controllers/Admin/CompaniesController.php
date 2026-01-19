@@ -6,6 +6,7 @@ namespace App\Controllers\Admin;
 
 use App\Core\Controller;
 use App\Models\Company;
+use App\Models\CompanyContact;
 use App\Models\Sponsor;
 use App\Helpers\Sanitizer;
 use App\Helpers\Slug;
@@ -17,12 +18,14 @@ use App\Helpers\Slug;
 class CompaniesController extends Controller
 {
     private Company $companyModel;
+    private CompanyContact $contactModel;
     private Sponsor $sponsorModel;
 
     public function __construct()
     {
         parent::__construct();
         $this->companyModel = new Company();
+        $this->contactModel = new CompanyContact();
         $this->sponsorModel = new Sponsor();
     }
 
@@ -84,6 +87,7 @@ class CompaniesController extends Controller
         $this->renderAdmin('companies/form', [
             'title' => 'Nueva Empresa',
             'company' => null,
+            'contacts' => [],
             'saasUsage' => [],
             'sponsors' => $sponsors,
             'sizeOptions' => Company::getSizeOptions(),
@@ -117,6 +121,9 @@ class CompaniesController extends Controller
         try {
             $companyId = $this->companyModel->create($data);
 
+            // Save contacts
+            $this->saveContacts($companyId);
+
             // Save SaaS usage
             $saasIds = $this->getPost('saas_usage', []);
             if (is_array($saasIds)) {
@@ -149,10 +156,12 @@ class CompaniesController extends Controller
 
         $saasUsage = $this->companyModel->getSaasUsage((int) $id);
         $sponsors = $this->sponsorModel->getActive();
+        $contacts = $this->contactModel->getByCompany((int) $id);
 
         $this->renderAdmin('companies/form', [
             'title' => 'Editar Empresa',
             'company' => $company,
+            'contacts' => $contacts,
             'saasUsage' => $saasUsage,
             'saasUsageIds' => array_column($saasUsage, 'id'),
             'sponsors' => $sponsors,
@@ -194,6 +203,9 @@ class CompaniesController extends Controller
 
         try {
             $this->companyModel->update((int) $id, $data);
+
+            // Save contacts
+            $this->saveContacts((int) $id);
 
             // Update SaaS usage
             $currentUsage = $this->companyModel->getSaasUsage((int) $id);
@@ -570,5 +582,76 @@ class CompaniesController extends Controller
 
         // Return the URL
         return ['url' => '/uploads/logos/' . $type . '/' . $filename];
+    }
+
+    /**
+     * Save company contacts from form
+     */
+    private function saveContacts(int $companyId): void
+    {
+        $contacts = $this->getPost('contacts', []);
+        $primaryIndex = $this->getPost('primary_contact', '0');
+
+        if (!is_array($contacts)) {
+            return;
+        }
+
+        // Get existing contact IDs for this company
+        $existingContacts = $this->contactModel->getByCompany($companyId);
+        $existingIds = array_column($existingContacts, 'id');
+        $processedIds = [];
+
+        foreach ($contacts as $index => $contactData) {
+            // Skip empty contacts (no name and no email)
+            if (empty(trim($contactData['name'] ?? '')) && empty(trim($contactData['email'] ?? ''))) {
+                continue;
+            }
+
+            $isPrimary = ((string) $index === (string) $primaryIndex) ? 1 : 0;
+
+            $data = [
+                'company_id' => $companyId,
+                'name' => Sanitizer::string($contactData['name'] ?? ''),
+                'position' => Sanitizer::string($contactData['position'] ?? '') ?: null,
+                'email' => Sanitizer::string($contactData['email'] ?? '') ?: null,
+                'phone' => Sanitizer::string($contactData['phone'] ?? '') ?: null,
+                'is_primary' => $isPrimary,
+            ];
+
+            $contactId = !empty($contactData['id']) ? (int) $contactData['id'] : null;
+
+            if ($contactId && in_array($contactId, $existingIds)) {
+                // Update existing contact
+                $this->contactModel->update($contactId, $data);
+                $processedIds[] = $contactId;
+            } else {
+                // Create new contact
+                $newId = $this->contactModel->create($data);
+                $processedIds[] = $newId;
+            }
+        }
+
+        // Delete contacts that were removed from the form
+        foreach ($existingIds as $existingId) {
+            if (!in_array($existingId, $processedIds)) {
+                $this->contactModel->delete($existingId);
+            }
+        }
+
+        // Ensure at least one contact is primary
+        $updatedContacts = $this->contactModel->getByCompany($companyId);
+        if (!empty($updatedContacts)) {
+            $hasPrimary = false;
+            foreach ($updatedContacts as $contact) {
+                if ($contact['is_primary']) {
+                    $hasPrimary = true;
+                    break;
+                }
+            }
+            if (!$hasPrimary) {
+                // Set first contact as primary
+                $this->contactModel->setPrimary((int) $updatedContacts[0]['id'], $companyId);
+            }
+        }
     }
 }
