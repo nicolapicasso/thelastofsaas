@@ -179,45 +179,47 @@ $featuredImage = $event['featured_image'] ?? null;
 </section>
 <?php endif; ?>
 
-<!-- SECTION G: Speakers (Black on White) -->
+<!-- SECTION F: Speakers Carousel (White bg) -->
 <?php if (!empty($speakers)): ?>
 <section class="event-speakers">
     <div class="container-wide">
         <h2>SPEAKERS</h2>
-        <div class="speakers-grid">
-            <?php foreach ($speakers as $speaker): ?>
-                <a href="/speakers/<?= $speaker['slug'] ?? $speaker['id'] ?>" class="speaker-card">
-                    <div class="speaker-photo">
-                        <?php if (!empty($speaker['photo'])): ?>
-                            <?php
-                            // Check if there's an animated version (gif)
-                            $hasAnimated = !empty($speaker['photo_animated']);
-                            $staticPhoto = $speaker['photo'];
-                            $animatedPhoto = $speaker['photo_animated'] ?? $speaker['photo'];
-                            ?>
-                            <?php if ($hasAnimated): ?>
-                                <img src="<?= htmlspecialchars($staticPhoto) ?>" alt="<?= htmlspecialchars($speaker['name'] ?? '') ?>" class="photo-static">
-                                <img src="<?= htmlspecialchars($animatedPhoto) ?>" alt="<?= htmlspecialchars($speaker['name'] ?? '') ?>" class="photo-animated">
+        <div class="speakers-carousel-wrapper">
+            <div class="speakers-carousel">
+                <?php foreach ($speakers as $speaker): ?>
+                    <a href="/speakers/<?= $speaker['slug'] ?? $speaker['id'] ?>" class="speaker-card">
+                        <div class="speaker-photo">
+                            <?php if (!empty($speaker['photo'])): ?>
+                                <?php
+                                // Check if there's an animated version (gif)
+                                $hasAnimated = !empty($speaker['photo_animated']);
+                                $staticPhoto = $speaker['photo'];
+                                $animatedPhoto = $speaker['photo_animated'] ?? $speaker['photo'];
+                                ?>
+                                <?php if ($hasAnimated): ?>
+                                    <img src="<?= htmlspecialchars($staticPhoto) ?>" alt="<?= htmlspecialchars($speaker['name'] ?? '') ?>" class="photo-static">
+                                    <img src="<?= htmlspecialchars($animatedPhoto) ?>" alt="<?= htmlspecialchars($speaker['name'] ?? '') ?>" class="photo-animated">
+                                <?php else: ?>
+                                    <img src="<?= htmlspecialchars($staticPhoto) ?>" alt="<?= htmlspecialchars($speaker['name'] ?? '') ?>">
+                                <?php endif; ?>
                             <?php else: ?>
-                                <img src="<?= htmlspecialchars($staticPhoto) ?>" alt="<?= htmlspecialchars($speaker['name'] ?? '') ?>">
+                                <div class="speaker-placeholder">
+                                    <i class="fas fa-user"></i>
+                                </div>
                             <?php endif; ?>
-                        <?php else: ?>
-                            <div class="speaker-placeholder">
-                                <i class="fas fa-user"></i>
-                            </div>
-                        <?php endif; ?>
-                    </div>
-                    <div class="speaker-info">
-                        <strong><?= htmlspecialchars($speaker['name'] ?? '') ?></strong>
-                        <?php if (!empty($speaker['position'])): ?>
-                            <span class="speaker-position"><?= htmlspecialchars($speaker['position']) ?></span>
-                        <?php endif; ?>
-                        <?php if (!empty($speaker['company'])): ?>
-                            <span class="speaker-company"><?= htmlspecialchars($speaker['company']) ?></span>
-                        <?php endif; ?>
-                    </div>
-                </a>
-            <?php endforeach; ?>
+                        </div>
+                        <div class="speaker-info">
+                            <strong><?= htmlspecialchars($speaker['name'] ?? '') ?></strong>
+                            <?php if (!empty($speaker['position'])): ?>
+                                <span class="speaker-position"><?= htmlspecialchars($speaker['position']) ?></span>
+                            <?php endif; ?>
+                            <?php if (!empty($speaker['company'])): ?>
+                                <span class="speaker-company">en <?= htmlspecialchars($speaker['company']) ?></span>
+                            <?php endif; ?>
+                        </div>
+                    </a>
+                <?php endforeach; ?>
+            </div>
         </div>
     </div>
 </section>

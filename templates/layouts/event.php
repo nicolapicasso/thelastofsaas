@@ -778,58 +778,89 @@
             background: var(--text-dark);
         }
 
-        .speakers-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-            gap: 2.5rem;
+        /* Speakers Carousel */
+        .speakers-carousel-wrapper {
+            position: relative;
+            overflow: hidden;
+            margin: 0 -20px;
+            padding: 0 20px;
+        }
+
+        .speakers-carousel {
+            display: flex;
+            gap: 1.5rem;
+            overflow-x: auto;
+            scroll-behavior: smooth;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+            padding: 1rem 0 2rem;
+        }
+
+        .speakers-carousel::-webkit-scrollbar {
+            display: none;
         }
 
         .speaker-card {
-            text-align: center;
+            flex: 0 0 280px;
+            text-align: left;
             text-decoration: none;
             display: block;
             transition: var(--transition);
+            background: var(--bg-light);
+            overflow: hidden;
         }
 
         .speaker-card:hover {
             transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
         }
 
         .speaker-photo {
-            width: 140px;
-            height: 140px;
-            margin: 0 auto 1.25rem;
+            width: 100%;
+            height: 320px;
             overflow: hidden;
-            border: 3px solid var(--bg-dark);
             position: relative;
+            border-radius: 12px 12px 0 0;
         }
 
         .speaker-photo img {
             width: 100%;
             height: 100%;
             object-fit: cover;
-            transition: var(--transition);
+            filter: grayscale(100%);
+            transition: all 0.4s ease;
         }
 
-        .speaker-photo .photo-static {
-            position: absolute;
-            top: 0;
-            left: 0;
-        }
-
+        .speaker-photo .photo-static,
         .speaker-photo .photo-animated {
             position: absolute;
             top: 0;
             left: 0;
-            opacity: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .speaker-photo .photo-static {
+            z-index: 2;
+        }
+
+        .speaker-photo .photo-animated {
+            z-index: 1;
+            opacity: 1;
+            filter: grayscale(0%);
+        }
+
+        .speaker-card:hover .speaker-photo img {
+            filter: grayscale(0%);
         }
 
         .speaker-card:hover .photo-static {
             opacity: 0;
+            z-index: 1;
         }
 
         .speaker-card:hover .photo-animated {
-            opacity: 1;
+            z-index: 2;
         }
 
         .speaker-placeholder {
@@ -840,26 +871,47 @@
             justify-content: center;
             background: rgba(0, 0, 0, 0.05);
             color: var(--text-grey-dark);
-            font-size: 3rem;
+            font-size: 4rem;
+        }
+
+        .speaker-info {
+            padding: 1.5rem;
+            background: var(--bg-light);
+            border-radius: 0 0 12px 12px;
         }
 
         .speaker-info strong {
             display: block;
-            font-size: 14px;
+            font-size: 18px;
             font-weight: 700;
             text-transform: uppercase;
-            margin-bottom: 0.25rem;
+            margin-bottom: 0.5rem;
             color: var(--text-dark);
         }
 
-        .speaker-position,
+        .speaker-position {
+            display: block;
+            font-family: var(--font-mono);
+            font-size: 12px;
+            color: var(--text-grey-dark);
+            line-height: 1.5;
+        }
+
         .speaker-company {
             display: block;
             font-family: var(--font-mono);
             font-size: 11px;
             color: var(--text-grey-dark);
             text-transform: uppercase;
-            letter-spacing: 0.1em;
+            letter-spacing: 0.05em;
+            margin-top: 0.25rem;
+        }
+
+        /* Legacy grid support */
+        .speakers-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 2.5rem;
         }
 
         /* ============================================
@@ -1278,14 +1330,17 @@
                 width: auto;
             }
 
-            .speakers-grid {
-                grid-template-columns: repeat(2, 1fr);
-                gap: 1.5rem;
+            .speaker-card {
+                flex: 0 0 240px;
             }
 
             .speaker-photo {
-                width: 100px;
-                height: 100px;
+                height: 280px;
+            }
+
+            .speakers-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 1.5rem;
             }
 
             .footer-content {
