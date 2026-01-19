@@ -56,6 +56,41 @@ class Company extends Model
     }
 
     /**
+     * Search companies by name with pagination
+     */
+    public function searchByName(string $search, int $page = 1, int $perPage = 20, array $conditions = []): array
+    {
+        $offset = ($page - 1) * $perPage;
+
+        // Build WHERE clause
+        $where = "WHERE name LIKE ?";
+        $params = ['%' . $search . '%'];
+
+        foreach ($conditions as $key => $value) {
+            $where .= " AND {$key} = ?";
+            $params[] = $value;
+        }
+
+        // Count total
+        $countSql = "SELECT COUNT(*) FROM {$this->table} {$where}";
+        $total = (int) $this->db->fetchColumn($countSql, $params);
+
+        // Get data
+        $sql = "SELECT * FROM {$this->table} {$where} ORDER BY name ASC LIMIT {$perPage} OFFSET {$offset}";
+        $data = $this->db->fetchAll($sql, $params);
+
+        return [
+            'data' => $data,
+            'pagination' => [
+                'total' => $total,
+                'per_page' => $perPage,
+                'current_page' => $page,
+                'total_pages' => (int) ceil($total / $perPage),
+            ],
+        ];
+    }
+
+    /**
      * Get companies for an event
      */
     public function getByEvent(int $eventId): array

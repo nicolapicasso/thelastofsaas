@@ -36,6 +36,7 @@ class CompaniesController extends Controller
         $page = (int) ($this->getQuery('page', 1));
         $active = $this->getQuery('active');
         $sector = $this->getQuery('sector');
+        $search = trim($this->getQuery('search', ''));
 
         $conditions = [];
         if ($active !== null && $active !== '') {
@@ -45,7 +46,12 @@ class CompaniesController extends Controller
             $conditions['sector'] = $sector;
         }
 
-        $result = $this->companyModel->paginate($page, 20, $conditions, ['name' => 'ASC']);
+        // Use search or regular pagination
+        if (!empty($search)) {
+            $result = $this->companyModel->searchByName($search, $page, 20, $conditions);
+        } else {
+            $result = $this->companyModel->paginate($page, 20, $conditions, ['name' => 'ASC']);
+        }
 
         // Get unique sectors for filter
         $allCompanies = $this->companyModel->all();
@@ -59,6 +65,7 @@ class CompaniesController extends Controller
             'sectors' => $sectors,
             'currentActive' => $active,
             'currentSector' => $sector,
+            'currentSearch' => $search,
             'sizeOptions' => Company::getSizeOptions(),
             'flash' => $this->getFlash(),
             'csrf_token' => $this->generateCsrf(),

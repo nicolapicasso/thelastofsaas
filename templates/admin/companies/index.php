@@ -23,6 +23,10 @@
 
 <div class="card filters-card">
     <form method="GET" action="/admin/companies" class="filters-form">
+        <div class="filter-group" style="flex: 1;">
+            <label>Buscar</label>
+            <input type="text" name="search" value="<?= htmlspecialchars($currentSearch ?? '') ?>" placeholder="Nombre de la empresa..." class="form-control">
+        </div>
         <div class="filter-group">
             <label>Estado</label>
             <select name="active" onchange="this.form.submit()">
@@ -40,8 +44,11 @@
                 <?php endforeach; ?>
             </select>
         </div>
-        <?php if ($currentActive !== null || ($currentSector ?? '')): ?>
-            <a href="/admin/companies" class="btn btn-outline btn-sm">Limpiar</a>
+        <div class="filter-group" style="align-self: flex-end;">
+            <button type="submit" class="btn btn-primary btn-sm"><i class="fas fa-search"></i> Buscar</button>
+        </div>
+        <?php if ($currentActive !== null || ($currentSector ?? '') || !empty($currentSearch)): ?>
+            <a href="/admin/companies" class="btn btn-outline btn-sm" style="align-self: flex-end;">Limpiar</a>
         <?php endif; ?>
     </form>
 </div>

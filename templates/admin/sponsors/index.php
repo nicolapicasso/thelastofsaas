@@ -32,6 +32,10 @@
 <!-- Filters -->
 <div class="card filters-card">
     <form method="GET" action="/admin/sponsors" class="filters-form">
+        <div class="filter-group" style="flex: 1;">
+            <label>Buscar</label>
+            <input type="text" name="search" value="<?= htmlspecialchars($currentSearch ?? '') ?>" placeholder="Nombre del sponsor..." class="form-control">
+        </div>
         <div class="filter-group">
             <label>Estado</label>
             <select name="active" onchange="this.form.submit()">
@@ -40,8 +44,11 @@
                 <option value="0" <?= ($currentActive ?? '') === '0' ? 'selected' : '' ?>>Inactivos</option>
             </select>
         </div>
-        <?php if (($currentActive ?? null) !== null && $currentActive !== ''): ?>
-            <a href="/admin/sponsors" class="btn btn-outline btn-sm">Limpiar</a>
+        <div class="filter-group" style="align-self: flex-end;">
+            <button type="submit" class="btn btn-primary btn-sm"><i class="fas fa-search"></i> Buscar</button>
+        </div>
+        <?php if (($currentActive ?? null) !== null && $currentActive !== '' || !empty($currentSearch)): ?>
+            <a href="/admin/sponsors" class="btn btn-outline btn-sm" style="align-self: flex-end;">Limpiar</a>
         <?php endif; ?>
     </form>
 </div>

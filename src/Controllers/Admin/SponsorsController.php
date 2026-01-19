@@ -35,19 +35,26 @@ class SponsorsController extends Controller
 
         $page = (int) ($this->getQuery('page', 1));
         $active = $this->getQuery('active');
+        $search = trim($this->getQuery('search', ''));
 
         $conditions = [];
         if ($active !== null && $active !== '') {
             $conditions['active'] = (int) $active;
         }
 
-        $result = $this->sponsorModel->paginate($page, 20, $conditions, ['name' => 'ASC']);
+        // Use search or regular pagination
+        if (!empty($search)) {
+            $result = $this->sponsorModel->searchByName($search, $page, 20, $conditions);
+        } else {
+            $result = $this->sponsorModel->paginate($page, 20, $conditions, ['name' => 'ASC']);
+        }
 
         $this->renderAdmin('sponsors/index', [
             'title' => 'Sponsors',
             'sponsors' => $result['data'],
             'pagination' => $result['pagination'],
             'currentActive' => $active,
+            'currentSearch' => $search,
             'flash' => $this->getFlash(),
             'csrf_token' => $this->generateCsrf(),
         ]);
