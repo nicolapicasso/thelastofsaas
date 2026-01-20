@@ -3,6 +3,15 @@
  * Unassigned Matches Template
  * TLOS - The Last of SaaS
  */
+
+// Get current event slug for public links
+$currentEventSlug = '';
+foreach ($events as $evt) {
+    if ($evt['id'] == $currentEventId) {
+        $currentEventSlug = $evt['slug'] ?? '';
+        break;
+    }
+}
 ?>
 
 <div class="page-header">
@@ -11,6 +20,9 @@
         <p>Matches mutuos pendientes de asignar reunión</p>
     </div>
     <div class="page-header-actions">
+        <?php if ($currentEventSlug): ?>
+            <a href="/eventos/<?= htmlspecialchars($currentEventSlug) ?>/reuniones" class="btn btn-outline" target="_blank"><i class="fas fa-external-link-alt"></i> Ver Público</a>
+        <?php endif; ?>
         <a href="/admin/meetings/blocks?event_id=<?= $currentEventId ?>" class="btn btn-outline"><i class="fas fa-clock"></i> Bloques</a>
         <a href="/admin/meetings/assignments?event_id=<?= $currentEventId ?>" class="btn btn-outline"><i class="fas fa-handshake"></i> Asignadas</a>
         <a href="/admin/meetings/matching?event_id=<?= $currentEventId ?>" class="btn btn-outline"><i class="fas fa-project-diagram"></i> Resumen</a>

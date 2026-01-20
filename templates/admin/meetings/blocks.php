@@ -3,6 +3,15 @@
  * Meeting Blocks Template
  * TLOS - The Last of SaaS
  */
+
+// Get current event slug for public links
+$currentEventSlug = '';
+foreach ($events as $evt) {
+    if ($evt['id'] == $currentEventId) {
+        $currentEventSlug = $evt['slug'] ?? '';
+        break;
+    }
+}
 ?>
 
 <div class="page-header">
@@ -11,6 +20,9 @@
         <p>Configura los bloques de reuniones</p>
     </div>
     <div class="page-header-actions">
+        <?php if ($currentEventSlug): ?>
+            <a href="/eventos/<?= htmlspecialchars($currentEventSlug) ?>/reuniones" class="btn btn-outline" target="_blank"><i class="fas fa-external-link-alt"></i> Ver Público</a>
+        <?php endif; ?>
         <a href="/admin/meetings/assignments?event_id=<?= $currentEventId ?>" class="btn btn-outline"><i class="fas fa-calendar-check"></i> Reuniones</a>
         <a href="/admin/meetings/matching?event_id=<?= $currentEventId ?>" class="btn btn-outline"><i class="fas fa-handshake"></i> Matching</a>
     </div>
@@ -121,6 +133,14 @@
                             </td>
                             <td>
                                 <div class="btn-group">
+                                    <?php if ($currentEventSlug): ?>
+                                        <a href="/eventos/<?= htmlspecialchars($currentEventSlug) ?>/reuniones/pantalla/<?= $block['id'] ?>" class="btn btn-sm btn-outline btn-info" target="_blank" title="Pantalla">
+                                            <i class="fas fa-tv"></i>
+                                        </a>
+                                        <a href="/eventos/<?= htmlspecialchars($currentEventSlug) ?>/reuniones/horario/<?= $block['id'] ?>" class="btn btn-sm btn-outline" target="_blank" title="Horario">
+                                            <i class="fas fa-table"></i>
+                                        </a>
+                                    <?php endif; ?>
                                     <button type="button" class="btn btn-sm btn-outline" onclick="editBlock(<?= htmlspecialchars(json_encode($block)) ?>)" title="Editar">
                                         <i class="fas fa-edit"></i>
                                     </button>
