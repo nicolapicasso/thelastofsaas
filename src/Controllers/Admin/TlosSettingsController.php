@@ -77,7 +77,7 @@ class TlosSettingsController extends Controller
             foreach ($knownBooleanSettings as $key) {
                 if (!isset($settings[$key])) {
                     // Checkbox is unchecked (not sent in POST), set to '0'
-                    $this->settingsModel->set($key, '0');
+                    $this->settingsModel->setWithType($key, '0', 'boolean', 'meetings');
                 }
             }
 
@@ -99,6 +99,11 @@ class TlosSettingsController extends Controller
                 if ($setting) {
                     $value = $this->sanitizeSettingValue($value, $setting['setting_type']);
                     $this->settingsModel->set($key, $value);
+                } else {
+                    // Setting doesn't exist yet - determine type and create it
+                    $type = in_array($key, $knownBooleanSettings) ? 'boolean' : 'text';
+                    $value = $this->sanitizeSettingValue($value, $type);
+                    $this->settingsModel->setWithType($key, $value, $type);
                 }
             }
 

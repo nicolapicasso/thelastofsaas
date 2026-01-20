@@ -54,6 +54,28 @@ class TlosSetting extends Model
     }
 
     /**
+     * Set a setting value with specific type
+     */
+    public function setWithType(string $key, mixed $value, string $type, string $group = 'general'): bool
+    {
+        $setting = $this->findBy('setting_key', $key);
+
+        if ($setting) {
+            return $this->update($setting['id'], [
+                'setting_value' => (string) $value,
+                'setting_type' => $type,
+            ]);
+        }
+
+        return $this->create([
+            'setting_key' => $key,
+            'setting_value' => (string) $value,
+            'setting_type' => $type,
+            'setting_group' => $group,
+        ]) > 0;
+    }
+
+    /**
      * Get all settings
      */
     public function getAll(): array

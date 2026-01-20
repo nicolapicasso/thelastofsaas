@@ -76,6 +76,7 @@ class VotingsController extends Controller
             'events' => $events,
             'statusOptions' => Voting::getStatusOptions(),
             'csrf_token' => $this->generateCsrf(),
+            'flash' => $this->getFlash(),
         ]);
     }
 
@@ -137,6 +138,7 @@ class VotingsController extends Controller
             'totalVotes' => $totalVotes,
             'statusOptions' => Voting::getStatusOptions(),
             'csrf_token' => $this->generateCsrf(),
+            'flash' => $this->getFlash(),
         ]);
     }
 
@@ -370,6 +372,8 @@ class VotingsController extends Controller
             'voting' => $voting,
             'candidates' => $results['candidates'],
             'totalVotes' => $results['total_votes'],
+            'statusOptions' => Voting::getStatusOptions(),
+            'flash' => $this->getFlash(),
         ]);
     }
 

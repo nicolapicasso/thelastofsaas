@@ -21,7 +21,7 @@ $title = $isEdit ? 'Editar Votación' : 'Nueva Votación';
     </div>
 </div>
 
-<?php if ($flash): ?>
+<?php if (!empty($flash)): ?>
     <div class="alert alert-<?= $flash['type'] ?>"><?= $flash['message'] ?></div>
 <?php endif; ?>
 
@@ -161,7 +161,7 @@ $title = $isEdit ? 'Editar Votación' : 'Nueva Votación';
                 <div class="card-body">
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; text-align: center;">
                         <div>
-                            <div style="font-size: 1.5rem; font-weight: bold;"><?= $candidateCount ?? 0 ?></div>
+                            <div style="font-size: 1.5rem; font-weight: bold;"><?= count($candidates ?? []) ?></div>
                             <div class="text-muted">Candidatos</div>
                         </div>
                         <div>

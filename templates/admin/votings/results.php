@@ -17,7 +17,7 @@
     </div>
 </div>
 
-<?php if ($flash): ?>
+<?php if (!empty($flash)): ?>
     <div class="alert alert-<?= $flash['type'] ?>"><?= $flash['message'] ?></div>
 <?php endif; ?>
 

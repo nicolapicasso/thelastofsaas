@@ -68,6 +68,11 @@
                     <td>Nombre de la empresa</td>
                 </tr>
                 <tr>
+                    <td><code>description</code></td>
+                    <td>No</td>
+                    <td>Descripcion de la empresa</td>
+                </tr>
+                <tr>
                     <td><code>code</code></td>
                     <td>No</td>
                     <td>Codigo unico de la empresa</td>
@@ -88,14 +93,24 @@
                     <td>URL del sitio web</td>
                 </tr>
                 <tr>
+                    <td><code>contacts</code></td>
+                    <td>No</td>
+                    <td>Contactos de la empresa. Formato: <code>nombre|cargo|email|telefono</code>. Para varios contactos, separar con <code>;</code>. Ejemplo: <code>Juan Perez|CEO|juan@empresa.com|+34666111222;Maria Garcia|CTO|maria@empresa.com</code></td>
+                </tr>
+                <tr>
                     <td><code>contact_name</code></td>
                     <td>No</td>
-                    <td>Nombre del contacto</td>
+                    <td>(Alternativa simple) Nombre del contacto principal</td>
                 </tr>
                 <tr>
                     <td><code>contact_email</code></td>
                     <td>No</td>
-                    <td>Email de contacto</td>
+                    <td>(Alternativa simple) Email del contacto principal</td>
+                </tr>
+                <tr>
+                    <td><code>contact_phone</code></td>
+                    <td>No</td>
+                    <td>(Alternativa simple) Telefono del contacto principal</td>
                 </tr>
                 <tr>
                     <td><code>active</code></td>
@@ -110,9 +125,13 @@
             </tbody>
         </table>
         <p class="mt-3"><strong>Nota:</strong> Tambien se aceptan las columnas <code>saas_usage</code>, <code>saas que utiliza</code> o <code>herramientas</code> como alternativas a <code>saas</code>.</p>
-        <p class="mt-3"><strong>Ejemplo:</strong></p>
-        <pre class="bg-light p-3"><code>name;sector;employees;contact_email;saas
-"Tech Solutions";"Tecnologia";"51-200";"info@techsol.com";"Slack, HubSpot, Salesforce"
-"Innovate Corp";"Servicios";"11-50";"contacto@innovate.io";"Notion, Figma"</code></pre>
+        <p class="mt-3"><strong>Ejemplo basico:</strong></p>
+        <pre class="bg-light p-3"><code>name;description;sector;employees;contact_email;saas
+"Tech Solutions";"Empresa de tecnologia";"Tecnologia";"51-200";"info@techsol.com";"Slack, HubSpot, Salesforce"
+"Innovate Corp";"Servicios digitales";"Servicios";"11-50";"contacto@innovate.io";"Notion, Figma"</code></pre>
+        <p class="mt-3"><strong>Ejemplo con multiples contactos:</strong></p>
+        <pre class="bg-light p-3"><code>name;description;sector;contacts;saas
+"Tech Solutions";"Empresa de tecnologia";"Tecnologia";"Juan Perez|CEO|juan@tech.com|+34666111222;Maria Garcia|CTO|maria@tech.com";"Slack, HubSpot"
+"Innovate Corp";"Servicios digitales";"Servicios";"Pedro Lopez|Director|pedro@innovate.io";"Notion, Figma"</code></pre>
     </div>
 </div>

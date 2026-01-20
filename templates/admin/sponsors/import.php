@@ -68,6 +68,11 @@
                     <td>Nombre del sponsor</td>
                 </tr>
                 <tr>
+                    <td><code>description</code></td>
+                    <td>No</td>
+                    <td>Descripcion completa del sponsor</td>
+                </tr>
+                <tr>
                     <td><code>code</code></td>
                     <td>No</td>
                     <td>Codigo unico del sponsor</td>
@@ -75,7 +80,7 @@
                 <tr>
                     <td><code>tagline</code></td>
                     <td>No</td>
-                    <td>Descripcion corta</td>
+                    <td>Descripcion corta (eslogan)</td>
                 </tr>
                 <tr>
                     <td><code>website</code></td>
@@ -83,14 +88,24 @@
                     <td>URL del sitio web</td>
                 </tr>
                 <tr>
+                    <td><code>contacts</code></td>
+                    <td>No</td>
+                    <td>Contactos del sponsor. Formato: <code>nombre|email|telefono</code>. Para varios contactos, separar con <code>;</code>. Ejemplo: <code>Juan Perez|juan@empresa.com|+34666111222;Maria Garcia|maria@empresa.com</code></td>
+                </tr>
+                <tr>
                     <td><code>contact_name</code></td>
                     <td>No</td>
-                    <td>Nombre del contacto</td>
+                    <td>(Alternativa simple) Nombre del contacto principal</td>
                 </tr>
                 <tr>
                     <td><code>contact_email</code></td>
                     <td>No</td>
-                    <td>Email de contacto</td>
+                    <td>(Alternativa simple) Email del contacto principal</td>
+                </tr>
+                <tr>
+                    <td><code>contact_phone</code></td>
+                    <td>No</td>
+                    <td>(Alternativa simple) Telefono del contacto principal</td>
                 </tr>
                 <tr>
                     <td><code>active</code></td>
@@ -99,9 +114,13 @@
                 </tr>
             </tbody>
         </table>
-        <p class="mt-3"><strong>Ejemplo:</strong></p>
-        <pre class="bg-light p-3"><code>name,code,tagline,website,contact_email
-"Empresa ABC","abc","Innovacion tecnologica","https://abc.com","contacto@abc.com"
-"Startup XYZ","xyz","El futuro es ahora","https://xyz.io","info@xyz.io"</code></pre>
+        <p class="mt-3"><strong>Ejemplo basico:</strong></p>
+        <pre class="bg-light p-3"><code>name;description;tagline;website;contact_email
+"Empresa ABC";"Empresa lider en tecnologia";"Innovacion tecnologica";"https://abc.com";"contacto@abc.com"
+"Startup XYZ";"Startup de inteligencia artificial";"El futuro es ahora";"https://xyz.io";"info@xyz.io"</code></pre>
+        <p class="mt-3"><strong>Ejemplo con multiples contactos:</strong></p>
+        <pre class="bg-light p-3"><code>name;description;tagline;website;contacts
+"Empresa ABC";"Empresa lider en tecnologia";"Innovacion tecnologica";"https://abc.com";"Juan Perez|juan@abc.com|+34666111222;Maria Garcia|maria@abc.com"
+"Startup XYZ";"Startup de inteligencia artificial";"El futuro es ahora";"https://xyz.io";"Pedro Lopez|pedro@xyz.io"</code></pre>
     </div>
 </div>

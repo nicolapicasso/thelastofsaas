@@ -165,7 +165,14 @@ class VotingController extends Controller
         ];
 
         // Register vote
-        $result = $this->votingModel->registerVote($voteData);
+        $result = $this->votingModel->vote(
+            $voteData['voting_id'],
+            $voteData['candidate_id'],
+            $voteData['ip_address'],
+            $voteData['fingerprint'],
+            null,
+            null
+        );
 
         if (!$result) {
             $this->jsonError('Error al registrar el voto', 500);
@@ -235,9 +242,9 @@ class VotingController extends Controller
             return true;
         }
 
-        // Check IP in database (last 24 hours)
+        // Check IP in database
         $ip = $this->getClientIp();
-        if ($this->votingModel->hasIpVoted($votingId, $ip, 24)) {
+        if ($this->votingModel->hasVoted($votingId, $ip, null, null)) {
             return true;
         }
 

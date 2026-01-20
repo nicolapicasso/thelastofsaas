@@ -278,6 +278,25 @@ class SponsorsController extends Controller
             }
 
             try {
+                // Process contacts - supports multiple contacts format
+                $contactName = $data['contact_name'] ?? null;
+                $contactEmail = $data['contact_email'] ?? null;
+                $contactPhone = $data['contact_phone'] ?? null;
+
+                // Check for multiple contacts field
+                $contactsField = $data['contacts'] ?? $data['contactos'] ?? null;
+                if (!empty($contactsField)) {
+                    // Format: name|email|phone;name|email|phone (first contact is primary)
+                    $contactEntries = explode(';', $contactsField);
+                    $firstContact = trim($contactEntries[0] ?? '');
+                    if (!empty($firstContact)) {
+                        $parts = explode('|', $firstContact);
+                        $contactName = trim($parts[0] ?? '') ?: null;
+                        $contactEmail = trim($parts[1] ?? '') ?: null;
+                        $contactPhone = trim($parts[2] ?? '') ?: null;
+                    }
+                }
+
                 $sponsorData = [
                     'name' => $data['name'],
                     'slug' => Slug::unique($data['name'], 'sponsors'),
@@ -285,9 +304,9 @@ class SponsorsController extends Controller
                     'description' => $data['description'] ?? null,
                     'website' => $data['website'] ?? null,
                     'logo_url' => $data['logo_url'] ?? null,
-                    'contact_name' => $data['contact_name'] ?? null,
-                    'contact_email' => $data['contact_email'] ?? null,
-                    'contact_phone' => $data['contact_phone'] ?? null,
+                    'contact_name' => $contactName,
+                    'contact_email' => $contactEmail,
+                    'contact_phone' => $contactPhone,
                     'code' => substr(strtoupper(bin2hex(random_bytes(5))), 0, 10),
                     'active' => 1,
                 ];

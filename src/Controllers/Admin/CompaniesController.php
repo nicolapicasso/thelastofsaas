@@ -368,6 +368,44 @@ class CompaniesController extends Controller
                 $companyId = $this->companyModel->create($companyData);
                 $imported++;
 
+                // Process multiple contacts if 'contacts' column exists
+                $contactsField = $data['contacts'] ?? $data['contactos'] ?? null;
+                if (!empty($contactsField)) {
+                    // Format: name|position|email|phone;name|position|email|phone
+                    $contactEntries = explode(';', $contactsField);
+                    $isFirst = true;
+                    foreach ($contactEntries as $contactEntry) {
+                        $contactEntry = trim($contactEntry);
+                        if (empty($contactEntry)) continue;
+
+                        $parts = explode('|', $contactEntry);
+                        $contactData = [
+                            'company_id' => $companyId,
+                            'name' => trim($parts[0] ?? ''),
+                            'position' => trim($parts[1] ?? '') ?: null,
+                            'email' => trim($parts[2] ?? '') ?: null,
+                            'phone' => trim($parts[3] ?? '') ?: null,
+                            'is_primary' => $isFirst ? 1 : 0,
+                        ];
+
+                        if (!empty($contactData['name']) || !empty($contactData['email'])) {
+                            $this->contactModel->create($contactData);
+                            $isFirst = false;
+                        }
+                    }
+                } elseif (!empty($data['contact_name']) || !empty($data['contact_email'])) {
+                    // Fallback to single contact fields
+                    $contactData = [
+                        'company_id' => $companyId,
+                        'name' => $data['contact_name'] ?? '',
+                        'position' => $data['contact_position'] ?? null,
+                        'email' => $data['contact_email'] ?? null,
+                        'phone' => $data['contact_phone'] ?? null,
+                        'is_primary' => 1,
+                    ];
+                    $this->contactModel->create($contactData);
+                }
+
                 // Process SaaS usage if column exists
                 $saasField = $data['saas'] ?? $data['saas_usage'] ?? $data['saas que utiliza'] ?? $data['herramientas'] ?? null;
                 if (!empty($saasField)) {
