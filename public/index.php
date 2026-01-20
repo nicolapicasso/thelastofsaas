@@ -21,7 +21,10 @@ $isAjaxRequest = (
     isset($_SERVER['CONTENT_TYPE']) && strpos($_SERVER['CONTENT_TYPE'], 'application/json') !== false
 ) || (
     // Check if URL suggests an API/AJAX endpoint
-    preg_match('/(generate-qa|\/api\/|reorder|translate|toggle)/i', $_SERVER['REQUEST_URI'] ?? '')
+    preg_match('/(generate-qa|\/api\/|reorder|translate|toggle|validar-codigo)/i', $_SERVER['REQUEST_URI'] ?? '')
+) || (
+    // POST requests to registration endpoints should be treated as AJAX
+    $_SERVER['REQUEST_METHOD'] === 'POST' && preg_match('/\/registro($|\?)/', $_SERVER['REQUEST_URI'] ?? '')
 );
 
 // For AJAX requests, don't display errors as HTML - handle them as JSON
