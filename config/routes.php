@@ -426,6 +426,11 @@ $router->get('/eventos/{slug}', 'EventsController', 'show');
 $router->get('/eventos/{slug}/agenda', 'EventsController', 'agenda');
 $router->get('/eventos/{slug}/sponsors', 'EventsController', 'sponsors');
 
+// Meeting Display (Public screens)
+$router->get('/eventos/{slug}/reuniones', 'MeetingDisplayController', 'index');
+$router->get('/eventos/{slug}/reuniones/pantalla/{blockId}', 'MeetingDisplayController', 'roomDisplay');
+$router->get('/eventos/{slug}/reuniones/horario/{blockId}', 'MeetingDisplayController', 'schedule');
+
 // Public Sponsor Pages
 $router->get('/sponsors/{slug}', 'EventsController', 'sponsorPage');
 
