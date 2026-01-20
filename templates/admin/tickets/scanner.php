@@ -427,15 +427,24 @@ function processCode(code) {
         if (!response.ok) {
             // Try to get error message from response
             return response.text().then(text => {
+                let errorMessage = `Error del servidor: ${response.status}`;
+
+                // Try to parse as JSON
                 try {
                     const data = JSON.parse(text);
-                    throw new Error(data.error || data.message || `Error ${response.status}`);
-                } catch (e) {
-                    if (response.status === 401 || response.status === 403) {
-                        throw new Error('Sesión expirada. Por favor, vuelve a iniciar sesión.');
+                    if (data.error) {
+                        errorMessage = data.error;
+                    } else if (data.message) {
+                        errorMessage = data.message;
                     }
-                    throw new Error(`Error del servidor: ${response.status}`);
+                } catch (parseError) {
+                    // Not JSON, check for auth errors
+                    if (response.status === 401 || response.status === 403) {
+                        errorMessage = 'Sesión expirada. Por favor, vuelve a iniciar sesión.';
+                    }
                 }
+
+                throw new Error(errorMessage);
             });
         }
         return response.json();
