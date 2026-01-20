@@ -345,6 +345,7 @@ $router->get('/admin/tickets/{id}', 'Admin\\TicketsController', 'show');
 $router->post('/admin/tickets/{id}/check-in', 'Admin\\TicketsController', 'checkIn');
 $router->post('/admin/tickets/{id}/approve', 'Admin\\TicketsController', 'approve');
 $router->post('/admin/tickets/{id}/cancel', 'Admin\\TicketsController', 'cancel');
+$router->get('/admin/tickets/{id}/download', 'Admin\\TicketsController', 'download');
 
 // Meetings
 $router->get('/admin/meetings/blocks', 'Admin\\MeetingsController', 'blocks');
