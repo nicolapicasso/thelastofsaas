@@ -213,10 +213,16 @@
                 <?php endif; ?>
 
                 <?php if (in_array($ticket['status'], ['pending', 'confirmed'])): ?>
-                    <button type="button" class="btn btn-danger btn-block" onclick="cancelTicket()">
-                        <i class="fas fa-times"></i> Cancelar Ticket
+                    <button type="button" class="btn btn-warning btn-block" onclick="cancelTicket()">
+                        <i class="fas fa-ban"></i> Cancelar Ticket
                     </button>
                 <?php endif; ?>
+
+                <hr style="margin: 1rem 0; border-color: var(--color-gray-200);">
+
+                <button type="button" class="btn btn-outline btn-block" onclick="openChangeStatusModal()">
+                    <i class="fas fa-exchange-alt"></i> Cambiar Estado
+                </button>
 
                 <button type="button" class="btn btn-outline btn-block" onclick="resendEmail()">
                     <i class="fas fa-envelope"></i> Reenviar Email
@@ -225,8 +231,94 @@
                 <a href="/admin/tickets/<?= $ticket['id'] ?>/download" class="btn btn-outline btn-block">
                     <i class="fas fa-download"></i> Descargar PDF
                 </a>
+
+                <hr style="margin: 1rem 0; border-color: var(--color-gray-200);">
+
+                <button type="button" class="btn btn-danger btn-block" onclick="deleteTicket()">
+                    <i class="fas fa-trash"></i> Eliminar Ticket
+                </button>
             </div>
         </div>
+
+        <!-- Change Status Modal -->
+        <div id="status-modal" class="status-modal" style="display: none;">
+            <div class="status-modal-backdrop" onclick="closeChangeStatusModal()"></div>
+            <div class="status-modal-content">
+                <div class="status-modal-header">
+                    <h4>Cambiar Estado</h4>
+                    <button type="button" onclick="closeChangeStatusModal()">&times;</button>
+                </div>
+                <div class="status-modal-body">
+                    <select id="new-ticket-status" class="form-control">
+                        <?php foreach ($statusOptions as $key => $label): ?>
+                            <option value="<?= $key ?>" <?= $ticket['status'] === $key ? 'selected' : '' ?>><?= $label ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+                <div class="status-modal-footer">
+                    <button type="button" class="btn btn-outline" onclick="closeChangeStatusModal()">Cancelar</button>
+                    <button type="button" class="btn btn-primary" onclick="saveStatusChange()">Guardar</button>
+                </div>
+            </div>
+        </div>
+
+        <style>
+        .status-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 2000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .status-modal-backdrop {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+        }
+        .status-modal-content {
+            position: relative;
+            background: white;
+            border-radius: 12px;
+            width: 100%;
+            max-width: 350px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+        .status-modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 1.25rem;
+            border-bottom: 1px solid var(--color-gray-200);
+        }
+        .status-modal-header h4 {
+            margin: 0;
+            font-size: 1rem;
+        }
+        .status-modal-header button {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--color-gray-500);
+        }
+        .status-modal-body {
+            padding: 1.25rem;
+        }
+        .status-modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.5rem;
+            padding: 1rem 1.25rem;
+            border-top: 1px solid var(--color-gray-200);
+        }
+        </style>
 
         <!-- Activity Log -->
         <?php if (!empty($activityLog)): ?>
@@ -296,4 +388,69 @@ function resendEmail() {
         }
     });
 }
+
+function deleteTicket() {
+    if (!confirm('¿Estás seguro de que quieres eliminar este ticket? Esta acción no se puede deshacer.')) return;
+    fetch('/admin/tickets/bulk-action', {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-Token': '<?= $csrf_token ?>',
+            'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: JSON.stringify({
+            ids: [<?= $ticket['id'] ?>],
+            action: 'delete'
+        })
+    })
+    .then(r => r.json())
+    .then(d => {
+        if (d.success) {
+            window.location.href = '/admin/tickets?event_id=<?= $ticket['event_id'] ?>';
+        } else {
+            alert(d.error || 'Error al eliminar');
+        }
+    });
+}
+
+function openChangeStatusModal() {
+    document.getElementById('status-modal').style.display = 'flex';
+}
+
+function closeChangeStatusModal() {
+    document.getElementById('status-modal').style.display = 'none';
+}
+
+function saveStatusChange() {
+    const newStatus = document.getElementById('new-ticket-status').value;
+    fetch('/admin/tickets/bulk-action', {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-Token': '<?= $csrf_token ?>',
+            'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: JSON.stringify({
+            ids: [<?= $ticket['id'] ?>],
+            action: 'status',
+            value: newStatus
+        })
+    })
+    .then(r => r.json())
+    .then(d => {
+        if (d.success) {
+            location.reload();
+        } else {
+            alert(d.error || 'Error al cambiar estado');
+        }
+    });
+}
+
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        closeChangeStatusModal();
+    }
+});
 </script>

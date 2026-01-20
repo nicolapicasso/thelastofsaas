@@ -337,6 +337,7 @@ $router->get('/admin/tickets', 'Admin\\TicketsController', 'index');
 $router->get('/admin/tickets/export', 'Admin\\TicketsController', 'export');
 $router->get('/admin/tickets/scanner', 'Admin\\TicketsController', 'scanner');
 $router->post('/admin/tickets/validate-code', 'Admin\\TicketsController', 'validateCode');
+$router->post('/admin/tickets/bulk-action', 'Admin\\TicketsController', 'bulkAction');
 $router->get('/admin/tickets/types', 'Admin\\TicketsController', 'types');
 $router->post('/admin/tickets/types', 'Admin\\TicketsController', 'createType');
 $router->post('/admin/tickets/types/{id}', 'Admin\\TicketsController', 'updateType');

@@ -66,6 +66,7 @@ class TicketsController extends Controller
             'currentStatus' => $status,
             'stats' => $stats,
             'statusOptions' => Ticket::getStatusOptions(),
+            'csrf_token' => $this->generateCsrf(),
             'flash' => $this->getFlash(),
         ]);
     }
@@ -193,6 +194,117 @@ class TicketsController extends Controller
             $this->jsonSuccess(['message' => 'Ticket aprobado correctamente.']);
         } catch (\Exception $e) {
             $this->jsonError('Error al aprobar: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Bulk action on multiple tickets
+     */
+    public function bulkAction(): void
+    {
+        $this->requireAuth();
+
+        // Get JSON body
+        $contentType = $_SERVER['CONTENT_TYPE'] ?? '';
+        if (strpos($contentType, 'application/json') === false) {
+            $this->jsonError('Content-Type debe ser application/json');
+            return;
+        }
+
+        $json = json_decode(file_get_contents('php://input'), true);
+        if (!$json) {
+            $this->jsonError('JSON inválido');
+            return;
+        }
+
+        $ids = $json['ids'] ?? [];
+        $action = $json['action'] ?? '';
+        $value = $json['value'] ?? null;
+
+        if (empty($ids) || !is_array($ids)) {
+            $this->jsonError('No se han seleccionado tickets');
+            return;
+        }
+
+        if (empty($action)) {
+            $this->jsonError('Acción no especificada');
+            return;
+        }
+
+        $validActions = ['check-in', 'approve', 'status', 'delete'];
+        if (!in_array($action, $validActions)) {
+            $this->jsonError('Acción no válida');
+            return;
+        }
+
+        $processed = 0;
+        $errors = [];
+
+        foreach ($ids as $id) {
+            $id = (int) $id;
+            $ticket = $this->ticketModel->find($id);
+
+            if (!$ticket) {
+                $errors[] = "Ticket #$id no encontrado";
+                continue;
+            }
+
+            try {
+                switch ($action) {
+                    case 'check-in':
+                        if ($ticket['status'] === 'confirmed') {
+                            $this->ticketModel->checkIn($id);
+                            $processed++;
+                        } else {
+                            $errors[] = "Ticket #$id no está confirmado";
+                        }
+                        break;
+
+                    case 'approve':
+                        if ($ticket['status'] === 'pending') {
+                            $this->ticketModel->update($id, ['status' => 'confirmed']);
+                            $processed++;
+                        } else {
+                            $errors[] = "Ticket #$id no está pendiente";
+                        }
+                        break;
+
+                    case 'status':
+                        if (!$value) {
+                            $errors[] = "Estado no especificado";
+                            break;
+                        }
+                        $validStatuses = array_keys(Ticket::getStatusOptions());
+                        if (!in_array($value, $validStatuses)) {
+                            $errors[] = "Estado '$value' no válido";
+                            break;
+                        }
+                        $this->ticketModel->update($id, ['status' => $value]);
+                        $processed++;
+                        break;
+
+                    case 'delete':
+                        $this->ticketModel->delete($id);
+                        // Decrement sold count
+                        if (!empty($ticket['ticket_type_id'])) {
+                            $this->ticketTypeModel->decrementSold($ticket['ticket_type_id']);
+                        }
+                        $processed++;
+                        break;
+                }
+            } catch (\Exception $e) {
+                $errors[] = "Error en ticket #$id: " . $e->getMessage();
+            }
+        }
+
+        if ($processed > 0) {
+            $message = "$processed ticket(s) procesado(s) correctamente";
+            if (!empty($errors)) {
+                $message .= ". Errores: " . implode(', ', $errors);
+            }
+            $this->jsonSuccess(['message' => $message, 'processed' => $processed, 'errors' => $errors]);
+        } else {
+            $this->jsonError('No se pudo procesar ningún ticket. ' . implode(', ', $errors));
         }
     }
 
