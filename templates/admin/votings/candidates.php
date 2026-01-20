@@ -175,18 +175,19 @@
     z-index: 1000;
 }
 .modal-content {
-    background: var(--bg-primary);
+    background: var(--bg-primary, #ffffff);
     border-radius: 8px;
     width: 90%;
     max-height: 90vh;
     overflow-y: auto;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
 }
 .modal-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
     padding: 1rem 1.5rem;
-    border-bottom: 1px solid var(--border-color);
+    border-bottom: 1px solid var(--border-color, #e5e7eb);
 }
 .modal-header h3 { margin: 0; }
 .modal-close {
@@ -194,15 +195,19 @@
     border: none;
     font-size: 1.5rem;
     cursor: pointer;
-    color: var(--text-secondary);
+    color: var(--text-secondary, #6b7280);
 }
-.modal-body { padding: 1.5rem; }
+.modal-body {
+    padding: 1.5rem;
+    background: var(--bg-primary, #ffffff);
+}
 .modal-footer {
     display: flex;
     justify-content: flex-end;
     gap: 0.5rem;
     padding: 1rem 1.5rem;
-    border-top: 1px solid var(--border-color);
+    border-top: 1px solid var(--border-color, #e5e7eb);
+    background: var(--bg-primary, #ffffff);
 }
 .form-check {
     display: flex;
@@ -210,13 +215,17 @@
     gap: 0.5rem;
     cursor: pointer;
 }
-.drag-handle:hover { color: var(--primary-color) !important; }
+.drag-handle:hover { color: var(--primary-color, #3b82f6) !important; }
 </style>
 
 <script>
+let isEditMode = false;
+let editCandidateId = null;
+
 function openAddModal() {
+    isEditMode = false;
+    editCandidateId = null;
     document.getElementById('modalTitle').textContent = 'Añadir Candidato';
-    document.getElementById('candidateForm').action = '/admin/votings/<?= $voting['id'] ?>/candidates/add';
     document.getElementById('candidateId').value = '';
     document.getElementById('candidateName').value = '';
     document.getElementById('candidateDescription').value = '';
@@ -229,8 +238,9 @@ function openAddModal() {
 }
 
 function editCandidate(candidate) {
+    isEditMode = true;
+    editCandidateId = candidate.id;
     document.getElementById('modalTitle').textContent = 'Editar Candidato';
-    document.getElementById('candidateForm').action = '/admin/votings/<?= $voting['id'] ?>/candidates/' + candidate.id + '/edit';
     document.getElementById('candidateId').value = candidate.id;
     document.getElementById('candidateName').value = candidate.name;
     document.getElementById('candidateDescription').value = candidate.description || '';
@@ -253,6 +263,35 @@ function deleteCandidate(id) {
         body: new URLSearchParams({_csrf_token: '<?= $csrf_token ?>'})
     }).then(r => r.json()).then(d => d.success ? location.reload() : alert(d.error));
 }
+
+// Handle form submission via fetch
+document.getElementById('candidateForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+
+    const formData = new FormData(this);
+
+    // Determine URL based on mode
+    let url = '/admin/votings/<?= $voting['id'] ?>/candidates';
+    if (isEditMode && editCandidateId) {
+        url = '/admin/votings/<?= $voting['id'] ?>/candidates/' + editCandidateId;
+    }
+
+    fetch(url, {
+        method: 'POST',
+        body: new URLSearchParams(formData)
+    })
+    .then(r => r.json())
+    .then(d => {
+        if (d.success) {
+            location.reload();
+        } else {
+            alert(d.error || 'Error al guardar el candidato');
+        }
+    })
+    .catch(err => {
+        alert('Error de conexión: ' + err.message);
+    });
+});
 
 // Close modal on escape
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });

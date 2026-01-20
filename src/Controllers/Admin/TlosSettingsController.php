@@ -63,11 +63,29 @@ class TlosSettingsController extends Controller
         }
 
         try {
-            // Handle unchecked checkboxes: get all boolean settings and set to '0' if not in POST
+            // Known boolean settings from the form (these may not exist in DB yet)
+            $knownBooleanSettings = [
+                'notify_sponsors',
+                'notify_companies',
+                'allow_sponsor_messages',
+                'auto_match_notification',
+                'meeting_confirmation_email',
+                'meeting_reminder_email',
+            ];
+
+            // Handle unchecked checkboxes for known boolean settings
+            foreach ($knownBooleanSettings as $key) {
+                if (!isset($settings[$key])) {
+                    // Checkbox is unchecked (not sent in POST), set to '0'
+                    $this->settingsModel->set($key, '0');
+                }
+            }
+
+            // Also handle any other boolean settings from the database
             $allSettings = $this->settingsModel->getAllGrouped();
             foreach ($allSettings as $group => $groupSettings) {
                 foreach ($groupSettings as $setting) {
-                    if ($setting['setting_type'] === 'boolean' && !isset($settings[$setting['setting_key']])) {
+                    if ($setting['setting_type'] === 'boolean' && !isset($settings[$setting['setting_key']]) && !in_array($setting['setting_key'], $knownBooleanSettings)) {
                         // Checkbox is unchecked (not sent in POST), set to '0'
                         $this->settingsModel->set($setting['setting_key'], '0');
                     }

@@ -47,7 +47,7 @@
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
                 <div class="form-group">
                     <label class="form-check">
-                        <input type="checkbox" name="settings[notify_sponsors]" value="1" <?= ($settings['notify_sponsors'] ?? true) ? 'checked' : '' ?>>
+                        <input type="checkbox" name="settings[notify_sponsors]" value="1" <?= !empty($settings['notify_sponsors']) && $settings['notify_sponsors'] !== '0' ? 'checked' : '' ?>>
                         <span>Notificar a Sponsors</span>
                     </label>
                     <small class="text-muted">Enviar emails cuando reciban selecciones o matches</small>
@@ -55,7 +55,7 @@
 
                 <div class="form-group">
                     <label class="form-check">
-                        <input type="checkbox" name="settings[notify_companies]" value="1" <?= ($settings['notify_companies'] ?? true) ? 'checked' : '' ?>>
+                        <input type="checkbox" name="settings[notify_companies]" value="1" <?= !empty($settings['notify_companies']) && $settings['notify_companies'] !== '0' ? 'checked' : '' ?>>
                         <span>Notificar a Empresas</span>
                     </label>
                     <small class="text-muted">Enviar emails cuando reciban selecciones o matches</small>
@@ -64,7 +64,7 @@
 
             <div class="form-group">
                 <label class="form-check">
-                    <input type="checkbox" name="settings[allow_sponsor_messages]" value="1" <?= ($settings['allow_sponsor_messages'] ?? true) ? 'checked' : '' ?>>
+                    <input type="checkbox" name="settings[allow_sponsor_messages]" value="1" <?= !empty($settings['allow_sponsor_messages']) && $settings['allow_sponsor_messages'] !== '0' ? 'checked' : '' ?>>
                     <span>Sistema de mensajería activo</span>
                 </label>
                 <small class="text-muted">Permite el envío de mensajes entre sponsors y empresas</small>
@@ -102,7 +102,7 @@
 
             <div class="form-group">
                 <label class="form-check">
-                    <input type="checkbox" name="settings[auto_match_notification]" value="1" <?= ($settings['auto_match_notification'] ?? true) ? 'checked' : '' ?>>
+                    <input type="checkbox" name="settings[auto_match_notification]" value="1" <?= !empty($settings['auto_match_notification']) && $settings['auto_match_notification'] !== '0' ? 'checked' : '' ?>>
                     <span>Notificación automática de match</span>
                 </label>
                 <small class="text-muted">Enviar email automáticamente cuando se produce un match mutuo</small>
@@ -128,7 +128,7 @@
 
             <div class="form-group">
                 <label class="form-check">
-                    <input type="checkbox" name="settings[meeting_confirmation_email]" value="1" <?= ($settings['meeting_confirmation_email'] ?? true) ? 'checked' : '' ?>>
+                    <input type="checkbox" name="settings[meeting_confirmation_email]" value="1" <?= !empty($settings['meeting_confirmation_email']) && $settings['meeting_confirmation_email'] !== '0' ? 'checked' : '' ?>>
                     <span>Email de confirmación de reunión</span>
                 </label>
                 <small class="text-muted">Enviar email cuando se asigna una reunión</small>
@@ -136,7 +136,7 @@
 
             <div class="form-group">
                 <label class="form-check">
-                    <input type="checkbox" name="settings[meeting_reminder_email]" value="1" <?= ($settings['meeting_reminder_email'] ?? true) ? 'checked' : '' ?>>
+                    <input type="checkbox" name="settings[meeting_reminder_email]" value="1" <?= !empty($settings['meeting_reminder_email']) && $settings['meeting_reminder_email'] !== '0' ? 'checked' : '' ?>>
                     <span>Email de recordatorio</span>
                 </label>
                 <small class="text-muted">Enviar recordatorio antes del evento</small>
