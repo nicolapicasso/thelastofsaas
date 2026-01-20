@@ -478,10 +478,13 @@ class TicketsController extends Controller
                 $this->jsonError('Error al parsear JSON: ' . json_last_error_msg());
                 return;
             }
-            $code = Sanitizer::string($json['code'] ?? '');
+            // Handle code as string or int
+            $rawCode = $json['code'] ?? '';
+            $code = trim((string) $rawCode);
             $eventId = (int) ($json['event_id'] ?? 0);
         } else {
-            $code = Sanitizer::string($this->getPost('code'));
+            $rawCode = $this->getPost('code');
+            $code = trim((string) ($rawCode ?? ''));
             $eventId = (int) $this->getPost('event_id');
         }
 
