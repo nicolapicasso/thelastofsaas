@@ -520,6 +520,28 @@ function performAction(ids, action, value = null) {
             // Clear selection
             clearSelection();
 
+            // Update pending badge in sidebar
+            if (typeof data.pendingCount !== 'undefined') {
+                const badge = document.querySelector('.sidebar-nav a[href="/admin/tickets"] .nav-badge');
+                if (data.pendingCount > 0) {
+                    if (badge) {
+                        badge.textContent = data.pendingCount;
+                    } else {
+                        // Create badge if it doesn't exist
+                        const navLink = document.querySelector('.sidebar-nav a[href="/admin/tickets"]');
+                        if (navLink) {
+                            const newBadge = document.createElement('span');
+                            newBadge.className = 'nav-badge';
+                            newBadge.textContent = data.pendingCount;
+                            navLink.appendChild(newBadge);
+                        }
+                    }
+                } else {
+                    // Remove badge if count is 0
+                    if (badge) badge.remove();
+                }
+            }
+
             // Show success message
             showToast(data.message || 'Acción realizada correctamente');
         } else {

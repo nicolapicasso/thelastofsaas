@@ -37,7 +37,7 @@ class Message extends Model
 
     /**
      * Check if a user can send an initial message to a recipient in an event
-     * Returns true if no initial message exists yet, or if there's an active conversation
+     * Returns true if no initial message exists yet, or if recipient has replied
      */
     public function canSendMessage(
         int $eventId,
@@ -46,42 +46,17 @@ class Message extends Model
         string $recipientType,
         int $recipientId
     ): array {
-        // Check if sender has already sent an initial message to this recipient
-        $sql = "SELECT id FROM {$this->table}
+        // First, check if recipient has sent any message to sender (meaning sender can reply)
+        $sql = "SELECT id, sent_at FROM {$this->table}
                 WHERE event_id = ?
                   AND sender_type = ?
                   AND sender_id = ?
                   AND recipient_type = ?
                   AND recipient_id = ?
-                  AND parent_message_id IS NULL
+                ORDER BY sent_at DESC
                 LIMIT 1";
 
-        $existing = $this->db->fetch($sql, [
-            $eventId,
-            $senderType,
-            $senderId,
-            $recipientType,
-            $recipientId
-        ]);
-
-        if ($existing) {
-            return [
-                'can_send' => false,
-                'reason' => 'already_sent',
-                'message' => 'Ya has enviado un mensaje a este destinatario en este evento.'
-            ];
-        }
-
-        // Check if recipient has sent a message to sender (can reply)
-        $sql = "SELECT id FROM {$this->table}
-                WHERE event_id = ?
-                  AND sender_type = ?
-                  AND sender_id = ?
-                  AND recipient_type = ?
-                  AND recipient_id = ?
-                LIMIT 1";
-
-        $hasReceivedMessage = $this->db->fetch($sql, [
+        $lastReceivedMessage = $this->db->fetch($sql, [
             $eventId,
             $recipientType,
             $recipientId,
@@ -89,10 +64,69 @@ class Message extends Model
             $senderId
         ]);
 
+        // Check if sender has sent any message to recipient
+        $sql = "SELECT id, sent_at FROM {$this->table}
+                WHERE event_id = ?
+                  AND sender_type = ?
+                  AND sender_id = ?
+                  AND recipient_type = ?
+                  AND recipient_id = ?
+                ORDER BY sent_at DESC
+                LIMIT 1";
+
+        $lastSentMessage = $this->db->fetch($sql, [
+            $eventId,
+            $senderType,
+            $senderId,
+            $recipientType,
+            $recipientId
+        ]);
+
+        // If recipient has replied after sender's last message, sender can reply back
+        if ($lastReceivedMessage && $lastSentMessage) {
+            $receivedTime = strtotime($lastReceivedMessage['sent_at']);
+            $sentTime = strtotime($lastSentMessage['sent_at']);
+
+            if ($receivedTime > $sentTime) {
+                // Recipient replied after sender's last message - can reply
+                return [
+                    'can_send' => true,
+                    'is_reply' => true,
+                    'existing_message_id' => $lastReceivedMessage['id']
+                ];
+            } else {
+                // Sender sent last - waiting for reply
+                return [
+                    'can_send' => false,
+                    'reason' => 'waiting_reply',
+                    'message' => 'Ya has enviado un mensaje. Espera a que te respondan.'
+                ];
+            }
+        }
+
+        // If recipient has sent message but sender hasn't replied yet
+        if ($lastReceivedMessage && !$lastSentMessage) {
+            return [
+                'can_send' => true,
+                'is_reply' => true,
+                'existing_message_id' => $lastReceivedMessage['id']
+            ];
+        }
+
+        // If sender has sent but no reply received yet
+        if ($lastSentMessage && !$lastReceivedMessage) {
+            return [
+                'can_send' => false,
+                'reason' => 'already_sent',
+                'message' => 'Ya has enviado un mensaje a este destinatario. Espera a que te respondan.'
+            ];
+        }
+
+        // No messages exchanged yet - can send initial message
         return [
             'can_send' => true,
-            'is_reply' => (bool)$hasReceivedMessage,
-            'existing_message_id' => $hasReceivedMessage['id'] ?? null
+            'is_reply' => false,
+            'existing_message_id' => null
         ];
     }
 

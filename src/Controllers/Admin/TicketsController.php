@@ -302,7 +302,14 @@ class TicketsController extends Controller
             if (!empty($errors)) {
                 $message .= ". Errores: " . implode(', ', $errors);
             }
-            $this->jsonSuccess(['message' => $message, 'processed' => $processed, 'errors' => $errors]);
+            // Get updated pending count for badge
+            $pendingCount = $this->ticketModel->count(['status' => 'pending']);
+            $this->jsonSuccess([
+                'message' => $message,
+                'processed' => $processed,
+                'errors' => $errors,
+                'pendingCount' => $pendingCount
+            ]);
         } else {
             $this->jsonError('No se pudo procesar ningún ticket. ' . implode(', ', $errors));
         }

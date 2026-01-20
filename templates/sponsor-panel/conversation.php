@@ -436,8 +436,36 @@
                     const data = await response.json();
 
                     if (data.success) {
-                        // Reload page to show new message
-                        window.location.reload();
+                        // Add message to DOM immediately
+                        const emptyConv = document.querySelector('.empty-conversation');
+                        if (emptyConv) emptyConv.remove();
+
+                        const msgHtml = `
+                            <div class="message sent">
+                                <div class="message-content">${textarea.value.replace(/\n/g, '<br>')}</div>
+                                <div class="message-meta">
+                                    <span class="message-time">${new Date().toLocaleString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
+                                </div>
+                            </div>
+                        `;
+                        messagesContainer.insertAdjacentHTML('beforeend', msgHtml);
+                        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+
+                        // Clear form
+                        textarea.value = '';
+                        charCount.textContent = '0';
+                        sendBtn.disabled = false;
+                        sendBtn.innerHTML = '<i class="fas fa-paper-plane"></i> ENVIAR';
+
+                        // Show waiting message if this was the first message
+                        const formContainer = document.querySelector('.message-form-container');
+                        if (!formContainer.querySelector('.warning-message') && !data.can_reply) {
+                            formContainer.innerHTML = `
+                                <div class="warning-message">
+                                    <i class="fas fa-info-circle"></i> Ya has enviado un mensaje a esta empresa. Podrás responder cuando ellos te respondan.
+                                </div>
+                            `;
+                        }
                     } else {
                         alert(data.error || 'Error al enviar el mensaje');
                         sendBtn.disabled = false;

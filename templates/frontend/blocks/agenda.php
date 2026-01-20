@@ -101,11 +101,16 @@ $activityTypes = Activity::getActivityTypes();
                 <div class="agenda-group">
                     <div class="agenda-group-header">
                         <?php if ($groupBy === 'date'): ?>
+                            <?php
+                            $dateObj = new DateTime($groupKey);
+                            $monthYearFormatter = new IntlDateFormatter('es_ES', IntlDateFormatter::NONE, IntlDateFormatter::NONE, null, null, 'MMMM yyyy');
+                            $dayNameFormatter = new IntlDateFormatter('es_ES', IntlDateFormatter::NONE, IntlDateFormatter::NONE, null, null, 'EEEE');
+                            ?>
                             <h3 class="agenda-date">
-                                <span class="day"><?= date('d', strtotime($groupKey)) ?></span>
+                                <span class="day"><?= $dateObj->format('d') ?></span>
                                 <span class="month-year">
-                                    <?= strftime('%B %Y', strtotime($groupKey)) ?>
-                                    <small><?= strftime('%A', strtotime($groupKey)) ?></small>
+                                    <?= ucfirst($monthYearFormatter->format($dateObj)) ?>
+                                    <small><?= ucfirst($dayNameFormatter->format($dateObj)) ?></small>
                                 </span>
                             </h3>
                         <?php else: ?>
