@@ -977,10 +977,19 @@
                 body: new FormData(form)
             })
             .then(r => {
-                if (!r.ok) {
-                    throw new Error('Error del servidor: ' + r.status);
-                }
-                return r.json();
+                return r.text().then(text => {
+                    console.log('Server response:', text);
+                    try {
+                        const data = JSON.parse(text);
+                        if (!r.ok) {
+                            throw new Error(data.error || 'Error del servidor: ' + r.status);
+                        }
+                        return data;
+                    } catch (e) {
+                        console.error('Response was not JSON:', text);
+                        throw new Error('Error del servidor: ' + text.substring(0, 200));
+                    }
+                });
             })
             .then(data => {
                 if (data.success && data.redirect) {
