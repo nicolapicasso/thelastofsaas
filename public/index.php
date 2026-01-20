@@ -45,11 +45,12 @@ if ($isAjaxRequest) {
         header('Content-Type: application/json');
         echo json_encode([
             'success' => false,
-            'error' => 'Error del servidor: ' . $exception->getMessage(),
-            'debug' => [
-                'file' => basename($exception->getFile()),
-                'line' => $exception->getLine()
-            ]
+            'error' => $exception->getMessage(),
+            'file' => basename($exception->getFile()),
+            'line' => $exception->getLine(),
+            'trace' => array_slice(array_map(function($t) {
+                return ($t['file'] ?? 'unknown') . ':' . ($t['line'] ?? 0) . ' ' . ($t['function'] ?? '');
+            }, $exception->getTrace()), 0, 5)
         ]);
         exit;
     });
