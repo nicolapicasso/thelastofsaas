@@ -343,6 +343,7 @@ $router->post('/admin/tickets/types/{id}', 'Admin\\TicketsController', 'updateTy
 $router->post('/admin/tickets/types/{id}/delete', 'Admin\\TicketsController', 'deleteType');
 $router->get('/admin/tickets/{id}', 'Admin\\TicketsController', 'show');
 $router->post('/admin/tickets/{id}/check-in', 'Admin\\TicketsController', 'checkIn');
+$router->post('/admin/tickets/{id}/approve', 'Admin\\TicketsController', 'approve');
 $router->post('/admin/tickets/{id}/cancel', 'Admin\\TicketsController', 'cancel');
 
 // Meetings

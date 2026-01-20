@@ -200,9 +200,21 @@
                 <h3>Acciones</h3>
             </div>
             <div class="card-body">
+                <?php if ($ticket['status'] === 'pending'): ?>
+                    <button type="button" class="btn btn-success btn-block" onclick="approveTicket()">
+                        <i class="fas fa-check"></i> Aprobar Ticket
+                    </button>
+                <?php endif; ?>
+
                 <?php if ($ticket['status'] === 'confirmed'): ?>
                     <button type="button" class="btn btn-info btn-block" onclick="markAsUsed()">
                         <i class="fas fa-check-circle"></i> Marcar como Usado
+                    </button>
+                <?php endif; ?>
+
+                <?php if (in_array($ticket['status'], ['pending', 'confirmed'])): ?>
+                    <button type="button" class="btn btn-danger btn-block" onclick="cancelTicket()">
+                        <i class="fas fa-times"></i> Cancelar Ticket
                     </button>
                 <?php endif; ?>
 
@@ -264,11 +276,11 @@ function cancelTicket() {
 }
 
 function markAsUsed() {
-    if (!confirm('¿Marcar este ticket como usado?')) return;
-    fetch('/admin/tickets/<?= $ticket['id'] ?>/use', {
+    if (!confirm('¿Marcar este ticket como usado (check-in)?')) return;
+    fetch('/admin/tickets/<?= $ticket['id'] ?>/check-in', {
         method: 'POST',
         body: new URLSearchParams({_csrf_token: '<?= $csrf_token ?>'})
-    }).then(r => r.json()).then(d => d.success ? location.reload() : alert(d.error));
+    }).then(r => r.json()).then(d => d.success ? location.reload() : alert(d.error || d.message));
 }
 
 function resendEmail() {

@@ -165,6 +165,38 @@ class TicketsController extends Controller
     }
 
     /**
+     * Approve a pending ticket
+     */
+    public function approve(string $id): void
+    {
+        $this->requireAuth();
+
+        if (!$this->validateCsrf()) {
+            $this->jsonError('Sesión expirada.');
+            return;
+        }
+
+        $ticket = $this->ticketModel->find((int) $id);
+
+        if (!$ticket) {
+            $this->jsonError('Entrada no encontrada.');
+            return;
+        }
+
+        if ($ticket['status'] !== 'pending') {
+            $this->jsonError('Solo se pueden aprobar tickets pendientes.');
+            return;
+        }
+
+        try {
+            $this->ticketModel->update((int) $id, ['status' => 'confirmed']);
+            $this->jsonSuccess(['message' => 'Ticket aprobado correctamente.']);
+        } catch (\Exception $e) {
+            $this->jsonError('Error al aprobar: ' . $e->getMessage());
+        }
+    }
+
+    /**
      * Export tickets to CSV
      */
     public function export(): void

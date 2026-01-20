@@ -3,6 +3,10 @@
 $_settingModel = new \App\Models\Setting();
 $_siteName = $_settingModel->get('site_name', 'The Last of SaaS');
 $_siteLogo = $_settingModel->get('logo_header', '');
+
+// Get pending tickets count for badge
+$_ticketModel = new \App\Models\Ticket();
+$_pendingTicketsCount = $_ticketModel->count(['status' => 'pending']);
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -67,6 +71,9 @@ $_siteLogo = $_settingModel->get('logo_header', '');
                         <a href="/admin/tickets" class="<?= strpos($_SERVER['REQUEST_URI'], '/admin/tickets') !== false ? 'active' : '' ?>">
                             <span class="nav-icon"><i class="fas fa-ticket-alt"></i></span>
                             Tickets
+                            <?php if ($_pendingTicketsCount > 0): ?>
+                                <span class="nav-badge"><?= $_pendingTicketsCount ?></span>
+                            <?php endif; ?>
                         </a>
                     </li>
                     <li>
