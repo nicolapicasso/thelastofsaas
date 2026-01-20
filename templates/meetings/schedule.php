@@ -430,30 +430,30 @@ $siteLogo = '/assets/images/logo.svg';
                                     <div class="meeting-card">
                                         <div class="meeting-participant">
                                             <div class="participant-logo">
-                                                <?php if ($meeting['sponsor_logo']): ?>
-                                                    <img src="<?= htmlspecialchars($meeting['sponsor_logo']) ?>" alt="" onerror="this.parentElement.innerHTML='<span class=\'placeholder\'><i class=\'fas fa-building\'></i></span>'">
+                                                <?php if (!empty($meeting['sponsor_logo'])): ?>
+                                                    <img src="<?= htmlspecialchars($meeting['sponsor_logo'] ?? '') ?>" alt="" onerror="this.parentElement.innerHTML='<span class=\'placeholder\'><i class=\'fas fa-building\'></i></span>'">
                                                 <?php else: ?>
                                                     <span class="placeholder"><i class="fas fa-building"></i></span>
                                                 <?php endif; ?>
                                             </div>
                                             <div class="participant-info">
-                                                <div class="participant-name" title="<?= htmlspecialchars($meeting['sponsor_name']) ?>">
-                                                    <?= htmlspecialchars($meeting['sponsor_name']) ?>
+                                                <div class="participant-name" title="<?= htmlspecialchars($meeting['sponsor_name'] ?? '') ?>">
+                                                    <?= htmlspecialchars($meeting['sponsor_name'] ?? 'Sin nombre') ?>
                                                 </div>
                                             </div>
                                         </div>
                                         <div class="meeting-divider"></div>
                                         <div class="meeting-participant">
                                             <div class="participant-logo">
-                                                <?php if ($meeting['company_logo']): ?>
-                                                    <img src="<?= htmlspecialchars($meeting['company_logo']) ?>" alt="" onerror="this.parentElement.innerHTML='<span class=\'placeholder\'><i class=\'fas fa-briefcase\'></i></span>'">
+                                                <?php if (!empty($meeting['company_logo'])): ?>
+                                                    <img src="<?= htmlspecialchars($meeting['company_logo'] ?? '') ?>" alt="" onerror="this.parentElement.innerHTML='<span class=\'placeholder\'><i class=\'fas fa-briefcase\'></i></span>'">
                                                 <?php else: ?>
                                                     <span class="placeholder"><i class="fas fa-briefcase"></i></span>
                                                 <?php endif; ?>
                                             </div>
                                             <div class="participant-info">
-                                                <div class="participant-name" title="<?= htmlspecialchars($meeting['company_name']) ?>">
-                                                    <?= htmlspecialchars($meeting['company_name']) ?>
+                                                <div class="participant-name" title="<?= htmlspecialchars($meeting['company_name'] ?? '') ?>">
+                                                    <?= htmlspecialchars($meeting['company_name'] ?? 'Sin nombre') ?>
                                                 </div>
                                             </div>
                                         </div>

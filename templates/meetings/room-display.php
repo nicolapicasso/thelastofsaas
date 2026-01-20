@@ -4,7 +4,8 @@
  * Shows tables with participants and manages rounds with timer
  * TLOS - The Last of SaaS
  */
-$siteLogo = '/assets/images/logo.svg';
+$siteLogo = '/assets/images/logo-white.png';
+$sessionTime = substr($block['start_time'], 0, 5) . ' - ' . substr($block['end_time'], 0, 5);
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -60,7 +61,6 @@ $siteLogo = '/assets/images/logo.svg';
 
         .site-logo {
             height: 40px;
-            filter: brightness(0) invert(1);
         }
 
         .header-info h1 {
@@ -77,6 +77,24 @@ $siteLogo = '/assets/images/logo.svg';
             display: flex;
             align-items: center;
             gap: 2rem;
+        }
+
+        .session-time {
+            text-align: center;
+            padding: 0.5rem 1rem;
+            background: rgba(255,255,255,0.1);
+            border-radius: 8px;
+        }
+
+        .session-time-label {
+            font-size: 0.7rem;
+            opacity: 0.8;
+            text-transform: uppercase;
+        }
+
+        .session-time-value {
+            font-size: 1.1rem;
+            font-weight: 600;
         }
 
         .current-time {
@@ -102,12 +120,13 @@ $siteLogo = '/assets/images/logo.svg';
         /* Timer Section */
         .timer-section {
             background: var(--bg-card);
-            padding: 1.5rem 2rem;
+            padding: 1rem 2rem;
             display: flex;
             justify-content: center;
             align-items: center;
-            gap: 3rem;
+            gap: 2rem;
             border-bottom: 1px solid var(--border);
+            flex-wrap: wrap;
         }
 
         .timer-display {
@@ -117,7 +136,7 @@ $siteLogo = '/assets/images/logo.svg';
         }
 
         .timer-countdown {
-            font-size: 4rem;
+            font-size: 3.5rem;
             font-weight: 800;
             font-variant-numeric: tabular-nums;
             letter-spacing: -2px;
@@ -138,13 +157,13 @@ $siteLogo = '/assets/images/logo.svg';
         }
 
         .timer-label {
-            font-size: 1rem;
+            font-size: 0.85rem;
             color: var(--text-muted);
         }
 
         .timer-controls {
             display: flex;
-            gap: 0.75rem;
+            gap: 0.5rem;
         }
 
         .btn {
@@ -152,8 +171,8 @@ $siteLogo = '/assets/images/logo.svg';
             align-items: center;
             justify-content: center;
             gap: 0.5rem;
-            padding: 0.75rem 1.5rem;
-            font-size: 1rem;
+            padding: 0.6rem 1.2rem;
+            font-size: 0.9rem;
             font-weight: 600;
             border: none;
             border-radius: 8px;
@@ -181,7 +200,7 @@ $siteLogo = '/assets/images/logo.svg';
             border: 1px solid var(--border);
         }
 
-        .btn-next {
+        .btn-prev, .btn-next {
             background: var(--primary);
             color: white;
         }
@@ -193,12 +212,15 @@ $siteLogo = '/assets/images/logo.svg';
 
         .round-indicator {
             display: flex;
-            gap: 0.5rem;
+            gap: 0.4rem;
+            flex-wrap: wrap;
+            max-width: 200px;
+            justify-content: center;
         }
 
         .round-dot {
-            width: 12px;
-            height: 12px;
+            width: 10px;
+            height: 10px;
             border-radius: 50%;
             background: var(--border);
         }
@@ -211,27 +233,37 @@ $siteLogo = '/assets/images/logo.svg';
             background: var(--primary);
         }
 
-        /* Tables Grid */
+        /* Tables Grid - Responsive for up to 20+ tables */
         .tables-container {
-            padding: 2rem;
+            padding: 1rem;
             overflow-y: auto;
-            max-height: calc(100vh - 200px);
+            height: calc(100vh - 180px);
         }
 
         .tables-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 1.5rem;
-            max-width: 1800px;
-            margin: 0 auto;
+            gap: 1rem;
+            width: 100%;
+            height: 100%;
         }
+
+        /* Dynamic grid based on table count */
+        .tables-grid.tables-1-4 { grid-template-columns: repeat(2, 1fr); }
+        .tables-grid.tables-5-6 { grid-template-columns: repeat(3, 1fr); }
+        .tables-grid.tables-7-8 { grid-template-columns: repeat(4, 1fr); }
+        .tables-grid.tables-9-12 { grid-template-columns: repeat(4, 1fr); }
+        .tables-grid.tables-13-16 { grid-template-columns: repeat(4, 1fr); }
+        .tables-grid.tables-17-20 { grid-template-columns: repeat(5, 1fr); }
+        .tables-grid.tables-21-plus { grid-template-columns: repeat(6, 1fr); }
 
         /* Table Card */
         .table-card {
             background: var(--bg-card);
-            border-radius: 16px;
+            border-radius: 12px;
             overflow: hidden;
             border: 2px solid var(--border);
+            display: flex;
+            flex-direction: column;
         }
 
         .table-card.has-meeting {
@@ -240,23 +272,24 @@ $siteLogo = '/assets/images/logo.svg';
 
         .table-number {
             background: var(--bg-table);
-            padding: 0.75rem;
+            padding: 0.5rem;
             text-align: center;
-            font-size: 1.25rem;
+            font-size: 1rem;
             font-weight: 700;
         }
 
         .table-participants {
             display: flex;
             flex-direction: column;
+            flex: 1;
         }
 
         .participant {
-            padding: 1rem;
+            padding: 0.6rem;
             display: flex;
             align-items: center;
-            gap: 1rem;
-            min-height: 80px;
+            gap: 0.6rem;
+            flex: 1;
         }
 
         .participant:first-child {
@@ -269,9 +302,9 @@ $siteLogo = '/assets/images/logo.svg';
         }
 
         .participant-logo {
-            width: 50px;
-            height: 50px;
-            border-radius: 8px;
+            width: 36px;
+            height: 36px;
+            border-radius: 6px;
             background: white;
             display: flex;
             align-items: center;
@@ -284,7 +317,7 @@ $siteLogo = '/assets/images/logo.svg';
             width: 100%;
             height: 100%;
             object-fit: contain;
-            padding: 4px;
+            padding: 2px;
         }
 
         .participant-logo.empty {
@@ -292,18 +325,21 @@ $siteLogo = '/assets/images/logo.svg';
         }
 
         .participant-logo .placeholder {
-            font-size: 1.5rem;
+            font-size: 1rem;
             color: var(--text-muted);
         }
 
         .participant-name {
             font-weight: 600;
-            font-size: 0.95rem;
-            line-height: 1.3;
+            font-size: 0.8rem;
+            line-height: 1.2;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
         }
 
         .participant-role {
-            font-size: 0.75rem;
+            font-size: 0.65rem;
             color: var(--text-muted);
             text-transform: uppercase;
             letter-spacing: 0.5px;
@@ -312,12 +348,42 @@ $siteLogo = '/assets/images/logo.svg';
         .empty-slot {
             color: var(--text-muted);
             font-style: italic;
+            font-size: 0.75rem;
+        }
+
+        /* Smaller tables for many rooms */
+        .tables-grid.tables-17-20 .table-number,
+        .tables-grid.tables-21-plus .table-number {
+            padding: 0.3rem;
+            font-size: 0.85rem;
+        }
+
+        .tables-grid.tables-17-20 .participant,
+        .tables-grid.tables-21-plus .participant {
+            padding: 0.4rem;
+            gap: 0.4rem;
+        }
+
+        .tables-grid.tables-17-20 .participant-logo,
+        .tables-grid.tables-21-plus .participant-logo {
+            width: 28px;
+            height: 28px;
+        }
+
+        .tables-grid.tables-17-20 .participant-name,
+        .tables-grid.tables-21-plus .participant-name {
+            font-size: 0.7rem;
+        }
+
+        .tables-grid.tables-17-20 .participant-role,
+        .tables-grid.tables-21-plus .participant-role {
+            font-size: 0.55rem;
         }
 
         /* Status indicators */
         .status-bar {
-            padding: 0.5rem 1rem;
-            font-size: 0.85rem;
+            padding: 0.4rem 1rem;
+            font-size: 0.8rem;
             text-align: center;
         }
 
@@ -341,14 +407,14 @@ $siteLogo = '/assets/images/logo.svg';
             color: var(--text);
         }
 
-        /* Transition screen */
-        .transition-screen {
+        /* Transition screen - compact version in header */
+        .transition-overlay {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0,0,0,0.9);
+            background: rgba(0,0,0,0.95);
             display: none;
             align-items: center;
             justify-content: center;
@@ -356,27 +422,48 @@ $siteLogo = '/assets/images/logo.svg';
             z-index: 1000;
         }
 
-        .transition-screen.active {
+        .transition-overlay.active {
             display: flex;
         }
 
         .transition-message {
-            font-size: 3rem;
+            font-size: 2.5rem;
             font-weight: 700;
             text-align: center;
-            margin-bottom: 2rem;
+            margin-bottom: 1.5rem;
         }
 
-        .transition-countdown {
-            font-size: 8rem;
+        .transition-countdown-big {
+            font-size: 7rem;
             font-weight: 800;
             color: var(--warning);
         }
 
         .transition-hint {
-            font-size: 1.5rem;
+            font-size: 1.3rem;
             color: var(--text-muted);
             margin-top: 1rem;
+        }
+
+        /* Header transition bar (shown after initial countdown) */
+        .header-transition {
+            display: none;
+            background: var(--warning);
+            color: white;
+            padding: 0.5rem 2rem;
+            text-align: center;
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .header-transition.active {
+            display: block;
+        }
+
+        .header-transition-countdown {
+            font-weight: 800;
+            font-size: 1.3rem;
+            margin-left: 0.5rem;
         }
 
         /* Fullscreen button */
@@ -403,20 +490,28 @@ $siteLogo = '/assets/images/logo.svg';
                 flex-direction: column;
                 gap: 1rem;
                 text-align: center;
+                padding: 0.75rem;
             }
 
             .header-right {
-                flex-direction: column;
-                gap: 0.5rem;
+                flex-direction: row;
+                gap: 1rem;
+                flex-wrap: wrap;
+                justify-content: center;
             }
 
             .timer-section {
                 flex-direction: column;
-                gap: 1rem;
+                gap: 0.75rem;
+                padding: 0.75rem;
             }
 
             .timer-countdown {
-                font-size: 3rem;
+                font-size: 2.5rem;
+            }
+
+            .tables-container {
+                height: calc(100vh - 240px);
             }
         }
     </style>
@@ -432,6 +527,10 @@ $siteLogo = '/assets/images/logo.svg';
             </div>
         </div>
         <div class="header-right">
+            <div class="session-time">
+                <div class="session-time-label">Sesión</div>
+                <div class="session-time-value"><?= $sessionTime ?></div>
+            </div>
             <div class="round-info">
                 <div class="round-label">Ronda actual</div>
                 <div class="round-time" id="currentRoundTime">--:--</div>
@@ -439,6 +538,11 @@ $siteLogo = '/assets/images/logo.svg';
             <div class="current-time" id="clock">--:--</div>
         </div>
     </header>
+
+    <!-- Header Transition Bar (appears after initial countdown) -->
+    <div class="header-transition" id="headerTransition">
+        <i class="fas fa-exchange-alt"></i> Cambio de mesa - Siguiente ronda en <span class="header-transition-countdown" id="headerTransitionCountdown">110</span>s
+    </div>
 
     <!-- Timer Section -->
     <div class="timer-section">
@@ -456,6 +560,9 @@ $siteLogo = '/assets/images/logo.svg';
         </div>
 
         <div class="timer-controls">
+            <button class="btn btn-prev" id="btnPrev" onclick="prevRound()">
+                <i class="fas fa-backward"></i> Anterior
+            </button>
             <button class="btn btn-start" id="btnStart" onclick="startTimer()">
                 <i class="fas fa-play"></i> Iniciar
             </button>
@@ -465,7 +572,7 @@ $siteLogo = '/assets/images/logo.svg';
             <button class="btn btn-reset" id="btnReset" onclick="resetTimer()">
                 <i class="fas fa-redo"></i> Reiniciar
             </button>
-            <button class="btn btn-next" id="btnNext" onclick="nextRound()" disabled>
+            <button class="btn btn-next" id="btnNext" onclick="nextRound()">
                 <i class="fas fa-forward"></i> Siguiente
             </button>
         </div>
@@ -482,10 +589,10 @@ $siteLogo = '/assets/images/logo.svg';
         </div>
     </div>
 
-    <!-- Transition Screen -->
-    <div class="transition-screen" id="transitionScreen">
+    <!-- Transition Overlay (fullscreen for first 10 seconds) -->
+    <div class="transition-overlay" id="transitionOverlay">
         <div class="transition-message" id="transitionMessage">Cambio de ronda</div>
-        <div class="transition-countdown" id="transitionCountdown">120</div>
+        <div class="transition-countdown-big" id="transitionCountdownBig">10</div>
         <div class="transition-hint">Dirígete a tu siguiente mesa</div>
     </div>
 
@@ -494,21 +601,14 @@ $siteLogo = '/assets/images/logo.svg';
         <i class="fas fa-expand"></i>
     </button>
 
-    <!-- Audio elements for sounds -->
-    <audio id="beepSound" preload="auto">
-        <source src="data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2teleQdT0eyxhGM6N1jTxK6MYTZDYt++qY5kPUFj2L6riGE+QWHdwaeLYT5CYN3BqIpgPkJg3sGoi2A+QWDdwaiLYD5BYN3BqItgPkFg3cGoi2A+QWDdwaiLYD5BYN3BqItgP0Fg3cGoi2A/QWDdwaiLYD9BYN3BqItgP0Fg3cGoi2A/QWDdwaiLYD9BYN3BqItg" type="audio/wav">
-    </audio>
-    <audio id="startSound" preload="auto">
-        <source src="data:audio/wav;base64,UklGRl9vT19teleQdT0eyxhGM6N1jTxK6MYTZDYt++qY5kPUFj2L6riGE+QWHdwaeLYT5CYN3BqIpgPkJg3sGoi2A+QWDdwaiLYD5BYN3BqItgPkFg3cGoi2A+QWDdwaiLYD5BYN3BqItgPkFg3cGoi2A/QWDdwaiLYD9BYN3BqItgP0Fg3cGoi2A/QWDdwaiLYD9BYN3BqItgP0Fg3cGoi2A/QWDdwaiLYD9BYN3BqItg" type="audio/wav">
-    </audio>
-
     <script>
         // Meeting data from PHP
         const rounds = <?= json_encode($rounds) ?>;
         const roundTimes = Object.keys(rounds);
         const totalRooms = <?= $totalRooms ?>;
         const slotDuration = <?= $slotDuration ?>; // minutes
-        const transitionTime = 120; // seconds (2 minutes)
+        const transitionTime = 120; // seconds (2 minutes total)
+        const fullscreenCountdownTime = 10; // seconds for fullscreen overlay
 
         // State
         let currentRound = 0;
@@ -517,6 +617,7 @@ $siteLogo = '/assets/images/logo.svg';
         let isRunning = false;
         let inTransition = false;
         let transitionTimeRemaining = transitionTime;
+        let transitionInterval = null;
 
         // Audio context for beeps
         let audioContext = null;
@@ -527,43 +628,48 @@ $siteLogo = '/assets/images/logo.svg';
             }
         }
 
-        function playBeep(frequency = 800, duration = 200, count = 1, interval = 300) {
+        function playBeep(frequency = 800, duration = 200) {
             initAudio();
-            let played = 0;
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
 
-            function beep() {
-                const oscillator = audioContext.createOscillator();
-                const gainNode = audioContext.createGain();
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
 
-                oscillator.connect(gainNode);
-                gainNode.connect(audioContext.destination);
+            oscillator.frequency.value = frequency;
+            oscillator.type = 'sine';
 
-                oscillator.frequency.value = frequency;
-                oscillator.type = 'sine';
+            gainNode.gain.setValueAtTime(0.5, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration / 1000);
 
-                gainNode.gain.setValueAtTime(0.5, audioContext.currentTime);
-                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration / 1000);
-
-                oscillator.start(audioContext.currentTime);
-                oscillator.stop(audioContext.currentTime + duration / 1000);
-
-                played++;
-                if (played < count) {
-                    setTimeout(beep, interval);
-                }
-            }
-
-            beep();
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + duration / 1000);
         }
 
         function playEndSound() {
-            // 5 beeps to signal round end
-            playBeep(880, 300, 5, 400);
+            // 10 beeps: 9 short + 1 long at the end
+            initAudio();
+            let count = 0;
+            const totalBeeps = 10;
+
+            function beepSequence() {
+                count++;
+                if (count < totalBeeps) {
+                    // Short beeps
+                    playBeep(880, 200);
+                    setTimeout(beepSequence, 250);
+                } else {
+                    // Last beep - longer
+                    playBeep(880, 800);
+                }
+            }
+
+            beepSequence();
         }
 
         function playStartSound() {
             // Single longer beep to signal round start
-            playBeep(660, 500, 1);
+            playBeep(660, 500);
         }
 
         // Update clock
@@ -575,10 +681,24 @@ $siteLogo = '/assets/images/logo.svg';
         setInterval(updateClock, 1000);
         updateClock();
 
-        // Render tables for current round
-        function renderTables() {
+        // Get grid class based on number of tables
+        function getGridClass(count) {
+            if (count <= 4) return 'tables-1-4';
+            if (count <= 6) return 'tables-5-6';
+            if (count <= 8) return 'tables-7-8';
+            if (count <= 12) return 'tables-9-12';
+            if (count <= 16) return 'tables-13-16';
+            if (count <= 20) return 'tables-17-20';
+            return 'tables-21-plus';
+        }
+
+        // Render tables for specified round
+        function renderTables(roundIndex = currentRound) {
             const grid = document.getElementById('tablesGrid');
-            const roundData = rounds[roundTimes[currentRound]] || {};
+            const roundData = rounds[roundTimes[roundIndex]] || {};
+
+            // Set grid class for responsive sizing
+            grid.className = 'tables-grid ' + getGridClass(totalRooms);
 
             let html = '';
             for (let i = 1; i <= totalRooms; i++) {
@@ -593,12 +713,12 @@ $siteLogo = '/assets/images/logo.svg';
                                 ${hasMeeting ? `
                                     <div class="participant-logo">
                                         ${meeting.sponsor_logo ?
-                                            `<img src="${meeting.sponsor_logo}" alt="${meeting.sponsor_name}" onerror="this.parentElement.innerHTML='<span class=\\'placeholder\\'><i class=\\'fas fa-building\\'></i></span>'">`
+                                            `<img src="${meeting.sponsor_logo}" alt="${meeting.sponsor_name || ''}" onerror="this.parentElement.innerHTML='<span class=\\'placeholder\\'><i class=\\'fas fa-building\\'></i></span>'">`
                                             : '<span class="placeholder"><i class="fas fa-building"></i></span>'}
                                     </div>
                                     <div>
-                                        <div class="participant-role">Sponsor</div>
-                                        <div class="participant-name">${meeting.sponsor_name}</div>
+                                        <div class="participant-role">SaaS</div>
+                                        <div class="participant-name">${meeting.sponsor_name || 'Sin nombre'}</div>
                                     </div>
                                 ` : `
                                     <div class="participant-logo empty">
@@ -611,12 +731,12 @@ $siteLogo = '/assets/images/logo.svg';
                                 ${hasMeeting ? `
                                     <div class="participant-logo">
                                         ${meeting.company_logo ?
-                                            `<img src="${meeting.company_logo}" alt="${meeting.company_name}" onerror="this.parentElement.innerHTML='<span class=\\'placeholder\\'><i class=\\'fas fa-briefcase\\'></i></span>'">`
+                                            `<img src="${meeting.company_logo}" alt="${meeting.company_name || ''}" onerror="this.parentElement.innerHTML='<span class=\\'placeholder\\'><i class=\\'fas fa-briefcase\\'></i></span>'">`
                                             : '<span class="placeholder"><i class="fas fa-briefcase"></i></span>'}
                                     </div>
                                     <div>
                                         <div class="participant-role">Empresa</div>
-                                        <div class="participant-name">${meeting.company_name}</div>
+                                        <div class="participant-name">${meeting.company_name || 'Sin nombre'}</div>
                                     </div>
                                 ` : `
                                     <div class="participant-logo empty">
@@ -633,17 +753,25 @@ $siteLogo = '/assets/images/logo.svg';
             grid.innerHTML = html;
 
             // Update round time display
-            document.getElementById('currentRoundTime').textContent = roundTimes[currentRound] || '--:--';
+            document.getElementById('currentRoundTime').textContent = roundTimes[roundIndex] || '--:--';
 
             // Update round indicators
             document.querySelectorAll('.round-dot').forEach((dot, index) => {
                 dot.classList.remove('active', 'completed');
-                if (index < currentRound) {
+                if (index < roundIndex) {
                     dot.classList.add('completed');
-                } else if (index === currentRound) {
+                } else if (index === roundIndex) {
                     dot.classList.add('active');
                 }
             });
+
+            // Update prev/next button states
+            updateNavigationButtons();
+        }
+
+        function updateNavigationButtons() {
+            document.getElementById('btnPrev').disabled = currentRound <= 0;
+            document.getElementById('btnNext').disabled = currentRound >= roundTimes.length - 1;
         }
 
         // Timer functions
@@ -714,7 +842,6 @@ $siteLogo = '/assets/images/logo.svg';
 
             document.getElementById('btnStart').style.display = 'inline-flex';
             document.getElementById('btnPause').style.display = 'none';
-            document.getElementById('btnNext').disabled = false;
 
             if (currentRound < roundTimes.length - 1) {
                 // Start transition period
@@ -729,19 +856,41 @@ $siteLogo = '/assets/images/logo.svg';
             inTransition = true;
             transitionTimeRemaining = transitionTime;
 
-            const screen = document.getElementById('transitionScreen');
-            screen.classList.add('active');
+            // Show next round tables immediately
+            renderTables(currentRound + 1);
 
-            document.getElementById('transitionMessage').textContent = `Cambio a ronda ${currentRound + 2}`;
+            // Show fullscreen overlay for first 10 seconds
+            const overlay = document.getElementById('transitionOverlay');
+            overlay.classList.add('active');
+            document.getElementById('transitionMessage').textContent = `Siguiente: Ronda ${currentRound + 2}`;
+            document.getElementById('transitionCountdownBig').textContent = fullscreenCountdownTime;
+
             document.getElementById('statusText').textContent = 'Transición - Cambio de mesa';
             document.getElementById('statusBar').className = 'status-bar status-transition';
 
-            const transitionInterval = setInterval(() => {
+            let fullscreenCountdown = fullscreenCountdownTime;
+
+            transitionInterval = setInterval(() => {
                 transitionTimeRemaining--;
-                document.getElementById('transitionCountdown').textContent = transitionTimeRemaining;
+                fullscreenCountdown--;
+
+                // Update fullscreen countdown
+                if (fullscreenCountdown > 0) {
+                    document.getElementById('transitionCountdownBig').textContent = fullscreenCountdown;
+                } else if (fullscreenCountdown === 0) {
+                    // Hide fullscreen overlay, show header bar
+                    overlay.classList.remove('active');
+                    document.getElementById('headerTransition').classList.add('active');
+                }
+
+                // Update header transition countdown
+                if (fullscreenCountdown <= 0) {
+                    document.getElementById('headerTransitionCountdown').textContent = transitionTimeRemaining;
+                }
 
                 if (transitionTimeRemaining <= 0) {
                     clearInterval(transitionInterval);
+                    transitionInterval = null;
                     endTransition();
                 }
             }, 1000);
@@ -749,31 +898,54 @@ $siteLogo = '/assets/images/logo.svg';
 
         function endTransition() {
             inTransition = false;
-            document.getElementById('transitionScreen').classList.remove('active');
+            document.getElementById('transitionOverlay').classList.remove('active');
+            document.getElementById('headerTransition').classList.remove('active');
 
-            // Auto advance to next round and start
+            // Advance to next round
             currentRound++;
             timeRemaining = slotDuration * 60;
             updateCountdown();
             renderTables();
-            document.getElementById('btnNext').disabled = true;
 
             // Auto start next round
             startTimer();
+        }
+
+        function skipTransition() {
+            if (transitionInterval) {
+                clearInterval(transitionInterval);
+                transitionInterval = null;
+            }
+            endTransition();
+        }
+
+        function prevRound() {
+            if (currentRound <= 0) return;
+
+            if (inTransition) {
+                skipTransition();
+            }
+
+            pauseTimer();
+            currentRound--;
+            timeRemaining = slotDuration * 60;
+            updateCountdown();
+            renderTables();
+            document.getElementById('statusText').textContent = 'Preparado para iniciar';
+            document.getElementById('statusBar').className = 'status-bar status-waiting';
         }
 
         function nextRound() {
             if (currentRound >= roundTimes.length - 1) return;
 
             if (inTransition) {
-                // Skip transition
-                transitionTimeRemaining = 0;
+                skipTransition();
             } else {
+                pauseTimer();
                 currentRound++;
                 timeRemaining = slotDuration * 60;
                 updateCountdown();
                 renderTables();
-                document.getElementById('btnNext').disabled = true;
                 document.getElementById('statusText').textContent = 'Preparado para iniciar';
                 document.getElementById('statusBar').className = 'status-bar status-waiting';
             }
@@ -800,12 +972,16 @@ $siteLogo = '/assets/images/logo.svg';
                 } else {
                     startTimer();
                 }
-            } else if (e.code === 'KeyN' || e.code === 'ArrowRight') {
+            } else if (e.code === 'ArrowRight' || e.code === 'KeyN') {
                 nextRound();
+            } else if (e.code === 'ArrowLeft' || e.code === 'KeyP') {
+                prevRound();
             } else if (e.code === 'KeyR') {
                 resetTimer();
             } else if (e.code === 'KeyF') {
                 toggleFullscreen();
+            } else if (e.code === 'Escape' && inTransition) {
+                skipTransition();
             }
         });
     </script>
