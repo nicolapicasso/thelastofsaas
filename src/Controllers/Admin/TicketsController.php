@@ -470,8 +470,14 @@ class TicketsController extends Controller
 
         // Get JSON body if content type is JSON
         $contentType = $_SERVER['CONTENT_TYPE'] ?? '';
+        $rawInput = file_get_contents('php://input');
+
         if (strpos($contentType, 'application/json') !== false) {
-            $json = json_decode(file_get_contents('php://input'), true);
+            $json = json_decode($rawInput, true);
+            if ($json === null && json_last_error() !== JSON_ERROR_NONE) {
+                $this->jsonError('Error al parsear JSON: ' . json_last_error_msg());
+                return;
+            }
             $code = Sanitizer::string($json['code'] ?? '');
             $eventId = (int) ($json['event_id'] ?? 0);
         } else {
@@ -487,7 +493,7 @@ class TicketsController extends Controller
         $ticket = $this->ticketModel->findByCode($code);
 
         if (!$ticket) {
-            $this->jsonError('Entrada no encontrada.', ['valid' => false]);
+            $this->jsonError('Entrada no encontrada para código: ' . $code);
             return;
         }
 
