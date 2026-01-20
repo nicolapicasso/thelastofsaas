@@ -52,7 +52,7 @@ class MeetingDisplayController extends Controller
         // Group by time slot (round)
         $rounds = $this->groupMeetingsByTime($meetings, $block);
 
-        $this->view('meetings/room-display', [
+        $this->render('meetings/room-display', [
             'event' => $event,
             'block' => $block,
             'rounds' => $rounds,
@@ -88,7 +88,7 @@ class MeetingDisplayController extends Controller
         // Get unique times for table headers
         $times = array_keys($schedule);
 
-        $this->view('meetings/schedule', [
+        $this->render('meetings/schedule', [
             'event' => $event,
             'block' => $block,
             'schedule' => $schedule,
@@ -116,7 +116,7 @@ class MeetingDisplayController extends Controller
             $block['stats'] = $this->blockModel->getStats($block['id']);
         }
 
-        $this->view('meetings/index', [
+        $this->render('meetings/index', [
             'event' => $event,
             'blocks' => $blocks,
             'pageTitle' => 'Reuniones - ' . $event['name'],
