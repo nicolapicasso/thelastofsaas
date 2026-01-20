@@ -97,6 +97,7 @@ class TicketsController extends Controller
             'sponsor' => $sponsor,
             'inviteCode' => $inviteCode,
             'inputCode' => $inputCode,
+            'csrf_token' => $this->generateCsrf(),
             'meta_title' => 'Registro - ' . $event['name']
         ]);
     }
