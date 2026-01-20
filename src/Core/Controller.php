@@ -88,9 +88,18 @@ abstract class Controller
     /**
      * Return JSON error response
      */
-    protected function jsonError(string $message, array $data = []): void
+    protected function jsonError(string $message, array|int $dataOrCode = []): void
     {
-        $this->json(array_merge(['success' => false, 'error' => $message], $data), 400);
+        $statusCode = 400;
+        $data = [];
+
+        if (is_int($dataOrCode)) {
+            $statusCode = $dataOrCode;
+        } else {
+            $data = $dataOrCode;
+        }
+
+        $this->json(array_merge(['success' => false, 'error' => $message], $data), $statusCode);
     }
 
     /**

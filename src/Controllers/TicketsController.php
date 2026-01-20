@@ -389,7 +389,7 @@ class TicketsController extends Controller
         } catch (\Throwable $e) {
             error_log('Ticket registration error: ' . $e->getMessage() . ' in ' . $e->getFile() . ':' . $e->getLine());
             error_log('Stack trace: ' . $e->getTraceAsString());
-            $this->jsonError('Error: ' . $e->getMessage() . ' [' . basename($e->getFile()) . ':' . $e->getLine() . ']', 500);
+            $this->jsonError('Error: ' . $e->getMessage() . ' [' . basename($e->getFile()) . ':' . $e->getLine() . ']');
         }
     }
 
