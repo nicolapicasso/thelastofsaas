@@ -26,25 +26,43 @@ class QRService
      */
     public function generatePng(string $data): string
     {
-        // Use Google Charts API as a simple solution
-        // For production, consider using a PHP library like endroid/qr-code
-        $url = $this->buildGoogleChartsUrl($data);
+        // Try QR Server API (free, reliable)
+        $url = $this->buildQRServerUrl($data);
 
-        $ch = curl_init($url);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
-        curl_setopt($ch, CURLOPT_TIMEOUT, 10);
+        $context = stream_context_create([
+            'http' => [
+                'timeout' => 10,
+                'ignore_errors' => true
+            ],
+            'ssl' => [
+                'verify_peer' => false,
+                'verify_peer_name' => false
+            ]
+        ]);
 
-        $imageData = curl_exec($ch);
-        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        curl_close($ch);
+        $imageData = @file_get_contents($url, false, $context);
 
-        if ($httpCode !== 200 || !$imageData) {
-            // Fallback: generate a simple placeholder
-            return $this->generatePlaceholder($data);
+        if ($imageData && strlen($imageData) > 100) {
+            return $imageData;
         }
 
-        return $imageData;
+        // Fallback: generate a simple placeholder
+        return $this->generatePlaceholder($data);
+    }
+
+    /**
+     * Build QR Server API URL (https://goqr.me/api/)
+     */
+    private function buildQRServerUrl(string $data): string
+    {
+        $params = [
+            'size' => $this->size . 'x' . $this->size,
+            'data' => $data,
+            'margin' => $this->margin,
+            'ecc' => $this->errorCorrection
+        ];
+
+        return 'https://api.qrserver.com/v1/create-qr-code/?' . http_build_query($params);
     }
 
     /**
