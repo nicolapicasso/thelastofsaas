@@ -191,6 +191,7 @@ class TicketsController extends Controller
      */
     public function store(string $eventSlug): void
     {
+        try {
         $event = $this->eventModel->findBySlug($eventSlug);
 
         if (!$event || !in_array($event['status'], ['published', 'active'])) {
@@ -384,6 +385,11 @@ class TicketsController extends Controller
             'success' => true,
             'redirect' => url("/eventos/{$eventSlug}/ticket/{$ticket['code']}")
         ]);
+
+        } catch (\Throwable $e) {
+            error_log('Ticket registration error: ' . $e->getMessage() . ' in ' . $e->getFile() . ':' . $e->getLine());
+            $this->jsonError('Error en el registro: ' . $e->getMessage(), 500);
+        }
     }
 
     /**
