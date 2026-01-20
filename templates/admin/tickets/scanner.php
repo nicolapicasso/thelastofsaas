@@ -411,26 +411,46 @@ function processCode(code) {
     // Send validation and check-in request
     fetch('/admin/tickets/validate', {
         method: 'POST',
+        credentials: 'include', // Important: include cookies for session
         headers: {
             'Content-Type': 'application/json',
-            'X-CSRF-Token': csrfToken
+            'X-CSRF-Token': csrfToken,
+            'X-Requested-With': 'XMLHttpRequest'
         },
         body: JSON.stringify({
             code: code,
             event_id: eventId
         })
     })
-    .then(response => response.json())
+    .then(response => {
+        // Check if response is OK
+        if (!response.ok) {
+            // Try to get error message from response
+            return response.text().then(text => {
+                try {
+                    const data = JSON.parse(text);
+                    throw new Error(data.error || data.message || `Error ${response.status}`);
+                } catch (e) {
+                    if (response.status === 401 || response.status === 403) {
+                        throw new Error('Sesión expirada. Por favor, vuelve a iniciar sesión.');
+                    }
+                    throw new Error(`Error del servidor: ${response.status}`);
+                }
+            });
+        }
+        return response.json();
+    })
     .then(data => {
         if (data.success) {
             showResult('success', data.message, data.ticket);
             addToRecentCheckins(data.ticket);
         } else {
-            showResult(data.already_checked_in ? 'warning' : 'error', data.message, data.ticket);
+            showResult(data.already_checked_in ? 'warning' : 'error', data.message || data.error, data.ticket);
         }
     })
     .catch(error => {
-        showResult('error', 'Error de conexión');
+        console.error('Scan error:', error);
+        showResult('error', error.message || 'Error de conexión. Comprueba tu conexión a internet.');
     });
 }
 

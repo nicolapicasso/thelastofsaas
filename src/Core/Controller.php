@@ -253,6 +253,17 @@ abstract class Controller
     protected function requireAuth(): void
     {
         if (!$this->isAuthenticated()) {
+            // For AJAX requests, return JSON error instead of redirect
+            if ($this->isAjax()) {
+                http_response_code(401);
+                header('Content-Type: application/json');
+                echo json_encode([
+                    'success' => false,
+                    'error' => 'Sesión expirada. Por favor, vuelve a iniciar sesión.',
+                    'redirect' => '/admin/login'
+                ]);
+                exit;
+            }
             $this->redirect('/admin/login');
         }
     }
