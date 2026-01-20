@@ -86,9 +86,8 @@ class TicketsController extends Controller
 
         $event = $this->eventModel->find($ticket['event_id']);
         $ticketType = $this->ticketTypeModel->find($ticket['ticket_type_id']);
-        $sponsor = $ticket['invited_by_sponsor_id']
-            ? $this->sponsorModel->find($ticket['invited_by_sponsor_id'])
-            : null;
+        $sponsorId = $ticket['sponsor_id'] ?? $ticket['invited_by_sponsor_id'] ?? null;
+        $sponsor = $sponsorId ? $this->sponsorModel->find($sponsorId) : null;
 
         $this->renderAdmin('tickets/show', [
             'title' => 'Detalle de Entrada',
@@ -98,6 +97,7 @@ class TicketsController extends Controller
             'sponsor' => $sponsor,
             'statusOptions' => Ticket::getStatusOptions(),
             'csrf_token' => $this->generateCsrf(),
+            'flash' => $_SESSION['flash'] ?? null,
         ]);
     }
 

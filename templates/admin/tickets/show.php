@@ -21,7 +21,7 @@
     </div>
 </div>
 
-<?php if ($flash): ?>
+<?php if (!empty($flash)): ?>
     <div class="alert alert-<?= $flash['type'] ?>"><?= $flash['message'] ?></div>
 <?php endif; ?>
 
@@ -41,11 +41,11 @@
                     </tr>
                     <tr>
                         <th>Evento</th>
-                        <td><?= htmlspecialchars($ticket['event_name']) ?></td>
+                        <td><?= htmlspecialchars($event['name'] ?? $ticket['event_name'] ?? '') ?></td>
                     </tr>
                     <tr>
                         <th>Tipo de Ticket</th>
-                        <td><?= htmlspecialchars($ticket['ticket_type_name']) ?></td>
+                        <td><?= htmlspecialchars($ticketType['name'] ?? $ticket['ticket_type_name'] ?? '') ?></td>
                     </tr>
                     <tr>
                         <th>Precio</th>
@@ -124,19 +124,21 @@
         </div>
 
         <!-- Sponsor Info (if applicable) -->
-        <?php if ($ticket['sponsor_id']): ?>
+        <?php if (!empty($sponsor)): ?>
         <div class="card">
             <div class="card-header">
                 <h3>Sponsor Asociado</h3>
             </div>
             <div class="card-body">
                 <div style="display: flex; align-items: center; gap: 1rem;">
-                    <?php if ($ticket['sponsor_logo']): ?>
-                        <img src="<?= htmlspecialchars($ticket['sponsor_logo']) ?>" alt="" style="width: 60px; height: 60px; object-fit: contain; border-radius: 8px;">
+                    <?php if (!empty($sponsor['logo_url'])): ?>
+                        <img src="<?= htmlspecialchars($sponsor['logo_url']) ?>" alt="" style="width: 60px; height: 60px; object-fit: contain; border-radius: 8px;">
                     <?php endif; ?>
                     <div>
-                        <strong><?= htmlspecialchars($ticket['sponsor_name']) ?></strong>
-                        <br><small class="text-muted">Código: <?= $ticket['sponsor_code'] ?></small>
+                        <strong><?= htmlspecialchars($sponsor['name'] ?? '') ?></strong>
+                        <?php if (!empty($sponsor['code'])): ?>
+                            <br><small class="text-muted">Código: <?= htmlspecialchars($sponsor['code']) ?></small>
+                        <?php endif; ?>
                     </div>
                 </div>
             </div>
