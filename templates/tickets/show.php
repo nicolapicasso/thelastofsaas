@@ -19,7 +19,7 @@ $qrDataUri = $qrService->generateDataUri($ticket['code']);
     <style>
         :root {
             --primary: #4F46E5;
-            --primary-dark: #3730A3;
+            --primary-dark: #000;
             --success: #10B981;
             --warning: #F59E0B;
             --error: #EF4444;

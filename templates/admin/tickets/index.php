@@ -204,9 +204,11 @@
     position: sticky;
     top: 70px;
     z-index: 100;
+    overflow: visible !important;
 }
 .bulk-actions-bar .card-body {
     padding: 0.75rem 1rem;
+    overflow: visible !important;
 }
 #selected-count {
     font-weight: 600;
@@ -229,7 +231,11 @@
     border-radius: var(--radius-md);
     box-shadow: var(--shadow-md);
     min-width: 160px;
-    z-index: 1000;
+    z-index: 1001;
+}
+.bulk-actions-bar .dropdown-menu {
+    top: calc(100% + 5px);
+    z-index: 1002;
 }
 .dropdown-menu-right {
     left: auto;
@@ -306,6 +312,29 @@
     gap: 0.5rem;
     padding: 1rem 1.5rem;
     border-top: 1px solid var(--color-gray-200);
+}
+
+/* Toast notification */
+.toast-notification {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: var(--color-success);
+    color: white;
+    padding: 12px 20px;
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-lg);
+    z-index: 3000;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.3s ease;
+}
+.toast-notification.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+.toast-notification i {
+    margin-right: 8px;
 }
 </style>
 
@@ -403,6 +432,16 @@ function bulkAction(action, value = null) {
     performAction(selectedIds, action, value);
 }
 
+// Status options for UI update
+const statusLabels = <?= json_encode($statusOptions) ?>;
+const statusClasses = {
+    'confirmed': 'success',
+    'checked_in': 'info',
+    'used': 'info',
+    'pending': 'warning',
+    'cancelled': 'danger'
+};
+
 // Perform action (single or bulk)
 function performAction(ids, action, value = null) {
     const body = {
@@ -424,7 +463,69 @@ function performAction(ids, action, value = null) {
     .then(r => r.json())
     .then(data => {
         if (data.success) {
-            location.reload();
+            // Update UI without reload
+            if (action === 'delete') {
+                // Remove deleted rows
+                ids.forEach(id => {
+                    const row = document.querySelector(`tr[data-id="${id}"]`);
+                    if (row) row.remove();
+                });
+            } else if (action === 'status' || action === 'check-in' || action === 'approve') {
+                // Determine new status
+                let newStatus = value;
+                if (action === 'check-in') newStatus = 'used';
+                if (action === 'approve') newStatus = 'confirmed';
+
+                // Update status badge in each row
+                ids.forEach(id => {
+                    const row = document.querySelector(`tr[data-id="${id}"]`);
+                    if (row) {
+                        const badgeCell = row.querySelector('td:nth-child(6)');
+                        if (badgeCell) {
+                            const statusClass = statusClasses[newStatus] || 'secondary';
+                            const statusLabel = statusLabels[newStatus] || newStatus;
+                            badgeCell.innerHTML = `<span class="badge badge-${statusClass}">${statusLabel}</span>`;
+                        }
+
+                        // Update action buttons
+                        const actionsCell = row.querySelector('td:nth-child(7) .btn-group');
+                        if (actionsCell) {
+                            // Remove old conditional buttons
+                            actionsCell.querySelectorAll('.btn-success, .btn-primary').forEach(btn => {
+                                if (!btn.classList.contains('btn-outline')) {
+                                    btn.remove();
+                                }
+                            });
+
+                            // Add new buttons based on status
+                            const viewBtn = actionsCell.querySelector('a[title="Ver detalles"]');
+                            if (newStatus === 'confirmed') {
+                                const checkInBtn = document.createElement('button');
+                                checkInBtn.type = 'button';
+                                checkInBtn.className = 'btn btn-sm btn-outline btn-success';
+                                checkInBtn.onclick = () => singleAction(id, 'check-in');
+                                checkInBtn.title = 'Check-in';
+                                checkInBtn.innerHTML = '<i class="fas fa-check"></i>';
+                                viewBtn.after(checkInBtn);
+                            } else if (newStatus === 'pending') {
+                                const approveBtn = document.createElement('button');
+                                approveBtn.type = 'button';
+                                approveBtn.className = 'btn btn-sm btn-outline btn-primary';
+                                approveBtn.onclick = () => singleAction(id, 'approve');
+                                approveBtn.title = 'Aprobar';
+                                approveBtn.innerHTML = '<i class="fas fa-thumbs-up"></i>';
+                                viewBtn.after(approveBtn);
+                            }
+                        }
+                    }
+                });
+            }
+
+            // Clear selection
+            clearSelection();
+
+            // Show success message
+            showToast(data.message || 'Acción realizada correctamente');
         } else {
             alert(data.error || 'Error al realizar la acción');
         }
@@ -433,6 +534,19 @@ function performAction(ids, action, value = null) {
         console.error(err);
         alert('Error de conexión');
     });
+}
+
+// Toast notification
+function showToast(message) {
+    const toast = document.createElement('div');
+    toast.className = 'toast-notification';
+    toast.innerHTML = `<i class="fas fa-check-circle"></i> ${message}`;
+    document.body.appendChild(toast);
+    setTimeout(() => toast.classList.add('show'), 10);
+    setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => toast.remove(), 300);
+    }, 3000);
 }
 
 // Change status modal
