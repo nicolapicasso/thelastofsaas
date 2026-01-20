@@ -6,6 +6,7 @@ namespace App\Controllers\Admin;
 
 use App\Core\Controller;
 use App\Models\Sponsor;
+use App\Models\SponsorContact;
 use App\Models\Event;
 use App\Helpers\Sanitizer;
 use App\Helpers\Slug;
@@ -17,12 +18,14 @@ use App\Helpers\Slug;
 class SponsorsController extends Controller
 {
     private Sponsor $sponsorModel;
+    private SponsorContact $contactModel;
     private Event $eventModel;
 
     public function __construct()
     {
         parent::__construct();
         $this->sponsorModel = new Sponsor();
+        $this->contactModel = new SponsorContact();
         $this->eventModel = new Event();
     }
 
@@ -70,6 +73,7 @@ class SponsorsController extends Controller
         $this->renderAdmin('sponsors/form', [
             'title' => 'Nuevo Sponsor',
             'sponsor' => null,
+            'contacts' => [],
             'events' => [],
             'csrf_token' => $this->generateCsrf(),
         ]);
@@ -100,6 +104,10 @@ class SponsorsController extends Controller
 
         try {
             $sponsorId = $this->sponsorModel->create($data);
+
+            // Save contacts
+            $this->saveContacts($sponsorId);
+
             $this->flash('success', 'Sponsor creado correctamente.');
             $this->redirect('/admin/sponsors/' . $sponsorId . '/edit');
         } catch (\Exception $e) {
@@ -123,10 +131,12 @@ class SponsorsController extends Controller
         }
 
         $events = $this->sponsorModel->getEvents((int) $id);
+        $contacts = $this->contactModel->getBySponsor((int) $id);
 
         $this->renderAdmin('sponsors/form', [
             'title' => 'Editar Sponsor',
             'sponsor' => $sponsor,
+            'contacts' => $contacts,
             'events' => $events,
             'levelOptions' => Sponsor::getLevelOptions(),
             'csrf_token' => $this->generateCsrf(),
@@ -166,6 +176,10 @@ class SponsorsController extends Controller
 
         try {
             $this->sponsorModel->update((int) $id, $data);
+
+            // Save contacts
+            $this->saveContacts((int) $id);
+
             $this->flash('success', 'Sponsor actualizado correctamente.');
             $this->redirect('/admin/sponsors/' . $id . '/edit');
         } catch (\Exception $e) {
@@ -278,25 +292,6 @@ class SponsorsController extends Controller
             }
 
             try {
-                // Process contacts - supports multiple contacts format
-                $contactName = $data['contact_name'] ?? null;
-                $contactEmail = $data['contact_email'] ?? null;
-                $contactPhone = $data['contact_phone'] ?? null;
-
-                // Check for multiple contacts field
-                $contactsField = $data['contacts'] ?? $data['contactos'] ?? null;
-                if (!empty($contactsField)) {
-                    // Format: name|email|phone;name|email|phone (first contact is primary)
-                    $contactEntries = explode(';', $contactsField);
-                    $firstContact = trim($contactEntries[0] ?? '');
-                    if (!empty($firstContact)) {
-                        $parts = explode('|', $firstContact);
-                        $contactName = trim($parts[0] ?? '') ?: null;
-                        $contactEmail = trim($parts[1] ?? '') ?: null;
-                        $contactPhone = trim($parts[2] ?? '') ?: null;
-                    }
-                }
-
                 $sponsorData = [
                     'name' => $data['name'],
                     'slug' => Slug::unique($data['name'], 'sponsors'),
@@ -304,14 +299,48 @@ class SponsorsController extends Controller
                     'description' => $data['description'] ?? null,
                     'website' => $data['website'] ?? null,
                     'logo_url' => $data['logo_url'] ?? null,
-                    'contact_name' => $contactName,
-                    'contact_email' => $contactEmail,
-                    'contact_phone' => $contactPhone,
                     'code' => substr(strtoupper(bin2hex(random_bytes(5))), 0, 10),
                     'active' => 1,
                 ];
 
-                $this->sponsorModel->create($sponsorData);
+                $sponsorId = $this->sponsorModel->create($sponsorData);
+
+                // Process multiple contacts if 'contacts' column exists
+                $contactsField = $data['contacts'] ?? $data['contactos'] ?? null;
+                if (!empty($contactsField)) {
+                    // Format: name|email|phone;name|email|phone
+                    $contactEntries = explode(';', $contactsField);
+                    $isFirst = true;
+                    foreach ($contactEntries as $contactEntry) {
+                        $contactEntry = trim($contactEntry);
+                        if (empty($contactEntry)) continue;
+
+                        $parts = explode('|', $contactEntry);
+                        $contactData = [
+                            'sponsor_id' => $sponsorId,
+                            'name' => trim($parts[0] ?? ''),
+                            'email' => trim($parts[1] ?? '') ?: null,
+                            'phone' => trim($parts[2] ?? '') ?: null,
+                            'is_primary' => $isFirst ? 1 : 0,
+                        ];
+
+                        if (!empty($contactData['name']) || !empty($contactData['email'])) {
+                            $this->contactModel->create($contactData);
+                            $isFirst = false;
+                        }
+                    }
+                } elseif (!empty($data['contact_name']) || !empty($data['contact_email'])) {
+                    // Fallback to single contact fields
+                    $contactData = [
+                        'sponsor_id' => $sponsorId,
+                        'name' => $data['contact_name'] ?? '',
+                        'email' => $data['contact_email'] ?? null,
+                        'phone' => $data['contact_phone'] ?? null,
+                        'is_primary' => 1,
+                    ];
+                    $this->contactModel->create($contactData);
+                }
+
                 $imported++;
             } catch (\Exception $e) {
                 $errors[] = "Línea {$i}: " . $e->getMessage();
@@ -502,5 +531,76 @@ class SponsorsController extends Controller
 
         // Return the URL
         return ['url' => '/uploads/logos/' . $type . '/' . $filename];
+    }
+
+    /**
+     * Save sponsor contacts from form
+     */
+    private function saveContacts(int $sponsorId): void
+    {
+        $contacts = $this->getPost('contacts', []);
+        $primaryIndex = $this->getPost('primary_contact', '0');
+
+        if (!is_array($contacts)) {
+            return;
+        }
+
+        // Get existing contact IDs for this sponsor
+        $existingContacts = $this->contactModel->getBySponsor($sponsorId);
+        $existingIds = array_column($existingContacts, 'id');
+        $processedIds = [];
+
+        foreach ($contacts as $index => $contactData) {
+            // Skip empty contacts (no name and no email)
+            if (empty(trim($contactData['name'] ?? '')) && empty(trim($contactData['email'] ?? ''))) {
+                continue;
+            }
+
+            $isPrimary = ((string) $index === (string) $primaryIndex) ? 1 : 0;
+
+            $data = [
+                'sponsor_id' => $sponsorId,
+                'name' => Sanitizer::string($contactData['name'] ?? ''),
+                'position' => Sanitizer::string($contactData['position'] ?? '') ?: null,
+                'email' => Sanitizer::string($contactData['email'] ?? '') ?: null,
+                'phone' => Sanitizer::string($contactData['phone'] ?? '') ?: null,
+                'is_primary' => $isPrimary,
+            ];
+
+            $contactId = !empty($contactData['id']) ? (int) $contactData['id'] : null;
+
+            if ($contactId && in_array($contactId, $existingIds)) {
+                // Update existing contact
+                $this->contactModel->update($contactId, $data);
+                $processedIds[] = $contactId;
+            } else {
+                // Create new contact
+                $newId = $this->contactModel->create($data);
+                $processedIds[] = $newId;
+            }
+        }
+
+        // Delete contacts that were removed from the form
+        foreach ($existingIds as $existingId) {
+            if (!in_array($existingId, $processedIds)) {
+                $this->contactModel->delete($existingId);
+            }
+        }
+
+        // Ensure at least one contact is primary
+        $updatedContacts = $this->contactModel->getBySponsor($sponsorId);
+        if (!empty($updatedContacts)) {
+            $hasPrimary = false;
+            foreach ($updatedContacts as $contact) {
+                if ($contact['is_primary']) {
+                    $hasPrimary = true;
+                    break;
+                }
+            }
+            if (!$hasPrimary) {
+                // Set first contact as primary
+                $this->contactModel->setPrimary((int) $updatedContacts[0]['id'], $sponsorId);
+            }
+        }
     }
 }
