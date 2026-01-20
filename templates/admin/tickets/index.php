@@ -490,12 +490,8 @@ function performAction(ids, action, value = null) {
                         // Update action buttons
                         const actionsCell = row.querySelector('td:nth-child(7) .btn-group');
                         if (actionsCell) {
-                            // Remove old conditional buttons
-                            actionsCell.querySelectorAll('.btn-success, .btn-primary').forEach(btn => {
-                                if (!btn.classList.contains('btn-outline')) {
-                                    btn.remove();
-                                }
-                            });
+                            // Remove old conditional buttons (check-in and approve)
+                            actionsCell.querySelectorAll('button[title="Check-in"], button[title="Aprobar"]').forEach(btn => btn.remove());
 
                             // Add new buttons based on status
                             const viewBtn = actionsCell.querySelector('a[title="Ver detalles"]');
