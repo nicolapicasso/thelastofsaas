@@ -131,7 +131,8 @@ class SponsorInviteCode extends Model
     public function useCode(int $codeId): bool
     {
         $sql = "UPDATE sponsor_invite_codes SET times_used = times_used + 1 WHERE id = ?";
-        return $this->db->query($sql, [$codeId]);
+        $stmt = $this->db->query($sql, [$codeId]);
+        return $stmt->rowCount() > 0;
     }
 
     /**
