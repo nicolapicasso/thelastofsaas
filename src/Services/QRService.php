@@ -136,8 +136,8 @@ class QRService
         $fontSize = 3;
         $text = substr($data, 0, 20);
         $textWidth = strlen($text) * imagefontwidth($fontSize);
-        $x = ($this->size - $textWidth) / 2;
-        $y = ($this->size - imagefontheight($fontSize)) / 2;
+        $x = (int)(($this->size - $textWidth) / 2);
+        $y = (int)(($this->size - imagefontheight($fontSize)) / 2);
 
         imagestring($image, $fontSize, $x, $y - 20, 'QR Code', $black);
         imagestring($image, $fontSize, $x, $y + 10, $text, $black);

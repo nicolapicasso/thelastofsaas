@@ -67,12 +67,12 @@
                 <tbody>
                     <?php foreach ($tickets as $ticket): ?>
                         <tr>
-                            <td><code><?= htmlspecialchars($ticket['ticket_code']) ?></code></td>
+                            <td><code><?= htmlspecialchars($ticket['code'] ?? $ticket['ticket_code'] ?? '') ?></code></td>
                             <td>
-                                <strong><?= htmlspecialchars($ticket['attendee_first_name'] . ' ' . $ticket['attendee_last_name']) ?></strong>
-                                <br><small class="text-muted"><?= htmlspecialchars($ticket['attendee_email']) ?></small>
+                                <strong><?= htmlspecialchars($ticket['attendee_name'] ?? (($ticket['attendee_first_name'] ?? '') . ' ' . ($ticket['attendee_last_name'] ?? ''))) ?></strong>
+                                <br><small class="text-muted"><?= htmlspecialchars($ticket['attendee_email'] ?? '') ?></small>
                             </td>
-                            <td><?= $ticket['attendee_company_name'] ? htmlspecialchars($ticket['attendee_company_name']) : '-' ?></td>
+                            <td><?= !empty($ticket['attendee_company'] ?? $ticket['attendee_company_name'] ?? '') ? htmlspecialchars($ticket['attendee_company'] ?? $ticket['attendee_company_name'] ?? '') : '-' ?></td>
                             <td>
                                 <?= htmlspecialchars($ticket['ticket_type_name']) ?>
                                 <?php if ($ticket['sponsor_name']): ?>

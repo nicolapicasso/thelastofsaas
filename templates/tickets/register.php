@@ -592,6 +592,98 @@
             font-weight: 700;
         }
 
+        /* Error Modal */
+        .error-modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+
+        .error-modal-overlay.active {
+            display: flex;
+        }
+
+        .error-modal {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            max-width: 450px;
+            width: 100%;
+            padding: 2rem;
+            text-align: center;
+            animation: modalSlideIn 0.3s ease;
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .error-modal-icon {
+            font-size: 48px;
+            margin-bottom: 1.5rem;
+        }
+
+        .error-modal-icon.error {
+            color: var(--error-color);
+        }
+
+        .error-modal-icon.warning {
+            color: #f59e0b;
+        }
+
+        .error-modal-icon.info {
+            color: var(--success-color);
+        }
+
+        .error-modal-title {
+            font-family: var(--font-heading);
+            font-size: 20px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-light);
+            margin-bottom: 1rem;
+        }
+
+        .error-modal-message {
+            color: var(--text-grey);
+            font-size: 14px;
+            line-height: 1.6;
+            margin-bottom: 1.5rem;
+        }
+
+        .error-modal-btn {
+            background: transparent;
+            border: 1px solid var(--text-light);
+            color: var(--text-light);
+            padding: 0.75rem 2rem;
+            font-family: var(--font-mono);
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .error-modal-btn:hover {
+            background: var(--text-light);
+            color: var(--bg-dark);
+        }
+
         /* Responsive */
         @media (max-width: 992px) {
             .register-layout {
@@ -830,6 +922,18 @@
         </div>
     </section>
 
+    <!-- Error Modal -->
+    <div class="error-modal-overlay" id="errorModal">
+        <div class="error-modal">
+            <div class="error-modal-icon" id="errorModalIcon">
+                <i class="fas fa-exclamation-circle"></i>
+            </div>
+            <h3 class="error-modal-title" id="errorModalTitle">Error</h3>
+            <p class="error-modal-message" id="errorModalMessage"></p>
+            <button type="button" class="error-modal-btn" onclick="closeErrorModal()">ENTENDIDO</button>
+        </div>
+    </div>
+
     <script>
     document.addEventListener('DOMContentLoaded', function() {
         const form = document.getElementById('registerForm');
@@ -995,7 +1099,7 @@
                 if (data.success && data.redirect) {
                     window.location.href = data.redirect;
                 } else {
-                    alert(data.error || 'Error al procesar el registro');
+                    showErrorModal(data.error || 'Error al procesar el registro');
                     submitBtn.querySelector('.btn-text').style.display = 'inline';
                     submitBtn.querySelector('.btn-loading').style.display = 'none';
                     submitBtn.disabled = false;
@@ -1003,12 +1107,74 @@
             })
             .catch(err => {
                 console.error('Registration error:', err);
-                alert('Error: ' + err.message);
+                showErrorModal(err.message);
                 submitBtn.querySelector('.btn-text').style.display = 'inline';
                 submitBtn.querySelector('.btn-loading').style.display = 'none';
                 submitBtn.disabled = false;
             });
         });
+    });
+
+    // Error Modal Functions
+    function showErrorModal(message, type = 'error') {
+        const modal = document.getElementById('errorModal');
+        const icon = document.getElementById('errorModalIcon');
+        const title = document.getElementById('errorModalTitle');
+        const msg = document.getElementById('errorModalMessage');
+
+        // Parse message if it's JSON
+        let displayMessage = message;
+        let displayTitle = 'Error';
+        let iconClass = 'error';
+        let iconName = 'fa-exclamation-circle';
+
+        // Check for specific error messages
+        if (message.includes('Ya existe un registro') || message.includes('already registered')) {
+            displayTitle = 'Ya estas registrado';
+            displayMessage = 'Este email ya tiene un registro para este evento. Revisa tu correo para encontrar tu entrada.';
+            iconClass = 'warning';
+            iconName = 'fa-user-check';
+        } else if (message.includes('Token de seguridad')) {
+            displayTitle = 'Sesion expirada';
+            displayMessage = 'Tu sesion ha expirado. Por favor, recarga la pagina e intenta de nuevo.';
+            iconClass = 'warning';
+            iconName = 'fa-clock';
+        } else if (message.includes('No quedan entradas')) {
+            displayTitle = 'Entradas agotadas';
+            displayMessage = 'Lo sentimos, no quedan entradas disponibles de este tipo.';
+            iconClass = 'warning';
+            iconName = 'fa-ticket-alt';
+        } else {
+            // Clean up technical error messages
+            displayMessage = message.replace(/Error: |Error del servidor: /g, '').replace(/\{.*\}/g, '').trim();
+            if (displayMessage.length > 150) {
+                displayMessage = 'Ha ocurrido un error al procesar tu registro. Por favor, intenta de nuevo.';
+            }
+        }
+
+        icon.className = 'error-modal-icon ' + iconClass;
+        icon.innerHTML = '<i class="fas ' + iconName + '"></i>';
+        title.textContent = displayTitle;
+        msg.textContent = displayMessage;
+        modal.classList.add('active');
+    }
+
+    function closeErrorModal() {
+        document.getElementById('errorModal').classList.remove('active');
+    }
+
+    // Close modal on overlay click
+    document.getElementById('errorModal').addEventListener('click', function(e) {
+        if (e.target === this) {
+            closeErrorModal();
+        }
+    });
+
+    // Close modal on Escape key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            closeErrorModal();
+        }
     });
     </script>
 </body>
