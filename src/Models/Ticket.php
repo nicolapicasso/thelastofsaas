@@ -33,11 +33,35 @@ class Ticket extends Model
     ];
 
     /**
+     * Create ticket with auto-generated code
+     */
+    public function create(array $data): int
+    {
+        if (empty($data['code'])) {
+            $data['code'] = $this->generateCode();
+        }
+        return parent::create($data);
+    }
+
+    /**
      * Get ticket by code
      */
     public function findByCode(string $code): ?array
     {
         return $this->findBy('code', $code);
+    }
+
+    /**
+     * Check if ticket exists for email in event
+     */
+    public function existsForEmail(int $eventId, string $email): bool
+    {
+        $sql = "SELECT COUNT(*) as count FROM tickets
+                WHERE event_id = ? AND attendee_email = ?
+                AND status NOT IN ('cancelled', 'refunded')";
+
+        $result = $this->db->fetch($sql, [$eventId, $email]);
+        return ($result['count'] ?? 0) > 0;
     }
 
     /**
