@@ -491,13 +491,23 @@ class TicketsController extends Controller
             return;
         }
 
+        // Helper to get attendee name from ticket
+        $getAttendeeName = function($t) {
+            if (!empty($t['attendee_name'])) {
+                return $t['attendee_name'];
+            }
+            $firstName = $t['attendee_first_name'] ?? '';
+            $lastName = $t['attendee_last_name'] ?? '';
+            return trim($firstName . ' ' . $lastName) ?: 'Sin nombre';
+        };
+
         // Check if ticket is for the selected event
         if ($eventId && $ticket['event_id'] != $eventId) {
             $event = $this->eventModel->find($ticket['event_id']);
             $this->jsonError('Este ticket es para otro evento: ' . ($event['name'] ?? 'Desconocido'), [
                 'valid' => false,
                 'ticket' => [
-                    'name' => $this->ticketModel->getAttendeeName($ticket),
+                    'name' => $getAttendeeName($ticket),
                     'email' => $ticket['attendee_email'],
                 ]
             ]);
@@ -508,7 +518,7 @@ class TicketsController extends Controller
         $ticketData = [
             'id' => $ticket['id'],
             'code' => $ticket['ticket_code'] ?? $ticket['code'],
-            'name' => $this->ticketModel->getAttendeeName($ticket),
+            'name' => $getAttendeeName($ticket),
             'email' => $ticket['attendee_email'],
             'company' => $ticket['attendee_company_name'] ?? $ticket['attendee_company'] ?? '',
             'status' => $ticket['status'],
