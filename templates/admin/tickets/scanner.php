@@ -409,7 +409,7 @@ function processCode(code) {
     `;
 
     // Send validation and check-in request
-    fetch('/admin/tickets/validate', {
+    fetch('/admin/tickets/validate-code', {
         method: 'POST',
         credentials: 'include', // Important: include cookies for session
         headers: {
