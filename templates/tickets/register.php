@@ -433,6 +433,58 @@
             color: var(--error-color);
         }
 
+        /* Sponsor Invitation Block */
+        .sponsor-invitation {
+            background: linear-gradient(135deg, var(--bg-card) 0%, rgba(255, 255, 255, 0.03) 100%);
+            border: 2px solid var(--border-color);
+            padding: 2.5rem;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .sponsor-invitation-logo {
+            width: 120px;
+            height: 120px;
+            object-fit: contain;
+            background: var(--text-light);
+            padding: 1rem;
+            margin: 0 auto 1.5rem;
+            display: block;
+        }
+
+        .sponsor-invitation-text {
+            font-family: var(--font-heading);
+            font-size: clamp(18px, 3vw, 24px);
+            font-weight: 600;
+            line-height: 1.4;
+            color: var(--text-light);
+            text-transform: uppercase;
+            letter-spacing: 0.02em;
+        }
+
+        .sponsor-invitation-text .sponsor-name {
+            display: block;
+            font-size: clamp(24px, 4vw, 32px);
+            font-weight: 800;
+            color: var(--text-light);
+            margin-bottom: 0.5rem;
+        }
+
+        .sponsor-invitation-text .invitation-phrase {
+            display: block;
+            font-size: clamp(14px, 2vw, 16px);
+            font-weight: 400;
+            color: var(--text-grey);
+            margin-bottom: 0.5rem;
+        }
+
+        .sponsor-invitation-text .event-name {
+            display: block;
+            font-size: clamp(20px, 3.5vw, 28px);
+            font-weight: 700;
+            color: var(--success-color);
+        }
+
         /* Summary Sidebar */
         .register-sidebar {
             position: sticky;
@@ -598,6 +650,30 @@
                     HUBO UN ERROR CON EL PAGO. POR FAVOR, INTENTALO DE NUEVO.
                 </div>
             <?php endif; ?>
+
+            <!-- Sponsor Invitation Block (visible when sponsor is detected) -->
+            <?php if (!empty($sponsor)): ?>
+            <div class="sponsor-invitation" id="sponsorInvitationBlock">
+                <?php if (!empty($sponsor['logo_url'])): ?>
+                    <img src="<?= htmlspecialchars($sponsor['logo_url']) ?>" alt="<?= htmlspecialchars($sponsor['name']) ?>" class="sponsor-invitation-logo">
+                <?php endif; ?>
+                <div class="sponsor-invitation-text">
+                    <span class="sponsor-name"><?= htmlspecialchars($sponsor['name']) ?></span>
+                    <span class="invitation-phrase">tiene el placer de invitarte a</span>
+                    <span class="event-name"><?= htmlspecialchars($event['name']) ?></span>
+                </div>
+            </div>
+            <?php endif; ?>
+
+            <!-- Dynamic Sponsor Invitation Block (shown when code is validated via JS) -->
+            <div class="sponsor-invitation" id="dynamicSponsorInvitation" style="display: none;">
+                <img src="" alt="" class="sponsor-invitation-logo" id="dynamicSponsorLogo" style="display: none;">
+                <div class="sponsor-invitation-text">
+                    <span class="sponsor-name" id="dynamicSponsorName"></span>
+                    <span class="invitation-phrase">tiene el placer de invitarte a</span>
+                    <span class="event-name"><?= htmlspecialchars($event['name']) ?></span>
+                </div>
+            </div>
 
             <div class="register-layout">
                 <!-- Form -->
@@ -840,6 +916,11 @@
                         sponsorCodeInput.readOnly = true;
                         applyCodeBtn.style.display = 'none';
                         updateSummary();
+
+                        // Show dynamic sponsor invitation block
+                        if (appliedSponsorName) {
+                            showSponsorInvitation(appliedSponsorName, data.sponsor_logo || '');
+                        }
                     } else {
                         showCodeMessage(data.error || 'Codigo no valido', 'error');
                     }
@@ -859,6 +940,28 @@
             codeMessage.textContent = message;
             codeMessage.className = 'code-message ' + type;
             codeMessage.style.display = 'block';
+        }
+
+        function showSponsorInvitation(sponsorName, sponsorLogo) {
+            const invitationBlock = document.getElementById('dynamicSponsorInvitation');
+            const sponsorNameEl = document.getElementById('dynamicSponsorName');
+            const sponsorLogoEl = document.getElementById('dynamicSponsorLogo');
+
+            if (invitationBlock && sponsorName) {
+                sponsorNameEl.textContent = sponsorName;
+
+                if (sponsorLogo) {
+                    sponsorLogoEl.src = sponsorLogo;
+                    sponsorLogoEl.alt = sponsorName;
+                    sponsorLogoEl.style.display = 'block';
+                } else {
+                    sponsorLogoEl.style.display = 'none';
+                }
+
+                invitationBlock.style.display = 'block';
+                // Smooth scroll to the invitation block
+                invitationBlock.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
         }
 
         // Form submission

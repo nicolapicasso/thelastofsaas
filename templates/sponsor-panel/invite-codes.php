@@ -267,6 +267,26 @@
             border-color: var(--text-light);
         }
 
+        .code-url {
+            display: block;
+            margin-top: 0.5rem;
+            font-family: var(--font-mono);
+            font-size: 10px;
+            color: var(--text-grey);
+            word-break: break-all;
+            cursor: pointer;
+            transition: var(--transition);
+            padding: 0.25rem 0;
+        }
+
+        .code-url:hover {
+            color: var(--text-light);
+        }
+
+        .code-url i {
+            margin-right: 0.25rem;
+        }
+
         .usage-badge {
             font-family: var(--font-mono);
             font-size: 11px;
@@ -477,10 +497,17 @@
                     </thead>
                     <tbody>
                         <?php foreach ($codes as $code): ?>
+                            <?php
+                            $baseUrl = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http') . '://' . ($_SERVER['HTTP_HOST'] ?? 'localhost');
+                            $fullUrl = $baseUrl . '/eventos/' . htmlspecialchars($event['slug']) . '/registro?code=' . htmlspecialchars($code['code']);
+                            ?>
                             <tr>
                                 <td>
-                                    <span class="code-value" onclick="copyCode('<?= htmlspecialchars($code['code']) ?>')" title="Click para copiar">
+                                    <span class="code-value" onclick="copyCode('<?= htmlspecialchars($code['code']) ?>')" title="Click para copiar codigo">
                                         <?= htmlspecialchars($code['code']) ?>
+                                    </span>
+                                    <span class="code-url" onclick="copyUrl('<?= $fullUrl ?>')" title="Click para copiar URL completa">
+                                        <i class="fas fa-link"></i> <?= $fullUrl ?>
                                     </span>
                                 </td>
                                 <td>
@@ -535,11 +562,41 @@
     <script>
     function copyCode(code) {
         navigator.clipboard.writeText(code).then(() => {
-            alert('Codigo copiado: ' + code);
+            showToast('Codigo copiado: ' + code);
         }).catch(() => {
             prompt('Copia este codigo:', code);
         });
     }
+
+    function copyUrl(url) {
+        navigator.clipboard.writeText(url).then(() => {
+            showToast('URL copiada al portapapeles');
+        }).catch(() => {
+            prompt('Copia esta URL:', url);
+        });
+    }
+
+    function showToast(message) {
+        // Remove existing toast if any
+        const existingToast = document.querySelector('.copy-toast');
+        if (existingToast) existingToast.remove();
+
+        const toast = document.createElement('div');
+        toast.className = 'copy-toast';
+        toast.textContent = message;
+        toast.style.cssText = 'position: fixed; bottom: 2rem; left: 50%; transform: translateX(-50%); background: var(--success-color); color: var(--bg-dark); padding: 1rem 2rem; font-family: var(--font-mono); font-size: 12px; text-transform: uppercase; letter-spacing: 0.1em; z-index: 9999; animation: fadeInOut 2s ease-in-out forwards;';
+        document.body.appendChild(toast);
+
+        setTimeout(() => toast.remove(), 2000);
+    }
     </script>
+    <style>
+    @keyframes fadeInOut {
+        0% { opacity: 0; transform: translateX(-50%) translateY(20px); }
+        15% { opacity: 1; transform: translateX(-50%) translateY(0); }
+        85% { opacity: 1; transform: translateX(-50%) translateY(0); }
+        100% { opacity: 0; transform: translateX(-50%) translateY(-20px); }
+    }
+    </style>
 </body>
 </html>

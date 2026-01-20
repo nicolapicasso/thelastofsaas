@@ -158,6 +158,7 @@ class TicketsController extends Controller
                 'discount' => $discount,
                 'is_free' => $isFree,
                 'sponsor_name' => $sponsor['name'] ?? '',
+                'sponsor_logo' => $sponsor['logo_url'] ?? '',
                 'message' => 'Código válido'
             ]);
             return;
@@ -175,6 +176,7 @@ class TicketsController extends Controller
                     'discount' => 100,
                     'is_free' => true,
                     'sponsor_name' => $sponsor['name'],
+                    'sponsor_logo' => $sponsor['logo_url'] ?? '',
                     'message' => 'Código de sponsor válido'
                 ]);
                 return;
