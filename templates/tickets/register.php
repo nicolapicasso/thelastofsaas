@@ -401,6 +401,38 @@
             font-size: 16px;
         }
 
+        .btn-outline {
+            background: transparent;
+            color: var(--text-light);
+            border-color: var(--text-light);
+            padding: 1rem 1.5rem;
+        }
+
+        .btn-outline:hover {
+            background: var(--text-light);
+            color: var(--bg-dark);
+        }
+
+        .code-message {
+            font-family: var(--font-mono);
+            font-size: 12px;
+            padding: 0.75rem 1rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .code-message.success {
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid var(--success-color);
+            color: var(--success-color);
+        }
+
+        .code-message.error {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid var(--error-color);
+            color: var(--error-color);
+        }
+
         /* Summary Sidebar */
         .register-sidebar {
             position: sticky;
@@ -654,7 +686,14 @@
                             <h2><span class="step-number">3</span> CODIGO DE DESCUENTO <small>(opcional)</small></h2>
                             <div class="form-group">
                                 <label class="form-label">Tienes un codigo de sponsor?</label>
-                                <input type="text" name="sponsor_code" class="form-control" placeholder="Introduce tu codigo" style="max-width: 300px;">
+                                <div style="display: flex; gap: 1rem; max-width: 450px;">
+                                    <input type="text" name="sponsor_code" id="sponsorCode" class="form-control" placeholder="Introduce tu codigo" style="flex: 1;">
+                                    <button type="button" id="applyCodeBtn" class="btn btn-outline" style="white-space: nowrap;">
+                                        <span class="btn-text">APLICAR</span>
+                                        <span class="btn-loading" style="display: none;"><i class="fas fa-spinner fa-spin"></i></span>
+                                    </button>
+                                </div>
+                                <div id="codeMessage" class="code-message" style="margin-top: 0.75rem; display: none;"></div>
                             </div>
                         </div>
                         <?php endif; ?>
@@ -720,7 +759,9 @@
         const form = document.getElementById('registerForm');
         const ticketOptions = document.querySelectorAll('.ticket-type-option');
         const submitBtn = document.getElementById('submitBtn');
-        const hasSponsor = <?= !empty($sponsor) ? 'true' : 'false' ?>;
+        let hasSponsor = <?= !empty($sponsor) ? 'true' : 'false' ?>;
+        let appliedDiscount = null;
+        let appliedSponsorName = null;
 
         // Ticket type selection
         ticketOptions.forEach(option => {
@@ -741,8 +782,11 @@
 
                 document.getElementById('summaryTicketType').textContent = name;
 
-                if (hasSponsor || price === 0) {
+                if (hasSponsor || appliedDiscount === 100 || price === 0) {
                     document.getElementById('summaryTotal').textContent = 'GRATIS';
+                } else if (appliedDiscount > 0) {
+                    const discountedPrice = price * (1 - appliedDiscount / 100);
+                    document.getElementById('summaryTotal').textContent = discountedPrice.toFixed(2) + ' EUR';
                 } else {
                     document.getElementById('summaryTotal').textContent = price.toFixed(2) + ' EUR';
                 }
@@ -751,6 +795,71 @@
 
         // Initial update
         updateSummary();
+
+        // Apply discount code button
+        const applyCodeBtn = document.getElementById('applyCodeBtn');
+        const sponsorCodeInput = document.getElementById('sponsorCode');
+        const codeMessage = document.getElementById('codeMessage');
+
+        if (applyCodeBtn) {
+            applyCodeBtn.addEventListener('click', function() {
+                const code = sponsorCodeInput.value.trim();
+                if (!code) {
+                    showCodeMessage('Introduce un codigo', 'error');
+                    return;
+                }
+
+                const ticketTypeId = document.querySelector('input[name="ticket_type_id"]:checked')?.value;
+
+                applyCodeBtn.querySelector('.btn-text').style.display = 'none';
+                applyCodeBtn.querySelector('.btn-loading').style.display = 'inline';
+                applyCodeBtn.disabled = true;
+
+                fetch('/eventos/<?= htmlspecialchars($event['slug'] ?? '') ?>/validar-codigo', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: '_csrf_token=' + encodeURIComponent(document.querySelector('[name="_csrf_token"]').value) +
+                          '&code=' + encodeURIComponent(code) +
+                          (ticketTypeId ? '&ticket_type_id=' + ticketTypeId : '')
+                })
+                .then(r => r.json())
+                .then(data => {
+                    if (data.success) {
+                        appliedDiscount = data.discount || 0;
+                        appliedSponsorName = data.sponsor_name || '';
+                        if (data.is_free || appliedDiscount === 100) {
+                            hasSponsor = true;
+                            showCodeMessage('Codigo aplicado - Entrada GRATIS' + (appliedSponsorName ? ' (cortesia de ' + appliedSponsorName + ')' : ''), 'success');
+                        } else if (appliedDiscount > 0) {
+                            showCodeMessage('Codigo aplicado - ' + appliedDiscount + '% de descuento', 'success');
+                        } else {
+                            showCodeMessage('Codigo valido', 'success');
+                        }
+                        sponsorCodeInput.readOnly = true;
+                        applyCodeBtn.style.display = 'none';
+                        updateSummary();
+                    } else {
+                        showCodeMessage(data.error || 'Codigo no valido', 'error');
+                    }
+                })
+                .catch(err => {
+                    showCodeMessage('Error al validar el codigo', 'error');
+                })
+                .finally(() => {
+                    applyCodeBtn.querySelector('.btn-text').style.display = 'inline';
+                    applyCodeBtn.querySelector('.btn-loading').style.display = 'none';
+                    applyCodeBtn.disabled = false;
+                });
+            });
+        }
+
+        function showCodeMessage(message, type) {
+            codeMessage.textContent = message;
+            codeMessage.className = 'code-message ' + type;
+            codeMessage.style.display = 'block';
+        }
 
         // Form submission
         form.addEventListener('submit', function(e) {
@@ -764,7 +873,12 @@
                 method: 'POST',
                 body: new FormData(form)
             })
-            .then(r => r.json())
+            .then(r => {
+                if (!r.ok) {
+                    throw new Error('Error del servidor: ' + r.status);
+                }
+                return r.json();
+            })
             .then(data => {
                 if (data.success && data.redirect) {
                     window.location.href = data.redirect;
@@ -776,7 +890,8 @@
                 }
             })
             .catch(err => {
-                alert('Error de conexion');
+                console.error('Registration error:', err);
+                alert('Error: ' + err.message);
                 submitBtn.querySelector('.btn-text').style.display = 'inline';
                 submitBtn.querySelector('.btn-loading').style.display = 'none';
                 submitBtn.disabled = false;

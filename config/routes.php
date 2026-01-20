@@ -432,6 +432,7 @@ $router->get('/empresas/{slug}', 'EventsController', 'companyPage');
 // Tickets
 $router->get('/eventos/{slug}/registro', 'TicketsController', 'register');
 $router->post('/eventos/{slug}/registro', 'TicketsController', 'store');
+$router->post('/eventos/{slug}/validar-codigo', 'TicketsController', 'validateCode');
 $router->get('/eventos/{slug}/ticket/confirmacion', 'TicketsController', 'paymentSuccess');
 $router->get('/eventos/{slug}/ticket/{code}', 'TicketsController', 'show');
 $router->get('/eventos/{slug}/ticket/{code}/download', 'TicketsController', 'download');

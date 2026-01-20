@@ -265,6 +265,7 @@ class VotingsController extends Controller
         $websiteUrl = Sanitizer::url($this->getPost('website_url'));
         $baseVotes = (int) $this->getPost('base_votes', 0);
         $displayOrder = (int) $this->getPost('display_order', 0);
+        $active = Sanitizer::bool($this->getPost('active', true)) ? 1 : 0;
 
         if (empty($name)) {
             $this->jsonError('El nombre es obligatorio.');
@@ -279,6 +280,7 @@ class VotingsController extends Controller
                 'website_url' => $websiteUrl,
                 'base_votes' => $baseVotes,
                 'display_order' => $displayOrder,
+                'active' => $active,
             ]);
 
             $this->jsonSuccess(['id' => $candidateId, 'message' => 'Candidato añadido.']);

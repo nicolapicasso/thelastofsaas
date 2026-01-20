@@ -63,21 +63,21 @@ class TlosSettingsController extends Controller
         }
 
         try {
-            // Known boolean settings from the form (these may not exist in DB yet)
+            // Known boolean settings from the form with their correct groups
             $knownBooleanSettings = [
-                'notify_sponsors',
-                'notify_companies',
-                'allow_sponsor_messages',
-                'auto_match_notification',
-                'meeting_confirmation_email',
-                'meeting_reminder_email',
+                'notify_sponsors' => 'email',
+                'notify_companies' => 'email',
+                'allow_sponsor_messages' => 'email',
+                'auto_match_notification' => 'matching',
+                'meeting_confirmation_email' => 'meetings',
+                'meeting_reminder_email' => 'meetings',
             ];
 
             // Handle unchecked checkboxes for known boolean settings
-            foreach ($knownBooleanSettings as $key) {
+            foreach ($knownBooleanSettings as $key => $group) {
                 if (!isset($settings[$key])) {
                     // Checkbox is unchecked (not sent in POST), set to '0'
-                    $this->settingsModel->setWithType($key, '0', 'boolean', 'meetings');
+                    $this->settingsModel->setWithType($key, '0', 'boolean', $group);
                 }
             }
 
@@ -85,7 +85,7 @@ class TlosSettingsController extends Controller
             $allSettings = $this->settingsModel->getAllGrouped();
             foreach ($allSettings as $group => $groupSettings) {
                 foreach ($groupSettings as $setting) {
-                    if ($setting['setting_type'] === 'boolean' && !isset($settings[$setting['setting_key']]) && !in_array($setting['setting_key'], $knownBooleanSettings)) {
+                    if ($setting['setting_type'] === 'boolean' && !isset($settings[$setting['setting_key']]) && !array_key_exists($setting['setting_key'], $knownBooleanSettings)) {
                         // Checkbox is unchecked (not sent in POST), set to '0'
                         $this->settingsModel->set($setting['setting_key'], '0');
                     }
@@ -100,10 +100,12 @@ class TlosSettingsController extends Controller
                     $value = $this->sanitizeSettingValue($value, $setting['setting_type']);
                     $this->settingsModel->set($key, $value);
                 } else {
-                    // Setting doesn't exist yet - determine type and create it
-                    $type = in_array($key, $knownBooleanSettings) ? 'boolean' : 'text';
+                    // Setting doesn't exist yet - determine type and group
+                    $isBoolean = array_key_exists($key, $knownBooleanSettings);
+                    $type = $isBoolean ? 'boolean' : 'text';
+                    $group = $isBoolean ? $knownBooleanSettings[$key] : 'general';
                     $value = $this->sanitizeSettingValue($value, $type);
-                    $this->settingsModel->setWithType($key, $value, $type);
+                    $this->settingsModel->setWithType($key, $value, $type, $group);
                 }
             }
 
