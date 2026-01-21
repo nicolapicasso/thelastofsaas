@@ -15,8 +15,8 @@
                  alt="<?= htmlspecialchars($member['name']) ?>"
                  class="photo-main"
                  loading="lazy">
-            <?php if (!empty($member['photo_hover'])): ?>
-                <img src="<?= htmlspecialchars($member['photo_hover']) ?>"
+            <?php if (!empty($member['photo_animated'])): ?>
+                <img src="<?= htmlspecialchars($member['photo_animated']) ?>"
                      alt="<?= htmlspecialchars($member['name']) ?>"
                      class="photo-hover"
                      loading="lazy">
@@ -31,8 +31,8 @@
             <!-- Overlay for minimal mode -->
             <div class="member-overlay">
                 <h3><?= htmlspecialchars($member['name']) ?></h3>
-                <?php if (!empty($member['role'])): ?>
-                    <p class="member-role"><?= htmlspecialchars($member['role']) ?></p>
+                <?php if (!empty($member['position'])): ?>
+                    <p class="member-role"><?= htmlspecialchars($member['position']) ?></p>
                 <?php endif; ?>
             </div>
         <?php endif; ?>
@@ -41,8 +41,8 @@
     <?php if ($displayMode !== 'minimalista'): ?>
         <div class="member-info">
             <h3><?= htmlspecialchars($member['name']) ?></h3>
-            <?php if (!empty($member['role'])): ?>
-                <p class="member-role"><?= htmlspecialchars($member['role']) ?></p>
+            <?php if (!empty($member['position'])): ?>
+                <p class="member-role"><?= htmlspecialchars($member['position']) ?></p>
             <?php endif; ?>
 
             <?php if ($displayMode === 'detallada' && !empty($member['bio'])): ?>
