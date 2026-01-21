@@ -9,6 +9,7 @@ $columns = (int)($settings['columns'] ?? 4);
 $displayMode = $settings['display_mode'] ?? 'cards';
 $cardStyle = $settings['card_style'] ?? 'minimal';
 $numberStyle = $settings['number_style'] ?? 'large';
+$iconStyle = $settings['icon_style'] ?? 'gradient';
 $showIcon = $settings['show_icon'] ?? true;
 $showDescription = $settings['show_description'] ?? true;
 $hoverEffect = $settings['hover_effect'] ?? 'lift';
@@ -18,16 +19,16 @@ $hasStagger = !empty($settings['animation_stagger']) && !empty($settings['animat
 
 // Color handling
 $customStyles = [];
-if (!empty($settings['background_color']) && $settings['background_color'] !== '#ffffff') {
+if (!empty($settings['background_color'])) {
     $customStyles[] = "--block-bg-color: {$settings['background_color']}";
 }
-if (!empty($settings['title_color']) && $settings['title_color'] !== '#1f2937') {
+if (!empty($settings['title_color'])) {
     $customStyles[] = "--block-title-color: {$settings['title_color']}";
 }
-if (!empty($settings['subtitle_color']) && $settings['subtitle_color'] !== '#4b5563') {
+if (!empty($settings['subtitle_color'])) {
     $customStyles[] = "--block-subtitle-color: {$settings['subtitle_color']}";
 }
-if (!empty($settings['text_color']) && $settings['text_color'] !== '#6b7280') {
+if (!empty($settings['text_color'])) {
     $customStyles[] = "--block-text-color: {$settings['text_color']}";
 }
 
@@ -70,14 +71,14 @@ $blockId = 'business-types-' . uniqid();
                         <?php elseif ($displayMode === 'icons_only'): ?>
                             <!-- Icons Only Mode -->
                             <?php if ($showIcon && !empty($item['icon'])): ?>
-                                <div class="business-type-icon large">
+                                <div class="business-type-icon large icon-style-<?= $iconStyle ?>">
                                     <i class="<?= htmlspecialchars($item['icon']) ?>"></i>
                                 </div>
                             <?php endif; ?>
                         <?php else: ?>
                             <!-- Cards Mode (default) -->
                             <?php if ($showIcon && !empty($item['icon'])): ?>
-                                <div class="business-type-icon">
+                                <div class="business-type-icon icon-style-<?= $iconStyle ?>">
                                     <i class="<?= htmlspecialchars($item['icon']) ?>"></i>
                                 </div>
                             <?php elseif (!empty($item['image'])): ?>
@@ -288,6 +289,19 @@ $blockId = 'business-types-' . uniqid();
 
 .business-type-card:hover .business-type-icon {
     transform: scale(1.1);
+}
+
+/* Icon Style: Light (black on white) */
+.business-type-icon.icon-style-light {
+    background: #ffffff;
+    color: #1a1a1a;
+    border: 1px solid var(--color-gray-200, #e5e7eb);
+}
+
+/* Icon Style: Dark (white on black) */
+.business-type-icon.icon-style-dark {
+    background: #1a1a1a;
+    color: #ffffff;
 }
 
 .business-type-image {
