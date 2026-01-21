@@ -48,7 +48,7 @@ class LiveMatchController extends Controller
     {
         $event = $this->eventModel->findBy('slug', $slug);
 
-        if (!$event || !$event['active']) {
+        if (!$event || !($event['active'] ?? true)) {
             $this->render('errors/404', ['message' => 'Evento no encontrado']);
             return;
         }
@@ -126,7 +126,7 @@ class LiveMatchController extends Controller
         }
 
         // Check if sponsor is active and part of this event
-        if (!$sponsor['active']) {
+        if (!($sponsor['active'] ?? true)) {
             $this->jsonError('Este SaaS no esta activo.');
             return;
         }
@@ -202,7 +202,7 @@ class LiveMatchController extends Controller
             return;
         }
 
-        if (!$company['active']) {
+        if (!($company['active'] ?? true)) {
             $this->jsonError('Esta empresa no esta activa.');
             return;
         }
