@@ -5,23 +5,27 @@
  */
 ?>
 <!DOCTYPE html>
-<html lang="es" data-page-time="<?= time() ?>">
+<html lang="es" data-page-id="<?= uniqid('sp_', true) ?>">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    <!-- Immediate cache detection - runs before page renders -->
+    <!-- bfcache detection - only reloads when restored from bfcache -->
     <script>
-    (function(){
-        var pageTime = parseInt(document.documentElement.getAttribute('data-page-time')) * 1000;
-        var now = Date.now();
-        // If page is more than 10 seconds old, it's cached - reload once
-        if (now - pageTime > 10000) {
-            window.location.reload(true);
+    window.addEventListener('pageshow', function(event) {
+        if (event.persisted) {
+            // Page was restored from bfcache - reload to get fresh data
+            var pageId = document.documentElement.getAttribute('data-page-id');
+            var reloadKey = 'bfcache_reload_' + pageId;
+            // Only reload once per page instance to prevent loops
+            if (!sessionStorage.getItem(reloadKey)) {
+                sessionStorage.setItem(reloadKey, '1');
+                window.location.reload();
+            }
         }
-    })();
+    });
     </script>
     <title>Panel Sponsor - <?= htmlspecialchars($sponsor['name']) ?></title>
 
