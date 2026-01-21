@@ -200,13 +200,6 @@ class ImagePicker {
         document.body.style.overflow = 'hidden';
     }
 
-    close() {
-        this.modal.classList.remove('active');
-        document.body.style.overflow = '';
-        this.currentInput = null;
-        this.currentPicker = null;
-    }
-
     switchTab(tab) {
         // Update buttons
         this.modal.querySelectorAll('.tab-btn').forEach(btn => {
