@@ -8,6 +8,8 @@ class ImagePicker {
         this.modal = null;
         this.currentInput = null;
         this.mediaLibrary = [];
+        this.multipleMode = false;
+        this.selectedUrls = [];
         this.init();
     }
 
@@ -41,9 +43,9 @@ class ImagePicker {
                         <div class="tab-content active" id="tab-upload">
                             <div class="upload-area" id="uploadArea">
                                 <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
-                                <p>Arrastra una imagen aquí o</p>
+                                <p class="upload-text">Arrastra una imagen aquí o</p>
                                 <label class="btn btn-primary">
-                                    Seleccionar archivo
+                                    <span class="upload-btn-text">Seleccionar archivo</span>
                                     <input type="file" id="imageFileInput" accept="image/*" hidden>
                                 </label>
                                 <p class="upload-hint">PNG, JPG, GIF, SVG, WebP (max 10MB)</p>
@@ -103,7 +105,13 @@ class ImagePicker {
 
         // File upload
         const fileInput = this.modal.querySelector('#imageFileInput');
-        fileInput.addEventListener('change', (e) => this.handleFileSelect(e.target.files[0]));
+        fileInput.addEventListener('change', (e) => {
+            if (this.multipleMode && e.target.files.length > 1) {
+                this.handleMultipleFileSelect(e.target.files);
+            } else if (e.target.files.length > 0) {
+                this.handleFileSelect(e.target.files[0]);
+            }
+        });
 
         // Drag and drop
         const uploadArea = this.modal.querySelector('#uploadArea');
@@ -116,7 +124,11 @@ class ImagePicker {
             e.preventDefault();
             uploadArea.classList.remove('dragover');
             if (e.dataTransfer.files.length) {
-                this.handleFileSelect(e.dataTransfer.files[0]);
+                if (this.multipleMode && e.dataTransfer.files.length > 1) {
+                    this.handleMultipleFileSelect(e.dataTransfer.files);
+                } else {
+                    this.handleFileSelect(e.dataTransfer.files[0]);
+                }
             }
         });
 
@@ -255,16 +267,38 @@ class ImagePicker {
             const result = await response.json();
 
             if (result.success) {
-                this.selectedUrl = result.media.url;
+                if (this.multipleMode) {
+                    this.selectedUrls.push(result.media.url);
+                } else {
+                    this.selectedUrl = result.media.url;
+                }
                 this.modal.querySelector('#confirmPickerBtn').disabled = false;
 
                 // Show preview in upload area
-                uploadProgress.innerHTML = `
-                    <div class="upload-success">
-                        <img src="${result.media.url}" alt="Uploaded">
-                        <p class="success-text"><i class="fas fa-check-circle"></i> Imagen subida correctamente</p>
-                    </div>
-                `;
+                if (this.multipleMode) {
+                    uploadProgress.innerHTML = `
+                        <div class="upload-success">
+                            <img src="${result.media.url}" alt="Uploaded">
+                            <p class="success-text"><i class="fas fa-check-circle"></i> Imagen añadida (${this.selectedUrls.length} seleccionadas)</p>
+                            <button type="button" class="btn btn-outline btn-sm" id="uploadMoreBtn">
+                                <i class="fas fa-plus"></i> Subir más
+                            </button>
+                        </div>
+                    `;
+                    // Bind upload more button
+                    uploadProgress.querySelector('#uploadMoreBtn')?.addEventListener('click', () => {
+                        uploadArea.style.display = 'block';
+                        uploadProgress.style.display = 'none';
+                        this.modal.querySelector('#imageFileInput').value = '';
+                    });
+                } else {
+                    uploadProgress.innerHTML = `
+                        <div class="upload-success">
+                            <img src="${result.media.url}" alt="Uploaded">
+                            <p class="success-text"><i class="fas fa-check-circle"></i> Imagen subida correctamente</p>
+                        </div>
+                    `;
+                }
             } else {
                 throw new Error(result.error || 'Error al subir la imagen');
             }
@@ -272,6 +306,95 @@ class ImagePicker {
             uploadArea.style.display = 'block';
             uploadProgress.style.display = 'none';
             alert(error.message || 'Error al subir la imagen');
+        }
+    }
+
+    async handleMultipleFileSelect(files) {
+        if (!files || files.length === 0) return;
+
+        const validTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/svg+xml', 'image/webp'];
+        const validFiles = Array.from(files).filter(file => {
+            if (!validTypes.includes(file.type)) {
+                console.warn(`Archivo ignorado (tipo no válido): ${file.name}`);
+                return false;
+            }
+            if (file.size > 10 * 1024 * 1024) {
+                console.warn(`Archivo ignorado (muy grande): ${file.name}`);
+                return false;
+            }
+            return true;
+        });
+
+        if (validFiles.length === 0) {
+            alert('Ningún archivo válido seleccionado. Use PNG, JPG, GIF, SVG o WebP (max 10MB).');
+            return;
+        }
+
+        // Show progress
+        const uploadArea = this.modal.querySelector('#uploadArea');
+        const uploadProgress = this.modal.querySelector('#uploadProgress');
+        uploadArea.style.display = 'none';
+        uploadProgress.style.display = 'block';
+        uploadProgress.innerHTML = `
+            <div class="progress-bar">
+                <div class="progress-fill" style="width: 0%"></div>
+            </div>
+            <p class="progress-text">Subiendo 0 de ${validFiles.length} imágenes...</p>
+        `;
+
+        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content
+            || document.querySelector('input[name="_csrf_token"]')?.value
+            || document.querySelector('input[name="_csrf"]')?.value;
+
+        const uploadedUrls = [];
+        let completed = 0;
+
+        for (const file of validFiles) {
+            try {
+                const formData = new FormData();
+                formData.append('file', file);
+                if (csrfToken) {
+                    formData.append('_csrf_token', csrfToken);
+                }
+
+                const response = await fetch('/admin/media/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    uploadedUrls.push(result.media.url);
+                }
+            } catch (error) {
+                console.error(`Error subiendo ${file.name}:`, error);
+            }
+
+            completed++;
+            const progressPercent = (completed / validFiles.length) * 100;
+            uploadProgress.querySelector('.progress-fill').style.width = `${progressPercent}%`;
+            uploadProgress.querySelector('.progress-text').textContent =
+                `Subiendo ${completed} de ${validFiles.length} imágenes...`;
+        }
+
+        if (uploadedUrls.length > 0) {
+            this.selectedUrls = [...this.selectedUrls, ...uploadedUrls];
+            this.modal.querySelector('#confirmPickerBtn').disabled = false;
+
+            // Show success with thumbnails
+            uploadProgress.innerHTML = `
+                <div class="upload-success multiple">
+                    <div class="uploaded-thumbnails">
+                        ${uploadedUrls.map(url => `<img src="${url}" alt="Uploaded">`).join('')}
+                    </div>
+                    <p class="success-text"><i class="fas fa-check-circle"></i> ${uploadedUrls.length} imágenes subidas correctamente</p>
+                </div>
+            `;
+        } else {
+            uploadArea.style.display = 'block';
+            uploadProgress.style.display = 'none';
+            alert('No se pudo subir ninguna imagen');
         }
     }
 
@@ -357,24 +480,67 @@ class ImagePicker {
             return;
         }
 
+        // Determine which items are selected based on mode
+        const isSelected = (url) => {
+            if (this.multipleMode) {
+                return this.selectedUrls.includes(url);
+            }
+            return this.selectedUrl === url;
+        };
+
         grid.innerHTML = filtered.map(media => `
-            <div class="library-item ${this.selectedUrl === media.url ? 'selected' : ''}" data-url="${media.url}">
+            <div class="library-item ${isSelected(media.url) ? 'selected' : ''}" data-url="${media.url}">
                 <img src="${media.url}" alt="${media.alt_text || media.original_filename || ''}">
                 <div class="library-item-info">
                     <span class="filename">${media.original_filename || media.filename}</span>
                 </div>
+                ${this.multipleMode ? '<div class="library-item-check"><i class="fas fa-check"></i></div>' : ''}
             </div>
         `).join('');
 
         // Bind click events
         grid.querySelectorAll('.library-item').forEach(item => {
             item.addEventListener('click', () => {
-                grid.querySelectorAll('.library-item').forEach(i => i.classList.remove('selected'));
-                item.classList.add('selected');
-                this.selectedUrl = item.dataset.url;
-                this.modal.querySelector('#confirmPickerBtn').disabled = false;
+                const url = item.dataset.url;
+
+                if (this.multipleMode) {
+                    // Toggle selection in multiple mode
+                    const index = this.selectedUrls.indexOf(url);
+                    if (index > -1) {
+                        this.selectedUrls.splice(index, 1);
+                        item.classList.remove('selected');
+                    } else {
+                        this.selectedUrls.push(url);
+                        item.classList.add('selected');
+                    }
+                    this.modal.querySelector('#confirmPickerBtn').disabled = this.selectedUrls.length === 0;
+
+                    // Update count display
+                    this.updateSelectionCount();
+                } else {
+                    // Single selection mode
+                    grid.querySelectorAll('.library-item').forEach(i => i.classList.remove('selected'));
+                    item.classList.add('selected');
+                    this.selectedUrl = url;
+                    this.modal.querySelector('#confirmPickerBtn').disabled = false;
+                }
             });
         });
+    }
+
+    updateSelectionCount() {
+        let countDisplay = this.modal.querySelector('.selection-count');
+        if (!countDisplay) {
+            countDisplay = document.createElement('div');
+            countDisplay.className = 'selection-count';
+            this.modal.querySelector('.image-picker-footer').prepend(countDisplay);
+        }
+        if (this.selectedUrls.length > 0) {
+            countDisplay.innerHTML = `<i class="fas fa-images"></i> ${this.selectedUrls.length} imágenes seleccionadas`;
+            countDisplay.style.display = 'block';
+        } else {
+            countDisplay.style.display = 'none';
+        }
     }
 
     filterLibrary(query) {
@@ -382,13 +548,24 @@ class ImagePicker {
     }
 
     confirmSelection() {
-        if (!this.selectedUrl) return;
+        // Handle multiple mode
+        if (this.multipleMode) {
+            if (this.selectedUrls.length === 0) return;
 
-        // If callback mode (for WYSIWYG), call the callback
-        if (this.onSelectCallback) {
-            this.onSelectCallback(this.selectedUrl);
-            this.close();
-            return;
+            if (this.onSelectMultipleCallback) {
+                this.onSelectMultipleCallback(this.selectedUrls);
+                this.close();
+                return;
+            }
+        } else {
+            if (!this.selectedUrl) return;
+
+            // If callback mode (for WYSIWYG), call the callback
+            if (this.onSelectCallback) {
+                this.onSelectCallback(this.selectedUrl);
+                this.close();
+                return;
+            }
         }
 
         // Normal mode - update input
@@ -424,16 +601,63 @@ class ImagePicker {
         this.currentInput = null;
         this.currentPicker = null;
         this.selectedUrl = null;
+        this.multipleMode = false;
         this.onSelectCallback = callback;
 
         // Reset modal state
         this.switchTab('upload');
         this.modal.querySelector('#imageFileInput').value = '';
+        this.modal.querySelector('#imageFileInput').removeAttribute('multiple');
         this.modal.querySelector('#externalUrlInput').value = '';
         this.modal.querySelector('#urlPreview').innerHTML = '';
         this.modal.querySelector('#confirmPickerBtn').disabled = true;
         this.modal.querySelector('#uploadProgress').style.display = 'none';
         this.modal.querySelector('#uploadArea').style.display = 'block';
+
+        // Update text for single mode
+        this.modal.querySelector('.upload-text').textContent = 'Arrastra una imagen aquí o';
+        this.modal.querySelector('.upload-btn-text').textContent = 'Seleccionar archivo';
+
+        // Load library
+        this.loadLibrary();
+
+        // Show modal
+        this.modal.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
+
+    /**
+     * Open picker for multiple image selection (galleries)
+     * @param {Function} callback - Called with array of selected URLs
+     */
+    openForMultipleSelection(callback) {
+        this.currentInput = null;
+        this.currentPicker = null;
+        this.selectedUrl = null;
+        this.selectedUrls = [];
+        this.multipleMode = true;
+        this.onSelectMultipleCallback = callback;
+        this.onSelectCallback = null;
+
+        // Reset modal state
+        this.switchTab('upload');
+        const fileInput = this.modal.querySelector('#imageFileInput');
+        fileInput.value = '';
+        fileInput.setAttribute('multiple', 'multiple');
+
+        this.modal.querySelector('#externalUrlInput').value = '';
+        this.modal.querySelector('#urlPreview').innerHTML = '';
+        this.modal.querySelector('#confirmPickerBtn').disabled = true;
+        this.modal.querySelector('#uploadProgress').style.display = 'none';
+        this.modal.querySelector('#uploadArea').style.display = 'block';
+
+        // Update text for multiple mode
+        this.modal.querySelector('.upload-text').textContent = 'Arrastra imágenes aquí o';
+        this.modal.querySelector('.upload-btn-text').textContent = 'Seleccionar archivos';
+
+        // Remove selection count if exists
+        const countDisplay = this.modal.querySelector('.selection-count');
+        if (countDisplay) countDisplay.remove();
 
         // Load library
         this.loadLibrary();
@@ -449,6 +673,9 @@ class ImagePicker {
         this.currentInput = null;
         this.currentPicker = null;
         this.onSelectCallback = null;
+        this.onSelectMultipleCallback = null;
+        this.multipleMode = false;
+        this.selectedUrls = [];
     }
 
     clearImage(input, picker) {

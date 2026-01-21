@@ -57,8 +57,9 @@
 
                     if (!imagesInput || !imagesList) return;
 
-                    if (window.imagePicker && window.imagePicker.openForEditor) {
-                        window.imagePicker.openForEditor(function(url) {
+                    // Use multiple selection mode for galleries
+                    if (window.imagePicker && window.imagePicker.openForMultipleSelection) {
+                        window.imagePicker.openForMultipleSelection(function(urls) {
                             var images = [];
                             try {
                                 images = JSON.parse(imagesInput.value) || [];
@@ -66,7 +67,10 @@
                                 images = [];
                             }
 
-                            images.push({ url: url, alt: '' });
+                            // Add all selected URLs
+                            urls.forEach(function(url) {
+                                images.push({ url: url, alt: '' });
+                            });
 
                             imagesInput.value = JSON.stringify(images);
                             imagesInput.dispatchEvent(new Event('change', { bubbles: true }));
@@ -1346,25 +1350,21 @@
                     });
                 }
 
-                // Add images button
+                // Add images button - uses imagePicker with multiple selection
                 addGalleryImagesBtn.addEventListener('click', function() {
                     console.log('Add gallery images button clicked!');
-                    console.log('MediaLibrary:', typeof MediaLibrary, MediaLibrary);
-                    if (typeof MediaLibrary !== 'undefined') {
-                        console.log('Opening MediaLibrary...');
-                        MediaLibrary.open({
-                            multiple: true,
-                            onSelect: function(selected) {
-                                var images = getGalleryImages();
-                                selected.forEach(function(media) {
-                                    images.push({ url: media.url, alt: media.alt || '' });
-                                });
-                                setGalleryImages(images);
-                                renderGalleryImages();
-                            }
+                    if (window.imagePicker && window.imagePicker.openForMultipleSelection) {
+                        console.log('Opening imagePicker for multiple selection...');
+                        window.imagePicker.openForMultipleSelection(function(urls) {
+                            var images = getGalleryImages();
+                            urls.forEach(function(url) {
+                                images.push({ url: url, alt: '' });
+                            });
+                            setGalleryImages(images);
+                            renderGalleryImages();
                         });
                     } else {
-                        alert('Media Library no disponible');
+                        alert('Selector de imágenes no disponible');
                     }
                 });
 
