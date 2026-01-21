@@ -29,6 +29,11 @@ $isAjaxRequest = (
 
 // For AJAX requests, don't display errors as HTML - handle them as JSON
 if ($isAjaxRequest) {
+    // Prevent browser caching of AJAX responses
+    header('Cache-Control: no-cache, no-store, must-revalidate, private');
+    header('Pragma: no-cache');
+    header('Expires: 0');
+
     ini_set('display_errors', '0');
 
     // Set up error handler for AJAX requests

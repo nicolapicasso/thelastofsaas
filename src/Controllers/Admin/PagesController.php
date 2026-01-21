@@ -255,6 +255,9 @@ class PagesController extends Controller
 
         try {
             header('Content-Type: application/json');
+            header('Cache-Control: no-cache, no-store, must-revalidate, private');
+            header('Pragma: no-cache');
+            header('Expires: 0');
 
             if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
                 ob_end_clean();

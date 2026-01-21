@@ -73,6 +73,10 @@ abstract class Controller
 
         http_response_code($statusCode);
         header('Content-Type: application/json; charset=utf-8');
+        // Prevent browser caching of dynamic JSON responses
+        header('Cache-Control: no-cache, no-store, must-revalidate, private');
+        header('Pragma: no-cache');
+        header('Expires: 0');
         echo json_encode($data, JSON_UNESCAPED_UNICODE);
         exit;
     }

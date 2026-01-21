@@ -69,6 +69,11 @@ class View
      */
     public function renderAdmin(string $template, array $data = []): void
     {
+        // Prevent browser caching of admin pages
+        header('Cache-Control: no-cache, no-store, must-revalidate, private');
+        header('Pragma: no-cache');
+        header('Expires: 0');
+
         $this->layout = 'admin/layouts/main';
         $this->render('admin/' . $template, $data);
     }
