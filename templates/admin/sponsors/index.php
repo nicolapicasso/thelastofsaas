@@ -92,6 +92,11 @@
                                 <?php if ($sponsor['tagline'] ?? null): ?>
                                     <br><small class="text-muted"><?= htmlspecialchars($sponsor['tagline']) ?></small>
                                 <?php endif; ?>
+                                <?php if ($sponsor['code'] ?? null): ?>
+                                    <br><a href="/sponsor/login?code=<?= htmlspecialchars($sponsor['code']) ?>" target="_blank" class="panel-link" title="Abrir panel del sponsor">
+                                        <i class="fas fa-external-link-alt"></i> <code><?= htmlspecialchars($sponsor['code']) ?></code>
+                                    </a>
+                                <?php endif; ?>
                             </td>
                             <td>
                                 <?php if ($sponsor['contact_email'] ?? null): ?>
@@ -153,3 +158,23 @@
         <?php endif; ?>
     <?php endif; ?>
 </div>
+
+<style>
+.panel-link {
+    font-size: 0.75rem;
+    color: #215A6B;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+.panel-link:hover {
+    text-decoration: underline;
+}
+.panel-link code {
+    background: #f1f3f4;
+    padding: 0.1rem 0.3rem;
+    border-radius: 3px;
+    font-size: 0.7rem;
+}
+</style>

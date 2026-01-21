@@ -89,6 +89,11 @@
                                 <?php if ($company['contact_email'] ?? null): ?>
                                     <br><small class="text-muted"><?= htmlspecialchars(explode(',', $company['contact_email'])[0]) ?></small>
                                 <?php endif; ?>
+                                <?php if ($company['code'] ?? null): ?>
+                                    <br><a href="/empresa/login?code=<?= htmlspecialchars($company['code']) ?>" target="_blank" class="panel-link" title="Abrir panel de la empresa">
+                                        <i class="fas fa-external-link-alt"></i> <code><?= htmlspecialchars($company['code']) ?></code>
+                                    </a>
+                                <?php endif; ?>
                             </td>
                             <td><?= ($company['sector'] ?? null) ? htmlspecialchars($company['sector']) : '<span class="text-muted">-</span>' ?></td>
                             <td><?= ($company['employees'] ?? null) ? '<span class="badge badge-info">' . htmlspecialchars($company['employees']) . '</span>' : '-' ?></td>
@@ -118,3 +123,23 @@
         <?php endif; ?>
     <?php endif; ?>
 </div>
+
+<style>
+.panel-link {
+    font-size: 0.75rem;
+    color: #215A6B;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+.panel-link:hover {
+    text-decoration: underline;
+}
+.panel-link code {
+    background: #f1f3f4;
+    padding: 0.1rem 0.3rem;
+    border-radius: 3px;
+    font-size: 0.7rem;
+}
+</style>
