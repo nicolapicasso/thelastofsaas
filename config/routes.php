@@ -73,7 +73,7 @@ $router->post('/search', 'Frontend\\SearchController', 'results');
 
 // Auth
 $router->get('/admin/login', 'Admin\\AuthController', 'loginForm');
-$router->post('/admin/login', 'Admin\\AuthController', 'login');
+$router->post('/auth', 'Admin\\AuthController', 'login');
 $router->get('/admin/logout', 'Admin\\AuthController', 'logout');
 
 // Dashboard
@@ -304,6 +304,8 @@ $router->get('/admin/events/{id}/stats', 'Admin\\EventsController', 'stats');
 $router->post('/admin/events/{id}/sponsors', 'Admin\\EventsController', 'addSponsor');
 $router->post('/admin/events/{id}/sponsors/{sponsorId}/delete', 'Admin\\EventsController', 'removeSponsor');
 $router->post('/admin/events/{id}/sponsors/{sponsorId}/level', 'Admin\\EventsController', 'updateSponsorLevel');
+$router->post('/admin/events/{id}/companies', 'Admin\\EventsController', 'addCompany');
+$router->post('/admin/events/{id}/companies/{companyId}/delete', 'Admin\\EventsController', 'removeCompany');
 $router->post('/admin/events/{id}/features', 'Admin\\EventsController', 'addFeature');
 
 // Sponsors
@@ -334,14 +336,18 @@ $router->post('/admin/companies/{id}/regenerate-code', 'Admin\\CompaniesControll
 $router->get('/admin/tickets', 'Admin\\TicketsController', 'index');
 $router->get('/admin/tickets/export', 'Admin\\TicketsController', 'export');
 $router->get('/admin/tickets/scanner', 'Admin\\TicketsController', 'scanner');
+$router->get('/scanner-manifest.json', 'Admin\\TicketsController', 'scannerManifest');
 $router->post('/admin/tickets/validate-code', 'Admin\\TicketsController', 'validateCode');
+$router->post('/admin/tickets/bulk-action', 'Admin\\TicketsController', 'bulkAction');
 $router->get('/admin/tickets/types', 'Admin\\TicketsController', 'types');
 $router->post('/admin/tickets/types', 'Admin\\TicketsController', 'createType');
 $router->post('/admin/tickets/types/{id}', 'Admin\\TicketsController', 'updateType');
 $router->post('/admin/tickets/types/{id}/delete', 'Admin\\TicketsController', 'deleteType');
 $router->get('/admin/tickets/{id}', 'Admin\\TicketsController', 'show');
 $router->post('/admin/tickets/{id}/check-in', 'Admin\\TicketsController', 'checkIn');
+$router->post('/admin/tickets/{id}/approve', 'Admin\\TicketsController', 'approve');
 $router->post('/admin/tickets/{id}/cancel', 'Admin\\TicketsController', 'cancel');
+$router->get('/admin/tickets/{id}/download', 'Admin\\TicketsController', 'download');
 
 // Meetings
 $router->get('/admin/meetings/blocks', 'Admin\\MeetingsController', 'blocks');
@@ -356,6 +362,7 @@ $router->post('/admin/meetings/assign', 'Admin\\MeetingsController', 'assign');
 $router->post('/admin/meetings/assignments/{id}/cancel', 'Admin\\MeetingsController', 'cancelAssignment');
 $router->get('/admin/meetings/export', 'Admin\\MeetingsController', 'export');
 $router->get('/admin/meetings/matching', 'Admin\\MeetingsController', 'matching');
+$router->get('/admin/meetings/badges', 'Admin\\MeetingsController', 'badges');
 
 // Votings
 $router->get('/admin/votings', 'Admin\\VotingsController', 'index');
@@ -366,9 +373,22 @@ $router->post('/admin/votings/{id}', 'Admin\\VotingsController', 'update');
 $router->post('/admin/votings/{id}/delete', 'Admin\\VotingsController', 'destroy');
 $router->get('/admin/votings/{id}/results', 'Admin\\VotingsController', 'results');
 $router->post('/admin/votings/{id}/reset-votes', 'Admin\\VotingsController', 'resetVotes');
+$router->get('/admin/votings/{id}/candidates', 'Admin\\VotingsController', 'candidates');
 $router->post('/admin/votings/{id}/candidates', 'Admin\\VotingsController', 'addCandidate');
 $router->post('/admin/votings/{id}/candidates/{candidateId}', 'Admin\\VotingsController', 'updateCandidate');
 $router->post('/admin/votings/{id}/candidates/{candidateId}/delete', 'Admin\\VotingsController', 'deleteCandidate');
+
+// Sponsor Invite Codes
+$router->get('/admin/sponsor-invite-codes', 'Admin\\SponsorInviteCodesController', 'index');
+$router->get('/admin/sponsor-invite-codes/create', 'Admin\\SponsorInviteCodesController', 'create');
+$router->post('/admin/sponsor-invite-codes', 'Admin\\SponsorInviteCodesController', 'store');
+$router->get('/admin/sponsor-invite-codes/bulk', 'Admin\\SponsorInviteCodesController', 'bulkCreate');
+$router->post('/admin/sponsor-invite-codes/bulk', 'Admin\\SponsorInviteCodesController', 'bulkCreate');
+$router->get('/admin/sponsor-invite-codes/export', 'Admin\\SponsorInviteCodesController', 'export');
+$router->get('/admin/sponsor-invite-codes/{id}/edit', 'Admin\\SponsorInviteCodesController', 'edit');
+$router->post('/admin/sponsor-invite-codes/{id}', 'Admin\\SponsorInviteCodesController', 'update');
+$router->post('/admin/sponsor-invite-codes/{id}/delete', 'Admin\\SponsorInviteCodesController', 'destroy');
+$router->post('/admin/sponsor-invite-codes/{id}/toggle-active', 'Admin\\SponsorInviteCodesController', 'toggleActive');
 
 // TLOS Settings
 $router->get('/admin/tlos-settings', 'Admin\\TlosSettingsController', 'index');
@@ -377,6 +397,26 @@ $router->get('/admin/tlos-settings/get', 'Admin\\TlosSettingsController', 'get')
 $router->post('/admin/tlos-settings/set', 'Admin\\TlosSettingsController', 'set');
 $router->post('/admin/tlos-settings/test-email', 'Admin\\TlosSettingsController', 'testEmail');
 $router->post('/admin/tlos-settings/test-stripe', 'Admin\\TlosSettingsController', 'testStripe');
+
+// Rooms
+$router->get('/admin/rooms', 'Admin\\RoomsController', 'index');
+$router->get('/admin/rooms/create', 'Admin\\RoomsController', 'create');
+$router->post('/admin/rooms', 'Admin\\RoomsController', 'store');
+$router->post('/admin/rooms/reorder', 'Admin\\RoomsController', 'reorder');
+$router->get('/admin/rooms/{id}/edit', 'Admin\\RoomsController', 'edit');
+$router->post('/admin/rooms/{id}', 'Admin\\RoomsController', 'update');
+$router->post('/admin/rooms/{id}/delete', 'Admin\\RoomsController', 'destroy');
+
+// Activities
+$router->get('/admin/activities', 'Admin\\ActivitiesController', 'index');
+$router->get('/admin/activities/create', 'Admin\\ActivitiesController', 'create');
+$router->post('/admin/activities', 'Admin\\ActivitiesController', 'store');
+$router->post('/admin/activities/reorder', 'Admin\\ActivitiesController', 'reorder');
+$router->get('/admin/activities/{id}/edit', 'Admin\\ActivitiesController', 'edit');
+$router->post('/admin/activities/{id}', 'Admin\\ActivitiesController', 'update');
+$router->post('/admin/activities/{id}/delete', 'Admin\\ActivitiesController', 'destroy');
+$router->post('/admin/activities/{id}/duplicate', 'Admin\\ActivitiesController', 'duplicate');
+$router->get('/admin/activities/event/{eventId}', 'Admin\\ActivitiesController', 'getByEvent');
 
 // ============================================
 // TLOS Frontend Routes
@@ -388,9 +428,29 @@ $router->get('/eventos/{slug}', 'EventsController', 'show');
 $router->get('/eventos/{slug}/agenda', 'EventsController', 'agenda');
 $router->get('/eventos/{slug}/sponsors', 'EventsController', 'sponsors');
 
+// Meeting Display (Public screens)
+$router->get('/eventos/{slug}/reuniones', 'MeetingDisplayController', 'index');
+$router->get('/eventos/{slug}/reuniones/pantalla/{blockId}', 'MeetingDisplayController', 'roomDisplay');
+$router->get('/eventos/{slug}/reuniones/horario/{blockId}', 'MeetingDisplayController', 'schedule');
+
+// Live Match Scanner (PWA)
+$router->get('/eventos/{slug}/match', 'Frontend\\LiveMatchController', 'index');
+$router->get('/eventos/{slug}/match-manifest.json', 'Frontend\\LiveMatchController', 'manifest');
+$router->post('/eventos/{slug}/match/identify', 'Frontend\\LiveMatchController', 'identifySponsor');
+$router->post('/eventos/{slug}/match/scan-company', 'Frontend\\LiveMatchController', 'scanCompany');
+$router->post('/eventos/{slug}/match/select-slot', 'Frontend\\LiveMatchController', 'selectSlot');
+$router->get('/eventos/{slug}/match/meetings', 'Frontend\\LiveMatchController', 'getMeetings');
+
+// Public Sponsor Pages
+$router->get('/sponsors/{slug}', 'EventsController', 'sponsorPage');
+
+// Public Company Pages
+$router->get('/empresas/{slug}', 'EventsController', 'companyPage');
+
 // Tickets
 $router->get('/eventos/{slug}/registro', 'TicketsController', 'register');
 $router->post('/eventos/{slug}/registro', 'TicketsController', 'store');
+$router->post('/eventos/{slug}/validar-codigo', 'TicketsController', 'validateCode');
 $router->get('/eventos/{slug}/ticket/confirmacion', 'TicketsController', 'paymentSuccess');
 $router->get('/eventos/{slug}/ticket/{code}', 'TicketsController', 'show');
 $router->get('/eventos/{slug}/ticket/{code}/download', 'TicketsController', 'download');
@@ -406,6 +466,12 @@ $router->get('/sponsor/empresas/{eventId}/{companyId}', 'SponsorPanelController'
 $router->post('/sponsor/seleccionar', 'SponsorPanelController', 'selectCompany');
 $router->post('/sponsor/deseleccionar', 'SponsorPanelController', 'unselectCompany');
 $router->get('/sponsor/matches/{eventId}', 'SponsorPanelController', 'matches');
+$router->get('/sponsor/codigos/{eventId}', 'SponsorPanelController', 'inviteCodes');
+$router->get('/sponsor/invitados/{eventId}', 'SponsorPanelController', 'invitedGuests');
+$router->get('/sponsor/mensajes/{eventId}', 'SponsorPanelController', 'messages');
+$router->get('/sponsor/mensajes/{eventId}/{companyId}', 'SponsorPanelController', 'conversation');
+$router->post('/sponsor/mensaje/enviar', 'SponsorPanelController', 'sendMessage');
+$router->post('/sponsor/mensaje/responder', 'SponsorPanelController', 'replyMessage');
 
 // Company Panel
 $router->get('/empresa/login', 'CompanyPanelController', 'login');
@@ -418,6 +484,10 @@ $router->post('/empresa/seleccionar', 'CompanyPanelController', 'selectSponsor')
 $router->post('/empresa/deseleccionar', 'CompanyPanelController', 'unselectSponsor');
 $router->get('/empresa/matches/{eventId}', 'CompanyPanelController', 'matches');
 $router->post('/empresa/perfil', 'CompanyPanelController', 'updateProfile');
+$router->get('/empresa/mensajes/{eventId}', 'CompanyPanelController', 'messages');
+$router->get('/empresa/mensajes/{eventId}/{sponsorId}', 'CompanyPanelController', 'conversation');
+$router->post('/empresa/mensaje/enviar', 'CompanyPanelController', 'sendMessage');
+$router->post('/empresa/mensaje/responder', 'CompanyPanelController', 'replyMessage');
 
 // Voting
 $router->get('/votar/{slug}', 'VotingController', 'show');

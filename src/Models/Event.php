@@ -17,19 +17,25 @@ class Event extends Model
     protected array $fillable = [
         'name',
         'slug',
+        'short_description',
         'description',
-        'venue_name',
-        'venue_address',
-        'venue_city',
-        'venue_coordinates',
-        'event_date',
-        'event_end_date',
-        'total_capacity',
-        'status',
         'featured_image',
+        'location',
+        'address',
+        'city',
+        'coordinates',
+        'start_date',
+        'end_date',
+        'start_time',
+        'end_time',
+        'max_attendees',
+        'status',
         'registration_open',
         'matching_enabled',
         'meetings_enabled',
+        'is_featured',
+        'meta_title',
+        'meta_description',
     ];
 
     /**
@@ -47,7 +53,7 @@ class Event extends Model
     {
         return $this->where(
             ['status' => 'published'],
-            ['event_date' => 'ASC']
+            ['start_date' => 'ASC']
         );
     }
 
@@ -58,7 +64,7 @@ class Event extends Model
     {
         return $this->where(
             ['status' => 'active'],
-            ['event_date' => 'ASC']
+            ['start_date' => 'ASC']
         );
     }
 
@@ -69,8 +75,8 @@ class Event extends Model
     {
         $sql = "SELECT * FROM `{$this->table}`
                 WHERE status IN ('published', 'active')
-                AND event_date >= CURDATE()
-                ORDER BY event_date ASC";
+                AND start_date >= CURDATE()
+                ORDER BY start_date ASC";
 
         return $this->db->fetchAll($sql);
     }
@@ -80,11 +86,11 @@ class Event extends Model
      */
     public function getSponsors(int $eventId): array
     {
-        $sql = "SELECT s.*, es.priority_level, es.display_order, es.custom_landing_enabled, es.max_free_tickets
+        $sql = "SELECT s.*, es.level, es.display_order, es.max_free_tickets
                 FROM sponsors s
                 INNER JOIN event_sponsors es ON s.id = es.sponsor_id
                 WHERE es.event_id = ?
-                ORDER BY FIELD(es.priority_level, 'platinum', 'gold', 'silver', 'bronze'), es.display_order ASC";
+                ORDER BY FIELD(es.level, 'platinum', 'gold', 'silver', 'bronze'), es.display_order ASC";
 
         return $this->db->fetchAll($sql, [$eventId]);
     }
@@ -94,10 +100,10 @@ class Event extends Model
      */
     public function getSponsorsByLevel(int $eventId, string $level): array
     {
-        $sql = "SELECT s.*, es.priority_level, es.display_order
+        $sql = "SELECT s.*, es.level, es.display_order
                 FROM sponsors s
                 INNER JOIN event_sponsors es ON s.id = es.sponsor_id
-                WHERE es.event_id = ? AND es.priority_level = ?
+                WHERE es.event_id = ? AND es.level = ?
                 ORDER BY es.display_order ASC";
 
         return $this->db->fetchAll($sql, [$eventId, $level]);
@@ -108,11 +114,12 @@ class Event extends Model
      */
     public function addSponsor(int $eventId, int $sponsorId, string $level = 'bronze', int $order = 0): bool
     {
-        $sql = "INSERT INTO event_sponsors (event_id, sponsor_id, priority_level, display_order)
+        $sql = "INSERT INTO event_sponsors (event_id, sponsor_id, level, display_order)
                 VALUES (?, ?, ?, ?)
-                ON DUPLICATE KEY UPDATE priority_level = VALUES(priority_level), display_order = VALUES(display_order)";
+                ON DUPLICATE KEY UPDATE level = VALUES(level), display_order = VALUES(display_order)";
 
-        return $this->db->execute($sql, [$eventId, $sponsorId, $level, $order]);
+        $this->db->query($sql, [$eventId, $sponsorId, $level, $order]);
+        return true;
     }
 
     /**
@@ -121,7 +128,8 @@ class Event extends Model
     public function removeSponsor(int $eventId, int $sponsorId): bool
     {
         $sql = "DELETE FROM event_sponsors WHERE event_id = ? AND sponsor_id = ?";
-        return $this->db->execute($sql, [$eventId, $sponsorId]);
+        $this->db->query($sql, [$eventId, $sponsorId]);
+        return true;
     }
 
     /**
@@ -129,8 +137,43 @@ class Event extends Model
      */
     public function updateSponsorLevel(int $eventId, int $sponsorId, string $level): bool
     {
-        $sql = "UPDATE event_sponsors SET priority_level = ? WHERE event_id = ? AND sponsor_id = ?";
-        return $this->db->execute($sql, [$level, $eventId, $sponsorId]);
+        $sql = "UPDATE event_sponsors SET level = ? WHERE event_id = ? AND sponsor_id = ?";
+        $this->db->query($sql, [$level, $eventId, $sponsorId]);
+        return true;
+    }
+
+    /**
+     * Get event companies
+     */
+    public function getCompanies(int $eventId): array
+    {
+        $sql = "SELECT c.*
+                FROM companies c
+                INNER JOIN event_companies ec ON c.id = ec.company_id
+                WHERE ec.event_id = ?
+                ORDER BY c.name ASC";
+
+        return $this->db->fetchAll($sql, [$eventId]);
+    }
+
+    /**
+     * Associate company with event
+     */
+    public function addCompany(int $eventId, int $companyId): bool
+    {
+        $sql = "INSERT IGNORE INTO event_companies (event_id, company_id) VALUES (?, ?)";
+        $this->db->query($sql, [$eventId, $companyId]);
+        return true;
+    }
+
+    /**
+     * Remove company from event
+     */
+    public function removeCompany(int $eventId, int $companyId): bool
+    {
+        $sql = "DELETE FROM event_companies WHERE event_id = ? AND company_id = ?";
+        $this->db->query($sql, [$eventId, $companyId]);
+        return true;
     }
 
     /**
@@ -149,8 +192,7 @@ class Event extends Model
     {
         return $this->db->insert('event_features', [
             'event_id' => $eventId,
-            'title' => $data['title'],
-            'description' => $data['description'] ?? null,
+            'feature' => $data['feature'],
             'icon' => $data['icon'] ?? null,
             'display_order' => $data['display_order'] ?? 0,
         ]);
@@ -170,8 +212,8 @@ class Event extends Model
         $ticketsSql = "SELECT
             COUNT(*) as total_tickets,
             SUM(CASE WHEN status = 'confirmed' THEN 1 ELSE 0 END) as confirmed_tickets,
-            SUM(CASE WHEN status = 'checked_in' THEN 1 ELSE 0 END) as checked_in,
-            SUM(amount_paid) as total_revenue
+            SUM(CASE WHEN status = 'used' THEN 1 ELSE 0 END) as checked_in,
+            SUM(price) as total_revenue
             FROM tickets WHERE event_id = ?";
         $ticketStats = $this->db->fetch($ticketsSql, [$eventId]);
 
@@ -195,11 +237,11 @@ class Event extends Model
         $meetingsCount = (int) $this->db->fetchColumn($meetingsSql, [$eventId]);
 
         return [
-            'total_capacity' => (int) $event['total_capacity'],
+            'max_attendees' => (int) $event['max_attendees'],
             'tickets_sold' => (int) ($ticketStats['total_tickets'] ?? 0),
             'tickets_confirmed' => (int) ($ticketStats['confirmed_tickets'] ?? 0),
             'checked_in' => (int) ($ticketStats['checked_in'] ?? 0),
-            'available_capacity' => (int) $event['total_capacity'] - (int) ($ticketStats['confirmed_tickets'] ?? 0),
+            'available_capacity' => (int) $event['max_attendees'] - (int) ($ticketStats['confirmed_tickets'] ?? 0),
             'total_revenue' => (float) ($ticketStats['total_revenue'] ?? 0),
             'sponsors_count' => $sponsorsCount,
             'companies_count' => $companiesCount,
@@ -218,10 +260,46 @@ class Event extends Model
             return false;
         }
 
-        $confirmedSql = "SELECT COUNT(*) FROM tickets WHERE event_id = ? AND status IN ('confirmed', 'checked_in')";
+        $confirmedSql = "SELECT COUNT(*) FROM tickets WHERE event_id = ? AND status IN ('confirmed', 'used')";
         $confirmed = (int) $this->db->fetchColumn($confirmedSql, [$eventId]);
 
-        return $confirmed < (int) $event['total_capacity'];
+        return $confirmed < (int) $event['max_attendees'];
+    }
+
+    /**
+     * Check if registration is open for event
+     * @param int|array $eventOrId Event ID or event array
+     */
+    public function isRegistrationOpen(int|array $eventOrId): bool
+    {
+        if (is_array($eventOrId)) {
+            $event = $eventOrId;
+            $eventId = (int) $event['id'];
+        } else {
+            $eventId = $eventOrId;
+            $event = $this->find($eventId);
+            if (!$event) {
+                return false;
+            }
+        }
+
+        // Check status
+        if (!in_array($event['status'], ['published', 'active'])) {
+            return false;
+        }
+
+        // Check registration_open flag
+        if (isset($event['registration_open']) && !$event['registration_open']) {
+            return false;
+        }
+
+        // Check if event date has passed
+        if (strtotime($event['start_date']) < strtotime('today')) {
+            return false;
+        }
+
+        // Check capacity
+        return $this->hasCapacity($eventId);
     }
 
     /**

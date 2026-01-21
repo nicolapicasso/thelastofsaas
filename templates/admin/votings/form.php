@@ -21,11 +21,11 @@ $title = $isEdit ? 'Editar Votación' : 'Nueva Votación';
     </div>
 </div>
 
-<?php if ($flash): ?>
+<?php if (!empty($flash)): ?>
     <div class="alert alert-<?= $flash['type'] ?>"><?= $flash['message'] ?></div>
 <?php endif; ?>
 
-<form method="POST" action="<?= $isEdit ? "/admin/votings/{$voting['id']}/edit" : '/admin/votings/create' ?>" enctype="multipart/form-data">
+<form method="POST" action="<?= $isEdit ? "/admin/votings/{$voting['id']}" : '/admin/votings' ?>" enctype="multipart/form-data">
     <input type="hidden" name="_csrf_token" value="<?= $csrf_token ?>">
 
     <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 1.5rem;">
@@ -161,7 +161,7 @@ $title = $isEdit ? 'Editar Votación' : 'Nueva Votación';
                 <div class="card-body">
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; text-align: center;">
                         <div>
-                            <div style="font-size: 1.5rem; font-weight: bold;"><?= $candidateCount ?? 0 ?></div>
+                            <div style="font-size: 1.5rem; font-weight: bold;"><?= count($candidates ?? []) ?></div>
                             <div class="text-muted">Candidatos</div>
                         </div>
                         <div>

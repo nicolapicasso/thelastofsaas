@@ -2,10 +2,13 @@
 
 namespace App\Controllers;
 
+use App\Core\Controller;
 use App\Models\Event;
 use App\Models\Sponsor;
 use App\Models\Company;
+use App\Models\SponsorInviteCode;
 use App\Models\TlosSetting;
+use App\Models\Message;
 use App\Services\EmailService;
 
 /**
@@ -19,7 +22,9 @@ class SponsorPanelController extends Controller
     private Event $eventModel;
     private Sponsor $sponsorModel;
     private Company $companyModel;
+    private SponsorInviteCode $inviteCodeModel;
     private TlosSetting $settingModel;
+    private Message $messageModel;
 
     public function __construct()
     {
@@ -27,7 +32,9 @@ class SponsorPanelController extends Controller
         $this->eventModel = new Event();
         $this->sponsorModel = new Sponsor();
         $this->companyModel = new Company();
+        $this->inviteCodeModel = new SponsorInviteCode();
         $this->settingModel = new TlosSetting();
+        $this->messageModel = new Message();
     }
 
     /**
@@ -42,6 +49,23 @@ class SponsorPanelController extends Controller
         }
 
         $error = null;
+
+        // Check for code in URL (direct access link)
+        $urlCode = strtoupper(trim($_GET['code'] ?? ''));
+        if ($urlCode) {
+            $sponsor = $this->sponsorModel->findByCode($urlCode);
+            if ($sponsor && $sponsor['active']) {
+                // Store sponsor in session
+                $_SESSION['sponsor_id'] = $sponsor['id'];
+                $_SESSION['sponsor_code'] = $sponsor['code'];
+                $this->redirect('/sponsor/panel');
+                return;
+            } else {
+                $error = 'Código de acceso no válido';
+            }
+        }
+
+        // Handle form submission
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if (!$this->validateCsrf()) {
                 $error = 'Token de seguridad inválido';
@@ -93,10 +117,10 @@ class SponsorPanelController extends Controller
         // Get events where this sponsor participates
         $events = $this->sponsorModel->getEvents($sponsor['id']);
 
-        // Get current/upcoming event (first active one)
+        // Get current/upcoming event (first published or active one)
         $currentEvent = null;
         foreach ($events as $event) {
-            if ($event['status'] === 'published') {
+            if (in_array($event['status'], ['published', 'active'])) {
                 $currentEvent = $event;
                 break;
             }
@@ -141,7 +165,7 @@ class SponsorPanelController extends Controller
         if (!$sponsor) return;
 
         $event = $this->eventModel->find($eventId);
-        if (!$event || $event['status'] !== 'published') {
+        if (!$event || !in_array($event['status'], ['published', 'active'])) {
             $this->notFound();
             return;
         }
@@ -151,6 +175,9 @@ class SponsorPanelController extends Controller
             $this->redirect('/sponsor/panel');
             return;
         }
+
+        // Get all events for this sponsor (for event selector)
+        $events = $this->sponsorModel->getEvents($sponsor['id']);
 
         // Get all companies for this event
         $companies = $this->companyModel->getByEvent($event['id']);
@@ -207,6 +234,7 @@ class SponsorPanelController extends Controller
         $this->render('sponsor-panel/companies', [
             'sponsor' => $sponsor,
             'event' => $event,
+            'events' => $events,
             'companies' => $filteredCompanies,
             'selectedIds' => $selectedIds,
             'matchedIds' => $matchedIds,
@@ -216,6 +244,7 @@ class SponsorPanelController extends Controller
             'currentFilter' => $filter,
             'currentSector' => $sector,
             'currentSearch' => $search,
+            'csrf_token' => $this->generateCsrf(),
             'meta_title' => 'Empresas - ' . $event['name']
         ]);
     }
@@ -401,12 +430,394 @@ class SponsorPanelController extends Controller
         // Get scheduled meetings
         $meetings = $this->sponsorModel->getScheduledMeetings($sponsor['id'], $event['id']);
 
+        // Get all events for event selector
+        $events = $this->sponsorModel->getEvents($sponsor['id']);
+
         $this->render('sponsor-panel/matches', [
             'sponsor' => $sponsor,
             'event' => $event,
+            'events' => $events,
             'matches' => $matches,
             'meetings' => $meetings,
             'meta_title' => 'Tus Matches - ' . $event['name']
+        ]);
+    }
+
+    /**
+     * View sponsor's invite codes
+     */
+    public function inviteCodes(string $eventId): void
+    {
+        $sponsor = $this->requireSponsorAuth();
+        if (!$sponsor) return;
+
+        $event = $this->eventModel->find($eventId);
+        if (!$event) {
+            $this->notFound();
+            return;
+        }
+
+        // Verify sponsor participates in this event
+        if (!$this->sponsorModel->participatesInEvent($sponsor['id'], $event['id'])) {
+            $this->redirect('/sponsor/panel');
+            return;
+        }
+
+        // Get sponsor's invite codes for this event
+        $codes = $this->inviteCodeModel->getBySponsor($sponsor['id'], (int) $eventId);
+
+        // Get stats for each code
+        foreach ($codes as &$code) {
+            $code['stats'] = $this->inviteCodeModel->getUsageStats($code['id']);
+        }
+
+        // Get overall stats
+        $overallStats = $this->inviteCodeModel->getSponsorStats($sponsor['id'], (int) $eventId);
+
+        // Get all events for event selector
+        $events = $this->sponsorModel->getEvents($sponsor['id']);
+
+        $this->render('sponsor-panel/invite-codes', [
+            'sponsor' => $sponsor,
+            'event' => $event,
+            'events' => $events,
+            'codes' => $codes,
+            'overallStats' => $overallStats,
+            'meta_title' => 'Mis Codigos de Invitacion - ' . $event['name']
+        ]);
+    }
+
+    /**
+     * View tickets registered with sponsor's codes
+     */
+    public function invitedGuests(string $eventId): void
+    {
+        $sponsor = $this->requireSponsorAuth();
+        if (!$sponsor) return;
+
+        $event = $this->eventModel->find($eventId);
+        if (!$event) {
+            $this->notFound();
+            return;
+        }
+
+        // Verify sponsor participates in this event
+        if (!$this->sponsorModel->participatesInEvent($sponsor['id'], $event['id'])) {
+            $this->redirect('/sponsor/panel');
+            return;
+        }
+
+        // Get all invite codes for this sponsor/event
+        $codes = $this->inviteCodeModel->getBySponsor($sponsor['id'], (int) $eventId);
+
+        // Get all tickets for each code
+        $allTickets = [];
+        foreach ($codes as $code) {
+            $tickets = $this->inviteCodeModel->getTickets($code['id']);
+            foreach ($tickets as $ticket) {
+                $ticket['invite_code'] = $code['code'];
+                $allTickets[] = $ticket;
+            }
+        }
+
+        // Sort by creation date
+        usort($allTickets, function($a, $b) {
+            return strtotime($b['created_at']) - strtotime($a['created_at']);
+        });
+
+        // Get all events for event selector
+        $events = $this->sponsorModel->getEvents($sponsor['id']);
+
+        $this->render('sponsor-panel/invited-guests', [
+            'sponsor' => $sponsor,
+            'event' => $event,
+            'events' => $events,
+            'tickets' => $allTickets,
+            'meta_title' => 'Mis Invitados - ' . $event['name']
+        ]);
+    }
+
+    /**
+     * View messages inbox
+     */
+    public function messages(string $eventId): void
+    {
+        $sponsor = $this->requireSponsorAuth();
+        if (!$sponsor) return;
+
+        $event = $this->eventModel->find($eventId);
+        if (!$event) {
+            $this->notFound();
+            return;
+        }
+
+        // Verify sponsor participates in this event
+        if (!$this->sponsorModel->participatesInEvent($sponsor['id'], $event['id'])) {
+            $this->redirect('/sponsor/panel');
+            return;
+        }
+
+        // Check if messaging is enabled (default to true if setting doesn't exist)
+        $messagingEnabled = $this->settingModel->get('allow_sponsor_messages', '1');
+        if ($messagingEnabled === '0' || $messagingEnabled === false) {
+            $this->redirect('/sponsor/panel');
+            return;
+        }
+
+        // Get all events for this sponsor (for event selector)
+        $events = $this->sponsorModel->getEvents($sponsor['id']);
+
+        // Get inbox (conversations grouped)
+        $inbox = $this->messageModel->getInbox($event['id'], 'sponsor', $sponsor['id']);
+
+        // Get unread count
+        $unreadCount = $this->messageModel->getUnreadCount($event['id'], 'sponsor', $sponsor['id']);
+
+        $this->render('sponsor-panel/messages', [
+            'sponsor' => $sponsor,
+            'event' => $event,
+            'events' => $events,
+            'inbox' => $inbox,
+            'unreadCount' => $unreadCount,
+            'csrf_token' => $this->generateCsrf(),
+            'meta_title' => 'Mensajes - ' . $event['name']
+        ]);
+    }
+
+    /**
+     * View conversation with a company
+     */
+    public function conversation(string $eventId, string $companyId): void
+    {
+        $sponsor = $this->requireSponsorAuth();
+        if (!$sponsor) return;
+
+        $event = $this->eventModel->find($eventId);
+        $company = $this->companyModel->find($companyId);
+
+        if (!$event || !$company) {
+            $this->notFound();
+            return;
+        }
+
+        // Verify sponsor participates in this event
+        if (!$this->sponsorModel->participatesInEvent($sponsor['id'], $event['id'])) {
+            $this->redirect('/sponsor/panel');
+            return;
+        }
+
+        // Check if messaging is enabled (default to true if setting doesn't exist)
+        $messagingEnabled = $this->settingModel->get('allow_sponsor_messages', '1');
+        if ($messagingEnabled === '0' || $messagingEnabled === false) {
+            $this->redirect('/sponsor/panel');
+            return;
+        }
+
+        // Mark messages as read
+        $this->messageModel->markConversationAsRead(
+            $event['id'],
+            'sponsor',
+            $sponsor['id'],
+            'company',
+            $company['id']
+        );
+
+        // Get conversation
+        $messages = $this->messageModel->getConversation(
+            $event['id'],
+            'sponsor',
+            $sponsor['id'],
+            'company',
+            $company['id']
+        );
+
+        // Check if can send message
+        $canSend = $this->messageModel->canSendMessage(
+            $event['id'],
+            'sponsor',
+            $sponsor['id'],
+            'company',
+            $company['id']
+        );
+
+        $this->render('sponsor-panel/conversation', [
+            'sponsor' => $sponsor,
+            'event' => $event,
+            'company' => $company,
+            'messages' => $messages,
+            'canSend' => $canSend,
+            'csrf_token' => $this->generateCsrf(),
+            'meta_title' => 'Conversación con ' . $company['name']
+        ]);
+    }
+
+    /**
+     * Send message to company (AJAX)
+     */
+    public function sendMessage(): void
+    {
+        $sponsor = $this->requireSponsorAuth();
+        if (!$sponsor) {
+            $this->jsonError('No autorizado', 401);
+            return;
+        }
+
+        if (!$this->validateCsrf()) {
+            $this->jsonError('Token de seguridad inválido', 403);
+            return;
+        }
+
+        // Check if messaging is enabled
+        if (!$this->settingModel->get('allow_sponsor_messages', true)) {
+            $this->jsonError('El sistema de mensajería está desactivado', 403);
+            return;
+        }
+
+        $eventId = (int)($_POST['event_id'] ?? 0);
+        $companyId = (int)($_POST['company_id'] ?? 0);
+        $message = trim($_POST['message'] ?? '');
+
+        if (!$eventId || !$companyId || !$message) {
+            $this->jsonError('Datos incompletos', 400);
+            return;
+        }
+
+        // Verify event and company exist
+        $event = $this->eventModel->find($eventId);
+        $company = $this->companyModel->find($companyId);
+
+        if (!$event || !$company) {
+            $this->jsonError('Evento o empresa no encontrados', 404);
+            return;
+        }
+
+        // Check if sponsor participates in event
+        if (!$this->sponsorModel->participatesInEvent($sponsor['id'], $event['id'])) {
+            $this->jsonError('No participas en este evento', 403);
+            return;
+        }
+
+        // Check if can send
+        $canSend = $this->messageModel->canSendMessage(
+            $event['id'],
+            'sponsor',
+            $sponsor['id'],
+            'company',
+            $company['id']
+        );
+
+        if (!$canSend['can_send']) {
+            $this->jsonError($canSend['message'] ?? 'No puedes enviar más mensajes a esta empresa', 400);
+            return;
+        }
+
+        // Send message with contact details
+        $result = $this->messageModel->sendMessage(
+            $event['id'],
+            'sponsor',
+            $sponsor['id'],
+            'company',
+            $company['id'],
+            $message,
+            $sponsor['contact_name'] ?? null,
+            $sponsor['contact_email'] ?? null,
+            $sponsor['contact_phone'] ?? null
+        );
+
+        if (!$result) {
+            $this->jsonError('Error al enviar el mensaje', 500);
+            return;
+        }
+
+        // Send email notification
+        if ($this->settingModel->get('notify_companies', true)) {
+            try {
+                $emailService = new EmailService();
+                $emailService->sendMessageNotification('company', $company, $sponsor, $event, $message);
+            } catch (\Exception $e) {
+                error_log('Message notification error: ' . $e->getMessage());
+            }
+        }
+
+        $this->json([
+            'success' => true,
+            'message' => 'Mensaje enviado correctamente'
+        ]);
+    }
+
+    /**
+     * Reply to a message (AJAX)
+     */
+    public function replyMessage(): void
+    {
+        $sponsor = $this->requireSponsorAuth();
+        if (!$sponsor) {
+            $this->jsonError('No autorizado', 401);
+            return;
+        }
+
+        if (!$this->validateCsrf()) {
+            $this->jsonError('Token de seguridad inválido', 403);
+            return;
+        }
+
+        // Check if messaging is enabled
+        if (!$this->settingModel->get('allow_sponsor_messages', true)) {
+            $this->jsonError('El sistema de mensajería está desactivado', 403);
+            return;
+        }
+
+        $messageId = (int)($_POST['message_id'] ?? 0);
+        $message = trim($_POST['message'] ?? '');
+
+        if (!$messageId || !$message) {
+            $this->jsonError('Datos incompletos', 400);
+            return;
+        }
+
+        // Get original message
+        $originalMessage = $this->messageModel->getMessageWithDetails($messageId);
+        if (!$originalMessage) {
+            $this->jsonError('Mensaje no encontrado', 404);
+            return;
+        }
+
+        // Verify this sponsor is the recipient
+        if ($originalMessage['recipient_type'] !== 'sponsor' || $originalMessage['recipient_id'] != $sponsor['id']) {
+            $this->jsonError('No puedes responder a este mensaje', 403);
+            return;
+        }
+
+        // Send reply
+        $result = $this->messageModel->replyToMessage(
+            $messageId,
+            $message,
+            $sponsor['contact_name'] ?? null,
+            $sponsor['contact_email'] ?? null,
+            $sponsor['contact_phone'] ?? null
+        );
+
+        if (!$result) {
+            $this->jsonError('Error al enviar la respuesta', 500);
+            return;
+        }
+
+        // Get recipient details for notification
+        $event = $this->eventModel->find($originalMessage['event_id']);
+        $company = $this->companyModel->find($originalMessage['sender_id']);
+
+        if ($this->settingModel->get('notify_companies', true) && $company && $event) {
+            try {
+                $emailService = new EmailService();
+                $emailService->sendMessageNotification('company', $company, $sponsor, $event, $message);
+            } catch (\Exception $e) {
+                error_log('Reply notification error: ' . $e->getMessage());
+            }
+        }
+
+        $this->json([
+            'success' => true,
+            'message' => 'Respuesta enviada correctamente'
         ]);
     }
 
@@ -448,14 +859,5 @@ class SponsorPanelController extends Controller
         }
 
         return $sponsor;
-    }
-
-    /**
-     * Check if request is AJAX
-     */
-    private function isAjax(): bool
-    {
-        return !empty($_SERVER['HTTP_X_REQUESTED_WITH']) &&
-               strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest';
     }
 }

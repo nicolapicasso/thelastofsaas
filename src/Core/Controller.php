@@ -73,8 +73,37 @@ abstract class Controller
 
         http_response_code($statusCode);
         header('Content-Type: application/json; charset=utf-8');
+        // Prevent browser caching of dynamic JSON responses
+        header('Cache-Control: no-cache, no-store, must-revalidate, private');
+        header('Pragma: no-cache');
+        header('Expires: 0');
         echo json_encode($data, JSON_UNESCAPED_UNICODE);
         exit;
+    }
+
+    /**
+     * Return JSON success response
+     */
+    protected function jsonSuccess(array $data = []): void
+    {
+        $this->json(array_merge(['success' => true], $data));
+    }
+
+    /**
+     * Return JSON error response
+     */
+    protected function jsonError(string $message, array|int $dataOrCode = []): void
+    {
+        $statusCode = 400;
+        $data = [];
+
+        if (is_int($dataOrCode)) {
+            $statusCode = $dataOrCode;
+        } else {
+            $data = $dataOrCode;
+        }
+
+        $this->json(array_merge(['success' => false, 'error' => $message], $data), $statusCode);
     }
 
     /**
@@ -82,6 +111,17 @@ abstract class Controller
      */
     protected function redirect(string $url, int $statusCode = 302): void
     {
+        // Prevent caching of redirect responses
+        header('Cache-Control: no-cache, no-store, must-revalidate, private');
+        header('Pragma: no-cache');
+        header('Expires: 0');
+
+        // Add cache-busting parameter for admin URLs to prevent bfcache issues
+        if (strpos($url, '/admin') !== false) {
+            $separator = strpos($url, '?') !== false ? '&' : '?';
+            $url .= $separator . '_t=' . time();
+        }
+
         header("Location: {$url}", true, $statusCode);
         exit;
     }
@@ -180,6 +220,18 @@ abstract class Controller
     }
 
     /**
+     * Show 404 page
+     */
+    protected function notFound(): void
+    {
+        http_response_code(404);
+        $this->render('errors/404', [
+            'meta_title' => 'Pagina no encontrada'
+        ]);
+        exit;
+    }
+
+    /**
      * Check if user is authenticated
      */
     protected function isAuthenticated(): bool
@@ -216,6 +268,17 @@ abstract class Controller
     protected function requireAuth(): void
     {
         if (!$this->isAuthenticated()) {
+            // For AJAX requests, return JSON error instead of redirect
+            if ($this->isAjax()) {
+                http_response_code(401);
+                header('Content-Type: application/json');
+                echo json_encode([
+                    'success' => false,
+                    'error' => 'Sesión expirada. Por favor, vuelve a iniciar sesión.',
+                    'redirect' => '/admin/login'
+                ]);
+                exit;
+            }
             $this->redirect('/admin/login');
         }
     }

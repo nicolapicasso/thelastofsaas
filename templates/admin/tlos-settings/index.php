@@ -47,7 +47,7 @@
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
                 <div class="form-group">
                     <label class="form-check">
-                        <input type="checkbox" name="settings[notify_sponsors]" value="1" <?= ($settings['notify_sponsors'] ?? true) ? 'checked' : '' ?>>
+                        <input type="checkbox" name="settings[notify_sponsors]" value="1" <?= !empty($settings['notify_sponsors']) && $settings['notify_sponsors'] !== '0' ? 'checked' : '' ?>>
                         <span>Notificar a Sponsors</span>
                     </label>
                     <small class="text-muted">Enviar emails cuando reciban selecciones o matches</small>
@@ -55,7 +55,7 @@
 
                 <div class="form-group">
                     <label class="form-check">
-                        <input type="checkbox" name="settings[notify_companies]" value="1" <?= ($settings['notify_companies'] ?? true) ? 'checked' : '' ?>>
+                        <input type="checkbox" name="settings[notify_companies]" value="1" <?= !empty($settings['notify_companies']) && $settings['notify_companies'] !== '0' ? 'checked' : '' ?>>
                         <span>Notificar a Empresas</span>
                     </label>
                     <small class="text-muted">Enviar emails cuando reciban selecciones o matches</small>
@@ -64,10 +64,10 @@
 
             <div class="form-group">
                 <label class="form-check">
-                    <input type="checkbox" name="settings[allow_sponsor_messages]" value="1" <?= ($settings['allow_sponsor_messages'] ?? true) ? 'checked' : '' ?>>
-                    <span>Permitir mensajes de Sponsors</span>
+                    <input type="checkbox" name="settings[allow_sponsor_messages]" value="1" <?= !empty($settings['allow_sponsor_messages']) && $settings['allow_sponsor_messages'] !== '0' ? 'checked' : '' ?>>
+                    <span>Sistema de mensajería activo</span>
                 </label>
-                <small class="text-muted">Los sponsors pueden enviar mensajes personalizados con sus selecciones</small>
+                <small class="text-muted">Permite el envío de mensajes entre sponsors y empresas</small>
             </div>
 
             <div class="form-group">
@@ -102,7 +102,7 @@
 
             <div class="form-group">
                 <label class="form-check">
-                    <input type="checkbox" name="settings[auto_match_notification]" value="1" <?= ($settings['auto_match_notification'] ?? true) ? 'checked' : '' ?>>
+                    <input type="checkbox" name="settings[auto_match_notification]" value="1" <?= !empty($settings['auto_match_notification']) && $settings['auto_match_notification'] !== '0' ? 'checked' : '' ?>>
                     <span>Notificación automática de match</span>
                 </label>
                 <small class="text-muted">Enviar email automáticamente cuando se produce un match mutuo</small>
@@ -128,7 +128,7 @@
 
             <div class="form-group">
                 <label class="form-check">
-                    <input type="checkbox" name="settings[meeting_confirmation_email]" value="1" <?= ($settings['meeting_confirmation_email'] ?? true) ? 'checked' : '' ?>>
+                    <input type="checkbox" name="settings[meeting_confirmation_email]" value="1" <?= !empty($settings['meeting_confirmation_email']) && $settings['meeting_confirmation_email'] !== '0' ? 'checked' : '' ?>>
                     <span>Email de confirmación de reunión</span>
                 </label>
                 <small class="text-muted">Enviar email cuando se asigna una reunión</small>
@@ -136,10 +136,34 @@
 
             <div class="form-group">
                 <label class="form-check">
-                    <input type="checkbox" name="settings[meeting_reminder_email]" value="1" <?= ($settings['meeting_reminder_email'] ?? true) ? 'checked' : '' ?>>
+                    <input type="checkbox" name="settings[meeting_reminder_email]" value="1" <?= !empty($settings['meeting_reminder_email']) && $settings['meeting_reminder_email'] !== '0' ? 'checked' : '' ?>>
                     <span>Email de recordatorio</span>
                 </label>
                 <small class="text-muted">Enviar recordatorio antes del evento</small>
+            </div>
+
+            <hr style="margin: 1.5rem 0;">
+
+            <h4 style="margin-bottom: 1rem;"><i class="fas fa-medal"></i> Límite de Reuniones Pre-agendadas por Nivel</h4>
+            <p class="text-muted" style="margin-bottom: 1rem;">Número máximo de reuniones que cada nivel de sponsor puede agendar antes del evento. Durante el evento (matching en vivo) no hay límite.</p>
+
+            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem;">
+                <div class="form-group">
+                    <label class="form-label"><span class="badge badge-platinum">Platino</span></label>
+                    <input type="number" name="settings[pre_meeting_limit_platinum]" class="form-control" value="<?= htmlspecialchars($settings['pre_meeting_limit_platinum'] ?? '15') ?>" min="0" max="100">
+                </div>
+                <div class="form-group">
+                    <label class="form-label"><span class="badge badge-gold">Oro</span></label>
+                    <input type="number" name="settings[pre_meeting_limit_gold]" class="form-control" value="<?= htmlspecialchars($settings['pre_meeting_limit_gold'] ?? '10') ?>" min="0" max="100">
+                </div>
+                <div class="form-group">
+                    <label class="form-label"><span class="badge badge-silver">Plata</span></label>
+                    <input type="number" name="settings[pre_meeting_limit_silver]" class="form-control" value="<?= htmlspecialchars($settings['pre_meeting_limit_silver'] ?? '5') ?>" min="0" max="100">
+                </div>
+                <div class="form-group">
+                    <label class="form-label"><span class="badge badge-bronze">Bronce</span></label>
+                    <input type="number" name="settings[pre_meeting_limit_bronze]" class="form-control" value="<?= htmlspecialchars($settings['pre_meeting_limit_bronze'] ?? '0') ?>" min="0" max="100">
+                </div>
             </div>
         </div>
     </div>
@@ -196,5 +220,33 @@
 .form-check input[type="checkbox"] {
     width: 18px;
     height: 18px;
+}
+.badge-platinum {
+    background: linear-gradient(135deg, #E5E4E2 0%, #A8A9AD 100%);
+    color: #333;
+    padding: 0.35em 0.65em;
+    border-radius: 4px;
+    font-weight: 600;
+}
+.badge-gold {
+    background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+    color: #333;
+    padding: 0.35em 0.65em;
+    border-radius: 4px;
+    font-weight: 600;
+}
+.badge-silver {
+    background: linear-gradient(135deg, #C0C0C0 0%, #A0A0A0 100%);
+    color: #333;
+    padding: 0.35em 0.65em;
+    border-radius: 4px;
+    font-weight: 600;
+}
+.badge-bronze {
+    background: linear-gradient(135deg, #CD7F32 0%, #8B4513 100%);
+    color: #fff;
+    padding: 0.35em 0.65em;
+    border-radius: 4px;
+    font-weight: 600;
 }
 </style>

@@ -43,20 +43,14 @@ class AuthController extends Controller
      */
     public function login(): void
     {
-        // Validate CSRF
-        if (!$this->validateCsrf()) {
-            $this->flash('error', 'Sesión expirada. Por favor, inténtalo de nuevo.');
-            $this->redirect('/admin/login');
-        }
-
         $email = Sanitizer::email($this->getPost('email'));
         $password = $this->getPost('password', '');
-        $remember = Sanitizer::bool($this->getPost('remember'));
 
         // Validate inputs
         if (empty($email) || empty($password)) {
             $this->flash('error', 'Por favor, introduce tu email y contraseña.');
             $this->redirect('/admin/login');
+            return;
         }
 
         // Find user
@@ -65,18 +59,21 @@ class AuthController extends Controller
         if (!$user) {
             $this->flash('error', 'Credenciales incorrectas.');
             $this->redirect('/admin/login');
+            return;
         }
 
         // Check if user is active
         if (!$user['is_active']) {
             $this->flash('error', 'Tu cuenta está desactivada. Contacta con el administrador.');
             $this->redirect('/admin/login');
+            return;
         }
 
         // Verify password
         if (!$this->userModel->verifyPassword($password, $user['password'])) {
             $this->flash('error', 'Credenciales incorrectas.');
             $this->redirect('/admin/login');
+            return;
         }
 
         // Create session
@@ -87,11 +84,6 @@ class AuthController extends Controller
 
         // Update last login
         $this->userModel->updateLastLogin($user['id']);
-
-        // Handle remember me (optional - would need cookie implementation)
-        if ($remember) {
-            // Could implement persistent login cookie here
-        }
 
         // Regenerate session ID for security
         session_regenerate_id(true);

@@ -46,7 +46,7 @@ class VotingsController extends Controller
         }
 
         $result = $this->votingModel->paginate($page, 20, $conditions, ['created_at' => 'DESC']);
-        $events = $this->eventModel->all(['event_date' => 'DESC']);
+        $events = $this->eventModel->all(['start_date' => 'DESC']);
 
         $this->renderAdmin('votings/index', [
             'title' => 'Votaciones',
@@ -67,7 +67,7 @@ class VotingsController extends Controller
     {
         $this->requireAuth();
 
-        $events = $this->eventModel->all(['event_date' => 'DESC']);
+        $events = $this->eventModel->all(['start_date' => 'DESC']);
 
         $this->renderAdmin('votings/form', [
             'title' => 'Nueva Votación',
@@ -76,6 +76,7 @@ class VotingsController extends Controller
             'events' => $events,
             'statusOptions' => Voting::getStatusOptions(),
             'csrf_token' => $this->generateCsrf(),
+            'flash' => $this->getFlash(),
         ]);
     }
 
@@ -99,7 +100,7 @@ class VotingsController extends Controller
         }
 
         // Generate slug
-        $data['slug'] = Slug::generate($data['title'], 'votings');
+        $data['slug'] = Slug::unique($data['title'], 'votings');
 
         try {
             $votingId = $this->votingModel->create($data);
@@ -126,7 +127,7 @@ class VotingsController extends Controller
         }
 
         $candidates = $this->votingModel->getCandidates((int) $id);
-        $events = $this->eventModel->all(['event_date' => 'DESC']);
+        $events = $this->eventModel->all(['start_date' => 'DESC']);
         $totalVotes = $this->votingModel->getTotalVotes((int) $id);
 
         $this->renderAdmin('votings/form', [
@@ -137,6 +138,7 @@ class VotingsController extends Controller
             'totalVotes' => $totalVotes,
             'statusOptions' => Voting::getStatusOptions(),
             'csrf_token' => $this->generateCsrf(),
+            'flash' => $this->getFlash(),
         ]);
     }
 
@@ -168,7 +170,7 @@ class VotingsController extends Controller
 
         // Update slug if title changed
         if ($data['title'] !== $voting['title']) {
-            $data['slug'] = Slug::generate($data['title'], 'votings', (int) $id);
+            $data['slug'] = Slug::unique($data['title'], 'votings', 'slug', (int) $id);
         }
 
         try {
@@ -211,6 +213,34 @@ class VotingsController extends Controller
     }
 
     /**
+     * Show candidates management page
+     */
+    public function candidates(string $id): void
+    {
+        $this->requireAuth();
+
+        $voting = $this->votingModel->find((int) $id);
+
+        if (!$voting) {
+            $this->flash('error', 'Votación no encontrada.');
+            $this->redirect('/admin/votings');
+            return;
+        }
+
+        $candidates = $this->votingModel->getCandidates((int) $id);
+        $totalVotes = $this->votingModel->getTotalVotes((int) $id);
+
+        $this->renderAdmin('votings/candidates', [
+            'title' => 'Candidatos: ' . $voting['title'],
+            'voting' => $voting,
+            'candidates' => $candidates,
+            'totalVotes' => $totalVotes,
+            'csrf_token' => $this->generateCsrf(),
+            'flash' => $this->getFlash(),
+        ]);
+    }
+
+    /**
      * Add candidate
      */
     public function addCandidate(string $id): void
@@ -235,6 +265,7 @@ class VotingsController extends Controller
         $websiteUrl = Sanitizer::url($this->getPost('website_url'));
         $baseVotes = (int) $this->getPost('base_votes', 0);
         $displayOrder = (int) $this->getPost('display_order', 0);
+        $active = Sanitizer::bool($this->getPost('active', true)) ? 1 : 0;
 
         if (empty($name)) {
             $this->jsonError('El nombre es obligatorio.');
@@ -249,6 +280,7 @@ class VotingsController extends Controller
                 'website_url' => $websiteUrl,
                 'base_votes' => $baseVotes,
                 'display_order' => $displayOrder,
+                'active' => $active,
             ]);
 
             $this->jsonSuccess(['id' => $candidateId, 'message' => 'Candidato añadido.']);
@@ -342,6 +374,8 @@ class VotingsController extends Controller
             'voting' => $voting,
             'candidates' => $results['candidates'],
             'totalVotes' => $results['total_votes'],
+            'statusOptions' => Voting::getStatusOptions(),
+            'flash' => $this->getFlash(),
         ]);
     }
 

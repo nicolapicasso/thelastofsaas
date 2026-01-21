@@ -17,12 +17,11 @@ class MeetingBlock extends Model
     protected array $fillable = [
         'event_id',
         'name',
-        'description',
         'event_date',
         'start_time',
         'end_time',
-        'meeting_duration',
-        'simultaneous_meetings',
+        'slot_duration',
+        'total_rooms',
         'location',
         'active',
     ];
@@ -72,8 +71,8 @@ class MeetingBlock extends Model
 
         $startTime = strtotime($block['start_time']);
         $endTime = strtotime($block['end_time']);
-        $duration = (int) $block['meeting_duration'] * 60; // Convert to seconds
-        $rooms = (int) $block['simultaneous_meetings'];
+        $duration = (int) $block['slot_duration'] * 60; // Convert to seconds
+        $rooms = (int) $block['total_rooms'];
 
         $slotsCreated = 0;
         $currentTime = $startTime;
@@ -84,7 +83,7 @@ class MeetingBlock extends Model
             for ($room = 1; $room <= $rooms; $room++) {
                 $sql = "INSERT IGNORE INTO meeting_slots (block_id, slot_time, room_number, room_name)
                         VALUES (?, ?, ?, ?)";
-                $this->db->execute($sql, [
+                $this->db->query($sql, [
                     $blockId,
                     $slotTime,
                     $room,
@@ -164,7 +163,8 @@ class MeetingBlock extends Model
         }
 
         $sql = "DELETE FROM meeting_slots WHERE block_id = ?";
-        return $this->db->execute($sql, [$blockId]);
+        $this->db->query($sql, [$blockId]);
+        return true;
     }
 
     /**
@@ -183,8 +183,8 @@ class MeetingBlock extends Model
     {
         $startTime = strtotime($block['start_time']);
         $endTime = strtotime($block['end_time']);
-        $duration = (int) $block['meeting_duration'] * 60;
-        $rooms = (int) $block['simultaneous_meetings'];
+        $duration = (int) $block['slot_duration'] * 60;
+        $rooms = (int) $block['total_rooms'];
 
         $timeSlots = 0;
         $currentTime = $startTime;

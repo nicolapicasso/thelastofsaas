@@ -45,8 +45,8 @@
                     ?>
                 </span>
             </div>
-            <div class="menu-status <?= $menu['is_active'] ? 'active' : 'inactive' ?>">
-                <?= $menu['is_active'] ? 'Activo' : 'Inactivo' ?>
+            <div class="menu-status active">
+                Activo
             </div>
         </div>
 

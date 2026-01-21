@@ -370,4 +370,27 @@ namespace {
             return '/' . $language . $path;
         }
     }
+
+    /**
+     * Global helper function for generating full URLs
+     * Usage: url('/empresa/login') => 'https://example.com/empresa/login'
+     */
+    if (!function_exists('url')) {
+        function url(string $path = ''): string
+        {
+            $baseUrl = rtrim($_ENV['APP_URL'] ?? '', '/');
+
+            if (empty($baseUrl)) {
+                $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+                $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
+                $baseUrl = $protocol . '://' . $host;
+            }
+
+            if (empty($path)) {
+                return $baseUrl;
+            }
+
+            return $baseUrl . '/' . ltrim($path, '/');
+        }
+    }
 }

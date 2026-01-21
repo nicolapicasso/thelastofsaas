@@ -3,6 +3,15 @@
  * Unassigned Matches Template
  * TLOS - The Last of SaaS
  */
+
+// Get current event slug for public links
+$currentEventSlug = '';
+foreach ($events as $evt) {
+    if ($evt['id'] == $currentEventId) {
+        $currentEventSlug = $evt['slug'] ?? '';
+        break;
+    }
+}
 ?>
 
 <div class="page-header">
@@ -11,6 +20,9 @@
         <p>Matches mutuos pendientes de asignar reunión</p>
     </div>
     <div class="page-header-actions">
+        <?php if ($currentEventSlug): ?>
+            <a href="/eventos/<?= htmlspecialchars($currentEventSlug) ?>/reuniones" class="btn btn-outline" target="_blank"><i class="fas fa-external-link-alt"></i> Ver Público</a>
+        <?php endif; ?>
         <a href="/admin/meetings/blocks?event_id=<?= $currentEventId ?>" class="btn btn-outline"><i class="fas fa-clock"></i> Bloques</a>
         <a href="/admin/meetings/assignments?event_id=<?= $currentEventId ?>" class="btn btn-outline"><i class="fas fa-handshake"></i> Asignadas</a>
         <a href="/admin/meetings/matching?event_id=<?= $currentEventId ?>" class="btn btn-outline"><i class="fas fa-project-diagram"></i> Resumen</a>
@@ -33,14 +45,14 @@
             </select>
         </div>
         <div>
-            <strong><?= count($unassigned) ?></strong> <span class="text-muted">matches sin asignar</span>
+            <strong><?= count($matches) ?></strong> <span class="text-muted">matches sin asignar</span>
         </div>
     </div>
 </div>
 
 <!-- Unassigned Matches -->
 <div class="card">
-    <?php if (empty($unassigned)): ?>
+    <?php if (empty($matches)): ?>
         <div class="empty-state">
             <i class="fas fa-check-circle"></i>
             <h3>Todos los matches asignados</h3>
@@ -59,7 +71,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <?php foreach ($unassigned as $match): ?>
+                    <?php foreach ($matches as $match): ?>
                         <tr>
                             <td>
                                 <div style="display: flex; align-items: center; gap: 0.75rem;">
@@ -138,45 +150,54 @@
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0,0,0,0.5);
+    background: rgba(0,0,0,0.6);
     display: flex;
     align-items: center;
     justify-content: center;
     z-index: 1000;
 }
 .modal-content {
-    background: var(--bg-primary);
+    background: var(--bg-primary, #ffffff);
     border-radius: 8px;
     width: 90%;
     max-height: 90vh;
     overflow-y: auto;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
 }
 .modal-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
     padding: 1rem 1.5rem;
-    border-bottom: 1px solid var(--border-color);
+    border-bottom: 1px solid var(--border-color, #e5e7eb);
+    background: var(--bg-secondary, #f9fafb);
 }
 .modal-header h3 {
     margin: 0;
+    color: var(--text-primary, #111827);
 }
 .modal-close {
     background: none;
     border: none;
     font-size: 1.5rem;
     cursor: pointer;
-    color: var(--text-secondary);
+    color: var(--text-secondary, #6b7280);
+}
+.modal-close:hover {
+    color: var(--text-primary, #111827);
 }
 .modal-body {
     padding: 1.5rem;
+    background: var(--bg-primary, #ffffff);
+    color: var(--text-primary, #111827);
 }
 .modal-footer {
     display: flex;
     justify-content: flex-end;
     gap: 0.5rem;
     padding: 1rem 1.5rem;
-    border-top: 1px solid var(--border-color);
+    border-top: 1px solid var(--border-color, #e5e7eb);
+    background: var(--bg-secondary, #f9fafb);
 }
 </style>
 
@@ -202,16 +223,35 @@ function openAssignModal(sponsorId, companyId, sponsorName, companyName) {
         .then(data => {
             document.getElementById('slotsLoading').style.display = 'none';
 
-            if (data.slots && data.slots.length > 0) {
+            // Check if we have slots (count > 0 or non-empty grouped object)
+            const hasSlots = data.count > 0 || (data.slots && Object.keys(data.slots).length > 0);
+
+            if (hasSlots) {
                 const select = document.getElementById('slotSelect');
                 select.innerHTML = '<option value="">-- Seleccionar --</option>';
 
-                data.slots.forEach(slot => {
-                    const option = document.createElement('option');
-                    option.value = slot.id;
-                    option.textContent = `${slot.event_date} ${slot.slot_time.substring(0,5)} - ${slot.room_name || 'Mesa ' + slot.room_number} (${slot.block_name})`;
-                    select.appendChild(option);
-                });
+                // Handle grouped slots (object with block names as keys)
+                if (typeof data.slots === 'object' && !Array.isArray(data.slots)) {
+                    Object.keys(data.slots).forEach(blockName => {
+                        const optgroup = document.createElement('optgroup');
+                        optgroup.label = blockName;
+                        data.slots[blockName].forEach(slot => {
+                            const option = document.createElement('option');
+                            option.value = slot.id;
+                            option.textContent = `${slot.slot_time.substring(0,5)} - ${slot.room_name || 'Mesa ' + slot.room_number}`;
+                            optgroup.appendChild(option);
+                        });
+                        select.appendChild(optgroup);
+                    });
+                } else if (Array.isArray(data.slots)) {
+                    // Handle flat array of slots
+                    data.slots.forEach(slot => {
+                        const option = document.createElement('option');
+                        option.value = slot.id;
+                        option.textContent = `${slot.event_date} ${slot.slot_time.substring(0,5)} - ${slot.room_name || 'Mesa ' + slot.room_number} (${slot.block_name})`;
+                        select.appendChild(option);
+                    });
+                }
 
                 document.getElementById('slotsContainer').style.display = 'block';
             } else {

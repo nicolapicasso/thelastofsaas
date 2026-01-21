@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 /**
- * Omniwallet CMS - Entry Point
+ * TLOS CMS - Entry Point
  *
  * This is the main entry point for the application.
  * All requests are routed through this file.
@@ -21,11 +21,19 @@ $isAjaxRequest = (
     isset($_SERVER['CONTENT_TYPE']) && strpos($_SERVER['CONTENT_TYPE'], 'application/json') !== false
 ) || (
     // Check if URL suggests an API/AJAX endpoint
-    preg_match('/(generate-qa|\/api\/|reorder|translate|toggle)/i', $_SERVER['REQUEST_URI'] ?? '')
+    preg_match('/(generate-qa|\/api\/|reorder|translate|toggle|validar-codigo)/i', $_SERVER['REQUEST_URI'] ?? '')
+) || (
+    // POST requests to registration endpoints should be treated as AJAX
+    $_SERVER['REQUEST_METHOD'] === 'POST' && preg_match('/\/registro($|\?)/', $_SERVER['REQUEST_URI'] ?? '')
 );
 
 // For AJAX requests, don't display errors as HTML - handle them as JSON
 if ($isAjaxRequest) {
+    // Prevent browser caching of AJAX responses
+    header('Cache-Control: no-cache, no-store, must-revalidate, private');
+    header('Pragma: no-cache');
+    header('Expires: 0');
+
     ini_set('display_errors', '0');
 
     // Set up error handler for AJAX requests
@@ -42,11 +50,12 @@ if ($isAjaxRequest) {
         header('Content-Type: application/json');
         echo json_encode([
             'success' => false,
-            'error' => 'Error del servidor: ' . $exception->getMessage(),
-            'debug' => [
-                'file' => basename($exception->getFile()),
-                'line' => $exception->getLine()
-            ]
+            'error' => $exception->getMessage(),
+            'file' => basename($exception->getFile()),
+            'line' => $exception->getLine(),
+            'trace' => array_slice(array_map(function($t) {
+                return ($t['file'] ?? 'unknown') . ':' . ($t['line'] ?? 0) . ' ' . ($t['function'] ?? '');
+            }, $exception->getTrace()), 0, 5)
         ]);
         exit;
     });

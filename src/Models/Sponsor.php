@@ -17,17 +17,16 @@ class Sponsor extends Model
     protected array $fillable = [
         'name',
         'slug',
-        'category',
+        'tagline',
         'description',
-        'short_description',
         'website',
         'logo_url',
-        'contact_emails',
+        'contact_name',
+        'contact_email',
         'contact_phone',
-        'unique_code',
+        'code',
         'active',
         'max_simultaneous_meetings',
-        'can_send_messages',
         'linkedin_url',
         'twitter_url',
     ];
@@ -37,7 +36,7 @@ class Sponsor extends Model
      */
     public function findByCode(string $code): ?array
     {
-        return $this->findBy('unique_code', $code);
+        return $this->findBy('code', $code);
     }
 
     /**
@@ -57,31 +56,75 @@ class Sponsor extends Model
     }
 
     /**
+     * Search sponsors by name with pagination
+     */
+    public function searchByName(string $search, int $page = 1, int $perPage = 20, array $conditions = []): array
+    {
+        $offset = ($page - 1) * $perPage;
+
+        // Build WHERE clause
+        $where = "WHERE name LIKE ?";
+        $params = ['%' . $search . '%'];
+
+        foreach ($conditions as $key => $value) {
+            $where .= " AND {$key} = ?";
+            $params[] = $value;
+        }
+
+        // Count total
+        $countSql = "SELECT COUNT(*) FROM {$this->table} {$where}";
+        $total = (int) $this->db->fetchColumn($countSql, $params);
+
+        // Get data
+        $sql = "SELECT * FROM {$this->table} {$where} ORDER BY name ASC LIMIT {$perPage} OFFSET {$offset}";
+        $data = $this->db->fetchAll($sql, $params);
+
+        return [
+            'data' => $data,
+            'pagination' => [
+                'total' => $total,
+                'per_page' => $perPage,
+                'current_page' => $page,
+                'total_pages' => (int) ceil($total / $perPage),
+            ],
+        ];
+    }
+
+    /**
      * Get sponsors for an event
      */
     public function getByEvent(int $eventId): array
     {
-        $sql = "SELECT s.*, es.priority_level, es.display_order
+        $sql = "SELECT s.*, es.level, es.display_order
                 FROM sponsors s
                 INNER JOIN event_sponsors es ON s.id = es.sponsor_id
                 WHERE es.event_id = ? AND s.active = 1
-                ORDER BY FIELD(es.priority_level, 'platinum', 'gold', 'silver', 'bronze'), es.display_order ASC";
+                ORDER BY FIELD(es.level, 'platinum', 'gold', 'silver', 'bronze'), es.display_order ASC";
 
         return $this->db->fetchAll($sql, [$eventId]);
     }
 
     /**
-     * Get events for a sponsor
+     * Get events for a sponsor (published or active only)
      */
     public function getEvents(int $sponsorId): array
     {
-        $sql = "SELECT e.*, es.priority_level
+        $sql = "SELECT e.*, es.level
                 FROM events e
                 INNER JOIN event_sponsors es ON e.id = es.event_id
-                WHERE es.sponsor_id = ?
-                ORDER BY e.event_date DESC";
+                WHERE es.sponsor_id = ? AND e.status IN ('published', 'active')
+                ORDER BY e.start_date DESC";
 
         return $this->db->fetchAll($sql, [$sponsorId]);
+    }
+
+    /**
+     * Check if sponsor participates in an event
+     */
+    public function participatesInEvent(int $sponsorId, int $eventId): bool
+    {
+        $sql = "SELECT COUNT(*) FROM event_sponsors WHERE sponsor_id = ? AND event_id = ?";
+        return (int) $this->db->fetchColumn($sql, [$sponsorId, $eventId]) > 0;
     }
 
     /**
@@ -89,11 +132,11 @@ class Sponsor extends Model
      */
     public function getSelectedCompanies(int $sponsorId, int $eventId): array
     {
-        $sql = "SELECT c.*, ss.selected_at, ss.priority
+        $sql = "SELECT c.*, ss.created_at, ss.priority
                 FROM companies c
                 INNER JOIN sponsor_selections ss ON c.id = ss.company_id
                 WHERE ss.sponsor_id = ? AND ss.event_id = ? AND c.active = 1
-                ORDER BY ss.priority DESC, ss.selected_at ASC";
+                ORDER BY ss.priority DESC, ss.created_at ASC";
 
         return $this->db->fetchAll($sql, [$sponsorId, $eventId]);
     }
@@ -103,11 +146,11 @@ class Sponsor extends Model
      */
     public function getInterestedCompanies(int $sponsorId, int $eventId): array
     {
-        $sql = "SELECT c.*, cs.selected_at
+        $sql = "SELECT c.*, cs.created_at
                 FROM companies c
                 INNER JOIN company_selections cs ON c.id = cs.company_id
                 WHERE cs.sponsor_id = ? AND cs.event_id = ? AND c.active = 1
-                ORDER BY cs.selected_at ASC";
+                ORDER BY cs.created_at ASC";
 
         return $this->db->fetchAll($sql, [$sponsorId, $eventId]);
     }
@@ -118,13 +161,13 @@ class Sponsor extends Model
     public function getMutualMatches(int $sponsorId, int $eventId): array
     {
         $sql = "SELECT c.*,
-                       ss.selected_at as sponsor_selected_at,
-                       cs.selected_at as company_selected_at
+                       ss.created_at as sponsor_selected_at,
+                       cs.created_at as company_selected_at
                 FROM companies c
                 INNER JOIN sponsor_selections ss ON c.id = ss.company_id
                 INNER JOIN company_selections cs ON c.id = cs.company_id AND cs.sponsor_id = ss.sponsor_id AND cs.event_id = ss.event_id
                 WHERE ss.sponsor_id = ? AND ss.event_id = ? AND c.active = 1
-                ORDER BY ss.selected_at ASC";
+                ORDER BY ss.created_at ASC";
 
         return $this->db->fetchAll($sql, [$sponsorId, $eventId]);
     }
@@ -138,7 +181,8 @@ class Sponsor extends Model
                 VALUES (?, ?, ?, ?)
                 ON DUPLICATE KEY UPDATE priority = VALUES(priority)";
 
-        return $this->db->execute($sql, [$eventId, $sponsorId, $companyId, $priority]);
+        $this->db->query($sql, [$eventId, $sponsorId, $companyId, $priority]);
+        return true;
     }
 
     /**
@@ -147,7 +191,67 @@ class Sponsor extends Model
     public function deselectCompany(int $sponsorId, int $companyId, int $eventId): bool
     {
         $sql = "DELETE FROM sponsor_selections WHERE sponsor_id = ? AND company_id = ? AND event_id = ?";
-        return $this->db->execute($sql, [$sponsorId, $companyId, $eventId]);
+        $this->db->query($sql, [$sponsorId, $companyId, $eventId]);
+        return true;
+    }
+
+    /**
+     * Alias for deselectCompany
+     */
+    public function unselectCompany(int $sponsorId, int $companyId, int $eventId): bool
+    {
+        return $this->deselectCompany($sponsorId, $companyId, $eventId);
+    }
+
+    /**
+     * Get selections (alias for getSelectedCompanies with company_id included)
+     */
+    public function getSelections(int $sponsorId, int $eventId): array
+    {
+        $sql = "SELECT c.*, ss.created_at, ss.priority, c.id as company_id
+                FROM companies c
+                INNER JOIN sponsor_selections ss ON c.id = ss.company_id
+                WHERE ss.sponsor_id = ? AND ss.event_id = ? AND c.active = 1
+                ORDER BY ss.priority DESC, ss.created_at ASC";
+
+        return $this->db->fetchAll($sql, [$sponsorId, $eventId]);
+    }
+
+    /**
+     * Check if sponsor has selected a company
+     */
+    public function hasSelected(int $sponsorId, int $companyId, int $eventId): bool
+    {
+        $sql = "SELECT COUNT(*) FROM sponsor_selections WHERE sponsor_id = ? AND company_id = ? AND event_id = ?";
+        return (int) $this->db->fetchColumn($sql, [$sponsorId, $companyId, $eventId]) > 0;
+    }
+
+    /**
+     * Check if it's a mutual match
+     */
+    public function isMutualMatch(int $sponsorId, int $companyId, int $eventId): bool
+    {
+        $sql = "SELECT COUNT(*) FROM sponsor_selections ss
+                INNER JOIN company_selections cs
+                ON ss.sponsor_id = cs.sponsor_id AND ss.company_id = cs.company_id AND ss.event_id = cs.event_id
+                WHERE ss.sponsor_id = ? AND ss.company_id = ? AND ss.event_id = ?";
+        return (int) $this->db->fetchColumn($sql, [$sponsorId, $companyId, $eventId]) > 0;
+    }
+
+    /**
+     * Get scheduled meetings for sponsor
+     */
+    public function getScheduledMeetings(int $sponsorId, int $eventId): array
+    {
+        return $this->getMeetings($sponsorId, $eventId);
+    }
+
+    /**
+     * Save message to a company
+     */
+    public function saveMessage(int $sponsorId, int $companyId, int $eventId, string $message): bool
+    {
+        return $this->sendMessage($sponsorId, $companyId, $eventId, $message);
     }
 
     /**
@@ -156,7 +260,7 @@ class Sponsor extends Model
     public function getMeetings(int $sponsorId, int $eventId): array
     {
         $sql = "SELECT ma.*, ms.slot_time, ms.room_number, ms.room_name,
-                       mb.name as block_name, mb.event_date, mb.meeting_duration,
+                       mb.name as block_name, mb.event_date, mb.slot_duration,
                        c.name as company_name, c.logo_url as company_logo
                 FROM meeting_assignments ma
                 INNER JOIN meeting_slots ms ON ma.slot_id = ms.id
@@ -191,7 +295,8 @@ class Sponsor extends Model
                 VALUES (?, ?, ?, ?)
                 ON DUPLICATE KEY UPDATE message = VALUES(message), sent_at = CURRENT_TIMESTAMP";
 
-        return $this->db->execute($sql, [$eventId, $sponsorId, $companyId, $message]);
+        $this->db->query($sql, [$eventId, $sponsorId, $companyId, $message]);
+        return true;
     }
 
     /**
@@ -221,11 +326,11 @@ class Sponsor extends Model
      */
     public function getEmailsArray(array $sponsor): array
     {
-        if (empty($sponsor['contact_emails'])) {
+        if (empty($sponsor['contact_email'])) {
             return [];
         }
 
-        return array_map('trim', explode(',', $sponsor['contact_emails']));
+        return array_map('trim', explode(',', $sponsor['contact_email']));
     }
 
     /**

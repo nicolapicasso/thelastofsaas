@@ -2,8 +2,14 @@
 
 namespace App\Controllers;
 
+use App\Controllers\Frontend\BaseController;
 use App\Models\Event;
 use App\Models\TicketType;
+use App\Models\Activity;
+use App\Models\TeamMember;
+use App\Models\Sponsor;
+use App\Models\Company;
+use App\Models\Room;
 
 /**
  * Frontend Events Controller
@@ -11,16 +17,18 @@ use App\Models\TicketType;
  *
  * Public event listing and detail pages
  */
-class EventsController extends Controller
+class EventsController extends BaseController
 {
     private Event $eventModel;
     private TicketType $ticketTypeModel;
+    private Activity $activityModel;
 
     public function __construct()
     {
         parent::__construct();
         $this->eventModel = new Event();
         $this->ticketTypeModel = new TicketType();
+        $this->activityModel = new Activity();
     }
 
     /**
@@ -30,11 +38,30 @@ class EventsController extends Controller
     {
         $events = $this->eventModel->getUpcoming(12);
 
-        $this->render('events/index', [
+        $this->view->setLayout('layouts/event');
+        $this->render('events/index', $this->getEventData([
             'events' => $events,
             'meta_title' => 'Próximos Eventos - The Last of SaaS',
             'meta_description' => 'Descubre los próximos eventos de networking B2B y SaaS'
-        ]);
+        ]));
+    }
+
+    /**
+     * Get common event page data (navigation, settings, etc.)
+     */
+    private function getEventData(array $data = []): array
+    {
+        return array_merge([
+            'mainNav' => $this->getMainNavigation(),
+            'logoHeader' => $this->getSetting('logo_header', '/assets/images/logo.svg'),
+            'headerButtons' => $this->getHeaderButtons(),
+            'sidebarMenu' => $this->getSidebarMenu(),
+            'footerNav' => $this->getFooterNavigation(),
+            'footerTagline' => $this->getFooterTagline(),
+            'footerCopyright' => $this->getFooterCopyright(),
+            'socialLinks' => $this->getSocialLinks(),
+            'currentLang' => $this->currentLang,
+        ], $data);
     }
 
     /**
@@ -44,7 +71,7 @@ class EventsController extends Controller
     {
         $event = $this->eventModel->findBySlug($slug);
 
-        if (!$event || $event['status'] !== 'published') {
+        if (!$event || !in_array($event['status'], ['published', 'active'])) {
             $this->notFound();
             return;
         }
@@ -65,16 +92,56 @@ class EventsController extends Controller
         // Get event statistics
         $stats = $this->eventModel->getStats($event['id']);
 
-        $this->render('events/show', [
+        // Get event companies
+        $companies = $this->eventModel->getCompanies($event['id']);
+
+        // Get event activities/agenda
+        $activities = $this->activityModel->getByEvent($event['id']);
+
+        // Group activities by date
+        $activitiesByDate = [];
+        foreach ($activities as $activity) {
+            $date = $activity['activity_date'] ?? $event['start_date'];
+            $activitiesByDate[$date][] = $activity;
+        }
+
+        // Get speakers (team members with activities in this event)
+        $speakerIds = array_unique(array_filter(array_column($activities, 'speaker_id')));
+        $speakers = [];
+        if (!empty($speakerIds)) {
+            $teamMemberModel = new TeamMember();
+            foreach ($speakerIds as $speakerId) {
+                $speaker = $teamMemberModel->find((int)$speakerId);
+                if ($speaker && $speaker['active']) {
+                    $speakers[] = $speaker;
+                }
+            }
+        }
+
+        // Get event rooms with images
+        $roomModel = new Room();
+        $eventRooms = $roomModel->getWithImagesByEvent($event['id']);
+
+        // Get content activities (charlas and talleres)
+        $contentActivities = $this->activityModel->getByEventAndTypes($event['id'], ['charla', 'taller']);
+
+        $this->view->setLayout('layouts/event');
+        $this->render('events/show', $this->getEventData([
             'event' => $event,
             'sponsorsByLevel' => $sponsorsByLevel,
+            'eventRooms' => $eventRooms,
             'features' => $features,
             'ticketTypes' => $ticketTypes,
             'stats' => $stats,
+            'companies' => $companies,
+            'activities' => $activities,
+            'activitiesByDate' => $activitiesByDate,
+            'speakers' => $speakers,
+            'contentActivities' => $contentActivities,
             'meta_title' => $event['meta_title'] ?: $event['name'] . ' - The Last of SaaS',
             'meta_description' => $event['meta_description'] ?: $event['short_description'],
             'meta_image' => $event['featured_image']
-        ]);
+        ]));
     }
 
     /**
@@ -84,15 +151,16 @@ class EventsController extends Controller
     {
         $event = $this->eventModel->findBySlug($slug);
 
-        if (!$event || $event['status'] !== 'published') {
+        if (!$event || !in_array($event['status'], ['published', 'active'])) {
             $this->notFound();
             return;
         }
 
-        $this->render('events/agenda', [
+        $this->view->setLayout('layouts/event');
+        $this->render('events/agenda', $this->getEventData([
             'event' => $event,
             'meta_title' => 'Agenda - ' . $event['name']
-        ]);
+        ]));
     }
 
     /**
@@ -102,7 +170,7 @@ class EventsController extends Controller
     {
         $event = $this->eventModel->findBySlug($slug);
 
-        if (!$event || $event['status'] !== 'published') {
+        if (!$event || !in_array($event['status'], ['published', 'active'])) {
             $this->notFound();
             return;
         }
@@ -113,10 +181,61 @@ class EventsController extends Controller
             $sponsorsByLevel[$sponsor['level']][] = $sponsor;
         }
 
-        $this->render('events/sponsors', [
+        $this->view->setLayout('layouts/event');
+        $this->render('events/sponsors', $this->getEventData([
             'event' => $event,
             'sponsorsByLevel' => $sponsorsByLevel,
             'meta_title' => 'Sponsors - ' . $event['name']
-        ]);
+        ]));
+    }
+
+    /**
+     * Show sponsor public page
+     */
+    public function sponsorPage(string $slug): void
+    {
+        $sponsorModel = new Sponsor();
+        $sponsor = $sponsorModel->findBySlug($slug);
+
+        if (!$sponsor) {
+            $this->notFound();
+            return;
+        }
+
+        // Get events this sponsor participates in
+        $events = $sponsorModel->getEvents($sponsor['id']);
+
+        $this->view->setLayout('layouts/event');
+        $this->render('sponsors/show', $this->getEventData([
+            'sponsor' => $sponsor,
+            'events' => $events,
+            'meta_title' => $sponsor['name'] . ' - The Last of SaaS',
+            'meta_description' => $sponsor['description'] ?? ''
+        ]));
+    }
+
+    /**
+     * Show company public page
+     */
+    public function companyPage(string $slug): void
+    {
+        $companyModel = new Company();
+        $company = $companyModel->findBySlug($slug);
+
+        if (!$company) {
+            $this->notFound();
+            return;
+        }
+
+        // Get events this company participates in
+        $events = $companyModel->getEvents($company['id']);
+
+        $this->view->setLayout('layouts/event');
+        $this->render('companies/show', $this->getEventData([
+            'company' => $company,
+            'events' => $events,
+            'meta_title' => $company['name'] . ' - The Last of SaaS',
+            'meta_description' => $company['description'] ?? ''
+        ]));
     }
 }

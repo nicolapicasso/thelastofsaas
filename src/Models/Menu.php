@@ -19,7 +19,6 @@ class Menu extends Model
         'slug',
         'location',
         'description',
-        'is_active',
     ];
 
     /**
@@ -64,7 +63,7 @@ class Menu extends Model
      */
     public function getByLocation(string $location): ?array
     {
-        return $this->first(['location' => $location, 'is_active' => 1]);
+        return $this->first(['location' => $location]);
     }
 
     /**
@@ -115,7 +114,7 @@ class Menu extends Model
         $sql = "SELECT * FROM menu_items
                 WHERE menu_id = ? AND parent_id " . ($parentId === null ? "IS NULL" : "= ?") . "
                 AND is_active = 1
-                ORDER BY sort_order ASC";
+                ORDER BY display_order ASC";
 
         $params = $parentId === null ? [$menuId] : [$menuId, $parentId];
         $items = $this->db->fetchAll($sql, $params);
@@ -133,7 +132,7 @@ class Menu extends Model
      */
     public function getAllItems(int $menuId): array
     {
-        $sql = "SELECT * FROM menu_items WHERE menu_id = ? ORDER BY parent_id ASC, sort_order ASC";
+        $sql = "SELECT * FROM menu_items WHERE menu_id = ? ORDER BY parent_id ASC, display_order ASC";
         return $this->db->fetchAll($sql, [$menuId]);
     }
 
@@ -151,13 +150,8 @@ class Menu extends Model
      */
     public function createItem(array $data): int
     {
-        $sql = "INSERT INTO menu_items (menu_id, parent_id, title, url, target, icon, css_class, item_type, button_style, translations, sort_order, is_active)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-
-        $translations = $data['translations'] ?? null;
-        if (is_array($translations)) {
-            $translations = json_encode($translations);
-        }
+        $sql = "INSERT INTO menu_items (menu_id, parent_id, title, url, target, icon, css_class, display_order, is_active)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         $this->db->query($sql, [
             $data['menu_id'],
@@ -167,10 +161,7 @@ class Menu extends Model
             $data['target'] ?? '_self',
             $data['icon'] ?? null,
             $data['css_class'] ?? null,
-            $data['item_type'] ?? 'link',
-            $data['button_style'] ?? 'primary',
-            $translations,
-            $data['sort_order'] ?? 0,
+            $data['display_order'] ?? 0,
             $data['is_active'] ?? 1,
         ]);
 
@@ -188,18 +179,10 @@ class Menu extends Model
                 target = ?,
                 icon = ?,
                 css_class = ?,
-                item_type = ?,
-                button_style = ?,
-                translations = ?,
-                sort_order = ?,
+                display_order = ?,
                 is_active = ?,
                 parent_id = ?
                 WHERE id = ?";
-
-        $translations = $data['translations'] ?? null;
-        if (is_array($translations)) {
-            $translations = json_encode($translations);
-        }
 
         return $this->db->query($sql, [
             $data['title'],
@@ -207,10 +190,7 @@ class Menu extends Model
             $data['target'] ?? '_self',
             $data['icon'] ?? null,
             $data['css_class'] ?? null,
-            $data['item_type'] ?? 'link',
-            $data['button_style'] ?? 'primary',
-            $translations,
-            $data['sort_order'] ?? 0,
+            $data['display_order'] ?? 0,
             $data['is_active'] ?? 1,
             $data['parent_id'] ?: null,
             $itemId,
@@ -289,7 +269,7 @@ class Menu extends Model
     /**
      * Reorder menu items
      * Accepts either:
-     * - Array of objects: [{id: 1, sort_order: 0}, {id: 2, sort_order: 1}]
+     * - Array of objects: [{id: 1, display_order: 0}, {id: 2, display_order: 1}]
      * - Simple array: [itemId1, itemId2] where index is the order
      */
     public function reorderItems(array $items): bool
@@ -298,15 +278,15 @@ class Menu extends Model
             // Handle object format from JavaScript
             if (is_array($item) && isset($item['id'])) {
                 $itemId = (int) $item['id'];
-                $sortOrder = isset($item['sort_order']) ? (int) $item['sort_order'] : $order;
+                $displayOrder = isset($item['display_order']) ? (int) $item['display_order'] : $order;
             } else {
                 // Handle simple format (index as order, value as id)
                 $itemId = (int) $item;
-                $sortOrder = $order;
+                $displayOrder = $order;
             }
 
-            $sql = "UPDATE menu_items SET sort_order = ? WHERE id = ?";
-            $this->db->query($sql, [$sortOrder, $itemId]);
+            $sql = "UPDATE menu_items SET display_order = ? WHERE id = ?";
+            $this->db->query($sql, [$displayOrder, $itemId]);
         }
         return true;
     }

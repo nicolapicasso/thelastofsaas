@@ -45,7 +45,7 @@ class MeetingsController extends Controller
         $this->requireAuth();
 
         $eventId = (int) $this->getQuery('event_id');
-        $events = $this->eventModel->all(['event_date' => 'DESC']);
+        $events = $this->eventModel->all(['start_date' => 'DESC']);
 
         if (!$eventId && !empty($events)) {
             $eventId = $events[0]['id'];
@@ -85,10 +85,9 @@ class MeetingsController extends Controller
         $eventDate = $this->getPost('event_date');
         $startTime = $this->getPost('start_time');
         $endTime = $this->getPost('end_time');
-        $meetingDuration = (int) $this->getPost('meeting_duration', 15);
-        $simultaneousMeetings = (int) $this->getPost('simultaneous_meetings', 10);
+        $slotDuration = (int) $this->getPost('slot_duration', 15);
+        $totalRooms = (int) $this->getPost('total_rooms', 10);
         $location = Sanitizer::string($this->getPost('location'));
-        $description = $this->getPost('description');
 
         if (!$eventId || empty($name) || empty($eventDate) || empty($startTime) || empty($endTime)) {
             $this->flash('error', 'Faltan campos obligatorios.');
@@ -102,10 +101,9 @@ class MeetingsController extends Controller
                 'event_date' => $eventDate,
                 'start_time' => $startTime,
                 'end_time' => $endTime,
-                'meeting_duration' => $meetingDuration,
-                'simultaneous_meetings' => $simultaneousMeetings,
+                'slot_duration' => $slotDuration,
+                'total_rooms' => $totalRooms,
                 'location' => $location ?: null,
-                'description' => $description ?: null,
                 'active' => 1,
             ]);
 
@@ -127,15 +125,18 @@ class MeetingsController extends Controller
     {
         $this->requireAuth();
 
+        $block = $this->blockModel->find((int) $id);
+        $eventId = $block['event_id'] ?? 0;
+
         if (!$this->validateCsrf()) {
-            $this->jsonError('Sesión expirada.');
+            $this->flash('error', 'Sesión expirada.');
+            $this->redirect('/admin/meetings/blocks?event_id=' . $eventId);
             return;
         }
 
-        $block = $this->blockModel->find((int) $id);
-
         if (!$block) {
-            $this->jsonError('Bloque no encontrado.');
+            $this->flash('error', 'Bloque no encontrado.');
+            $this->redirect('/admin/meetings/blocks');
             return;
         }
 
@@ -144,19 +145,20 @@ class MeetingsController extends Controller
             'event_date' => $this->getPost('event_date'),
             'start_time' => $this->getPost('start_time'),
             'end_time' => $this->getPost('end_time'),
-            'meeting_duration' => (int) $this->getPost('meeting_duration', 15),
-            'simultaneous_meetings' => (int) $this->getPost('simultaneous_meetings', 10),
+            'slot_duration' => (int) $this->getPost('slot_duration', 15),
+            'total_rooms' => (int) $this->getPost('total_rooms', 10),
             'location' => Sanitizer::string($this->getPost('location')) ?: null,
-            'description' => $this->getPost('description') ?: null,
             'active' => Sanitizer::bool($this->getPost('active')) ? 1 : 0,
         ];
 
         try {
             $this->blockModel->update((int) $id, $data);
-            $this->jsonSuccess(['message' => 'Bloque actualizado.']);
+            $this->flash('success', 'Bloque actualizado.');
         } catch (\Exception $e) {
-            $this->jsonError('Error: ' . $e->getMessage());
+            $this->flash('error', 'Error: ' . $e->getMessage());
         }
+
+        $this->redirect('/admin/meetings/blocks?event_id=' . $eventId);
     }
 
     /**
@@ -166,24 +168,31 @@ class MeetingsController extends Controller
     {
         $this->requireAuth();
 
+        $block = $this->blockModel->find((int) $id);
+        $eventId = $block['event_id'] ?? 0;
+
         if (!$this->validateCsrf()) {
-            $this->jsonError('Sesión expirada.');
+            $this->flash('error', 'Sesión expirada.');
+            $this->redirect('/admin/meetings/blocks?event_id=' . $eventId);
             return;
         }
 
         $stats = $this->blockModel->getStats((int) $id);
 
         if (($stats['assigned_slots'] ?? 0) > 0) {
-            $this->jsonError('No se puede eliminar: tiene reuniones asignadas.');
+            $this->flash('error', 'No se puede eliminar: tiene reuniones asignadas.');
+            $this->redirect('/admin/meetings/blocks?event_id=' . $eventId);
             return;
         }
 
         try {
             $this->blockModel->delete((int) $id);
-            $this->jsonSuccess(['message' => 'Bloque eliminado.']);
+            $this->flash('success', 'Bloque eliminado.');
         } catch (\Exception $e) {
-            $this->jsonError('Error: ' . $e->getMessage());
+            $this->flash('error', 'Error: ' . $e->getMessage());
         }
+
+        $this->redirect('/admin/meetings/blocks?event_id=' . $eventId);
     }
 
     /**
@@ -222,7 +231,7 @@ class MeetingsController extends Controller
         $this->requireAuth();
 
         $eventId = (int) $this->getQuery('event_id');
-        $events = $this->eventModel->all(['event_date' => 'DESC']);
+        $events = $this->eventModel->all(['start_date' => 'DESC']);
 
         if (!$eventId && !empty($events)) {
             $eventId = $events[0]['id'];
@@ -251,7 +260,7 @@ class MeetingsController extends Controller
         $this->requireAuth();
 
         $eventId = (int) $this->getQuery('event_id');
-        $events = $this->eventModel->all(['event_date' => 'DESC']);
+        $events = $this->eventModel->all(['start_date' => 'DESC']);
 
         if (!$eventId && !empty($events)) {
             $eventId = $events[0]['id'];
@@ -401,7 +410,7 @@ class MeetingsController extends Controller
             fputcsv($output, [
                 $assignment['event_date'],
                 $assignment['slot_time'],
-                $assignment['meeting_duration'] . ' min',
+                ($assignment['slot_duration'] ?? 15) . ' min',
                 $assignment['room_name'] ?? 'Mesa ' . $assignment['room_number'],
                 $assignment['block_name'],
                 $assignment['sponsor_name'],
@@ -423,7 +432,7 @@ class MeetingsController extends Controller
         $this->requireAuth();
 
         $eventId = (int) $this->getQuery('event_id');
-        $events = $this->eventModel->all(['event_date' => 'DESC']);
+        $events = $this->eventModel->all(['start_date' => 'DESC']);
 
         if (!$eventId && !empty($events)) {
             $eventId = $events[0]['id'];
@@ -447,6 +456,44 @@ class MeetingsController extends Controller
                 'without_meeting' => $withoutMeeting,
             ],
             'csrf_token' => $this->generateCsrf(),
+            'flash' => $this->getFlash(),
+        ]);
+    }
+
+    /**
+     * Badges for QR printing
+     */
+    public function badges(): void
+    {
+        $this->requireAuth();
+
+        $eventId = (int) $this->getQuery('event_id');
+        $type = $this->getQuery('type', 'all'); // all, sponsors, companies
+        $events = $this->eventModel->all(['start_date' => 'DESC']);
+
+        if (!$eventId && !empty($events)) {
+            $eventId = $events[0]['id'];
+        }
+
+        $sponsors = [];
+        $companies = [];
+
+        if ($eventId) {
+            if ($type === 'all' || $type === 'sponsors') {
+                $sponsors = $this->sponsorModel->getByEvent($eventId);
+            }
+            if ($type === 'all' || $type === 'companies') {
+                $companies = $this->companyModel->getByEvent($eventId);
+            }
+        }
+
+        $this->renderAdmin('meetings/badges', [
+            'title' => 'Badges QR para Imprimir',
+            'sponsors' => $sponsors,
+            'companies' => $companies,
+            'events' => $events,
+            'currentEventId' => $eventId,
+            'currentType' => $type,
             'flash' => $this->getFlash(),
         ]);
     }

@@ -88,11 +88,16 @@ use App\Models\Media;
     <?php else: ?>
         <div class="media-grid">
             <?php foreach ($items as $item): ?>
+                <?php
+                $itemUrl = '/uploads/' . ($item['filepath'] ?? '');
+                $itemType = $item['filetype'] ?? '';
+                $itemSize = $item['filesize'] ?? 0;
+                ?>
                 <div class="media-item" data-id="<?= $item['id'] ?>" onclick="openMediaModal(<?= $item['id'] ?>)">
                     <div class="media-preview">
-                        <?php if (strpos($item['mime_type'], 'image/') === 0): ?>
-                            <img src="<?= htmlspecialchars($item['url']) ?>" alt="<?= htmlspecialchars($item['alt_text'] ?? '') ?>">
-                        <?php elseif (strpos($item['mime_type'], 'video/') === 0): ?>
+                        <?php if (strpos($itemType, 'image/') === 0): ?>
+                            <img src="<?= htmlspecialchars($itemUrl) ?>" alt="<?= htmlspecialchars($item['alt_text'] ?? '') ?>">
+                        <?php elseif (strpos($itemType, 'video/') === 0): ?>
                             <div class="media-icon video">
                                 <i class="fas fa-play-circle"></i>
                             </div>
@@ -103,10 +108,10 @@ use App\Models\Media;
                         <?php endif; ?>
                     </div>
                     <div class="media-info">
-                        <span class="media-name" title="<?= htmlspecialchars($item['original_filename']) ?>">
-                            <?= htmlspecialchars(substr($item['original_filename'], 0, 20)) ?><?= strlen($item['original_filename']) > 20 ? '...' : '' ?>
+                        <span class="media-name" title="<?= htmlspecialchars($item['original_filename'] ?? '') ?>">
+                            <?= htmlspecialchars(substr($item['original_filename'] ?? '', 0, 20)) ?><?= strlen($item['original_filename'] ?? '') > 20 ? '...' : '' ?>
                         </span>
-                        <span class="media-size"><?= Media::formatSize($item['file_size']) ?></span>
+                        <span class="media-size"><?= Media::formatSize((int) $itemSize) ?></span>
                     </div>
                 </div>
             <?php endforeach; ?>

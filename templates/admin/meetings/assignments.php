@@ -3,6 +3,15 @@
  * Meeting Assignments Template
  * TLOS - The Last of SaaS
  */
+
+// Get current event slug for public links
+$currentEventSlug = '';
+foreach ($events as $evt) {
+    if ($evt['id'] == $currentEventId) {
+        $currentEventSlug = $evt['slug'] ?? '';
+        break;
+    }
+}
 ?>
 
 <div class="page-header">
@@ -11,6 +20,9 @@
         <p>Gestiona las reuniones programadas</p>
     </div>
     <div class="page-header-actions">
+        <?php if ($currentEventSlug): ?>
+            <a href="/eventos/<?= htmlspecialchars($currentEventSlug) ?>/reuniones" class="btn btn-outline" target="_blank"><i class="fas fa-external-link-alt"></i> Ver Público</a>
+        <?php endif; ?>
         <a href="/admin/meetings/blocks?event_id=<?= $currentEventId ?>" class="btn btn-outline"><i class="fas fa-clock"></i> Bloques</a>
         <a href="/admin/meetings/unassigned?event_id=<?= $currentEventId ?>" class="btn btn-outline"><i class="fas fa-user-plus"></i> Sin Asignar</a>
         <a href="/admin/meetings/export?event_id=<?= $currentEventId ?>" class="btn btn-outline"><i class="fas fa-download"></i> Exportar</a>
@@ -70,7 +82,7 @@
                     <?php foreach ($assignments as $a): ?>
                         <tr>
                             <td><?= date('d/m/Y', strtotime($a['event_date'])) ?></td>
-                            <td><strong><?= substr($a['slot_time'], 0, 5) ?></strong> <small class="text-muted">(<?= $a['meeting_duration'] ?>min)</small></td>
+                            <td><strong><?= substr($a['slot_time'], 0, 5) ?></strong> <small class="text-muted">(<?= $a['slot_duration'] ?? 30 ?>min)</small></td>
                             <td><?= $a['room_name'] ?? 'Mesa ' . $a['room_number'] ?></td>
                             <td><?= htmlspecialchars($a['sponsor_name']) ?></td>
                             <td><?= htmlspecialchars($a['company_name']) ?></td>

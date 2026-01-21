@@ -55,12 +55,6 @@ $action = $isEdit ? "/admin/menus/{$menu['id']}/update" : "/admin/menus";
                                   placeholder="Descripción opcional del menú"><?= htmlspecialchars($menu['description'] ?? '') ?></textarea>
                     </div>
 
-                    <div class="form-group">
-                        <label class="checkbox-label">
-                            <input type="checkbox" name="is_active" value="1" <?= ($menu['is_active'] ?? true) ? 'checked' : '' ?>>
-                            <span>Menú activo</span>
-                        </label>
-                    </div>
                 </div>
                 <div class="card-footer">
                     <button type="submit" class="btn btn-primary btn-block">

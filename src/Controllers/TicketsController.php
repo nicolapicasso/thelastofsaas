@@ -2,10 +2,12 @@
 
 namespace App\Controllers;
 
+use App\Core\Controller;
 use App\Models\Event;
 use App\Models\Ticket;
 use App\Models\TicketType;
 use App\Models\Sponsor;
+use App\Models\SponsorInviteCode;
 use App\Services\StripeService;
 use App\Services\EmailService;
 use App\Services\QRService;
@@ -22,6 +24,7 @@ class TicketsController extends Controller
     private Ticket $ticketModel;
     private TicketType $ticketTypeModel;
     private Sponsor $sponsorModel;
+    private SponsorInviteCode $inviteCodeModel;
 
     public function __construct()
     {
@@ -30,6 +33,7 @@ class TicketsController extends Controller
         $this->ticketModel = new Ticket();
         $this->ticketTypeModel = new TicketType();
         $this->sponsorModel = new Sponsor();
+        $this->inviteCodeModel = new SponsorInviteCode();
     }
 
     /**
@@ -39,7 +43,7 @@ class TicketsController extends Controller
     {
         $event = $this->eventModel->findBySlug($eventSlug);
 
-        if (!$event || $event['status'] !== 'published') {
+        if (!$event || !in_array($event['status'], ['published', 'active'])) {
             $this->notFound();
             return;
         }
@@ -56,17 +60,33 @@ class TicketsController extends Controller
         // Get available ticket types
         $ticketTypes = $this->ticketTypeModel->getAvailableForEvent($event['id']);
 
-        // Check for sponsor code in URL
-        $sponsorCode = $_GET['code'] ?? null;
+        // Check for code in URL (can be sponsor code or invite code)
+        $inputCode = $_GET['code'] ?? null;
         $sponsor = null;
-        if ($sponsorCode) {
-            $sponsor = $this->sponsorModel->findByCode($sponsorCode);
-            if ($sponsor) {
-                // Verify sponsor is associated with this event
-                $eventSponsors = $this->eventModel->getSponsors($event['id']);
-                $sponsorIds = array_column($eventSponsors, 'id');
-                if (!in_array($sponsor['id'], $sponsorIds)) {
-                    $sponsor = null;
+        $inviteCode = null;
+
+        if ($inputCode) {
+            // First try invite code
+            $inviteCode = $this->inviteCodeModel->findByCode($inputCode, $event['id']);
+            if ($inviteCode) {
+                $validation = $this->inviteCodeModel->isValid($inviteCode);
+                if (!$validation['valid']) {
+                    $inviteCode = null;
+                } else {
+                    $sponsor = $this->sponsorModel->find($inviteCode['sponsor_id']);
+                }
+            }
+
+            // If not an invite code, try sponsor code
+            if (!$inviteCode) {
+                $sponsor = $this->sponsorModel->findByCode($inputCode);
+                if ($sponsor) {
+                    // Verify sponsor is associated with this event
+                    $eventSponsors = $this->eventModel->getSponsors($event['id']);
+                    $sponsorIds = array_column($eventSponsors, 'id');
+                    if (!in_array($sponsor['id'], $sponsorIds)) {
+                        $sponsor = null;
+                    }
                 }
             }
         }
@@ -75,9 +95,97 @@ class TicketsController extends Controller
             'event' => $event,
             'ticketTypes' => $ticketTypes,
             'sponsor' => $sponsor,
-            'sponsorCode' => $sponsorCode,
+            'inviteCode' => $inviteCode,
+            'inputCode' => $inputCode,
+            'sponsorCode' => $inputCode,
+            'csrf_token' => $this->generateCsrf(),
             'meta_title' => 'Registro - ' . $event['name']
         ]);
+    }
+
+    /**
+     * Validate discount code (AJAX)
+     */
+    public function validateCode(string $eventSlug): void
+    {
+        $event = $this->eventModel->findBySlug($eventSlug);
+
+        if (!$event) {
+            $this->jsonError('Evento no encontrado', 404);
+            return;
+        }
+
+        if (!$this->validateCsrf()) {
+            $this->jsonError('Token de seguridad inválido', 403);
+            return;
+        }
+
+        $code = trim($_POST['code'] ?? '');
+        $ticketTypeId = (int)($_POST['ticket_type_id'] ?? 0);
+
+        if (empty($code)) {
+            $this->jsonError('Código no especificado');
+            return;
+        }
+
+        // First try as invite code
+        $inviteCode = $this->inviteCodeModel->findByCode($code, $event['id']);
+        if ($inviteCode) {
+            $validation = $this->inviteCodeModel->isValid($inviteCode);
+            if (!$validation['valid']) {
+                $this->jsonError(implode(' ', $validation['errors']));
+                return;
+            }
+
+            // Check ticket type restriction
+            if ($inviteCode['ticket_type_id'] && $ticketTypeId && $inviteCode['ticket_type_id'] != $ticketTypeId) {
+                $this->jsonError('Este código no es válido para este tipo de entrada');
+                return;
+            }
+
+            $sponsor = $this->sponsorModel->find($inviteCode['sponsor_id']);
+            $discount = 0;
+            $isFree = false;
+
+            if ($inviteCode['discount_type'] === 'percentage') {
+                $discount = (int)$inviteCode['discount_amount'];
+                $isFree = ($discount >= 100);
+            } elseif ($inviteCode['discount_type'] === 'fixed') {
+                // For fixed discount, we'll mark as valid but not show percentage
+                $discount = 0;
+            }
+
+            $this->json([
+                'success' => true,
+                'discount' => $discount,
+                'is_free' => $isFree,
+                'sponsor_name' => $sponsor['name'] ?? '',
+                'sponsor_logo' => $sponsor['logo_url'] ?? '',
+                'message' => 'Código válido'
+            ]);
+            return;
+        }
+
+        // Try as direct sponsor code
+        $sponsor = $this->sponsorModel->findByCode($code);
+        if ($sponsor) {
+            // Verify sponsor is associated with this event
+            $eventSponsors = $this->eventModel->getSponsors($event['id']);
+            $sponsorIds = array_column($eventSponsors, 'id');
+            if (in_array($sponsor['id'], $sponsorIds)) {
+                $this->json([
+                    'success' => true,
+                    'discount' => 100,
+                    'is_free' => true,
+                    'sponsor_name' => $sponsor['name'],
+                    'sponsor_logo' => $sponsor['logo_url'] ?? '',
+                    'message' => 'Código de sponsor válido'
+                ]);
+                return;
+            }
+        }
+
+        $this->jsonError('Código no válido o no aplicable a este evento');
     }
 
     /**
@@ -85,9 +193,10 @@ class TicketsController extends Controller
      */
     public function store(string $eventSlug): void
     {
+        try {
         $event = $this->eventModel->findBySlug($eventSlug);
 
-        if (!$event || $event['status'] !== 'published') {
+        if (!$event || !in_array($event['status'], ['published', 'active'])) {
             $this->jsonError('Evento no encontrado', 404);
             return;
         }
@@ -138,22 +247,55 @@ class TicketsController extends Controller
             return;
         }
 
-        // Validate sponsor code if provided
+        // Validate code (invite code or sponsor code)
         $sponsorId = null;
+        $inviteCodeId = null;
+        $inviteCode = null;
+        $discount = 0;
+
         if ($sponsorCode) {
-            $sponsor = $this->sponsorModel->findByCode($sponsorCode);
-            if ($sponsor) {
-                $eventSponsors = $this->eventModel->getSponsors($event['id']);
-                $sponsorIds = array_column($eventSponsors, 'id');
-                if (in_array($sponsor['id'], $sponsorIds)) {
-                    $sponsorId = $sponsor['id'];
+            // First try as invite code
+            $inviteCode = $this->inviteCodeModel->findByCode($sponsorCode, $event['id']);
+            if ($inviteCode) {
+                $validation = $this->inviteCodeModel->isValid($inviteCode);
+                if ($validation['valid']) {
+                    // Check if restricted to specific ticket type
+                    if ($inviteCode['ticket_type_id'] && $inviteCode['ticket_type_id'] != $ticketTypeId) {
+                        $this->jsonError('Este codigo no es valido para este tipo de entrada', 400);
+                        return;
+                    }
+                    $sponsorId = $inviteCode['sponsor_id'];
+                    $inviteCodeId = $inviteCode['id'];
+                } else {
+                    $this->jsonError(implode(' ', $validation['errors']), 400);
+                    return;
+                }
+            } else {
+                // Try as direct sponsor code
+                $sponsor = $this->sponsorModel->findByCode($sponsorCode);
+                if ($sponsor) {
+                    $eventSponsors = $this->eventModel->getSponsors($event['id']);
+                    $sponsorIds = array_column($eventSponsors, 'id');
+                    if (in_array($sponsor['id'], $sponsorIds)) {
+                        $sponsorId = $sponsor['id'];
+                    }
                 }
             }
         }
 
-        // Determine if payment is needed
+        // Determine if payment is needed and calculate price
         $price = (float)$ticketType['price'];
-        $needsPayment = $price > 0 && !$sponsorId; // Sponsor tickets are free
+
+        // Apply discount from invite code if applicable
+        if ($inviteCode && $price > 0) {
+            $discount = $this->inviteCodeModel->calculateDiscount($inviteCode, $price);
+            $price = max(0, $price - $discount);
+        } elseif ($sponsorId && !$inviteCodeId) {
+            // Direct sponsor code = free ticket
+            $price = 0;
+        }
+
+        $needsPayment = $price > 0;
 
         if ($needsPayment) {
             // Create pending ticket and redirect to payment
@@ -161,6 +303,7 @@ class TicketsController extends Controller
                 'event_id' => $event['id'],
                 'ticket_type_id' => $ticketTypeId,
                 'sponsor_id' => $sponsorId,
+                'invite_code_id' => $inviteCodeId,
                 'attendee_name' => $attendeeName,
                 'attendee_email' => $attendeeEmail,
                 'attendee_phone' => $attendeePhone,
@@ -171,6 +314,11 @@ class TicketsController extends Controller
             ];
 
             $ticketId = $this->ticketModel->create($ticketData);
+
+            // Update invite code usage if applicable
+            if ($inviteCodeId) {
+                $this->inviteCodeModel->useCode($inviteCodeId);
+            }
 
             if (!$ticketId) {
                 $this->jsonError('Error al crear el registro', 500);
@@ -206,6 +354,7 @@ class TicketsController extends Controller
             'event_id' => $event['id'],
             'ticket_type_id' => $ticketTypeId,
             'sponsor_id' => $sponsorId,
+            'invite_code_id' => $inviteCodeId,
             'attendee_name' => $attendeeName,
             'attendee_email' => $attendeeEmail,
             'attendee_phone' => $attendeePhone,
@@ -222,6 +371,11 @@ class TicketsController extends Controller
             return;
         }
 
+        // Update invite code usage if applicable
+        if ($inviteCodeId) {
+            $this->inviteCodeModel->useCode($inviteCodeId);
+        }
+
         $ticket = $this->ticketModel->find($ticketId);
 
         // Send confirmation email
@@ -233,6 +387,12 @@ class TicketsController extends Controller
             'success' => true,
             'redirect' => url("/eventos/{$eventSlug}/ticket/{$ticket['code']}")
         ]);
+
+        } catch (\Throwable $e) {
+            error_log('Ticket registration error: ' . $e->getMessage() . ' in ' . $e->getFile() . ':' . $e->getLine());
+            error_log('Stack trace: ' . $e->getTraceAsString());
+            $this->jsonError('Error: ' . $e->getMessage() . ' [' . basename($e->getFile()) . ':' . $e->getLine() . ']');
+        }
     }
 
     /**

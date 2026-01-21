@@ -46,7 +46,9 @@ class MediaController extends Controller
             echo json_encode([
                 'success' => true,
                 'media' => array_map(function($item) {
-                    $item['formatted_size'] = Media::formatSize($item['file_size']);
+                    $item['url'] = '/uploads/' . ($item['filepath'] ?? '');
+                    $item['mime_type'] = $item['filetype'] ?? '';
+                    $item['formatted_size'] = Media::formatSize((int) ($item['filesize'] ?? 0));
                     return $item;
                 }, $result['items']),
                 'pagination' => [
@@ -80,16 +82,25 @@ class MediaController extends Controller
      */
     public function upload(): void
     {
+        // Suppress PHP errors from being output, capture them instead
+        ob_start();
         header('Content-Type: application/json');
 
-        if (!isset($_FILES['file'])) {
-            echo json_encode(['success' => false, 'error' => 'No se recibió ningún archivo']);
-            return;
+        try {
+            if (!isset($_FILES['file'])) {
+                ob_end_clean();
+                echo json_encode(['success' => false, 'error' => 'No se recibió ningún archivo']);
+                return;
+            }
+
+            $result = $this->mediaService->upload($_FILES['file']);
+            ob_end_clean();
+            echo json_encode($result);
+        } catch (\Throwable $e) {
+            ob_end_clean();
+            error_log('Media upload error: ' . $e->getMessage());
+            echo json_encode(['success' => false, 'error' => 'Error al subir archivo: ' . $e->getMessage()]);
         }
-
-        $result = $this->mediaService->upload($_FILES['file']);
-
-        echo json_encode($result);
     }
 
     /**
@@ -151,7 +162,11 @@ class MediaController extends Controller
             return;
         }
 
-        $media['formatted_size'] = Media::formatSize($media['file_size']);
+        // Add computed fields for frontend compatibility
+        $media['url'] = '/uploads/' . ($media['filepath'] ?? '');
+        $media['mime_type'] = $media['filetype'] ?? '';
+        $media['file_size'] = $media['filesize'] ?? 0;
+        $media['formatted_size'] = Media::formatSize((int) ($media['filesize'] ?? 0));
 
         echo json_encode(['success' => true, 'media' => $media]);
     }
@@ -187,7 +202,9 @@ class MediaController extends Controller
         echo json_encode([
             'success' => true,
             'items' => array_map(function($item) {
-                $item['formatted_size'] = Media::formatSize($item['file_size']);
+                $item['url'] = '/uploads/' . ($item['filepath'] ?? '');
+                $item['mime_type'] = $item['filetype'] ?? '';
+                $item['formatted_size'] = Media::formatSize((int) ($item['filesize'] ?? 0));
                 return $item;
             }, $result['items']),
             'pagination' => [

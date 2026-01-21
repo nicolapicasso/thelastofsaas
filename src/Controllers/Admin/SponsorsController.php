@@ -6,6 +6,7 @@ namespace App\Controllers\Admin;
 
 use App\Core\Controller;
 use App\Models\Sponsor;
+use App\Models\SponsorContact;
 use App\Models\Event;
 use App\Helpers\Sanitizer;
 use App\Helpers\Slug;
@@ -17,12 +18,14 @@ use App\Helpers\Slug;
 class SponsorsController extends Controller
 {
     private Sponsor $sponsorModel;
+    private SponsorContact $contactModel;
     private Event $eventModel;
 
     public function __construct()
     {
         parent::__construct();
         $this->sponsorModel = new Sponsor();
+        $this->contactModel = new SponsorContact();
         $this->eventModel = new Event();
     }
 
@@ -35,31 +38,28 @@ class SponsorsController extends Controller
 
         $page = (int) ($this->getQuery('page', 1));
         $active = $this->getQuery('active');
-        $category = $this->getQuery('category');
+        $search = trim($this->getQuery('search', ''));
 
         $conditions = [];
         if ($active !== null && $active !== '') {
             $conditions['active'] = (int) $active;
         }
-        if ($category) {
-            $conditions['category'] = $category;
+
+        // Use search or regular pagination
+        if (!empty($search)) {
+            $result = $this->sponsorModel->searchByName($search, $page, 20, $conditions);
+        } else {
+            $result = $this->sponsorModel->paginate($page, 20, $conditions, ['name' => 'ASC']);
         }
-
-        $result = $this->sponsorModel->paginate($page, 20, $conditions, ['name' => 'ASC']);
-
-        // Get unique categories for filter
-        $allSponsors = $this->sponsorModel->all();
-        $categories = array_unique(array_filter(array_column($allSponsors, 'category')));
-        sort($categories);
 
         $this->renderAdmin('sponsors/index', [
             'title' => 'Sponsors',
             'sponsors' => $result['data'],
             'pagination' => $result['pagination'],
-            'categories' => $categories,
             'currentActive' => $active,
-            'currentCategory' => $category,
+            'currentSearch' => $search,
             'flash' => $this->getFlash(),
+            'csrf_token' => $this->generateCsrf(),
         ]);
     }
 
@@ -73,6 +73,7 @@ class SponsorsController extends Controller
         $this->renderAdmin('sponsors/form', [
             'title' => 'Nuevo Sponsor',
             'sponsor' => null,
+            'contacts' => [],
             'events' => [],
             'csrf_token' => $this->generateCsrf(),
         ]);
@@ -98,11 +99,15 @@ class SponsorsController extends Controller
         }
 
         // Generate slug and unique code
-        $data['slug'] = Slug::generate($data['name'], 'sponsors');
-        $data['unique_code'] = Sponsor::generateUniqueCode();
+        $data['slug'] = Slug::unique($data['name'], 'sponsors');
+        $data['code'] = substr(strtoupper(bin2hex(random_bytes(5))), 0, 10);
 
         try {
             $sponsorId = $this->sponsorModel->create($data);
+
+            // Save contacts
+            $this->saveContacts($sponsorId);
+
             $this->flash('success', 'Sponsor creado correctamente.');
             $this->redirect('/admin/sponsors/' . $sponsorId . '/edit');
         } catch (\Exception $e) {
@@ -126,10 +131,12 @@ class SponsorsController extends Controller
         }
 
         $events = $this->sponsorModel->getEvents((int) $id);
+        $contacts = $this->contactModel->getBySponsor((int) $id);
 
         $this->renderAdmin('sponsors/form', [
             'title' => 'Editar Sponsor',
             'sponsor' => $sponsor,
+            'contacts' => $contacts,
             'events' => $events,
             'levelOptions' => Sponsor::getLevelOptions(),
             'csrf_token' => $this->generateCsrf(),
@@ -164,11 +171,15 @@ class SponsorsController extends Controller
 
         // Update slug if name changed
         if ($data['name'] !== $sponsor['name']) {
-            $data['slug'] = Slug::generate($data['name'], 'sponsors', (int) $id);
+            $data['slug'] = Slug::unique($data['name'], 'sponsors', 'slug', (int) $id);
         }
 
         try {
             $this->sponsorModel->update((int) $id, $data);
+
+            // Save contacts
+            $this->saveContacts((int) $id);
+
             $this->flash('success', 'Sponsor actualizado correctamente.');
             $this->redirect('/admin/sponsors/' . $id . '/edit');
         } catch (\Exception $e) {
@@ -233,6 +244,14 @@ class SponsorsController extends Controller
 
         $file = $_FILES['csv_file']['tmp_name'];
         $content = file_get_contents($file);
+
+        // Remove UTF-8 BOM if present
+        $content = preg_replace('/^\xEF\xBB\xBF/', '', $content);
+
+        // Normalize line endings
+        $content = str_replace("\r\n", "\n", $content);
+        $content = str_replace("\r", "\n", $content);
+
         $lines = explode("\n", $content);
 
         if (count($lines) < 2) {
@@ -244,18 +263,28 @@ class SponsorsController extends Controller
         $firstLine = $lines[0];
         $delimiter = $this->detectDelimiter($firstLine);
 
-        $headers = str_getcsv($firstLine, $delimiter);
+        $headers = str_getcsv($firstLine, $delimiter, '"', '');
         $headers = array_map('trim', $headers);
         $headers = array_map('strtolower', $headers);
+        $headerCount = count($headers);
 
         $imported = 0;
+        $logosDownloaded = 0;
         $errors = [];
 
         for ($i = 1; $i < count($lines); $i++) {
             $line = trim($lines[$i]);
             if (empty($line)) continue;
 
-            $row = str_getcsv($line, $delimiter);
+            $row = str_getcsv($line, $delimiter, '"', '');
+
+            // Ensure row has same number of elements as headers
+            if (count($row) < $headerCount) {
+                $row = array_pad($row, $headerCount, '');
+            } elseif (count($row) > $headerCount) {
+                $row = array_slice($row, 0, $headerCount);
+            }
+
             $data = array_combine($headers, $row);
 
             if (empty($data['name'])) {
@@ -264,19 +293,64 @@ class SponsorsController extends Controller
             }
 
             try {
+                // Process logo URL - download if external
+                $originalLogoUrl = $data['logo_url'] ?? null;
+                $processedLogoUrl = $this->downloadLogoFromUrl($originalLogoUrl, 'sponsors');
+
+                // Track if logo was downloaded
+                if ($originalLogoUrl && $processedLogoUrl && $processedLogoUrl !== $originalLogoUrl && strpos($processedLogoUrl, '/uploads/') === 0) {
+                    $logosDownloaded++;
+                }
+
                 $sponsorData = [
                     'name' => $data['name'],
-                    'slug' => Slug::generate($data['name'], 'sponsors'),
-                    'category' => $data['category'] ?? null,
+                    'slug' => Slug::unique($data['name'], 'sponsors'),
+                    'tagline' => $data['tagline'] ?? null,
                     'description' => $data['description'] ?? null,
                     'website' => $data['website'] ?? null,
-                    'logo_url' => $data['logo_url'] ?? null,
-                    'contact_emails' => $data['contact_emails'] ?? null,
-                    'unique_code' => Sponsor::generateUniqueCode(),
+                    'logo_url' => $processedLogoUrl,
+                    'code' => substr(strtoupper(bin2hex(random_bytes(5))), 0, 10),
                     'active' => 1,
                 ];
 
-                $this->sponsorModel->create($sponsorData);
+                $sponsorId = $this->sponsorModel->create($sponsorData);
+
+                // Process multiple contacts if 'contacts' column exists
+                $contactsField = $data['contacts'] ?? $data['contactos'] ?? null;
+                if (!empty($contactsField)) {
+                    // Format: name|email|phone;name|email|phone
+                    $contactEntries = explode(';', $contactsField);
+                    $isFirst = true;
+                    foreach ($contactEntries as $contactEntry) {
+                        $contactEntry = trim($contactEntry);
+                        if (empty($contactEntry)) continue;
+
+                        $parts = explode('|', $contactEntry);
+                        $contactData = [
+                            'sponsor_id' => $sponsorId,
+                            'name' => trim($parts[0] ?? ''),
+                            'email' => trim($parts[1] ?? '') ?: null,
+                            'phone' => trim($parts[2] ?? '') ?: null,
+                            'is_primary' => $isFirst ? 1 : 0,
+                        ];
+
+                        if (!empty($contactData['name']) || !empty($contactData['email'])) {
+                            $this->contactModel->create($contactData);
+                            $isFirst = false;
+                        }
+                    }
+                } elseif (!empty($data['contact_name']) || !empty($data['contact_email'])) {
+                    // Fallback to single contact fields
+                    $contactData = [
+                        'sponsor_id' => $sponsorId,
+                        'name' => $data['contact_name'] ?? '',
+                        'email' => $data['contact_email'] ?? null,
+                        'phone' => $data['contact_phone'] ?? null,
+                        'is_primary' => 1,
+                    ];
+                    $this->contactModel->create($contactData);
+                }
+
                 $imported++;
             } catch (\Exception $e) {
                 $errors[] = "Línea {$i}: " . $e->getMessage();
@@ -284,6 +358,9 @@ class SponsorsController extends Controller
         }
 
         $message = "Importados {$imported} sponsors.";
+        if ($logosDownloaded > 0) {
+            $message .= " Logos descargados: {$logosDownloaded}.";
+        }
         if (!empty($errors)) {
             $message .= " Errores: " . count($errors);
         }
@@ -305,8 +382,8 @@ class SponsorsController extends Controller
         }
 
         try {
-            $newCode = Sponsor::generateUniqueCode();
-            $this->sponsorModel->update((int) $id, ['unique_code' => $newCode]);
+            $newCode = substr(strtoupper(bin2hex(random_bytes(5))), 0, 10);
+            $this->sponsorModel->update((int) $id, ['code' => $newCode]);
             $this->jsonSuccess(['code' => $newCode, 'message' => 'Código regenerado.']);
         } catch (\Exception $e) {
             $this->jsonError('Error al regenerar código: ' . $e->getMessage());
@@ -331,17 +408,19 @@ class SponsorsController extends Controller
         fprintf($output, chr(0xEF) . chr(0xBB) . chr(0xBF)); // BOM for Excel
 
         // Headers
-        fputcsv($output, ['name', 'category', 'description', 'website', 'logo_url', 'contact_emails', 'unique_code', 'active'], ';');
+        fputcsv($output, ['name', 'tagline', 'description', 'website', 'logo_url', 'contact_name', 'contact_email', 'contact_phone', 'code', 'active'], ';');
 
         foreach ($sponsors as $sponsor) {
             fputcsv($output, [
                 $sponsor['name'],
-                $sponsor['category'],
-                $sponsor['description'],
-                $sponsor['website'],
-                $sponsor['logo_url'],
-                $sponsor['contact_emails'],
-                $sponsor['unique_code'],
+                $sponsor['tagline'] ?? '',
+                $sponsor['description'] ?? '',
+                $sponsor['website'] ?? '',
+                $sponsor['logo_url'] ?? '',
+                $sponsor['contact_name'] ?? '',
+                $sponsor['contact_email'] ?? '',
+                $sponsor['contact_phone'] ?? '',
+                $sponsor['code'] ?? '',
                 $sponsor['active'],
             ], ';');
         }
@@ -373,21 +452,30 @@ class SponsorsController extends Controller
         $errors = [];
 
         $name = Sanitizer::string($this->getPost('name'));
-        $category = Sanitizer::string($this->getPost('category'));
+        $tagline = Sanitizer::string($this->getPost('tagline'));
         $description = $this->getPost('description');
-        $shortDescription = Sanitizer::string($this->getPost('short_description'));
         $website = Sanitizer::url($this->getPost('website'));
         $logoUrl = Sanitizer::url($this->getPost('logo_url'));
-        $contactEmails = Sanitizer::string($this->getPost('contact_emails'));
+        $contactName = Sanitizer::string($this->getPost('contact_name'));
+        $contactEmail = Sanitizer::string($this->getPost('contact_email'));
         $contactPhone = Sanitizer::string($this->getPost('contact_phone'));
         $active = Sanitizer::bool($this->getPost('active'));
         $maxSimultaneousMeetings = Sanitizer::int($this->getPost('max_simultaneous_meetings')) ?: 1;
-        $canSendMessages = Sanitizer::bool($this->getPost('can_send_messages'));
         $linkedinUrl = Sanitizer::url($this->getPost('linkedin_url'));
         $twitterUrl = Sanitizer::url($this->getPost('twitter_url'));
 
         if (empty($name)) {
             $errors[] = 'El nombre es obligatorio.';
+        }
+
+        // Handle logo file upload
+        if (isset($_FILES['logo_file']) && $_FILES['logo_file']['error'] === UPLOAD_ERR_OK) {
+            $uploadResult = $this->handleLogoUpload($_FILES['logo_file'], 'sponsors');
+            if (isset($uploadResult['error'])) {
+                $errors[] = $uploadResult['error'];
+            } else {
+                $logoUrl = $uploadResult['url'];
+            }
         }
 
         if (!empty($errors)) {
@@ -396,18 +484,221 @@ class SponsorsController extends Controller
 
         return [
             'name' => $name,
-            'category' => $category ?: null,
+            'tagline' => $tagline ?: null,
             'description' => $description ?: null,
-            'short_description' => $shortDescription ?: null,
             'website' => $website ?: null,
             'logo_url' => $logoUrl ?: null,
-            'contact_emails' => $contactEmails ?: null,
+            'contact_name' => $contactName ?: null,
+            'contact_email' => $contactEmail ?: null,
             'contact_phone' => $contactPhone ?: null,
             'active' => $active ? 1 : 0,
             'max_simultaneous_meetings' => $maxSimultaneousMeetings,
-            'can_send_messages' => $canSendMessages ? 1 : 0,
             'linkedin_url' => $linkedinUrl ?: null,
             'twitter_url' => $twitterUrl ?: null,
         ];
+    }
+
+    /**
+     * Handle logo file upload
+     */
+    private function handleLogoUpload(array $file, string $type): array
+    {
+        $allowedTypes = ['image/png', 'image/jpeg', 'image/gif', 'image/svg+xml', 'image/webp'];
+        $maxSize = 2 * 1024 * 1024; // 2MB
+
+        // Validate file type
+        $finfo = new \finfo(FILEINFO_MIME_TYPE);
+        $mimeType = $finfo->file($file['tmp_name']);
+
+        if (!in_array($mimeType, $allowedTypes)) {
+            return ['error' => 'Tipo de archivo no permitido. Use PNG, JPG, GIF, SVG o WebP.'];
+        }
+
+        // Validate file size
+        if ($file['size'] > $maxSize) {
+            return ['error' => 'El archivo es demasiado grande. Maximo 2MB.'];
+        }
+
+        // Create upload directory if it doesn't exist
+        $uploadDir = dirname(__DIR__, 3) . '/public/uploads/logos/' . $type;
+        if (!is_dir($uploadDir)) {
+            mkdir($uploadDir, 0755, true);
+        }
+
+        // Generate unique filename
+        $extension = match($mimeType) {
+            'image/png' => 'png',
+            'image/jpeg' => 'jpg',
+            'image/gif' => 'gif',
+            'image/svg+xml' => 'svg',
+            'image/webp' => 'webp',
+            default => 'png'
+        };
+        $filename = uniqid($type . '_') . '.' . $extension;
+        $filepath = $uploadDir . '/' . $filename;
+
+        // Move uploaded file
+        if (!move_uploaded_file($file['tmp_name'], $filepath)) {
+            return ['error' => 'Error al guardar el archivo.'];
+        }
+
+        // Return the URL
+        return ['url' => '/uploads/logos/' . $type . '/' . $filename];
+    }
+
+    /**
+     * Download logo from external URL and save locally
+     */
+    private function downloadLogoFromUrl(?string $url, string $type): ?string
+    {
+        if (empty($url)) {
+            return null;
+        }
+
+        // Only process external URLs
+        if (!preg_match('/^https?:\/\//i', $url)) {
+            return $url; // Return as-is if it's already a local path
+        }
+
+        try {
+            // Create upload directory if it doesn't exist
+            $uploadDir = dirname(__DIR__, 3) . '/public/uploads/logos/' . $type;
+            if (!is_dir($uploadDir)) {
+                mkdir($uploadDir, 0755, true);
+            }
+
+            // Set up context with timeout and user agent
+            $context = stream_context_create([
+                'http' => [
+                    'timeout' => 10,
+                    'user_agent' => 'Mozilla/5.0 (compatible; TLOS/1.0)',
+                    'follow_location' => true,
+                    'max_redirects' => 3,
+                ],
+                'ssl' => [
+                    'verify_peer' => false,
+                    'verify_peer_name' => false,
+                ],
+            ]);
+
+            // Download the image
+            $imageData = @file_get_contents($url, false, $context);
+
+            if ($imageData === false || empty($imageData)) {
+                return $url; // Return original URL on failure
+            }
+
+            // Detect image type from content
+            $finfo = new \finfo(FILEINFO_MIME_TYPE);
+            $mimeType = $finfo->buffer($imageData);
+
+            $allowedTypes = [
+                'image/png' => 'png',
+                'image/jpeg' => 'jpg',
+                'image/gif' => 'gif',
+                'image/svg+xml' => 'svg',
+                'image/webp' => 'webp',
+                'image/x-icon' => 'ico',
+            ];
+
+            if (!isset($allowedTypes[$mimeType])) {
+                // Try to get extension from URL
+                $pathInfo = pathinfo(parse_url($url, PHP_URL_PATH));
+                $ext = strtolower($pathInfo['extension'] ?? '');
+                if (!in_array($ext, ['png', 'jpg', 'jpeg', 'gif', 'svg', 'webp', 'ico'])) {
+                    return $url; // Return original URL if not a valid image
+                }
+                $extension = ($ext === 'jpeg') ? 'jpg' : $ext;
+            } else {
+                $extension = $allowedTypes[$mimeType];
+            }
+
+            // Generate unique filename
+            $filename = uniqid($type . '_') . '.' . $extension;
+            $filepath = $uploadDir . '/' . $filename;
+
+            // Save the file
+            if (file_put_contents($filepath, $imageData) === false) {
+                return $url; // Return original URL on failure
+            }
+
+            // Return local URL
+            return '/uploads/logos/' . $type . '/' . $filename;
+
+        } catch (\Exception $e) {
+            // On any error, return the original URL
+            return $url;
+        }
+    }
+
+    /**
+     * Save sponsor contacts from form
+     */
+    private function saveContacts(int $sponsorId): void
+    {
+        $contacts = $this->getPost('contacts', []);
+        $primaryIndex = $this->getPost('primary_contact', '0');
+
+        if (!is_array($contacts)) {
+            return;
+        }
+
+        // Get existing contact IDs for this sponsor
+        $existingContacts = $this->contactModel->getBySponsor($sponsorId);
+        $existingIds = array_column($existingContacts, 'id');
+        $processedIds = [];
+
+        foreach ($contacts as $index => $contactData) {
+            // Skip empty contacts (no name and no email)
+            if (empty(trim($contactData['name'] ?? '')) && empty(trim($contactData['email'] ?? ''))) {
+                continue;
+            }
+
+            $isPrimary = ((string) $index === (string) $primaryIndex) ? 1 : 0;
+
+            $data = [
+                'sponsor_id' => $sponsorId,
+                'name' => Sanitizer::string($contactData['name'] ?? ''),
+                'position' => Sanitizer::string($contactData['position'] ?? '') ?: null,
+                'email' => Sanitizer::string($contactData['email'] ?? '') ?: null,
+                'phone' => Sanitizer::string($contactData['phone'] ?? '') ?: null,
+                'is_primary' => $isPrimary,
+            ];
+
+            $contactId = !empty($contactData['id']) ? (int) $contactData['id'] : null;
+
+            if ($contactId && in_array($contactId, $existingIds)) {
+                // Update existing contact
+                $this->contactModel->update($contactId, $data);
+                $processedIds[] = $contactId;
+            } else {
+                // Create new contact
+                $newId = $this->contactModel->create($data);
+                $processedIds[] = $newId;
+            }
+        }
+
+        // Delete contacts that were removed from the form
+        foreach ($existingIds as $existingId) {
+            if (!in_array($existingId, $processedIds)) {
+                $this->contactModel->delete($existingId);
+            }
+        }
+
+        // Ensure at least one contact is primary
+        $updatedContacts = $this->contactModel->getBySponsor($sponsorId);
+        if (!empty($updatedContacts)) {
+            $hasPrimary = false;
+            foreach ($updatedContacts as $contact) {
+                if ($contact['is_primary']) {
+                    $hasPrimary = true;
+                    break;
+                }
+            }
+            if (!$hasPrimary) {
+                // Set first contact as primary
+                $this->contactModel->setPrimary((int) $updatedContacts[0]['id'], $sponsorId);
+            }
+        }
     }
 }

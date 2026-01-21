@@ -453,6 +453,7 @@ CREATE TABLE `tickets` (
     `event_id` INT NOT NULL,
     `ticket_type_id` INT NOT NULL,
     `sponsor_id` INT DEFAULT NULL,
+    `invite_code_id` INT DEFAULT NULL,
     `code` VARCHAR(20) NOT NULL UNIQUE,
     `attendee_name` VARCHAR(255) NOT NULL,
     `attendee_email` VARCHAR(255) NOT NULL,

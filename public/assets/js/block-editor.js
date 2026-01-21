@@ -879,6 +879,18 @@
                 return;
             }
 
+            // Execute inline scripts from loaded HTML (they don't execute automatically via innerHTML)
+            const scripts = form.querySelectorAll('script');
+            scripts.forEach(function(script) {
+                const newScript = document.createElement('script');
+                if (script.src) {
+                    newScript.src = script.src;
+                } else {
+                    newScript.textContent = script.textContent;
+                }
+                script.parentNode.replaceChild(newScript, script);
+            });
+
             // Handle "Add slide" button for hero block
             const addSlideBtn = form.querySelector('.add-slide-btn');
             console.log('addSlideBtn found:', addSlideBtn);

@@ -42,7 +42,7 @@ class TicketsController extends Controller
         $status = $this->getQuery('status');
         $page = (int) ($this->getQuery('page', 1));
 
-        $events = $this->eventModel->all(['event_date' => 'DESC']);
+        $events = $this->eventModel->all(['start_date' => 'DESC']);
 
         if (!$eventId && !empty($events)) {
             $eventId = $events[0]['id'];
@@ -66,6 +66,7 @@ class TicketsController extends Controller
             'currentStatus' => $status,
             'stats' => $stats,
             'statusOptions' => Ticket::getStatusOptions(),
+            'csrf_token' => $this->generateCsrf(),
             'flash' => $this->getFlash(),
         ]);
     }
@@ -86,9 +87,8 @@ class TicketsController extends Controller
 
         $event = $this->eventModel->find($ticket['event_id']);
         $ticketType = $this->ticketTypeModel->find($ticket['ticket_type_id']);
-        $sponsor = $ticket['invited_by_sponsor_id']
-            ? $this->sponsorModel->find($ticket['invited_by_sponsor_id'])
-            : null;
+        $sponsorId = $ticket['sponsor_id'] ?? $ticket['invited_by_sponsor_id'] ?? null;
+        $sponsor = $sponsorId ? $this->sponsorModel->find($sponsorId) : null;
 
         $this->renderAdmin('tickets/show', [
             'title' => 'Detalle de Entrada',
@@ -98,6 +98,7 @@ class TicketsController extends Controller
             'sponsor' => $sponsor,
             'statusOptions' => Ticket::getStatusOptions(),
             'csrf_token' => $this->generateCsrf(),
+            'flash' => $_SESSION['flash'] ?? null,
         ]);
     }
 
@@ -161,6 +162,156 @@ class TicketsController extends Controller
             $this->jsonSuccess(['message' => 'Entrada cancelada.']);
         } catch (\Exception $e) {
             $this->jsonError('Error al cancelar: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Approve a pending ticket
+     */
+    public function approve(string $id): void
+    {
+        $this->requireAuth();
+
+        if (!$this->validateCsrf()) {
+            $this->jsonError('Sesión expirada.');
+            return;
+        }
+
+        $ticket = $this->ticketModel->find((int) $id);
+
+        if (!$ticket) {
+            $this->jsonError('Entrada no encontrada.');
+            return;
+        }
+
+        if ($ticket['status'] !== 'pending') {
+            $this->jsonError('Solo se pueden aprobar tickets pendientes.');
+            return;
+        }
+
+        try {
+            $this->ticketModel->update((int) $id, ['status' => 'confirmed']);
+            $this->jsonSuccess(['message' => 'Ticket aprobado correctamente.']);
+        } catch (\Exception $e) {
+            $this->jsonError('Error al aprobar: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Bulk action on multiple tickets
+     */
+    public function bulkAction(): void
+    {
+        $this->requireAuth();
+
+        // Get JSON body
+        $contentType = $_SERVER['CONTENT_TYPE'] ?? '';
+        if (strpos($contentType, 'application/json') === false) {
+            $this->jsonError('Content-Type debe ser application/json');
+            return;
+        }
+
+        $json = json_decode(file_get_contents('php://input'), true);
+        if (!$json) {
+            $this->jsonError('JSON inválido');
+            return;
+        }
+
+        $ids = $json['ids'] ?? [];
+        $action = $json['action'] ?? '';
+        $value = $json['value'] ?? null;
+
+        if (empty($ids) || !is_array($ids)) {
+            $this->jsonError('No se han seleccionado tickets');
+            return;
+        }
+
+        if (empty($action)) {
+            $this->jsonError('Acción no especificada');
+            return;
+        }
+
+        $validActions = ['check-in', 'approve', 'status', 'delete'];
+        if (!in_array($action, $validActions)) {
+            $this->jsonError('Acción no válida');
+            return;
+        }
+
+        $processed = 0;
+        $errors = [];
+
+        foreach ($ids as $id) {
+            $id = (int) $id;
+            $ticket = $this->ticketModel->find($id);
+
+            if (!$ticket) {
+                $errors[] = "Ticket #$id no encontrado";
+                continue;
+            }
+
+            try {
+                switch ($action) {
+                    case 'check-in':
+                        if ($ticket['status'] === 'confirmed') {
+                            $this->ticketModel->checkIn($id);
+                            $processed++;
+                        } else {
+                            $errors[] = "Ticket #$id no está confirmado";
+                        }
+                        break;
+
+                    case 'approve':
+                        if ($ticket['status'] === 'pending') {
+                            $this->ticketModel->update($id, ['status' => 'confirmed']);
+                            $processed++;
+                        } else {
+                            $errors[] = "Ticket #$id no está pendiente";
+                        }
+                        break;
+
+                    case 'status':
+                        if (!$value) {
+                            $errors[] = "Estado no especificado";
+                            break;
+                        }
+                        $validStatuses = array_keys(Ticket::getStatusOptions());
+                        if (!in_array($value, $validStatuses)) {
+                            $errors[] = "Estado '$value' no válido";
+                            break;
+                        }
+                        $this->ticketModel->update($id, ['status' => $value]);
+                        $processed++;
+                        break;
+
+                    case 'delete':
+                        $this->ticketModel->delete($id);
+                        // Decrement sold count
+                        if (!empty($ticket['ticket_type_id'])) {
+                            $this->ticketTypeModel->decrementSold($ticket['ticket_type_id']);
+                        }
+                        $processed++;
+                        break;
+                }
+            } catch (\Exception $e) {
+                $errors[] = "Error en ticket #$id: " . $e->getMessage();
+            }
+        }
+
+        if ($processed > 0) {
+            $message = "$processed ticket(s) procesado(s) correctamente";
+            if (!empty($errors)) {
+                $message .= ". Errores: " . implode(', ', $errors);
+            }
+            // Get updated pending count for badge
+            $pendingCount = $this->ticketModel->count(['status' => 'pending']);
+            $this->jsonSuccess([
+                'message' => $message,
+                'processed' => $processed,
+                'errors' => $errors,
+                'pendingCount' => $pendingCount
+            ]);
+        } else {
+            $this->jsonError('No se pudo procesar ningún ticket. ' . implode(', ', $errors));
         }
     }
 
@@ -240,7 +391,7 @@ class TicketsController extends Controller
         $this->requireAuth();
 
         $eventId = (int) $this->getQuery('event_id');
-        $events = $this->eventModel->all(['event_date' => 'DESC']);
+        $events = $this->eventModel->all(['start_date' => 'DESC']);
 
         if (!$eventId && !empty($events)) {
             $eventId = $events[0]['id'];
@@ -275,9 +426,11 @@ class TicketsController extends Controller
         $name = Sanitizer::string($this->getPost('name'));
         $description = $this->getPost('description');
         $price = (float) $this->getPost('price', 0);
-        $quantityAvailable = $this->getPost('quantity_available');
-        $saleStartDate = $this->getPost('sale_start_date');
-        $saleEndDate = $this->getPost('sale_end_date');
+        $maxTickets = $this->getPost('max_tickets');
+        $saleStart = $this->getPost('sale_start');
+        $saleEnd = $this->getPost('sale_end');
+        $active = $this->getPost('active') ? 1 : 0;
+        $requiresApproval = $this->getPost('requires_approval') ? 1 : 0;
 
         if (!$eventId || empty($name)) {
             $this->flash('error', 'Evento y nombre son obligatorios.');
@@ -290,11 +443,12 @@ class TicketsController extends Controller
                 'name' => $name,
                 'description' => $description ?: null,
                 'price' => $price,
-                'is_free' => $price == 0 ? 1 : 0,
-                'quantity_available' => $quantityAvailable ?: null,
-                'sale_start_date' => $saleStartDate ?: null,
-                'sale_end_date' => $saleEndDate ?: null,
-                'status' => 'active',
+                'max_tickets' => $maxTickets ?: 100,
+                'tickets_sold' => 0,
+                'sale_start' => $saleStart ?: null,
+                'sale_end' => $saleEnd ?: null,
+                'active' => $active,
+                'requires_approval' => $requiresApproval,
             ]);
 
             $this->flash('success', 'Tipo de entrada creado.');
@@ -313,35 +467,39 @@ class TicketsController extends Controller
         $this->requireAuth();
 
         if (!$this->validateCsrf()) {
-            $this->jsonError('Sesión expirada.');
+            $this->flash('error', 'Sesión expirada.');
+            $this->redirect('/admin/tickets/types');
             return;
         }
 
         $ticketType = $this->ticketTypeModel->find((int) $id);
 
         if (!$ticketType) {
-            $this->jsonError('Tipo de entrada no encontrado.');
+            $this->flash('error', 'Tipo de entrada no encontrado.');
+            $this->redirect('/admin/tickets/types');
             return;
         }
 
+        $eventId = $ticketType['event_id'];
         $data = [
             'name' => Sanitizer::string($this->getPost('name')),
             'description' => $this->getPost('description'),
             'price' => (float) $this->getPost('price', 0),
-            'quantity_available' => $this->getPost('quantity_available') ?: null,
-            'sale_start_date' => $this->getPost('sale_start_date') ?: null,
-            'sale_end_date' => $this->getPost('sale_end_date') ?: null,
-            'status' => $this->getPost('status', 'active'),
+            'max_tickets' => $this->getPost('max_tickets') ?: 100,
+            'sale_start' => $this->getPost('sale_start') ?: null,
+            'sale_end' => $this->getPost('sale_end') ?: null,
+            'active' => $this->getPost('active') ? 1 : 0,
+            'requires_approval' => $this->getPost('requires_approval') ? 1 : 0,
         ];
-
-        $data['is_free'] = $data['price'] == 0 ? 1 : 0;
 
         try {
             $this->ticketTypeModel->update((int) $id, $data);
-            $this->jsonSuccess(['message' => 'Tipo de entrada actualizado.']);
+            $this->flash('success', 'Tipo de entrada actualizado.');
         } catch (\Exception $e) {
-            $this->jsonError('Error: ' . $e->getMessage());
+            $this->flash('error', 'Error: ' . $e->getMessage());
         }
+
+        $this->redirect('/admin/tickets/types?event_id=' . $eventId);
     }
 
     /**
@@ -379,6 +537,16 @@ class TicketsController extends Controller
     }
 
     /**
+     * Serve scanner PWA manifest
+     */
+    public function scannerManifest(): void
+    {
+        header('Content-Type: application/manifest+json');
+        echo file_get_contents(PUBLIC_PATH . '/scanner-manifest.json');
+        exit;
+    }
+
+    /**
      * QR Scanner page
      */
     public function scanner(): void
@@ -401,13 +569,53 @@ class TicketsController extends Controller
     }
 
     /**
-     * Validate ticket code (AJAX for scanner)
+     * Download ticket as image/PDF
+     */
+    public function download(string $id): void
+    {
+        $this->requireAuth();
+
+        $ticket = $this->ticketModel->find((int) $id);
+
+        if (!$ticket) {
+            $this->flash('error', 'Entrada no encontrada.');
+            $this->redirect('/admin/tickets');
+            return;
+        }
+
+        $event = $this->eventModel->find($ticket['event_id']);
+        $code = $ticket['code'] ?? $ticket['ticket_code'];
+
+        // Redirect to public ticket page which has download functionality
+        $this->redirect("/eventos/{$event['slug']}/ticket/{$code}");
+    }
+
+    /**
+     * Validate ticket code and perform check-in (AJAX for scanner)
      */
     public function validateCode(): void
     {
         $this->requireAuth();
 
-        $code = Sanitizer::string($this->getPost('code'));
+        // Get JSON body if content type is JSON
+        $contentType = $_SERVER['CONTENT_TYPE'] ?? '';
+        $rawInput = file_get_contents('php://input');
+
+        if (strpos($contentType, 'application/json') !== false) {
+            $json = json_decode($rawInput, true);
+            if ($json === null && json_last_error() !== JSON_ERROR_NONE) {
+                $this->jsonError('Error al parsear JSON: ' . json_last_error_msg());
+                return;
+            }
+            // Handle code as string or int
+            $rawCode = $json['code'] ?? '';
+            $code = trim((string) $rawCode);
+            $eventId = (int) ($json['event_id'] ?? 0);
+        } else {
+            $rawCode = $this->getPost('code');
+            $code = trim((string) ($rawCode ?? ''));
+            $eventId = (int) $this->getPost('event_id');
+        }
 
         if (empty($code)) {
             $this->jsonError('Código no proporcionado.');
@@ -417,27 +625,98 @@ class TicketsController extends Controller
         $ticket = $this->ticketModel->findByCode($code);
 
         if (!$ticket) {
-            $this->jsonError('Entrada no encontrada.', ['valid' => false]);
+            $this->jsonError('Entrada no encontrada para código: ' . $code);
+            return;
+        }
+
+        // Helper to get attendee name from ticket
+        $getAttendeeName = function($t) {
+            if (!empty($t['attendee_name'])) {
+                return $t['attendee_name'];
+            }
+            $firstName = $t['attendee_first_name'] ?? '';
+            $lastName = $t['attendee_last_name'] ?? '';
+            return trim($firstName . ' ' . $lastName) ?: 'Sin nombre';
+        };
+
+        // Check if ticket is for the selected event
+        if ($eventId && $ticket['event_id'] != $eventId) {
+            $event = $this->eventModel->find($ticket['event_id']);
+            $this->jsonError('Este ticket es para otro evento: ' . ($event['name'] ?? 'Desconocido'), [
+                'valid' => false,
+                'ticket' => [
+                    'name' => $getAttendeeName($ticket),
+                    'email' => $ticket['attendee_email'],
+                ]
+            ]);
             return;
         }
 
         $event = $this->eventModel->find($ticket['event_id']);
-
-        $response = [
-            'valid' => true,
-            'ticket' => [
-                'id' => $ticket['id'],
-                'code' => $ticket['ticket_code'],
-                'name' => $this->ticketModel->getAttendeeName($ticket),
-                'email' => $ticket['attendee_email'],
-                'company' => $ticket['attendee_company_name'],
-                'status' => $ticket['status'],
-                'event_name' => $event['name'] ?? 'N/A',
-            ],
-            'can_checkin' => $ticket['status'] === 'confirmed',
-            'already_checked_in' => $ticket['status'] === 'checked_in',
+        $ticketData = [
+            'id' => $ticket['id'],
+            'code' => $ticket['ticket_code'] ?? $ticket['code'],
+            'name' => $getAttendeeName($ticket),
+            'email' => $ticket['attendee_email'],
+            'company' => $ticket['attendee_company_name'] ?? $ticket['attendee_company'] ?? '',
+            'status' => $ticket['status'],
+            'event_name' => $event['name'] ?? 'N/A',
         ];
 
-        $this->jsonSuccess($response);
+        // Check ticket status and perform check-in
+        $status = $ticket['status'];
+
+        if ($status === 'used' || $status === 'checked_in') {
+            $checkedAt = $ticket['used_at'] ?? $ticket['checked_in_at'] ?? '';
+            $this->json([
+                'success' => false,
+                'message' => 'Ya ha hecho check-in' . ($checkedAt ? ' a las ' . date('H:i', strtotime($checkedAt)) : ''),
+                'already_checked_in' => true,
+                'ticket' => $ticketData,
+            ]);
+            return;
+        }
+
+        if ($status === 'cancelled') {
+            $this->json([
+                'success' => false,
+                'message' => 'Ticket cancelado',
+                'ticket' => $ticketData,
+            ]);
+            return;
+        }
+
+        if ($status === 'pending') {
+            $this->json([
+                'success' => false,
+                'message' => 'Ticket pendiente de aprobación',
+                'ticket' => $ticketData,
+            ]);
+            return;
+        }
+
+        if ($status !== 'confirmed') {
+            $this->json([
+                'success' => false,
+                'message' => 'Estado del ticket: ' . $status,
+                'ticket' => $ticketData,
+            ]);
+            return;
+        }
+
+        // Perform check-in
+        try {
+            $this->ticketModel->checkIn((int) $ticket['id']);
+            $ticketData['status'] = 'used';
+
+            $this->jsonSuccess([
+                'message' => '✓ Check-in realizado correctamente',
+                'ticket' => $ticketData,
+            ]);
+        } catch (\Exception $e) {
+            $this->jsonError('Error al hacer check-in: ' . $e->getMessage(), [
+                'ticket' => $ticketData,
+            ]);
+        }
     }
 }

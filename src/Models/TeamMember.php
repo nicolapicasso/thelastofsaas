@@ -18,16 +18,28 @@ class TeamMember extends Model
     protected array $fillable = [
         'name',
         'slug',
-        'role',
+        'position',
+        'company',
         'bio',
         'photo',
-        'photo_hover',
+        'photo_animated',
         'email',
-        'linkedin',
-        'twitter',
+        'phone',
+        'linkedin_url',
+        'twitter_url',
+        'website_url',
         'sort_order',
-        'is_active',
+        'active',
     ];
+
+    /**
+     * Get active team members (for speakers dropdown)
+     */
+    public function getActive(): array
+    {
+        $sql = "SELECT * FROM `{$this->table}` WHERE active = 1 ORDER BY sort_order ASC, name ASC";
+        return $this->db->fetchAll($sql);
+    }
 
     /**
      * Get all team members (random order)

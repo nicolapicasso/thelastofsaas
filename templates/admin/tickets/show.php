@@ -21,7 +21,7 @@
     </div>
 </div>
 
-<?php if ($flash): ?>
+<?php if (!empty($flash)): ?>
     <div class="alert alert-<?= $flash['type'] ?>"><?= $flash['message'] ?></div>
 <?php endif; ?>
 
@@ -41,11 +41,11 @@
                     </tr>
                     <tr>
                         <th>Evento</th>
-                        <td><?= htmlspecialchars($ticket['event_name']) ?></td>
+                        <td><?= htmlspecialchars($event['name'] ?? $ticket['event_name'] ?? '') ?></td>
                     </tr>
                     <tr>
                         <th>Tipo de Ticket</th>
-                        <td><?= htmlspecialchars($ticket['ticket_type_name']) ?></td>
+                        <td><?= htmlspecialchars($ticketType['name'] ?? $ticket['ticket_type_name'] ?? '') ?></td>
                     </tr>
                     <tr>
                         <th>Precio</th>
@@ -124,19 +124,21 @@
         </div>
 
         <!-- Sponsor Info (if applicable) -->
-        <?php if ($ticket['sponsor_id']): ?>
+        <?php if (!empty($sponsor)): ?>
         <div class="card">
             <div class="card-header">
                 <h3>Sponsor Asociado</h3>
             </div>
             <div class="card-body">
                 <div style="display: flex; align-items: center; gap: 1rem;">
-                    <?php if ($ticket['sponsor_logo']): ?>
-                        <img src="<?= htmlspecialchars($ticket['sponsor_logo']) ?>" alt="" style="width: 60px; height: 60px; object-fit: contain; border-radius: 8px;">
+                    <?php if (!empty($sponsor['logo_url'])): ?>
+                        <img src="<?= htmlspecialchars($sponsor['logo_url']) ?>" alt="" style="width: 60px; height: 60px; object-fit: contain; border-radius: 8px;">
                     <?php endif; ?>
                     <div>
-                        <strong><?= htmlspecialchars($ticket['sponsor_name']) ?></strong>
-                        <br><small class="text-muted">Código: <?= $ticket['sponsor_code'] ?></small>
+                        <strong><?= htmlspecialchars($sponsor['name'] ?? '') ?></strong>
+                        <?php if (!empty($sponsor['code'])): ?>
+                            <br><small class="text-muted">Código: <?= htmlspecialchars($sponsor['code']) ?></small>
+                        <?php endif; ?>
                     </div>
                 </div>
             </div>
@@ -198,11 +200,29 @@
                 <h3>Acciones</h3>
             </div>
             <div class="card-body">
+                <?php if ($ticket['status'] === 'pending'): ?>
+                    <button type="button" class="btn btn-success btn-block" onclick="approveTicket()">
+                        <i class="fas fa-check"></i> Aprobar Ticket
+                    </button>
+                <?php endif; ?>
+
                 <?php if ($ticket['status'] === 'confirmed'): ?>
                     <button type="button" class="btn btn-info btn-block" onclick="markAsUsed()">
                         <i class="fas fa-check-circle"></i> Marcar como Usado
                     </button>
                 <?php endif; ?>
+
+                <?php if (in_array($ticket['status'], ['pending', 'confirmed'])): ?>
+                    <button type="button" class="btn btn-warning btn-block" onclick="cancelTicket()">
+                        <i class="fas fa-ban"></i> Cancelar Ticket
+                    </button>
+                <?php endif; ?>
+
+                <hr style="margin: 1rem 0; border-color: var(--color-gray-200);">
+
+                <button type="button" class="btn btn-outline btn-block" onclick="openChangeStatusModal()">
+                    <i class="fas fa-exchange-alt"></i> Cambiar Estado
+                </button>
 
                 <button type="button" class="btn btn-outline btn-block" onclick="resendEmail()">
                     <i class="fas fa-envelope"></i> Reenviar Email
@@ -211,8 +231,94 @@
                 <a href="/admin/tickets/<?= $ticket['id'] ?>/download" class="btn btn-outline btn-block">
                     <i class="fas fa-download"></i> Descargar PDF
                 </a>
+
+                <hr style="margin: 1rem 0; border-color: var(--color-gray-200);">
+
+                <button type="button" class="btn btn-danger btn-block" onclick="deleteTicket()">
+                    <i class="fas fa-trash"></i> Eliminar Ticket
+                </button>
             </div>
         </div>
+
+        <!-- Change Status Modal -->
+        <div id="status-modal" class="status-modal" style="display: none;">
+            <div class="status-modal-backdrop" onclick="closeChangeStatusModal()"></div>
+            <div class="status-modal-content">
+                <div class="status-modal-header">
+                    <h4>Cambiar Estado</h4>
+                    <button type="button" onclick="closeChangeStatusModal()">&times;</button>
+                </div>
+                <div class="status-modal-body">
+                    <select id="new-ticket-status" class="form-control">
+                        <?php foreach ($statusOptions as $key => $label): ?>
+                            <option value="<?= $key ?>" <?= $ticket['status'] === $key ? 'selected' : '' ?>><?= $label ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+                <div class="status-modal-footer">
+                    <button type="button" class="btn btn-outline" onclick="closeChangeStatusModal()">Cancelar</button>
+                    <button type="button" class="btn btn-primary" onclick="saveStatusChange()">Guardar</button>
+                </div>
+            </div>
+        </div>
+
+        <style>
+        .status-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 2000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .status-modal-backdrop {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+        }
+        .status-modal-content {
+            position: relative;
+            background: white;
+            border-radius: 12px;
+            width: 100%;
+            max-width: 350px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+        .status-modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 1.25rem;
+            border-bottom: 1px solid var(--color-gray-200);
+        }
+        .status-modal-header h4 {
+            margin: 0;
+            font-size: 1rem;
+        }
+        .status-modal-header button {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--color-gray-500);
+        }
+        .status-modal-body {
+            padding: 1.25rem;
+        }
+        .status-modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.5rem;
+            padding: 1rem 1.25rem;
+            border-top: 1px solid var(--color-gray-200);
+        }
+        </style>
 
         <!-- Activity Log -->
         <?php if (!empty($activityLog)): ?>
@@ -262,11 +368,11 @@ function cancelTicket() {
 }
 
 function markAsUsed() {
-    if (!confirm('¿Marcar este ticket como usado?')) return;
-    fetch('/admin/tickets/<?= $ticket['id'] ?>/use', {
+    if (!confirm('¿Marcar este ticket como usado (check-in)?')) return;
+    fetch('/admin/tickets/<?= $ticket['id'] ?>/check-in', {
         method: 'POST',
         body: new URLSearchParams({_csrf_token: '<?= $csrf_token ?>'})
-    }).then(r => r.json()).then(d => d.success ? location.reload() : alert(d.error));
+    }).then(r => r.json()).then(d => d.success ? location.reload() : alert(d.error || d.message));
 }
 
 function resendEmail() {
@@ -282,4 +388,69 @@ function resendEmail() {
         }
     });
 }
+
+function deleteTicket() {
+    if (!confirm('¿Estás seguro de que quieres eliminar este ticket? Esta acción no se puede deshacer.')) return;
+    fetch('/admin/tickets/bulk-action', {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-Token': '<?= $csrf_token ?>',
+            'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: JSON.stringify({
+            ids: [<?= $ticket['id'] ?>],
+            action: 'delete'
+        })
+    })
+    .then(r => r.json())
+    .then(d => {
+        if (d.success) {
+            window.location.href = '/admin/tickets?event_id=<?= $ticket['event_id'] ?>';
+        } else {
+            alert(d.error || 'Error al eliminar');
+        }
+    });
+}
+
+function openChangeStatusModal() {
+    document.getElementById('status-modal').style.display = 'flex';
+}
+
+function closeChangeStatusModal() {
+    document.getElementById('status-modal').style.display = 'none';
+}
+
+function saveStatusChange() {
+    const newStatus = document.getElementById('new-ticket-status').value;
+    fetch('/admin/tickets/bulk-action', {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-Token': '<?= $csrf_token ?>',
+            'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: JSON.stringify({
+            ids: [<?= $ticket['id'] ?>],
+            action: 'status',
+            value: newStatus
+        })
+    })
+    .then(r => r.json())
+    .then(d => {
+        if (d.success) {
+            location.reload();
+        } else {
+            alert(d.error || 'Error al cambiar estado');
+        }
+    });
+}
+
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        closeChangeStatusModal();
+    }
+});
 </script>

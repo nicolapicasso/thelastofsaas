@@ -24,7 +24,7 @@ class Category extends Model
         'parent_id',
         'color',
         'icon',
-        'sort_order',
+        'display_order',
         'is_active',
         'meta_title',
         'meta_description',
@@ -37,7 +37,7 @@ class Category extends Model
      */
     public function getActive(): array
     {
-        return $this->where(['is_active' => 1], ['sort_order' => 'ASC', 'name' => 'ASC']);
+        return $this->where(['is_active' => 1], ['display_order' => 'ASC', 'name' => 'ASC']);
     }
 
     /**
@@ -123,7 +123,7 @@ class Category extends Model
                 LEFT JOIN posts p ON p.category_id = c.id AND p.status = 'published'
                 WHERE c.is_active = 1
                 GROUP BY c.id
-                ORDER BY c.sort_order ASC, c.name ASC";
+                ORDER BY c.display_order ASC, c.name ASC";
         return $this->db->fetchAll($sql);
     }
 
@@ -137,7 +137,7 @@ class Category extends Model
                 LEFT JOIN success_cases sc ON sc.category_id = c.id AND sc.status = 'published'
                 WHERE c.is_active = 1
                 GROUP BY c.id
-                ORDER BY c.sort_order ASC, c.name ASC";
+                ORDER BY c.display_order ASC, c.name ASC";
         return $this->db->fetchAll($sql);
     }
 
@@ -151,7 +151,7 @@ class Category extends Model
                 LEFT JOIN services s ON s.category_id = c.id AND s.is_active = 1
                 WHERE c.is_active = 1
                 GROUP BY c.id
-                ORDER BY c.sort_order ASC, c.name ASC";
+                ORDER BY c.display_order ASC, c.name ASC";
         return $this->db->fetchAll($sql);
     }
 
@@ -165,7 +165,7 @@ class Category extends Model
                 LEFT JOIN tools t ON t.category_id = c.id AND t.is_active = 1
                 WHERE c.is_active = 1
                 GROUP BY c.id
-                ORDER BY c.sort_order ASC, c.name ASC";
+                ORDER BY c.display_order ASC, c.name ASC";
         return $this->db->fetchAll($sql);
     }
 
@@ -185,7 +185,7 @@ class Category extends Model
         // Services
         $sql = "SELECT id, title, slug, image, icon_class as icon, short_description, 'service' as type
                 FROM services WHERE category_id = ? AND is_active = 1
-                ORDER BY sort_order ASC LIMIT 10";
+                ORDER BY display_order ASC LIMIT 10";
         $content['services'] = $this->db->fetchAll($sql, [$categoryId]);
 
         // Success Cases
@@ -193,19 +193,19 @@ class Category extends Model
                 FROM success_cases sc
                 LEFT JOIN clients cl ON cl.id = sc.client_id
                 WHERE sc.category_id = ? AND sc.status = 'published'
-                ORDER BY sc.is_featured DESC, sc.sort_order ASC LIMIT 10";
+                ORDER BY sc.is_featured DESC, sc.display_order ASC LIMIT 10";
         $content['cases'] = $this->db->fetchAll($sql, [$categoryId]);
 
         // Tools
         $sql = "SELECT id, title, slug, logo, subtitle, 'tool' as type
                 FROM tools WHERE category_id = ? AND is_active = 1
-                ORDER BY sort_order ASC LIMIT 10";
+                ORDER BY display_order ASC LIMIT 10";
         $content['tools'] = $this->db->fetchAll($sql, [$categoryId]);
 
         // FAQs
         $sql = "SELECT id, question, answer, 'faq' as type
                 FROM faqs WHERE category_id = ? AND is_active = 1
-                ORDER BY sort_order ASC LIMIT 10";
+                ORDER BY display_order ASC LIMIT 10";
         $content['faqs'] = $this->db->fetchAll($sql, [$categoryId]);
 
         return $content;
@@ -225,7 +225,7 @@ class Category extends Model
                 FROM `{$this->table}` c
                 WHERE c.is_active = 1
                 HAVING posts_count > 0 OR services_count > 0 OR cases_count > 0 OR tools_count > 0 OR faqs_count > 0
-                ORDER BY c.sort_order ASC, c.name ASC";
+                ORDER BY c.display_order ASC, c.name ASC";
         return $this->db->fetchAll($sql);
     }
 
@@ -257,7 +257,7 @@ class Category extends Model
     public function reorder(array $ids): void
     {
         foreach ($ids as $order => $id) {
-            $this->update((int) $id, ['sort_order' => $order]);
+            $this->update((int) $id, ['display_order' => $order]);
         }
     }
 
@@ -268,7 +268,7 @@ class Category extends Model
     {
         $sql = "SELECT * FROM `{$this->table}`
                 WHERE parent_id = ? AND is_active = 1
-                ORDER BY sort_order ASC, name ASC";
+                ORDER BY display_order ASC, name ASC";
         return $this->db->fetchAll($sql, [$parentId]);
     }
 
@@ -305,7 +305,7 @@ class Category extends Model
      */
     public function getAllHierarchical(): array
     {
-        $sql = "SELECT * FROM `{$this->table}` ORDER BY sort_order ASC, name ASC";
+        $sql = "SELECT * FROM `{$this->table}` ORDER BY display_order ASC, name ASC";
         $categories = $this->db->fetchAll($sql);
         return $this->flattenTree($categories);
     }

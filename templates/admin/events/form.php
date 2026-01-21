@@ -12,6 +12,11 @@ $isEdit = isset($event) && $event;
         <p><?= $isEdit ? htmlspecialchars($event['name']) : 'Crear un nuevo evento' ?></p>
     </div>
     <div class="page-header-actions">
+        <?php if ($isEdit && !empty($event['slug'])): ?>
+            <a href="/eventos/<?= htmlspecialchars($event['slug']) ?>" class="btn btn-outline" target="_blank">
+                <i class="fas fa-external-link-alt"></i> Ver en web
+            </a>
+        <?php endif; ?>
         <a href="/admin/events" class="btn btn-outline">
             <i class="fas fa-arrow-left"></i> Volver
         </a>
@@ -26,10 +31,14 @@ $isEdit = isset($event) && $event;
 
 <?php if ($isEdit && !empty($stats)): ?>
 <!-- Stats Cards -->
-<div class="stats-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; margin-bottom: 1.5rem;">
+<div class="stats-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 1rem; margin-bottom: 1.5rem;">
     <div class="card" style="padding: 1rem; text-align: center;">
         <div style="font-size: 2rem; font-weight: bold; color: var(--primary);"><?= $stats['sponsors_count'] ?? 0 ?></div>
         <div style="color: var(--text-muted); font-size: 0.85rem;">Sponsors</div>
+    </div>
+    <div class="card" style="padding: 1rem; text-align: center;">
+        <div style="font-size: 2rem; font-weight: bold; color: #059669;"><?= $stats['companies_count'] ?? 0 ?></div>
+        <div style="color: var(--text-muted); font-size: 0.85rem;">Empresas</div>
     </div>
     <div class="card" style="padding: 1rem; text-align: center;">
         <div style="font-size: 2rem; font-weight: bold; color: var(--success);"><?= $stats['tickets_confirmed'] ?? 0 ?></div>
@@ -46,7 +55,7 @@ $isEdit = isset($event) && $event;
 </div>
 <?php endif; ?>
 
-<form method="POST" action="<?= $isEdit ? '/admin/events/' . $event['id'] : '/admin/events' ?>">
+<form method="POST" action="<?= $isEdit ? '/admin/events/' . $event['id'] : '/admin/events' ?>" enctype="multipart/form-data">
     <input type="hidden" name="_csrf_token" value="<?= $csrf_token ?>">
 
     <div class="form-grid">
@@ -54,7 +63,7 @@ $isEdit = isset($event) && $event;
         <div class="form-main">
             <div class="card">
                 <div class="card-header">
-                    <h3>Información del Evento</h3>
+                    <h3>Informacion del Evento</h3>
                 </div>
                 <div class="card-body">
                     <div class="form-group">
@@ -64,20 +73,40 @@ $isEdit = isset($event) && $event;
                     </div>
 
                     <div class="form-group">
-                        <label for="description">Descripción</label>
-                        <textarea id="description" name="description" class="form-control" rows="4"><?= htmlspecialchars($event['description'] ?? '') ?></textarea>
+                        <label for="short_description">Descripcion Corta</label>
+                        <input type="text" id="short_description" name="short_description" class="form-control"
+                               value="<?= htmlspecialchars($event['short_description'] ?? '') ?>">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="description">Descripcion Larga (HTML)</label>
+                        <textarea id="description" name="description" class="form-control wysiwyg" rows="10"><?= htmlspecialchars($event['description'] ?? '') ?></textarea>
+                        <small class="form-text">Editor de texto enriquecido para la descripcion completa del evento</small>
                     </div>
 
                     <div class="form-row">
                         <div class="form-group">
-                            <label for="event_date">Fecha Inicio</label>
-                            <input type="date" id="event_date" name="event_date" class="form-control"
-                                   value="<?= $event['event_date'] ?? '' ?>">
+                            <label for="start_date">Fecha Inicio *</label>
+                            <input type="date" id="start_date" name="start_date" class="form-control"
+                                   value="<?= $event['start_date'] ?? '' ?>" required>
                         </div>
                         <div class="form-group">
-                            <label for="event_end_date">Fecha Fin</label>
-                            <input type="date" id="event_end_date" name="event_end_date" class="form-control"
-                                   value="<?= $event['event_end_date'] ?? '' ?>">
+                            <label for="end_date">Fecha Fin</label>
+                            <input type="date" id="end_date" name="end_date" class="form-control"
+                                   value="<?= $event['end_date'] ?? '' ?>">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="start_time">Hora Inicio</label>
+                            <input type="time" id="start_time" name="start_time" class="form-control"
+                                   value="<?= $event['start_time'] ?? '' ?>">
+                        </div>
+                        <div class="form-group">
+                            <label for="end_time">Hora Fin</label>
+                            <input type="time" id="end_time" name="end_time" class="form-control"
+                                   value="<?= $event['end_time'] ?? '' ?>">
                         </div>
                     </div>
                 </div>
@@ -85,110 +114,156 @@ $isEdit = isset($event) && $event;
 
             <div class="card">
                 <div class="card-header">
-                    <h3>Ubicación</h3>
+                    <h3>Ubicacion</h3>
                 </div>
                 <div class="card-body">
                     <div class="form-group">
-                        <label for="venue_name">Nombre del Lugar</label>
-                        <input type="text" id="venue_name" name="venue_name" class="form-control"
-                               value="<?= htmlspecialchars($event['venue_name'] ?? '') ?>"
+                        <label for="location">Nombre del Lugar</label>
+                        <input type="text" id="location" name="location" class="form-control"
+                               value="<?= htmlspecialchars($event['location'] ?? '') ?>"
                                placeholder="Ej: Palacio de Congresos">
                     </div>
 
                     <div class="form-row">
                         <div class="form-group">
-                            <label for="venue_address">Dirección</label>
-                            <input type="text" id="venue_address" name="venue_address" class="form-control"
-                                   value="<?= htmlspecialchars($event['venue_address'] ?? '') ?>">
+                            <label for="address">Direccion</label>
+                            <input type="text" id="address" name="address" class="form-control"
+                                   value="<?= htmlspecialchars($event['address'] ?? '') ?>">
                         </div>
                         <div class="form-group">
-                            <label for="venue_city">Ciudad</label>
-                            <input type="text" id="venue_city" name="venue_city" class="form-control"
-                                   value="<?= htmlspecialchars($event['venue_city'] ?? '') ?>">
+                            <label for="city">Ciudad</label>
+                            <input type="text" id="city" name="city" class="form-control"
+                                   value="<?= htmlspecialchars($event['city'] ?? '') ?>">
                         </div>
                     </div>
 
                     <div class="form-group">
-                        <label for="venue_coordinates">Coordenadas (opcional)</label>
-                        <input type="text" id="venue_coordinates" name="venue_coordinates" class="form-control"
-                               value="<?= htmlspecialchars($event['venue_coordinates'] ?? '') ?>"
+                        <label for="coordinates">Coordenadas (opcional)</label>
+                        <input type="text" id="coordinates" name="coordinates" class="form-control"
+                               value="<?= htmlspecialchars($event['coordinates'] ?? '') ?>"
                                placeholder="41.3851, 2.1734">
                     </div>
                 </div>
             </div>
 
-            <?php if ($isEdit && !empty($sponsors)): ?>
+            <?php if ($isEdit): ?>
             <div class="card">
                 <div class="card-header">
                     <h3>Sponsors del Evento</h3>
+                    <span class="badge" id="sponsors-count"><?= count($sponsors ?? []) ?> seleccionados</span>
                 </div>
                 <div class="card-body">
-                    <table class="table">
-                        <thead>
-                            <tr>
-                                <th>Sponsor</th>
-                                <th>Nivel</th>
-                                <th width="100">Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php foreach ($sponsors as $sponsor): ?>
-                            <tr>
-                                <td>
-                                    <?php if ($sponsor['logo_url']): ?>
-                                        <img src="<?= htmlspecialchars($sponsor['logo_url']) ?>" alt="" style="height: 30px; margin-right: 10px;">
-                                    <?php endif; ?>
-                                    <?= htmlspecialchars($sponsor['name']) ?>
-                                </td>
-                                <td>
-                                    <span class="badge badge-<?= $sponsor['priority_level'] === 'platinum' ? 'warning' : ($sponsor['priority_level'] === 'gold' ? 'warning' : 'secondary') ?>">
-                                        <?= ucfirst($sponsor['priority_level']) ?>
-                                    </span>
-                                </td>
-                                <td>
-                                    <a href="/admin/sponsors/<?= $sponsor['id'] ?>/edit" class="btn btn-sm btn-outline" title="Ver">
-                                        <i class="fas fa-eye"></i>
-                                    </a>
-                                </td>
-                            </tr>
-                            <?php endforeach; ?>
-                        </tbody>
-                    </table>
-
                     <?php if (!empty($allSponsors)): ?>
-                    <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border);">
-                        <div class="form-row" style="align-items: end;">
-                            <div class="form-group" style="flex: 2;">
-                                <label>Añadir Sponsor</label>
-                                <select id="new_sponsor_id" class="form-control">
-                                    <option value="">Seleccionar...</option>
-                                    <?php
-                                    $existingIds = array_column($sponsors, 'id');
-                                    foreach ($allSponsors as $s):
-                                        if (!in_array($s['id'], $existingIds)):
-                                    ?>
-                                        <option value="<?= $s['id'] ?>"><?= htmlspecialchars($s['name']) ?></option>
-                                    <?php
-                                        endif;
-                                    endforeach;
-                                    ?>
-                                </select>
-                            </div>
-                            <div class="form-group" style="flex: 1;">
-                                <label>Nivel</label>
-                                <select id="new_sponsor_level" class="form-control">
-                                    <?php foreach ($levelOptions as $val => $lbl): ?>
-                                        <option value="<?= $val ?>"><?= $lbl ?></option>
-                                    <?php endforeach; ?>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <button type="button" class="btn btn-outline" onclick="addSponsor()">
-                                    <i class="fas fa-plus"></i>
-                                </button>
-                            </div>
-                        </div>
+                    <div class="checkbox-list-header">
+                        <input type="text" id="sponsors-search" class="form-control" placeholder="Buscar sponsors..." style="margin-bottom: 1rem;">
                     </div>
+                    <div class="checkbox-list" id="sponsors-list" style="max-height: 400px; overflow-y: auto; border: 1px solid var(--border); border-radius: 4px;">
+                        <?php
+                        $existingSponsorIds = array_column($sponsors ?? [], 'id');
+                        $sponsorLevels = [];
+                        foreach ($sponsors ?? [] as $s) {
+                            $sponsorLevels[$s['id']] = $s['level'] ?? 'bronze';
+                        }
+                        foreach ($allSponsors as $s):
+                            $isChecked = in_array($s['id'], $existingSponsorIds);
+                            $currentLevel = $sponsorLevels[$s['id']] ?? 'bronze';
+                        ?>
+                        <div class="checkbox-item" data-name="<?= strtolower(htmlspecialchars($s['name'])) ?>" style="display: flex; align-items: center; padding: 0.75rem 1rem; border-bottom: 1px solid var(--border); gap: 1rem;">
+                            <input type="checkbox"
+                                   id="sponsor-<?= $s['id'] ?>"
+                                   name="sponsors[]"
+                                   value="<?= $s['id'] ?>"
+                                   <?= $isChecked ? 'checked' : '' ?>
+                                   onchange="updateSponsor(<?= $s['id'] ?>, this.checked)"
+                                   style="width: 20px; height: 20px;">
+                            <?php if (!empty($s['logo_url'])): ?>
+                                <img src="<?= htmlspecialchars($s['logo_url']) ?>" alt="" style="height: 32px; width: 60px; object-fit: contain; background: #f5f5f5; border-radius: 4px;">
+                            <?php else: ?>
+                                <div style="height: 32px; width: 60px; background: var(--bg-secondary); border-radius: 4px; display: flex; align-items: center; justify-content: center;">
+                                    <i class="fas fa-building" style="color: var(--text-muted);"></i>
+                                </div>
+                            <?php endif; ?>
+                            <label for="sponsor-<?= $s['id'] ?>" style="flex: 1; cursor: pointer; margin: 0; font-weight: 500;">
+                                <?= htmlspecialchars($s['name']) ?>
+                            </label>
+                            <select id="sponsor-level-<?= $s['id'] ?>"
+                                    onchange="updateSponsorLevel(<?= $s['id'] ?>, this.value)"
+                                    class="form-control"
+                                    style="width: 120px; <?= !$isChecked ? 'opacity: 0.5;' : '' ?>"
+                                    <?= !$isChecked ? 'disabled' : '' ?>>
+                                <?php foreach ($levelOptions as $val => $lbl): ?>
+                                    <option value="<?= $val ?>" <?= $currentLevel === $val ? 'selected' : '' ?>><?= $lbl ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                        <?php endforeach; ?>
+                    </div>
+                    <div style="margin-top: 0.5rem; display: flex; gap: 1rem;">
+                        <button type="button" class="btn btn-sm btn-outline" onclick="selectAllSponsors(true)">
+                            <i class="fas fa-check-double"></i> Seleccionar todos
+                        </button>
+                        <button type="button" class="btn btn-sm btn-outline" onclick="selectAllSponsors(false)">
+                            <i class="fas fa-times"></i> Deseleccionar todos
+                        </button>
+                    </div>
+                    <?php else: ?>
+                    <p class="text-muted">No hay sponsors disponibles. <a href="/admin/sponsors/create">Crear uno nuevo</a></p>
+                    <?php endif; ?>
+                </div>
+            </div>
+            <?php endif; ?>
+
+            <?php if ($isEdit): ?>
+            <div class="card">
+                <div class="card-header">
+                    <h3>Empresas del Evento</h3>
+                    <span class="badge" id="companies-count"><?= count($companies ?? []) ?> seleccionadas</span>
+                </div>
+                <div class="card-body">
+                    <?php if (!empty($allCompanies)): ?>
+                    <div class="checkbox-list-header">
+                        <input type="text" id="companies-search" class="form-control" placeholder="Buscar empresas..." style="margin-bottom: 1rem;">
+                    </div>
+                    <div class="checkbox-list" id="companies-list" style="max-height: 400px; overflow-y: auto; border: 1px solid var(--border); border-radius: 4px;">
+                        <?php
+                        $existingCompanyIds = array_column($companies ?? [], 'id');
+                        foreach ($allCompanies as $c):
+                            $isChecked = in_array($c['id'], $existingCompanyIds);
+                        ?>
+                        <div class="checkbox-item" data-name="<?= strtolower(htmlspecialchars($c['name'])) ?>" style="display: flex; align-items: center; padding: 0.75rem 1rem; border-bottom: 1px solid var(--border); gap: 1rem;">
+                            <input type="checkbox"
+                                   id="company-<?= $c['id'] ?>"
+                                   name="companies[]"
+                                   value="<?= $c['id'] ?>"
+                                   <?= $isChecked ? 'checked' : '' ?>
+                                   onchange="updateCompany(<?= $c['id'] ?>, this.checked)"
+                                   style="width: 20px; height: 20px;">
+                            <?php if (!empty($c['logo_url'])): ?>
+                                <img src="<?= htmlspecialchars($c['logo_url']) ?>" alt="" style="height: 32px; width: 60px; object-fit: contain; background: #f5f5f5; border-radius: 4px;">
+                            <?php else: ?>
+                                <div style="height: 32px; width: 60px; background: var(--bg-secondary); border-radius: 4px; display: flex; align-items: center; justify-content: center;">
+                                    <i class="fas fa-building" style="color: var(--text-muted);"></i>
+                                </div>
+                            <?php endif; ?>
+                            <label for="company-<?= $c['id'] ?>" style="flex: 1; cursor: pointer; margin: 0; font-weight: 500;">
+                                <?= htmlspecialchars($c['name']) ?>
+                            </label>
+                            <span style="color: var(--text-muted); font-size: 0.85rem;">
+                                <?= htmlspecialchars($c['sector'] ?? '') ?>
+                            </span>
+                        </div>
+                        <?php endforeach; ?>
+                    </div>
+                    <div style="margin-top: 0.5rem; display: flex; gap: 1rem;">
+                        <button type="button" class="btn btn-sm btn-outline" onclick="selectAllCompanies(true)">
+                            <i class="fas fa-check-double"></i> Seleccionar todas
+                        </button>
+                        <button type="button" class="btn btn-sm btn-outline" onclick="selectAllCompanies(false)">
+                            <i class="fas fa-times"></i> Deseleccionar todas
+                        </button>
+                    </div>
+                    <?php else: ?>
+                    <p class="text-muted">No hay empresas disponibles. <a href="/admin/companies/create">Crear una nueva</a></p>
                     <?php endif; ?>
                 </div>
             </div>
@@ -199,7 +274,7 @@ $isEdit = isset($event) && $event;
         <div class="form-sidebar">
             <div class="card">
                 <div class="card-header">
-                    <h3>Publicación</h3>
+                    <h3>Publicacion</h3>
                 </div>
                 <div class="card-body">
                     <div class="form-group">
@@ -214,26 +289,23 @@ $isEdit = isset($event) && $event;
                     </div>
 
                     <div class="form-group">
-                        <label for="total_capacity">Aforo Total *</label>
-                        <input type="number" id="total_capacity" name="total_capacity" class="form-control"
-                               value="<?= $event['total_capacity'] ?? 100 ?>" min="1" required>
+                        <label for="max_attendees">Aforo Total</label>
+                        <input type="number" id="max_attendees" name="max_attendees" class="form-control"
+                               value="<?= $event['max_attendees'] ?? 100 ?>" min="1">
                     </div>
 
                     <div class="form-group">
-                        <label for="featured_image">Imagen Destacada</label>
-                        <div class="media-picker">
-                            <input type="hidden" id="featured_image" name="featured_image"
-                                   value="<?= htmlspecialchars($event['featured_image'] ?? '') ?>">
-                            <div class="media-preview" id="featured_image_preview">
-                                <?php if (!empty($event['featured_image'])): ?>
-                                    <img src="<?= htmlspecialchars($event['featured_image']) ?>" alt="">
-                                <?php endif; ?>
+                        <label for="featured_image_file">Imagen Destacada</label>
+                        <?php if (!empty($event['featured_image'])): ?>
+                            <div class="image-preview" style="margin-bottom: 10px;">
+                                <img src="<?= htmlspecialchars($event['featured_image']) ?>" alt="Imagen actual"
+                                     style="max-width: 200px; max-height: 120px; border: 1px solid #ddd; border-radius: 4px; padding: 5px;">
                             </div>
-                            <button type="button" class="btn btn-outline btn-sm"
-                                    onclick="openMediaPicker('featured_image')">
-                                <i class="fas fa-image"></i> Seleccionar
-                            </button>
-                        </div>
+                        <?php endif; ?>
+                        <input type="file" id="featured_image_file" name="featured_image_file" class="form-control"
+                               accept="image/png,image/jpeg,image/gif,image/webp">
+                        <small class="form-help">PNG, JPG, GIF, WebP. Max: 2MB</small>
+                        <input type="hidden" name="featured_image" value="<?= htmlspecialchars($event['featured_image'] ?? '') ?>">
                     </div>
                 </div>
             </div>
@@ -272,32 +344,178 @@ $isEdit = isset($event) && $event;
 
 <?php if ($isEdit): ?>
 <script>
-function addSponsor() {
-    const sponsorId = document.getElementById('new_sponsor_id').value;
-    const level = document.getElementById('new_sponsor_level').value;
+const csrfToken = '<?= $csrf_token ?>';
+const eventId = <?= $event['id'] ?>;
 
-    if (!sponsorId) {
-        alert('Selecciona un sponsor');
-        return;
+// === SPONSORS ===
+function updateSponsor(sponsorId, isChecked) {
+    const levelSelect = document.getElementById('sponsor-level-' + sponsorId);
+    const formData = new FormData();
+    formData.append('_csrf_token', csrfToken);
+
+    if (isChecked) {
+        // Add sponsor
+        formData.append('sponsor_id', sponsorId);
+        formData.append('level', levelSelect.value);
+        levelSelect.disabled = false;
+        levelSelect.style.opacity = '1';
+
+        fetch('/admin/events/' + eventId + '/sponsors', {
+            method: 'POST',
+            body: formData
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (!data.success) {
+                document.getElementById('sponsor-' + sponsorId).checked = false;
+                alert(data.error || 'Error al anadir sponsor');
+            }
+            updateSponsorsCount();
+        });
+    } else {
+        // Remove sponsor
+        levelSelect.disabled = true;
+        levelSelect.style.opacity = '0.5';
+
+        fetch('/admin/events/' + eventId + '/sponsors/' + sponsorId + '/delete', {
+            method: 'POST',
+            body: formData
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (!data.success) {
+                document.getElementById('sponsor-' + sponsorId).checked = true;
+                alert(data.error || 'Error al quitar sponsor');
+            }
+            updateSponsorsCount();
+        });
     }
+}
+
+function updateSponsorLevel(sponsorId, level) {
+    const checkbox = document.getElementById('sponsor-' + sponsorId);
+    if (!checkbox.checked) return;
 
     const formData = new FormData();
-    formData.append('_csrf_token', '<?= $csrf_token ?>');
-    formData.append('sponsor_id', sponsorId);
+    formData.append('_csrf_token', csrfToken);
     formData.append('level', level);
 
-    fetch('/admin/events/<?= $event['id'] ?>/sponsors', {
+    fetch('/admin/events/' + eventId + '/sponsors/' + sponsorId + '/level', {
         method: 'POST',
         body: formData
     })
     .then(r => r.json())
     .then(data => {
-        if (data.success) {
-            location.reload();
-        } else {
-            alert(data.error || 'Error al añadir sponsor');
+        if (!data.success) {
+            alert(data.error || 'Error al actualizar nivel');
         }
     });
 }
+
+function selectAllSponsors(select) {
+    const checkboxes = document.querySelectorAll('#sponsors-list input[type="checkbox"]');
+    checkboxes.forEach(cb => {
+        if (cb.checked !== select) {
+            cb.checked = select;
+            updateSponsor(cb.value, select);
+        }
+    });
+}
+
+function updateSponsorsCount() {
+    const count = document.querySelectorAll('#sponsors-list input[type="checkbox"]:checked').length;
+    document.getElementById('sponsors-count').textContent = count + ' seleccionados';
+}
+
+// === COMPANIES ===
+function updateCompany(companyId, isChecked) {
+    const formData = new FormData();
+    formData.append('_csrf_token', csrfToken);
+
+    if (isChecked) {
+        // Add company
+        formData.append('company_id', companyId);
+
+        fetch('/admin/events/' + eventId + '/companies', {
+            method: 'POST',
+            body: formData
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (!data.success) {
+                document.getElementById('company-' + companyId).checked = false;
+                alert(data.error || 'Error al anadir empresa');
+            }
+            updateCompaniesCount();
+        });
+    } else {
+        // Remove company
+        fetch('/admin/events/' + eventId + '/companies/' + companyId + '/delete', {
+            method: 'POST',
+            body: formData
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (!data.success) {
+                document.getElementById('company-' + companyId).checked = true;
+                alert(data.error || 'Error al quitar empresa');
+            }
+            updateCompaniesCount();
+        });
+    }
+}
+
+function selectAllCompanies(select) {
+    const checkboxes = document.querySelectorAll('#companies-list input[type="checkbox"]');
+    checkboxes.forEach(cb => {
+        if (cb.checked !== select) {
+            cb.checked = select;
+            updateCompany(cb.value, select);
+        }
+    });
+}
+
+function updateCompaniesCount() {
+    const count = document.querySelectorAll('#companies-list input[type="checkbox"]:checked').length;
+    document.getElementById('companies-count').textContent = count + ' seleccionadas';
+}
+
+// === SEARCH FILTERS ===
+document.getElementById('sponsors-search')?.addEventListener('input', function(e) {
+    const query = e.target.value.toLowerCase();
+    document.querySelectorAll('#sponsors-list .checkbox-item').forEach(item => {
+        const name = item.dataset.name || '';
+        item.style.display = name.includes(query) ? 'flex' : 'none';
+    });
+});
+
+document.getElementById('companies-search')?.addEventListener('input', function(e) {
+    const query = e.target.value.toLowerCase();
+    document.querySelectorAll('#companies-list .checkbox-item').forEach(item => {
+        const name = item.dataset.name || '';
+        item.style.display = name.includes(query) ? 'flex' : 'none';
+    });
+});
 </script>
 <?php endif; ?>
+
+<!-- TinyMCE WYSIWYG Editor (Self-hosted via jsDelivr - no API key needed) -->
+<script src="https://cdn.jsdelivr.net/npm/tinymce@6.8.2/tinymce.min.js"></script>
+<script>
+tinymce.init({
+    selector: 'textarea.wysiwyg',
+    plugins: 'lists link autolink',
+    toolbar: 'undo redo | bold italic underline | bullist numlist | link | removeformat',
+    menubar: false,
+    statusbar: false,
+    height: 300,
+    branding: false,
+    promotion: false,
+    content_style: 'body { font-family: Montserrat, sans-serif; font-size: 14px; }',
+    setup: function(editor) {
+        editor.on('change', function() {
+            tinymce.triggerSave();
+        });
+    }
+});
+</script>

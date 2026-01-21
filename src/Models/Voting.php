@@ -218,7 +218,8 @@ class Voting extends Model
 
         // Increment candidate votes
         $sql = "UPDATE voting_candidates SET votes = votes + 1 WHERE id = ?";
-        return $this->db->execute($sql, [$candidateId]);
+        $this->db->query($sql, [$candidateId]);
+        return true;
     }
 
     /**

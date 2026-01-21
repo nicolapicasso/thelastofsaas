@@ -198,11 +198,12 @@
     z-index: 1000;
 }
 .modal-content {
-    background: var(--bg-primary);
+    background: var(--bg-primary, #ffffff);
     border-radius: 8px;
     width: 90%;
     max-height: 90vh;
     overflow-y: auto;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
 }
 .modal-header {
     display: flex;
@@ -238,7 +239,7 @@
 <script>
 function openAddModal() {
     document.getElementById('modalTitle').textContent = 'Nuevo Tipo de Ticket';
-    document.getElementById('typeForm').action = '/admin/tickets/types/create';
+    document.getElementById('typeForm').action = '/admin/tickets/types';
     document.getElementById('typeId').value = '';
     document.getElementById('typeName').value = '';
     document.getElementById('typeDescription').value = '';
@@ -253,7 +254,7 @@ function openAddModal() {
 
 function editType(type) {
     document.getElementById('modalTitle').textContent = 'Editar Tipo de Ticket';
-    document.getElementById('typeForm').action = '/admin/tickets/types/' + type.id + '/edit';
+    document.getElementById('typeForm').action = '/admin/tickets/types/' + type.id;
     document.getElementById('typeId').value = type.id;
     document.getElementById('typeName').value = type.name;
     document.getElementById('typeDescription').value = type.description || '';

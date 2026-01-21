@@ -7,6 +7,7 @@ namespace App\Controllers\Admin;
 use App\Core\Controller;
 use App\Models\Event;
 use App\Models\Sponsor;
+use App\Models\Company;
 use App\Models\TicketType;
 use App\Helpers\Sanitizer;
 use App\Helpers\Slug;
@@ -19,12 +20,14 @@ class EventsController extends Controller
 {
     private Event $eventModel;
     private Sponsor $sponsorModel;
+    private Company $companyModel;
 
     public function __construct()
     {
         parent::__construct();
         $this->eventModel = new Event();
         $this->sponsorModel = new Sponsor();
+        $this->companyModel = new Company();
     }
 
     /**
@@ -42,7 +45,7 @@ class EventsController extends Controller
             $conditions['status'] = $status;
         }
 
-        $result = $this->eventModel->paginate($page, 20, $conditions, ['event_date' => 'DESC']);
+        $result = $this->eventModel->paginate($page, 20, $conditions, ['start_date' => 'DESC']);
 
         $this->renderAdmin('events/index', [
             'title' => 'Eventos',
@@ -51,6 +54,7 @@ class EventsController extends Controller
             'currentStatus' => $status,
             'statusOptions' => Event::getStatusOptions(),
             'flash' => $this->getFlash(),
+            'csrf_token' => $this->generateCsrf(),
         ]);
     }
 
@@ -89,7 +93,7 @@ class EventsController extends Controller
         }
 
         // Generate slug
-        $data['slug'] = Slug::generate($data['name'], 'events');
+        $data['slug'] = Slug::unique($data['name'], 'events');
 
         try {
             $eventId = $this->eventModel->create($data);
@@ -116,16 +120,20 @@ class EventsController extends Controller
         }
 
         $sponsors = $this->eventModel->getSponsors((int) $id);
+        $companies = $this->eventModel->getCompanies((int) $id);
         $features = $this->eventModel->getFeatures((int) $id);
         $allSponsors = $this->sponsorModel->getActive();
+        $allCompanies = $this->companyModel->getActive();
         $stats = $this->eventModel->getStats((int) $id);
 
         $this->renderAdmin('events/form', [
             'title' => 'Editar Evento',
             'event' => $event,
             'sponsors' => $sponsors,
+            'companies' => $companies,
             'features' => $features,
             'allSponsors' => $allSponsors,
+            'allCompanies' => $allCompanies,
             'stats' => $stats,
             'statusOptions' => Event::getStatusOptions(),
             'levelOptions' => Sponsor::getLevelOptions(),
@@ -161,7 +169,7 @@ class EventsController extends Controller
 
         // Update slug if name changed
         if ($data['name'] !== $event['name']) {
-            $data['slug'] = Slug::generate($data['name'], 'events', (int) $id);
+            $data['slug'] = Slug::unique($data['name'], 'events', 'slug', (int) $id);
         }
 
         try {
@@ -291,6 +299,52 @@ class EventsController extends Controller
     }
 
     /**
+     * Add company to event
+     */
+    public function addCompany(string $id): void
+    {
+        $this->requireAuth();
+
+        if (!$this->validateCsrf()) {
+            $this->jsonError('Sesión expirada.');
+            return;
+        }
+
+        $companyId = (int) $this->getPost('company_id');
+        if (!$companyId) {
+            $this->jsonError('Empresa no especificada.');
+            return;
+        }
+
+        try {
+            $this->eventModel->addCompany((int) $id, $companyId);
+            $this->jsonSuccess(['message' => 'Empresa añadida correctamente.']);
+        } catch (\Exception $e) {
+            $this->jsonError('Error al añadir empresa: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Remove company from event
+     */
+    public function removeCompany(string $id, string $companyId): void
+    {
+        $this->requireAuth();
+
+        if (!$this->validateCsrf()) {
+            $this->jsonError('Sesión expirada.');
+            return;
+        }
+
+        try {
+            $this->eventModel->removeCompany((int) $id, (int) $companyId);
+            $this->jsonSuccess(['message' => 'Empresa eliminada del evento.']);
+        } catch (\Exception $e) {
+            $this->jsonError('Error al eliminar empresa: ' . $e->getMessage());
+        }
+    }
+
+    /**
      * Add feature to event
      */
     public function addFeature(string $id): void
@@ -342,14 +396,17 @@ class EventsController extends Controller
         $errors = [];
 
         $name = Sanitizer::string($this->getPost('name'));
+        $shortDescription = Sanitizer::string($this->getPost('short_description'));
         $description = $this->getPost('description');
-        $venueName = Sanitizer::string($this->getPost('venue_name'));
-        $venueAddress = Sanitizer::string($this->getPost('venue_address'));
-        $venueCity = Sanitizer::string($this->getPost('venue_city'));
-        $venueCoordinates = Sanitizer::string($this->getPost('venue_coordinates'));
-        $eventDate = $this->getPost('event_date');
-        $eventEndDate = $this->getPost('event_end_date');
-        $totalCapacity = Sanitizer::int($this->getPost('total_capacity'));
+        $location = Sanitizer::string($this->getPost('location'));
+        $address = Sanitizer::string($this->getPost('address'));
+        $city = Sanitizer::string($this->getPost('city'));
+        $coordinates = Sanitizer::string($this->getPost('coordinates'));
+        $startDate = $this->getPost('start_date');
+        $endDate = $this->getPost('end_date');
+        $startTime = $this->getPost('start_time');
+        $endTime = $this->getPost('end_time');
+        $maxAttendees = Sanitizer::int($this->getPost('max_attendees', 100));
         $status = $this->getPost('status', 'draft');
         $featuredImage = Sanitizer::url($this->getPost('featured_image'));
         $registrationOpen = Sanitizer::bool($this->getPost('registration_open'));
@@ -360,12 +417,26 @@ class EventsController extends Controller
             $errors[] = 'El nombre es obligatorio.';
         }
 
-        if ($totalCapacity < 1) {
-            $errors[] = 'El aforo debe ser mayor que 0.';
+        if (empty($startDate)) {
+            $errors[] = 'La fecha de inicio es obligatoria.';
+        }
+
+        if ($maxAttendees < 1) {
+            $maxAttendees = 100;
         }
 
         if (!in_array($status, array_keys(Event::getStatusOptions()))) {
             $errors[] = 'Estado no válido.';
+        }
+
+        // Handle featured image file upload
+        if (isset($_FILES['featured_image_file']) && $_FILES['featured_image_file']['error'] === UPLOAD_ERR_OK) {
+            $uploadResult = $this->handleImageUpload($_FILES['featured_image_file']);
+            if (isset($uploadResult['error'])) {
+                $errors[] = $uploadResult['error'];
+            } else {
+                $featuredImage = $uploadResult['url'];
+            }
         }
 
         if (!empty($errors)) {
@@ -374,19 +445,69 @@ class EventsController extends Controller
 
         return [
             'name' => $name,
+            'short_description' => $shortDescription ?: null,
             'description' => $description ?: null,
-            'venue_name' => $venueName ?: null,
-            'venue_address' => $venueAddress ?: null,
-            'venue_city' => $venueCity ?: null,
-            'venue_coordinates' => $venueCoordinates ?: null,
-            'event_date' => $eventDate ?: null,
-            'event_end_date' => $eventEndDate ?: null,
-            'total_capacity' => $totalCapacity,
+            'location' => $location ?: null,
+            'address' => $address ?: null,
+            'city' => $city ?: null,
+            'coordinates' => $coordinates ?: null,
+            'start_date' => $startDate,
+            'end_date' => $endDate ?: null,
+            'start_time' => $startTime ?: null,
+            'end_time' => $endTime ?: null,
+            'max_attendees' => $maxAttendees,
             'status' => $status,
             'featured_image' => $featuredImage ?: null,
             'registration_open' => $registrationOpen ? 1 : 0,
             'matching_enabled' => $matchingEnabled ? 1 : 0,
             'meetings_enabled' => $meetingsEnabled ? 1 : 0,
         ];
+    }
+
+    /**
+     * Handle image file upload
+     */
+    private function handleImageUpload(array $file): array
+    {
+        $allowedTypes = ['image/png', 'image/jpeg', 'image/gif', 'image/webp'];
+        $maxSize = 2 * 1024 * 1024; // 2MB
+
+        // Validate file type
+        $finfo = new \finfo(FILEINFO_MIME_TYPE);
+        $mimeType = $finfo->file($file['tmp_name']);
+
+        if (!in_array($mimeType, $allowedTypes)) {
+            return ['error' => 'Tipo de archivo no permitido. Use PNG, JPG, GIF o WebP.'];
+        }
+
+        // Validate file size
+        if ($file['size'] > $maxSize) {
+            return ['error' => 'El archivo es demasiado grande. Maximo 2MB.'];
+        }
+
+        // Create upload directory if it doesn't exist
+        $uploadDir = dirname(__DIR__, 3) . '/public/uploads/events';
+        if (!is_dir($uploadDir)) {
+            mkdir($uploadDir, 0755, true);
+        }
+
+        // Generate unique filename
+        $extension = match($mimeType) {
+            'image/png' => 'png',
+            'image/jpeg' => 'jpg',
+            'image/gif' => 'gif',
+            'image/webp' => 'webp',
+            default => 'jpg'
+        };
+        $filename = 'event_' . uniqid() . '.' . $extension;
+        $filepath = $uploadDir . '/' . $filename;
+
+        // Move uploaded file
+        if (!move_uploaded_file($file['tmp_name'], $filepath)) {
+            return ['error' => 'Error al guardar el archivo.'];
+        }
+
+        // Return the URL
+        return ['url' => '/uploads/events/' . $filename];
     }
 }
