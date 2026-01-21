@@ -325,7 +325,7 @@ $blockId = 'business-types-' . uniqid();
     font-size: var(--font-size-lg);
     font-weight: 600;
     margin-bottom: var(--spacing-sm);
-    color: var(--color-gray-900);
+    color: var(--block-title-color, var(--color-gray-900));
 }
 
 .business-type-card p {
