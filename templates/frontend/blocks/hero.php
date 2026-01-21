@@ -11,6 +11,51 @@ $overlayOpacity = $settings['overlay_opacity'] ?? 0.6;
 $parallaxEnabled = $settings['parallax_enabled'] ?? true;
 $heroId = 'hero-' . ($block['id'] ?? uniqid());
 
+/**
+ * Parse video URL and return embed data
+ * @param string $url YouTube or Vimeo URL
+ * @return array|null ['type' => 'youtube'|'vimeo', 'id' => 'videoId', 'embed' => 'embedUrl']
+ */
+function parseVideoUrl(string $url): ?array {
+    if (empty($url)) return null;
+
+    // YouTube patterns
+    $youtubePatterns = [
+        '/youtube\.com\/watch\?v=([a-zA-Z0-9_-]+)/',
+        '/youtube\.com\/embed\/([a-zA-Z0-9_-]+)/',
+        '/youtu\.be\/([a-zA-Z0-9_-]+)/',
+        '/youtube\.com\/v\/([a-zA-Z0-9_-]+)/',
+    ];
+
+    foreach ($youtubePatterns as $pattern) {
+        if (preg_match($pattern, $url, $matches)) {
+            return [
+                'type' => 'youtube',
+                'id' => $matches[1],
+                'embed' => 'https://www.youtube.com/embed/' . $matches[1] . '?autoplay=1&mute=1&loop=1&playlist=' . $matches[1] . '&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1&enablejsapi=1'
+            ];
+        }
+    }
+
+    // Vimeo patterns
+    $vimeoPatterns = [
+        '/vimeo\.com\/(\d+)/',
+        '/player\.vimeo\.com\/video\/(\d+)/',
+    ];
+
+    foreach ($vimeoPatterns as $pattern) {
+        if (preg_match($pattern, $url, $matches)) {
+            return [
+                'type' => 'vimeo',
+                'id' => $matches[1],
+                'embed' => 'https://player.vimeo.com/video/' . $matches[1] . '?autoplay=1&muted=1&loop=1&background=1&quality=1080p'
+            ];
+        }
+    }
+
+    return null;
+}
+
 // Calculate margins
 $marginTop = $settings['margin_top'] ?? 'auto';
 if ($marginTop === 'auto') {
@@ -39,11 +84,25 @@ $parallaxClass = $parallaxEnabled ? 'parallax-enabled' : '';
             <?php foreach ($slides as $i => $slide):
                 $titleColor = $slide['title_color'] ?? '#ffffff';
                 $subtitleColor = $slide['subtitle_color'] ?? 'rgba(255,255,255,0.9)';
+                $videoData = parseVideoUrl($slide['background_video'] ?? '');
+                $hasVideo = $videoData !== null;
                 $bgStyle = !empty($slide['background_image']) ? "background-image: url('{$slide['background_image']}'); --parallax-bg: url('{$slide['background_image']}')" : '';
             ?>
-                <div class="hero-slide <?= $i === 0 ? 'active' : '' ?>"
+                <div class="hero-slide <?= $i === 0 ? 'active' : '' ?> <?= $hasVideo ? 'has-video' : '' ?>"
                      style="<?= $bgStyle ?>"
                      data-bg="<?= htmlspecialchars($slide['background_image'] ?? '') ?>">
+                    <?php if ($hasVideo): ?>
+                        <div class="hero-video-container">
+                            <iframe
+                                src="<?= htmlspecialchars($videoData['embed']) ?>"
+                                frameborder="0"
+                                allow="autoplay; fullscreen; picture-in-picture"
+                                allowfullscreen
+                                title="Background video"
+                                loading="lazy"
+                            ></iframe>
+                        </div>
+                    <?php endif; ?>
                     <div class="container">
                         <div class="hero-content">
                             <?php if (!empty($slide['title'])): ?>
@@ -91,9 +150,23 @@ $parallaxClass = $parallaxEnabled ? 'parallax-enabled' : '';
         $slide = $slides[0];
         $titleColor = $slide['title_color'] ?? '#ffffff';
         $subtitleColor = $slide['subtitle_color'] ?? 'rgba(255,255,255,0.9)';
+        $videoData = parseVideoUrl($slide['background_video'] ?? '');
+        $hasVideo = $videoData !== null;
         $bgStyle = !empty($slide['background_image']) ? "background-image: url('{$slide['background_image']}'); --parallax-bg: url('{$slide['background_image']}')" : '';
         ?>
-        <div class="hero-single" style="<?= $bgStyle ?>" data-bg="<?= htmlspecialchars($slide['background_image'] ?? '') ?>">
+        <div class="hero-single <?= $hasVideo ? 'has-video' : '' ?>" style="<?= $bgStyle ?>" data-bg="<?= htmlspecialchars($slide['background_image'] ?? '') ?>">
+            <?php if ($hasVideo): ?>
+                <div class="hero-video-container">
+                    <iframe
+                        src="<?= htmlspecialchars($videoData['embed']) ?>"
+                        frameborder="0"
+                        allow="autoplay; fullscreen; picture-in-picture"
+                        allowfullscreen
+                        title="Background video"
+                        loading="lazy"
+                    ></iframe>
+                </div>
+            <?php endif; ?>
             <div class="container">
                 <div class="hero-content">
                     <?php if (!empty($slide['title'])): ?>
@@ -143,6 +216,41 @@ $parallaxClass = $parallaxEnabled ? 'parallax-enabled' : '';
     position: relative;
 }
 
+/* Video Background */
+.hero-video-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    z-index: -2;
+    pointer-events: none;
+}
+
+.hero-video-container iframe {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 100vw;
+    height: 100vh;
+    min-width: 177.78vh; /* 16:9 aspect ratio */
+    min-height: 56.25vw; /* 16:9 aspect ratio */
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+}
+
+/* When video is present, hide the parallax background */
+.hero-slide.has-video::after,
+.hero-single.has-video::after {
+    display: none;
+}
+
+.hero-slide.has-video,
+.hero-single.has-video {
+    background-image: none !important;
+}
+
 /* Parallax effect using pseudo-element for better mobile support */
 .block-hero.parallax-enabled .hero-slide,
 .block-hero.parallax-enabled .hero-single {
@@ -181,7 +289,7 @@ $parallaxClass = $parallaxEnabled ? 'parallax-enabled' : '';
     content: '';
     position: absolute;
     inset: 0;
-    background: linear-gradient(135deg, rgba(37, 86, 100, var(--overlay-opacity, 0.6)) 0%, rgba(62, 149, 176, calc(var(--overlay-opacity, 0.6) - 0.2)) 100%);
+    background: rgba(0, 0, 0, var(--overlay-opacity, 0.6));
     z-index: 0;
 }
 

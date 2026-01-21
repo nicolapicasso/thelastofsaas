@@ -86,14 +86,14 @@
     --spacing-3xl: 4rem;
 
     /* ============================================
-       Border Radius - Sinapsis Style
+       Border Radius - Angular Style
        ============================================ */
-    --radius-sm: 0.25rem;      /* 4px */
-    --radius-md: 0.5rem;       /* 8px */
-    --radius-lg: 1.25rem;      /* 20px - Cards */
-    --radius-xl: 1.875rem;     /* 30px - Forms */
-    --radius-pill: 50px;       /* Buttons */
-    --radius-full: 9999px;
+    --radius-sm: 0;
+    --radius-md: 0;
+    --radius-lg: 0;
+    --radius-xl: 0;
+    --radius-pill: 0;
+    --radius-full: 9999px;     /* Keep for circular elements like avatars */
 
     /* ============================================
        Shadows

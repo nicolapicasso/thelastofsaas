@@ -33,6 +33,14 @@ include_once TEMPLATES_PATH . '/admin/partials/image-picker.php';
                 </div>
 
                 <div class="form-group">
+                    <label>Fondo: Video (YouTube/Vimeo) o Imagen</label>
+                    <p class="form-help" style="margin-bottom: 0.5rem; font-size: 0.85em; color: #666;">
+                        Si añades un video, se reproducirá automáticamente sin sonido. La imagen se usará como fallback.
+                    </p>
+                    <input type="text" data-slide-field="background_video" value="<?= htmlspecialchars($slide['background_video'] ?? '') ?>" placeholder="URL de YouTube o Vimeo (ej: https://www.youtube.com/watch?v=...)">
+                </div>
+
+                <div class="form-group">
                     <label>Imagen de fondo</label>
                     <div class="image-picker-field">
                         <input type="text" data-slide-field="background_image" value="<?= htmlspecialchars($bgImage) ?>">
