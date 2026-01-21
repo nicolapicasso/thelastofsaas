@@ -5,10 +5,24 @@
  */
 ?>
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" data-page-time="<?= time() ?>">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <!-- Immediate cache detection - runs before page renders -->
+    <script>
+    (function(){
+        var pageTime = parseInt(document.documentElement.getAttribute('data-page-time')) * 1000;
+        var now = Date.now();
+        // If page is more than 10 seconds old, it's cached - reload once
+        if (now - pageTime > 10000) {
+            window.location.reload(true);
+        }
+    })();
+    </script>
     <title>Panel Sponsor - <?= htmlspecialchars($sponsor['name']) ?></title>
 
     <!-- Fonts - TLOS Brand -->

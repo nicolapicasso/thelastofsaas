@@ -124,8 +124,8 @@ abstract class Controller
         header('Pragma: no-cache');
         header('Expires: 0');
 
-        // Add cache-busting parameter for admin URLs to prevent bfcache issues
-        if (strpos($url, '/admin') !== false) {
+        // Add cache-busting parameter for panel URLs to prevent bfcache issues
+        if (strpos($url, '/admin') !== false || strpos($url, '/sponsor') !== false || strpos($url, '/empresa') !== false) {
             $separator = strpos($url, '?') !== false ? '&' : '?';
             $url .= $separator . '_t=' . time();
         }
