@@ -230,6 +230,34 @@ $_pendingTicketsCount = $_ticketModel->count(['status' => 'pending']);
     <?= $extraJs ?>
     <?php endif; ?>
 
+    <!-- Prevent bfcache (back-forward cache) from showing stale pages -->
+    <script>
+    (function() {
+        // Force reload when page is restored from bfcache
+        window.addEventListener('pageshow', function(event) {
+            if (event.persisted) {
+                window.location.reload();
+            }
+        });
+
+        // Also handle navigation via history API
+        window.addEventListener('popstate', function() {
+            window.location.reload();
+        });
+
+        // Mark page load time to detect stale pages
+        var pageLoadTime = Date.now();
+        document.addEventListener('visibilitychange', function() {
+            if (document.visibilityState === 'visible') {
+                // If page has been hidden for more than 30 seconds, reload
+                if (Date.now() - pageLoadTime > 30000) {
+                    window.location.reload();
+                }
+            }
+        });
+    })();
+    </script>
+
     <?php include TEMPLATES_PATH . '/admin/partials/icon-picker.php'; ?>
 </body>
 </html>
