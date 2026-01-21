@@ -244,22 +244,7 @@ $_pendingTicketsCount = $_ticketModel->count(['status' => 'pending']);
     <!-- Prevent bfcache (back-forward cache) from showing stale pages -->
     <script>
     (function() {
-        // Generate unique page instance ID
-        var pageInstanceId = '<?= bin2hex(random_bytes(8)) ?>';
         var pageLoadTime = Date.now();
-
-        // Store page instance in sessionStorage
-        var storageKey = 'admin_page_' + window.location.pathname;
-        var storedInstance = sessionStorage.getItem(storageKey);
-
-        // If we have a stored instance that differs, it means this is a cached page
-        if (storedInstance && storedInstance !== pageInstanceId) {
-            console.log('Cache detected (instance mismatch), forcing reload');
-            sessionStorage.setItem(storageKey, pageInstanceId);
-            window.location.reload(true);
-        } else {
-            sessionStorage.setItem(storageKey, pageInstanceId);
-        }
 
         // Force reload when page is restored from bfcache
         window.addEventListener('pageshow', function(event) {
@@ -282,14 +267,6 @@ $_pendingTicketsCount = $_ticketModel->count(['status' => 'pending']);
                     console.log('Stale page detected, forcing reload');
                     window.location.reload(true);
                 }
-            }
-        });
-
-        // Also handle focus event (some browsers don't trigger visibilitychange)
-        window.addEventListener('focus', function() {
-            if (Date.now() - pageLoadTime > 60000) {
-                console.log('Old page detected on focus, forcing reload');
-                window.location.reload(true);
             }
         });
     })();
