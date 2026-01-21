@@ -12,22 +12,6 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    <!-- bfcache detection - only reloads when restored from bfcache -->
-    <script>
-    window.addEventListener('pageshow', function(event) {
-        if (event.persisted) {
-            // Page was restored from bfcache - reload to get fresh data
-            var reloadKey = 'bfcache_' + window.location.pathname;
-            var lastReload = parseInt(sessionStorage.getItem(reloadKey) || '0');
-            var now = Date.now();
-            // Debounce: only reload if last reload was more than 2 seconds ago
-            if (now - lastReload > 2000) {
-                sessionStorage.setItem(reloadKey, now.toString());
-                window.location.reload();
-            }
-        }
-    });
-    </script>
     <title>Panel Empresa - <?= htmlspecialchars($company['name'] ?? '') ?></title>
 
     <!-- Fonts - TLOS Brand -->
