@@ -118,6 +118,11 @@ HTML;
      */
     public function renderFrontend(string $template, array $data = []): void
     {
+        // Prevent browser from serving stale cached content for dynamic pages
+        // no-cache forces browser to validate with server before using cached version
+        header('Cache-Control: no-cache, must-revalidate, private');
+        header('Pragma: no-cache');
+
         $this->layout = 'frontend/layouts/main';
         $this->render('frontend/' . $template, $data);
     }

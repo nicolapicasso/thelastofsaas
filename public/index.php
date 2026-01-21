@@ -121,6 +121,11 @@ if ($isAuthenticatedRoute && !$isAjaxRequest) {
     // Prevent ETags from causing 304 responses
     header_remove('ETag');
     header_remove('Last-Modified');
+} elseif (!$isAjaxRequest) {
+    // Frontend dynamic pages: force browser to validate with server
+    // This ensures changes to blocks are reflected immediately on F5 refresh
+    header('Cache-Control: no-cache, must-revalidate, private');
+    header('Pragma: no-cache');
 }
 
 // Initialize application
