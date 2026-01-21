@@ -111,6 +111,10 @@ abstract class Controller
      */
     protected function redirect(string $url, int $statusCode = 302): void
     {
+        // Prevent caching of redirect responses
+        header('Cache-Control: no-cache, no-store, must-revalidate, private');
+        header('Pragma: no-cache');
+        header('Expires: 0');
         header("Location: {$url}", true, $statusCode);
         exit;
     }
