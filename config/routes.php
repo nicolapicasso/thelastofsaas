@@ -336,6 +336,7 @@ $router->post('/admin/companies/{id}/regenerate-code', 'Admin\\CompaniesControll
 $router->get('/admin/tickets', 'Admin\\TicketsController', 'index');
 $router->get('/admin/tickets/export', 'Admin\\TicketsController', 'export');
 $router->get('/admin/tickets/scanner', 'Admin\\TicketsController', 'scanner');
+$router->get('/scanner-manifest.json', 'Admin\\TicketsController', 'scannerManifest');
 $router->post('/admin/tickets/validate-code', 'Admin\\TicketsController', 'validateCode');
 $router->post('/admin/tickets/bulk-action', 'Admin\\TicketsController', 'bulkAction');
 $router->get('/admin/tickets/types', 'Admin\\TicketsController', 'types');

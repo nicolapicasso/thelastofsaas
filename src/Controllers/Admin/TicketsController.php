@@ -537,6 +537,16 @@ class TicketsController extends Controller
     }
 
     /**
+     * Serve scanner PWA manifest
+     */
+    public function scannerManifest(): void
+    {
+        header('Content-Type: application/manifest+json');
+        echo file_get_contents(PUBLIC_PATH . '/scanner-manifest.json');
+        exit;
+    }
+
+    /**
      * QR Scanner page
      */
     public function scanner(): void
