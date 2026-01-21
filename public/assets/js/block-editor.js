@@ -630,6 +630,14 @@
             })
             .then(response => response.json())
             .then(data => {
+                // Debug: log server response timing
+                if (data._debug) {
+                    console.log('=== BLOCK LOAD DEBUG ===');
+                    console.log('Server loaded at:', data._debug.loaded_at);
+                    console.log('Block updated at:', data._debug.block_updated);
+                    console.log('Block ID:', data._debug.block_id);
+                    console.log('Client time:', new Date().toLocaleTimeString());
+                }
                 if (data.success) {
                     document.getElementById('block-editor-title').textContent = 'Editar: ' + data.typeName;
                     document.getElementById('block-editor-body').innerHTML = data.html;

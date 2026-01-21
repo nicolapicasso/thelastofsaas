@@ -4,6 +4,10 @@
     </div>
     <?php if ($page): ?>
     <div class="page-header-right">
+        <!-- Debug info - remove after debugging -->
+        <small style="color: #888; margin-right: 15px; font-size: 11px;">
+            DB: <?= date('H:i:s') ?> | Updated: <?= $page['updated_at'] ?? 'N/A' ?>
+        </small>
         <?php if ($page['status'] === 'published'): ?>
         <a href="/<?= $page['slug'] === 'home' ? '' : htmlspecialchars($page['slug']) ?>" target="_blank" class="btn btn-outline">Ver página</a>
         <?php endif; ?>
