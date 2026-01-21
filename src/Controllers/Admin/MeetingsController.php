@@ -125,15 +125,18 @@ class MeetingsController extends Controller
     {
         $this->requireAuth();
 
+        $block = $this->blockModel->find((int) $id);
+        $eventId = $block['event_id'] ?? 0;
+
         if (!$this->validateCsrf()) {
-            $this->jsonError('Sesión expirada.');
+            $this->flash('error', 'Sesión expirada.');
+            $this->redirect('/admin/meetings/blocks?event_id=' . $eventId);
             return;
         }
 
-        $block = $this->blockModel->find((int) $id);
-
         if (!$block) {
-            $this->jsonError('Bloque no encontrado.');
+            $this->flash('error', 'Bloque no encontrado.');
+            $this->redirect('/admin/meetings/blocks');
             return;
         }
 
@@ -150,10 +153,12 @@ class MeetingsController extends Controller
 
         try {
             $this->blockModel->update((int) $id, $data);
-            $this->jsonSuccess(['message' => 'Bloque actualizado.']);
+            $this->flash('success', 'Bloque actualizado.');
         } catch (\Exception $e) {
-            $this->jsonError('Error: ' . $e->getMessage());
+            $this->flash('error', 'Error: ' . $e->getMessage());
         }
+
+        $this->redirect('/admin/meetings/blocks?event_id=' . $eventId);
     }
 
     /**
@@ -163,24 +168,31 @@ class MeetingsController extends Controller
     {
         $this->requireAuth();
 
+        $block = $this->blockModel->find((int) $id);
+        $eventId = $block['event_id'] ?? 0;
+
         if (!$this->validateCsrf()) {
-            $this->jsonError('Sesión expirada.');
+            $this->flash('error', 'Sesión expirada.');
+            $this->redirect('/admin/meetings/blocks?event_id=' . $eventId);
             return;
         }
 
         $stats = $this->blockModel->getStats((int) $id);
 
         if (($stats['assigned_slots'] ?? 0) > 0) {
-            $this->jsonError('No se puede eliminar: tiene reuniones asignadas.');
+            $this->flash('error', 'No se puede eliminar: tiene reuniones asignadas.');
+            $this->redirect('/admin/meetings/blocks?event_id=' . $eventId);
             return;
         }
 
         try {
             $this->blockModel->delete((int) $id);
-            $this->jsonSuccess(['message' => 'Bloque eliminado.']);
+            $this->flash('success', 'Bloque eliminado.');
         } catch (\Exception $e) {
-            $this->jsonError('Error: ' . $e->getMessage());
+            $this->flash('error', 'Error: ' . $e->getMessage());
         }
+
+        $this->redirect('/admin/meetings/blocks?event_id=' . $eventId);
     }
 
     /**
