@@ -269,6 +269,7 @@ class SponsorsController extends Controller
         $headerCount = count($headers);
 
         $imported = 0;
+        $logosDownloaded = 0;
         $errors = [];
 
         for ($i = 1; $i < count($lines); $i++) {
@@ -292,13 +293,22 @@ class SponsorsController extends Controller
             }
 
             try {
+                // Process logo URL - download if external
+                $originalLogoUrl = $data['logo_url'] ?? null;
+                $processedLogoUrl = $this->downloadLogoFromUrl($originalLogoUrl, 'sponsors');
+
+                // Track if logo was downloaded
+                if ($originalLogoUrl && $processedLogoUrl && $processedLogoUrl !== $originalLogoUrl && strpos($processedLogoUrl, '/uploads/') === 0) {
+                    $logosDownloaded++;
+                }
+
                 $sponsorData = [
                     'name' => $data['name'],
                     'slug' => Slug::unique($data['name'], 'sponsors'),
                     'tagline' => $data['tagline'] ?? null,
                     'description' => $data['description'] ?? null,
                     'website' => $data['website'] ?? null,
-                    'logo_url' => $data['logo_url'] ?? null,
+                    'logo_url' => $processedLogoUrl,
                     'code' => substr(strtoupper(bin2hex(random_bytes(5))), 0, 10),
                     'active' => 1,
                 ];
@@ -348,6 +358,9 @@ class SponsorsController extends Controller
         }
 
         $message = "Importados {$imported} sponsors.";
+        if ($logosDownloaded > 0) {
+            $message .= " Logos descargados: {$logosDownloaded}.";
+        }
         if (!empty($errors)) {
             $message .= " Errores: " . count($errors);
         }
@@ -531,6 +544,91 @@ class SponsorsController extends Controller
 
         // Return the URL
         return ['url' => '/uploads/logos/' . $type . '/' . $filename];
+    }
+
+    /**
+     * Download logo from external URL and save locally
+     */
+    private function downloadLogoFromUrl(?string $url, string $type): ?string
+    {
+        if (empty($url)) {
+            return null;
+        }
+
+        // Only process external URLs
+        if (!preg_match('/^https?:\/\//i', $url)) {
+            return $url; // Return as-is if it's already a local path
+        }
+
+        try {
+            // Create upload directory if it doesn't exist
+            $uploadDir = dirname(__DIR__, 3) . '/public/uploads/logos/' . $type;
+            if (!is_dir($uploadDir)) {
+                mkdir($uploadDir, 0755, true);
+            }
+
+            // Set up context with timeout and user agent
+            $context = stream_context_create([
+                'http' => [
+                    'timeout' => 10,
+                    'user_agent' => 'Mozilla/5.0 (compatible; TLOS/1.0)',
+                    'follow_location' => true,
+                    'max_redirects' => 3,
+                ],
+                'ssl' => [
+                    'verify_peer' => false,
+                    'verify_peer_name' => false,
+                ],
+            ]);
+
+            // Download the image
+            $imageData = @file_get_contents($url, false, $context);
+
+            if ($imageData === false || empty($imageData)) {
+                return $url; // Return original URL on failure
+            }
+
+            // Detect image type from content
+            $finfo = new \finfo(FILEINFO_MIME_TYPE);
+            $mimeType = $finfo->buffer($imageData);
+
+            $allowedTypes = [
+                'image/png' => 'png',
+                'image/jpeg' => 'jpg',
+                'image/gif' => 'gif',
+                'image/svg+xml' => 'svg',
+                'image/webp' => 'webp',
+                'image/x-icon' => 'ico',
+            ];
+
+            if (!isset($allowedTypes[$mimeType])) {
+                // Try to get extension from URL
+                $pathInfo = pathinfo(parse_url($url, PHP_URL_PATH));
+                $ext = strtolower($pathInfo['extension'] ?? '');
+                if (!in_array($ext, ['png', 'jpg', 'jpeg', 'gif', 'svg', 'webp', 'ico'])) {
+                    return $url; // Return original URL if not a valid image
+                }
+                $extension = ($ext === 'jpeg') ? 'jpg' : $ext;
+            } else {
+                $extension = $allowedTypes[$mimeType];
+            }
+
+            // Generate unique filename
+            $filename = uniqid($type . '_') . '.' . $extension;
+            $filepath = $uploadDir . '/' . $filename;
+
+            // Save the file
+            if (file_put_contents($filepath, $imageData) === false) {
+                return $url; // Return original URL on failure
+            }
+
+            // Return local URL
+            return '/uploads/logos/' . $type . '/' . $filename;
+
+        } catch (\Exception $e) {
+            // On any error, return the original URL
+            return $url;
+        }
     }
 
     /**
