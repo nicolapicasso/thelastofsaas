@@ -16,44 +16,46 @@ $heroId = 'hero-' . ($block['id'] ?? uniqid());
  * @param string $url YouTube or Vimeo URL
  * @return array|null ['type' => 'youtube'|'vimeo', 'id' => 'videoId', 'embed' => 'embedUrl']
  */
-function parseVideoUrl(string $url): ?array {
-    if (empty($url)) return null;
+if (!function_exists('parseVideoUrl')) {
+    function parseVideoUrl(string $url): ?array {
+        if (empty($url)) return null;
 
-    // YouTube patterns
-    $youtubePatterns = [
-        '/youtube\.com\/watch\?v=([a-zA-Z0-9_-]+)/',
-        '/youtube\.com\/embed\/([a-zA-Z0-9_-]+)/',
-        '/youtu\.be\/([a-zA-Z0-9_-]+)/',
-        '/youtube\.com\/v\/([a-zA-Z0-9_-]+)/',
-    ];
+        // YouTube patterns
+        $youtubePatterns = [
+            '/youtube\.com\/watch\?v=([a-zA-Z0-9_-]+)/',
+            '/youtube\.com\/embed\/([a-zA-Z0-9_-]+)/',
+            '/youtu\.be\/([a-zA-Z0-9_-]+)/',
+            '/youtube\.com\/v\/([a-zA-Z0-9_-]+)/',
+        ];
 
-    foreach ($youtubePatterns as $pattern) {
-        if (preg_match($pattern, $url, $matches)) {
-            return [
-                'type' => 'youtube',
-                'id' => $matches[1],
-                'embed' => 'https://www.youtube.com/embed/' . $matches[1] . '?autoplay=1&mute=1&loop=1&playlist=' . $matches[1] . '&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1&enablejsapi=1'
-            ];
+        foreach ($youtubePatterns as $pattern) {
+            if (preg_match($pattern, $url, $matches)) {
+                return [
+                    'type' => 'youtube',
+                    'id' => $matches[1],
+                    'embed' => 'https://www.youtube.com/embed/' . $matches[1] . '?autoplay=1&mute=1&loop=1&playlist=' . $matches[1] . '&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1&enablejsapi=1'
+                ];
+            }
         }
-    }
 
-    // Vimeo patterns
-    $vimeoPatterns = [
-        '/vimeo\.com\/(\d+)/',
-        '/player\.vimeo\.com\/video\/(\d+)/',
-    ];
+        // Vimeo patterns
+        $vimeoPatterns = [
+            '/vimeo\.com\/(\d+)/',
+            '/player\.vimeo\.com\/video\/(\d+)/',
+        ];
 
-    foreach ($vimeoPatterns as $pattern) {
-        if (preg_match($pattern, $url, $matches)) {
-            return [
-                'type' => 'vimeo',
-                'id' => $matches[1],
-                'embed' => 'https://player.vimeo.com/video/' . $matches[1] . '?autoplay=1&muted=1&loop=1&background=1&quality=1080p'
-            ];
+        foreach ($vimeoPatterns as $pattern) {
+            if (preg_match($pattern, $url, $matches)) {
+                return [
+                    'type' => 'vimeo',
+                    'id' => $matches[1],
+                    'embed' => 'https://player.vimeo.com/video/' . $matches[1] . '?autoplay=1&muted=1&loop=1&background=1&quality=1080p'
+                ];
+            }
         }
-    }
 
-    return null;
+        return null;
+    }
 }
 
 // Calculate margins
