@@ -5,7 +5,7 @@
  */
 ?>
 <!DOCTYPE html>
-<html lang="es" data-page-id="<?= uniqid('cp_', true) ?>">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -17,11 +17,12 @@
     window.addEventListener('pageshow', function(event) {
         if (event.persisted) {
             // Page was restored from bfcache - reload to get fresh data
-            var pageId = document.documentElement.getAttribute('data-page-id');
-            var reloadKey = 'bfcache_reload_' + pageId;
-            // Only reload once per page instance to prevent loops
-            if (!sessionStorage.getItem(reloadKey)) {
-                sessionStorage.setItem(reloadKey, '1');
+            var reloadKey = 'bfcache_' + window.location.pathname;
+            var lastReload = parseInt(sessionStorage.getItem(reloadKey) || '0');
+            var now = Date.now();
+            // Debounce: only reload if last reload was more than 2 seconds ago
+            if (now - lastReload > 2000) {
+                sessionStorage.setItem(reloadKey, now.toString());
                 window.location.reload();
             }
         }
