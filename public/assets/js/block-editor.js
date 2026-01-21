@@ -586,8 +586,17 @@
             this.currentBlockId = blockId;
             this.currentBlockType = blockType;
 
+            // Add cache-busting parameter to prevent browser caching
+            const cacheBuster = Date.now();
+
             // Load block form
-            fetch(`/admin/blocks/form?block_id=${blockId}&type=${blockType}`)
+            fetch(`/admin/blocks/form?block_id=${blockId}&type=${blockType}&_t=${cacheBuster}`, {
+                cache: 'no-store',
+                headers: {
+                    'Cache-Control': 'no-cache',
+                    'Pragma': 'no-cache'
+                }
+            })
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
@@ -622,11 +631,14 @@
                 console.log('selected_cases value:', settings.selected_cases);
             }
 
-            fetch('/admin/blocks/' + this.currentBlockId, {
+            fetch('/admin/blocks/' + this.currentBlockId + '?_t=' + Date.now(), {
                 method: 'POST',
+                cache: 'no-store',
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded',
-                    'X-CSRF-Token': this.csrfToken
+                    'X-CSRF-Token': this.csrfToken,
+                    'Cache-Control': 'no-cache',
+                    'Pragma': 'no-cache'
                 },
                 body: 'content=' + encodeURIComponent(JSON.stringify(content)) +
                       '&settings=' + encodeURIComponent(JSON.stringify(settings)) +
@@ -995,6 +1007,24 @@
                 window.iconPicker.bindInputs();
             }
 
+            // Sync color pickers with text inputs
+            form.querySelectorAll('.color-picker-input').forEach(function(colorPicker) {
+                const targetId = colorPicker.dataset.syncTarget;
+                const textInput = document.getElementById(targetId);
+                if (textInput) {
+                    // Color picker -> text input
+                    colorPicker.addEventListener('input', function() {
+                        textInput.value = this.value;
+                    });
+                    // Text input -> color picker
+                    textInput.addEventListener('input', function() {
+                        if (/^#[0-9A-Fa-f]{6}$/.test(this.value)) {
+                            colorPicker.value = this.value;
+                        }
+                    });
+                }
+            });
+
             // Handle "Add item" buttons for business_types, benefits, etc.
             const addItemBtns = form.querySelectorAll('.add-item-btn');
             console.log('addItemBtns found:', addItemBtns.length);
@@ -1017,6 +1047,24 @@
                     // Re-bind icon picker for new elements
                     if (window.iconPicker) {
                         window.iconPicker.bindInputs();
+                    }
+                    // Re-bind color pickers for new elements
+                    const newItem = container.querySelector('.item-card:last-child');
+                    if (newItem) {
+                        newItem.querySelectorAll('.color-picker-input').forEach(function(colorPicker) {
+                            const targetId = colorPicker.dataset.syncTarget;
+                            const textInput = document.getElementById(targetId);
+                            if (textInput) {
+                                colorPicker.addEventListener('input', function() {
+                                    textInput.value = this.value;
+                                });
+                                textInput.addEventListener('input', function() {
+                                    if (/^#[0-9A-Fa-f]{6}$/.test(this.value)) {
+                                        colorPicker.value = this.value;
+                                    }
+                                });
+                            }
+                        });
                     }
                 });
             });
@@ -1539,6 +1587,7 @@
             }
             // Areas container template
             if (containerId === 'areasContainer') {
+                const uniqueId = Date.now() + '-' + index;
                 return `
                     <div class="item-card" data-item-index="${index}">
                         <div class="item-header">
@@ -1567,15 +1616,15 @@
                             <div class="form-group">
                                 <label>Color de fondo</label>
                                 <div class="color-input-wrapper">
-                                    <input type="color" data-item-field="background_color" value="#1A1A1A">
-                                    <input type="text" data-item-field="background_color" value="#1A1A1A" placeholder="#1A1A1A" class="color-text-input">
+                                    <input type="color" class="color-picker-input" data-sync-target="bg-color-${uniqueId}" value="#1A1A1A">
+                                    <input type="text" id="bg-color-${uniqueId}" data-item-field="background_color" value="#1A1A1A" placeholder="#1A1A1A" class="color-text-input">
                                 </div>
                             </div>
                             <div class="form-group">
                                 <label>Color del texto</label>
                                 <div class="color-input-wrapper">
-                                    <input type="color" data-item-field="text_color" value="#ffffff">
-                                    <input type="text" data-item-field="text_color" value="#ffffff" placeholder="#ffffff" class="color-text-input">
+                                    <input type="color" class="color-picker-input" data-sync-target="text-color-${uniqueId}" value="#ffffff">
+                                    <input type="text" id="text-color-${uniqueId}" data-item-field="text_color" value="#ffffff" placeholder="#ffffff" class="color-text-input">
                                 </div>
                             </div>
                         </div>

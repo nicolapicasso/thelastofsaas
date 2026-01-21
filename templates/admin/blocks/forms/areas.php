@@ -53,15 +53,15 @@
                     <div class="form-group">
                         <label>Color de fondo</label>
                         <div class="color-input-wrapper">
-                            <input type="color" data-item-field="background_color" value="<?= htmlspecialchars($item['background_color'] ?? '#1A1A1A') ?>">
-                            <input type="text" data-item-field="background_color" value="<?= htmlspecialchars($item['background_color'] ?? '#1A1A1A') ?>" placeholder="#1A1A1A" class="color-text-input">
+                            <input type="color" class="color-picker-input" data-sync-target="bg-color-<?= $index ?>" value="<?= htmlspecialchars($item['background_color'] ?? '#1A1A1A') ?>">
+                            <input type="text" id="bg-color-<?= $index ?>" data-item-field="background_color" value="<?= htmlspecialchars($item['background_color'] ?? '#1A1A1A') ?>" placeholder="#1A1A1A" class="color-text-input">
                         </div>
                     </div>
                     <div class="form-group">
                         <label>Color del texto (opcional)</label>
                         <div class="color-input-wrapper">
-                            <input type="color" data-item-field="text_color" value="<?= htmlspecialchars($item['text_color'] ?? '#ffffff') ?>">
-                            <input type="text" data-item-field="text_color" value="<?= htmlspecialchars($item['text_color'] ?? '#ffffff') ?>" placeholder="#ffffff" class="color-text-input">
+                            <input type="color" class="color-picker-input" data-sync-target="text-color-<?= $index ?>" value="<?= htmlspecialchars($item['text_color'] ?? '#ffffff') ?>">
+                            <input type="text" id="text-color-<?= $index ?>" data-item-field="text_color" value="<?= htmlspecialchars($item['text_color'] ?? '#ffffff') ?>" placeholder="#ffffff" class="color-text-input">
                         </div>
                     </div>
                 </div>
@@ -185,8 +185,8 @@
             <div class="form-group">
                 <label>Color del texto (general)</label>
                 <div class="color-input-wrapper">
-                    <input type="color" data-setting="text_color" value="<?= htmlspecialchars($settings['text_color'] ?? '#ffffff') ?>">
-                    <input type="text" data-setting="text_color" value="<?= htmlspecialchars($settings['text_color'] ?? '#ffffff') ?>" placeholder="#ffffff" class="color-text-input">
+                    <input type="color" class="color-picker-input" data-sync-target="setting-text-color" value="<?= htmlspecialchars($settings['text_color'] ?? '#ffffff') ?>">
+                    <input type="text" id="setting-text-color" data-setting="text_color" value="<?= htmlspecialchars($settings['text_color'] ?? '#ffffff') ?>" placeholder="#ffffff" class="color-text-input">
                 </div>
             </div>
         </div>
