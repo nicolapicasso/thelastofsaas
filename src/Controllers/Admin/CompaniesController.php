@@ -10,6 +10,7 @@ use App\Models\CompanyContact;
 use App\Models\Sponsor;
 use App\Helpers\Sanitizer;
 use App\Helpers\Slug;
+use App\Services\OmniwalletService;
 
 /**
  * Companies Controller
@@ -132,11 +133,41 @@ class CompaniesController extends Controller
                 }
             }
 
+            // Omniwallet integration - sync contacts and award points
+            $this->processOmniwalletCompanyRegistration($companyId, $data);
+
             $this->flash('success', 'Empresa creada correctamente.');
             $this->redirect('/admin/companies/' . $companyId . '/edit');
         } catch (\Exception $e) {
             $this->flash('error', 'Error al crear la empresa: ' . $e->getMessage());
             $this->redirect('/admin/companies/create');
+        }
+    }
+
+    /**
+     * Process Omniwallet integration for company registration
+     */
+    private function processOmniwalletCompanyRegistration(int $companyId, array $companyData): void
+    {
+        try {
+            $omniwallet = new OmniwalletService();
+
+            if (!$omniwallet->isEnabled()) {
+                return;
+            }
+
+            // Get contacts for this company
+            $contacts = $this->contactModel->where(['company_id' => $companyId]);
+
+            if (empty($contacts)) {
+                return;
+            }
+
+            $companyData['id'] = $companyId;
+            $omniwallet->processCompanyRegistration($companyData, $contacts);
+        } catch (\Exception $e) {
+            // Log error but don't fail the main operation
+            error_log('Omniwallet company registration error: ' . $e->getMessage());
         }
     }
 

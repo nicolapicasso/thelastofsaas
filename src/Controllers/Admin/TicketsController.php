@@ -10,6 +10,7 @@ use App\Models\TicketType;
 use App\Models\Event;
 use App\Models\Sponsor;
 use App\Helpers\Sanitizer;
+use App\Services\OmniwalletService;
 
 /**
  * Tickets Controller
@@ -128,9 +129,32 @@ class TicketsController extends Controller
 
         try {
             $this->ticketModel->checkIn((int) $id);
+
+            // Omniwallet integration - award points for check-in
+            $this->processOmniwalletCheckin($ticket);
+
             $this->jsonSuccess(['message' => 'Check-in realizado correctamente.']);
         } catch (\Exception $e) {
             $this->jsonError('Error al hacer check-in: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Process Omniwallet integration for check-in
+     */
+    private function processOmniwalletCheckin(array $ticket): void
+    {
+        try {
+            $omniwallet = new OmniwalletService();
+
+            if (!$omniwallet->isEnabled()) {
+                return;
+            }
+
+            $omniwallet->processCheckin($ticket);
+        } catch (\Exception $e) {
+            // Log error but don't fail the main operation
+            error_log('Omniwallet check-in error: ' . $e->getMessage());
         }
     }
 

@@ -200,6 +200,102 @@
         </div>
     </div>
 
+    <!-- Omniwallet Integration -->
+    <div class="card">
+        <div class="card-header">
+            <h3><i class="fas fa-wallet"></i> Omniwallet</h3>
+        </div>
+        <div class="card-body">
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle"></i> Integración con <strong>Omniwallet</strong> para gestión de puntos de fidelización.
+                <a href="https://omniwallet.cloud" target="_blank">Más información</a>
+            </div>
+
+            <div class="form-group">
+                <label class="form-check">
+                    <input type="checkbox" name="settings[omniwallet_enabled]" value="1" <?= !empty($settings['omniwallet_enabled']) && $settings['omniwallet_enabled'] !== '0' ? 'checked' : '' ?> onchange="toggleOmniwalletSettings(this.checked)">
+                    <span><strong>Activar integración Omniwallet</strong></span>
+                </label>
+            </div>
+
+            <div id="omniwallet-settings" style="<?= empty($settings['omniwallet_enabled']) || $settings['omniwallet_enabled'] === '0' ? 'opacity: 0.5; pointer-events: none;' : '' ?>">
+                <hr>
+                <h4 style="margin-bottom: 1rem;"><i class="fas fa-key"></i> Credenciales API</h4>
+
+                <div class="form-group">
+                    <label class="form-label">Account (Subdominio)</label>
+                    <input type="text" name="settings[omniwallet_account]" class="form-control" value="<?= htmlspecialchars($settings['omniwallet_account'] ?? '') ?>" placeholder="tu-cuenta" style="max-width: 300px;">
+                    <small class="text-muted">El subdominio de tu cuenta Omniwallet (ej: si accedes a <code>miempresa.omniwallet.cloud</code>, escribe <code>miempresa</code>)</small>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">API Token</label>
+                    <input type="password" name="settings[omniwallet_api_token]" class="form-control" value="<?= htmlspecialchars($settings['omniwallet_api_token'] ?? '') ?>" placeholder="Bearer token de la API">
+                    <small class="text-muted">Puedes obtener tu token en el panel de Omniwallet → Integraciones</small>
+                </div>
+
+                <div class="form-group">
+                    <button type="button" class="btn btn-outline btn-sm" onclick="testOmniwalletConnection()">
+                        <i class="fas fa-plug"></i> Probar conexión
+                    </button>
+                    <span id="omniwallet-test-result"></span>
+                </div>
+
+                <hr>
+                <h4 style="margin-bottom: 1rem;"><i class="fas fa-star"></i> Puntos por Acción</h4>
+                <p class="text-muted" style="margin-bottom: 1rem;">Configura cuántos puntos se otorgan en cada acción. Usa 0 para desactivar una acción específica.</p>
+
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem;">
+                    <div class="form-group">
+                        <label class="form-label">Registro de Sponsor</label>
+                        <input type="number" name="settings[omniwallet_points_sponsor_registration]" class="form-control" value="<?= htmlspecialchars($settings['omniwallet_points_sponsor_registration'] ?? '100') ?>" min="0">
+                        <small class="text-muted">Al crear un sponsor</small>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Registro de Empresa</label>
+                        <input type="number" name="settings[omniwallet_points_company_registration]" class="form-control" value="<?= htmlspecialchars($settings['omniwallet_points_company_registration'] ?? '50') ?>" min="0">
+                        <small class="text-muted">Al crear una empresa</small>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Compra de Entrada</label>
+                        <input type="number" name="settings[omniwallet_points_ticket_purchase]" class="form-control" value="<?= htmlspecialchars($settings['omniwallet_points_ticket_purchase'] ?? '200') ?>" min="0">
+                        <small class="text-muted">Al comprar un ticket</small>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Check-in en Evento</label>
+                        <input type="number" name="settings[omniwallet_points_checkin]" class="form-control" value="<?= htmlspecialchars($settings['omniwallet_points_checkin'] ?? '50') ?>" min="0">
+                        <small class="text-muted">Al hacer check-in</small>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Selección de SaaS</label>
+                        <input type="number" name="settings[omniwallet_points_saas_selection]" class="form-control" value="<?= htmlspecialchars($settings['omniwallet_points_saas_selection'] ?? '25') ?>" min="0">
+                        <small class="text-muted">Empresa selecciona sponsor</small>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Match Realizado</label>
+                        <input type="number" name="settings[omniwallet_points_match]" class="form-control" value="<?= htmlspecialchars($settings['omniwallet_points_match'] ?? '75') ?>" min="0">
+                        <small class="text-muted">Al producirse un match</small>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Reunión Programada</label>
+                        <input type="number" name="settings[omniwallet_points_meeting_scheduled]" class="form-control" value="<?= htmlspecialchars($settings['omniwallet_points_meeting_scheduled'] ?? '100') ?>" min="0">
+                        <small class="text-muted">Al agendar reunión</small>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Match en Vivo (Empresa)</label>
+                        <input type="number" name="settings[omniwallet_points_live_match_company]" class="form-control" value="<?= htmlspecialchars($settings['omniwallet_points_live_match_company'] ?? '150') ?>" min="0">
+                        <small class="text-muted">Match+reunión en vivo</small>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Match en Vivo (Sponsor)</label>
+                        <input type="number" name="settings[omniwallet_points_live_match_sponsor]" class="form-control" value="<?= htmlspecialchars($settings['omniwallet_points_live_match_sponsor'] ?? '150') ?>" min="0">
+                        <small class="text-muted">Match+reunión en vivo</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Save Button -->
     <div class="card">
         <div class="card-body">
@@ -209,6 +305,43 @@
         </div>
     </div>
 </form>
+
+<script>
+function toggleOmniwalletSettings(enabled) {
+    const settings = document.getElementById('omniwallet-settings');
+    if (enabled) {
+        settings.style.opacity = '1';
+        settings.style.pointerEvents = 'auto';
+    } else {
+        settings.style.opacity = '0.5';
+        settings.style.pointerEvents = 'none';
+    }
+}
+
+function testOmniwalletConnection() {
+    const resultSpan = document.getElementById('omniwallet-test-result');
+    resultSpan.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Probando...';
+
+    fetch('/admin/tlos-settings/test-omniwallet', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: '_csrf_token=<?= $csrf_token ?>&account=' + encodeURIComponent(document.querySelector('[name="settings[omniwallet_account]"]').value) + '&token=' + encodeURIComponent(document.querySelector('[name="settings[omniwallet_api_token]"]').value)
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            resultSpan.innerHTML = '<span style="color: green;"><i class="fas fa-check-circle"></i> ' + data.message + '</span>';
+        } else {
+            resultSpan.innerHTML = '<span style="color: red;"><i class="fas fa-times-circle"></i> ' + data.message + '</span>';
+        }
+    })
+    .catch(err => {
+        resultSpan.innerHTML = '<span style="color: red;"><i class="fas fa-times-circle"></i> Error de conexión</span>';
+    });
+}
+</script>
 
 <style>
 .form-check {

@@ -71,6 +71,7 @@ class TlosSettingsController extends Controller
                 'auto_match_notification' => 'matching',
                 'meeting_confirmation_email' => 'meetings',
                 'meeting_reminder_email' => 'meetings',
+                'omniwallet_enabled' => 'omniwallet',
             ];
 
             // Handle unchecked checkboxes for known boolean settings
@@ -207,6 +208,72 @@ class TlosSettingsController extends Controller
 
         // TODO: Implement actual Stripe connection test
         $this->jsonSuccess(['message' => 'Conexión con Stripe verificada.']);
+    }
+
+    /**
+     * Test Omniwallet API connection
+     */
+    public function testOmniwallet(): void
+    {
+        $this->requireAuth();
+
+        if (!$this->validateCsrf()) {
+            $this->jsonError('Sesión expirada.');
+            return;
+        }
+
+        $account = $this->getPost('account', '');
+        $token = $this->getPost('token', '');
+
+        if (empty($account) || empty($token)) {
+            $this->jsonError('Account y API Token son requeridos.');
+            return;
+        }
+
+        // Test the connection directly without relying on saved settings
+        $url = 'https://api.omniwallet.cloud/v1/settings';
+
+        $headers = [
+            'Authorization: Bearer ' . $token,
+            'X-Omniwallet-Account: ' . $account,
+            'Accept: application/vnd.api+json',
+            'Content-Type: application/vnd.api+json',
+        ];
+
+        $ch = curl_init();
+        curl_setopt_array($ch, [
+            CURLOPT_URL => $url,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_HTTPHEADER => $headers,
+            CURLOPT_TIMEOUT => 15,
+        ]);
+
+        $response = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $error = curl_error($ch);
+        curl_close($ch);
+
+        if ($error) {
+            $this->jsonError('Error de conexión: ' . $error);
+            return;
+        }
+
+        if ($httpCode === 401) {
+            $this->jsonError('Token de API no válido.');
+            return;
+        }
+
+        if ($httpCode === 404) {
+            $this->jsonError('Account no encontrado. Verifica el subdominio.');
+            return;
+        }
+
+        if ($httpCode >= 400) {
+            $this->jsonError('Error HTTP ' . $httpCode);
+            return;
+        }
+
+        $this->jsonSuccess(['message' => 'Conexión exitosa con Omniwallet']);
     }
 
     /**

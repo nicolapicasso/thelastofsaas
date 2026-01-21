@@ -10,8 +10,11 @@ use App\Models\MeetingSlot;
 use App\Models\MeetingAssignment;
 use App\Models\Event;
 use App\Models\Sponsor;
+use App\Models\SponsorContact;
 use App\Models\Company;
+use App\Models\CompanyContact;
 use App\Helpers\Sanitizer;
+use App\Services\OmniwalletService;
 
 /**
  * Meetings Controller
@@ -342,9 +345,47 @@ class MeetingsController extends Controller
                 return;
             }
 
+            // Omniwallet integration - award points for meeting scheduled
+            $this->processOmniwalletMeetingScheduled($companyId, $sponsorId, $eventId);
+
             $this->jsonSuccess(['id' => $assignmentId, 'message' => 'Reunión asignada correctamente.']);
         } catch (\Exception $e) {
             $this->jsonError('Error: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Process Omniwallet integration for admin-assigned meeting
+     */
+    private function processOmniwalletMeetingScheduled(int $companyId, int $sponsorId, int $eventId): void
+    {
+        try {
+            $omniwallet = new OmniwalletService();
+
+            if (!$omniwallet->isEnabled()) {
+                return;
+            }
+
+            // Get company and sponsor data
+            $company = $this->companyModel->find($companyId);
+            $sponsor = $this->sponsorModel->find($sponsorId);
+
+            if (!$company || !$sponsor) {
+                return;
+            }
+
+            // Get company contacts
+            $companyContactModel = new CompanyContact();
+            $contacts = $companyContactModel->where(['company_id' => $companyId]);
+
+            if (empty($contacts)) {
+                return;
+            }
+
+            // Award meeting scheduled points to company contacts
+            $omniwallet->processMeetingScheduled($company, $contacts, $sponsor, $eventId);
+        } catch (\Exception $e) {
+            error_log('Omniwallet meeting scheduled error: ' . $e->getMessage());
         }
     }
 

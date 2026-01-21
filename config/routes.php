@@ -397,6 +397,7 @@ $router->get('/admin/tlos-settings/get', 'Admin\\TlosSettingsController', 'get')
 $router->post('/admin/tlos-settings/set', 'Admin\\TlosSettingsController', 'set');
 $router->post('/admin/tlos-settings/test-email', 'Admin\\TlosSettingsController', 'testEmail');
 $router->post('/admin/tlos-settings/test-stripe', 'Admin\\TlosSettingsController', 'testStripe');
+$router->post('/admin/tlos-settings/test-omniwallet', 'Admin\\TlosSettingsController', 'testOmniwallet');
 
 // Rooms
 $router->get('/admin/rooms', 'Admin\\RoomsController', 'index');

@@ -10,6 +10,7 @@ use App\Models\SponsorContact;
 use App\Models\Event;
 use App\Helpers\Sanitizer;
 use App\Helpers\Slug;
+use App\Services\OmniwalletService;
 
 /**
  * Sponsors Controller
@@ -108,11 +109,41 @@ class SponsorsController extends Controller
             // Save contacts
             $this->saveContacts($sponsorId);
 
+            // Omniwallet integration - sync contacts and award points
+            $this->processOmniwalletSponsorRegistration($sponsorId, $data);
+
             $this->flash('success', 'Sponsor creado correctamente.');
             $this->redirect('/admin/sponsors/' . $sponsorId . '/edit');
         } catch (\Exception $e) {
             $this->flash('error', 'Error al crear el sponsor: ' . $e->getMessage());
             $this->redirect('/admin/sponsors/create');
+        }
+    }
+
+    /**
+     * Process Omniwallet integration for sponsor registration
+     */
+    private function processOmniwalletSponsorRegistration(int $sponsorId, array $sponsorData): void
+    {
+        try {
+            $omniwallet = new OmniwalletService();
+
+            if (!$omniwallet->isEnabled()) {
+                return;
+            }
+
+            // Get contacts for this sponsor
+            $contacts = $this->contactModel->where(['sponsor_id' => $sponsorId]);
+
+            if (empty($contacts)) {
+                return;
+            }
+
+            $sponsorData['id'] = $sponsorId;
+            $omniwallet->processSponsorRegistration($sponsorData, $contacts);
+        } catch (\Exception $e) {
+            // Log error but don't fail the main operation
+            error_log('Omniwallet sponsor registration error: ' . $e->getMessage());
         }
     }
 

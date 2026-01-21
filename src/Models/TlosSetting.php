@@ -168,6 +168,7 @@ class TlosSetting extends Model
             'matching' => 'Matching',
             'stripe' => 'Stripe / Pagos',
             'meetings' => 'Reuniones',
+            'omniwallet' => 'Omniwallet',
         ];
     }
 
@@ -265,6 +266,48 @@ class TlosSetting extends Model
             'gold' => $this->getPreMeetingLimit('gold'),
             'silver' => $this->getPreMeetingLimit('silver'),
             'bronze' => $this->getPreMeetingLimit('bronze'),
+        ];
+    }
+
+    /**
+     * Helper: Check if Omniwallet integration is enabled
+     */
+    public function isOmniwalletEnabled(): bool
+    {
+        return (bool) $this->get('omniwallet_enabled', false);
+    }
+
+    /**
+     * Helper: Get Omniwallet API token
+     */
+    public function getOmniwalletApiToken(): string
+    {
+        return $this->get('omniwallet_api_token', '');
+    }
+
+    /**
+     * Helper: Get Omniwallet account subdomain
+     */
+    public function getOmniwalletAccount(): string
+    {
+        return $this->get('omniwallet_account', '');
+    }
+
+    /**
+     * Helper: Get all Omniwallet points configuration
+     */
+    public function getOmniwalletPointsConfig(): array
+    {
+        return [
+            'sponsor_registration' => (int) $this->get('omniwallet_points_sponsor_registration', 0),
+            'company_registration' => (int) $this->get('omniwallet_points_company_registration', 0),
+            'ticket_purchase' => (int) $this->get('omniwallet_points_ticket_purchase', 0),
+            'checkin' => (int) $this->get('omniwallet_points_checkin', 0),
+            'saas_selection' => (int) $this->get('omniwallet_points_saas_selection', 0),
+            'match' => (int) $this->get('omniwallet_points_match', 0),
+            'meeting_scheduled' => (int) $this->get('omniwallet_points_meeting_scheduled', 0),
+            'live_match_company' => (int) $this->get('omniwallet_points_live_match_company', 0),
+            'live_match_sponsor' => (int) $this->get('omniwallet_points_live_match_sponsor', 0),
         ];
     }
 }

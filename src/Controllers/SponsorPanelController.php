@@ -6,10 +6,12 @@ use App\Core\Controller;
 use App\Models\Event;
 use App\Models\Sponsor;
 use App\Models\Company;
+use App\Models\CompanyContact;
 use App\Models\SponsorInviteCode;
 use App\Models\TlosSetting;
 use App\Models\Message;
 use App\Services\EmailService;
+use App\Services\OmniwalletService;
 
 /**
  * Sponsor Panel Controller
@@ -371,11 +373,43 @@ class SponsorPanelController extends Controller
             }
         }
 
+        // Omniwallet integration - award points for match (company contacts only)
+        if ($isMatch) {
+            $this->processOmniwalletMatchFromSponsor($company, $sponsor, $event);
+        }
+
         $this->json([
             'success' => true,
             'is_match' => $isMatch,
             'message' => $isMatch ? '¡Match mutuo!' : 'Empresa seleccionada'
         ]);
+    }
+
+    /**
+     * Process Omniwallet integration when sponsor selection creates a match
+     */
+    private function processOmniwalletMatchFromSponsor(array $company, array $sponsor, array $event): void
+    {
+        try {
+            $omniwallet = new OmniwalletService();
+
+            if (!$omniwallet->isEnabled()) {
+                return;
+            }
+
+            // Get company contacts
+            $contactModel = new CompanyContact();
+            $contacts = $contactModel->where(['company_id' => $company['id']]);
+
+            if (empty($contacts)) {
+                return;
+            }
+
+            // Award match points to company contacts
+            $omniwallet->processMatch($company, $contacts, $sponsor, $event['id']);
+        } catch (\Exception $e) {
+            error_log('Omniwallet match error: ' . $e->getMessage());
+        }
     }
 
     /**

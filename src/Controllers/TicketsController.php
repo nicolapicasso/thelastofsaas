@@ -11,6 +11,7 @@ use App\Models\SponsorInviteCode;
 use App\Services\StripeService;
 use App\Services\EmailService;
 use App\Services\QRService;
+use App\Services\OmniwalletService;
 
 /**
  * Frontend Tickets Controller
@@ -381,6 +382,9 @@ class TicketsController extends Controller
         // Send confirmation email
         if ($status === 'confirmed') {
             $this->sendConfirmationEmail($ticket, $event);
+
+            // Omniwallet integration - award points for ticket purchase
+            $this->processOmniwalletTicketPurchase($ticket);
         }
 
         $this->json([
@@ -439,11 +443,33 @@ class TicketsController extends Controller
             // Send confirmation email
             $this->sendConfirmationEmail($ticket, $event);
 
+            // Omniwallet integration - award points for ticket purchase
+            $this->processOmniwalletTicketPurchase($ticket);
+
             $this->redirect("/eventos/{$eventSlug}/ticket/{$ticket['code']}");
 
         } catch (\Exception $e) {
             error_log('Payment verification error: ' . $e->getMessage());
             $this->redirect("/eventos/{$eventSlug}/registro?error=payment");
+        }
+    }
+
+    /**
+     * Process Omniwallet integration for ticket purchase
+     */
+    private function processOmniwalletTicketPurchase(array $ticket): void
+    {
+        try {
+            $omniwallet = new OmniwalletService();
+
+            if (!$omniwallet->isEnabled()) {
+                return;
+            }
+
+            $omniwallet->processTicketPurchase($ticket);
+        } catch (\Exception $e) {
+            // Log error but don't fail the main operation
+            error_log('Omniwallet ticket purchase error: ' . $e->getMessage());
         }
     }
 
