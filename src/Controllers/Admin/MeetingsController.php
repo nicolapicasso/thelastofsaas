@@ -459,4 +459,42 @@ class MeetingsController extends Controller
             'flash' => $this->getFlash(),
         ]);
     }
+
+    /**
+     * Badges for QR printing
+     */
+    public function badges(): void
+    {
+        $this->requireAuth();
+
+        $eventId = (int) $this->getQuery('event_id');
+        $type = $this->getQuery('type', 'all'); // all, sponsors, companies
+        $events = $this->eventModel->all(['start_date' => 'DESC']);
+
+        if (!$eventId && !empty($events)) {
+            $eventId = $events[0]['id'];
+        }
+
+        $sponsors = [];
+        $companies = [];
+
+        if ($eventId) {
+            if ($type === 'all' || $type === 'sponsors') {
+                $sponsors = $this->sponsorModel->getByEvent($eventId);
+            }
+            if ($type === 'all' || $type === 'companies') {
+                $companies = $this->companyModel->getByEvent($eventId);
+            }
+        }
+
+        $this->renderAdmin('meetings/badges', [
+            'title' => 'Badges QR para Imprimir',
+            'sponsors' => $sponsors,
+            'companies' => $companies,
+            'events' => $events,
+            'currentEventId' => $eventId,
+            'currentType' => $type,
+            'flash' => $this->getFlash(),
+        ]);
+    }
 }

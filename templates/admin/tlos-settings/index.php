@@ -141,6 +141,30 @@
                 </label>
                 <small class="text-muted">Enviar recordatorio antes del evento</small>
             </div>
+
+            <hr style="margin: 1.5rem 0;">
+
+            <h4 style="margin-bottom: 1rem;"><i class="fas fa-medal"></i> Límite de Reuniones Pre-agendadas por Nivel</h4>
+            <p class="text-muted" style="margin-bottom: 1rem;">Número máximo de reuniones que cada nivel de sponsor puede agendar antes del evento. Durante el evento (matching en vivo) no hay límite.</p>
+
+            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem;">
+                <div class="form-group">
+                    <label class="form-label"><span class="badge badge-platinum">Platino</span></label>
+                    <input type="number" name="settings[pre_meeting_limit_platinum]" class="form-control" value="<?= htmlspecialchars($settings['pre_meeting_limit_platinum'] ?? '15') ?>" min="0" max="100">
+                </div>
+                <div class="form-group">
+                    <label class="form-label"><span class="badge badge-gold">Oro</span></label>
+                    <input type="number" name="settings[pre_meeting_limit_gold]" class="form-control" value="<?= htmlspecialchars($settings['pre_meeting_limit_gold'] ?? '10') ?>" min="0" max="100">
+                </div>
+                <div class="form-group">
+                    <label class="form-label"><span class="badge badge-silver">Plata</span></label>
+                    <input type="number" name="settings[pre_meeting_limit_silver]" class="form-control" value="<?= htmlspecialchars($settings['pre_meeting_limit_silver'] ?? '5') ?>" min="0" max="100">
+                </div>
+                <div class="form-group">
+                    <label class="form-label"><span class="badge badge-bronze">Bronce</span></label>
+                    <input type="number" name="settings[pre_meeting_limit_bronze]" class="form-control" value="<?= htmlspecialchars($settings['pre_meeting_limit_bronze'] ?? '0') ?>" min="0" max="100">
+                </div>
+            </div>
         </div>
     </div>
 
@@ -196,5 +220,33 @@
 .form-check input[type="checkbox"] {
     width: 18px;
     height: 18px;
+}
+.badge-platinum {
+    background: linear-gradient(135deg, #E5E4E2 0%, #A8A9AD 100%);
+    color: #333;
+    padding: 0.35em 0.65em;
+    border-radius: 4px;
+    font-weight: 600;
+}
+.badge-gold {
+    background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+    color: #333;
+    padding: 0.35em 0.65em;
+    border-radius: 4px;
+    font-weight: 600;
+}
+.badge-silver {
+    background: linear-gradient(135deg, #C0C0C0 0%, #A0A0A0 100%);
+    color: #333;
+    padding: 0.35em 0.65em;
+    border-radius: 4px;
+    font-weight: 600;
+}
+.badge-bronze {
+    background: linear-gradient(135deg, #CD7F32 0%, #8B4513 100%);
+    color: #fff;
+    padding: 0.35em 0.65em;
+    border-radius: 4px;
+    font-weight: 600;
 }
 </style>

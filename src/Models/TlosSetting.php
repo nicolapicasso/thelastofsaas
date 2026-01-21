@@ -238,4 +238,33 @@ class TlosSetting extends Model
     {
         return $this->get('currency', 'eur');
     }
+
+    /**
+     * Helper: Get pre-meeting limit for sponsor tier
+     */
+    public function getPreMeetingLimit(string $tier): int
+    {
+        $tier = strtolower($tier);
+        $defaults = [
+            'platinum' => 15,
+            'gold' => 10,
+            'silver' => 5,
+            'bronze' => 0,
+        ];
+
+        return (int) $this->get('pre_meeting_limit_' . $tier, $defaults[$tier] ?? 0);
+    }
+
+    /**
+     * Helper: Get all pre-meeting limits
+     */
+    public function getAllPreMeetingLimits(): array
+    {
+        return [
+            'platinum' => $this->getPreMeetingLimit('platinum'),
+            'gold' => $this->getPreMeetingLimit('gold'),
+            'silver' => $this->getPreMeetingLimit('silver'),
+            'bronze' => $this->getPreMeetingLimit('bronze'),
+        ];
+    }
 }

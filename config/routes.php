@@ -362,6 +362,7 @@ $router->post('/admin/meetings/assign', 'Admin\\MeetingsController', 'assign');
 $router->post('/admin/meetings/assignments/{id}/cancel', 'Admin\\MeetingsController', 'cancelAssignment');
 $router->get('/admin/meetings/export', 'Admin\\MeetingsController', 'export');
 $router->get('/admin/meetings/matching', 'Admin\\MeetingsController', 'matching');
+$router->get('/admin/meetings/badges', 'Admin\\MeetingsController', 'badges');
 
 // Votings
 $router->get('/admin/votings', 'Admin\\VotingsController', 'index');
@@ -431,6 +432,14 @@ $router->get('/eventos/{slug}/sponsors', 'EventsController', 'sponsors');
 $router->get('/eventos/{slug}/reuniones', 'MeetingDisplayController', 'index');
 $router->get('/eventos/{slug}/reuniones/pantalla/{blockId}', 'MeetingDisplayController', 'roomDisplay');
 $router->get('/eventos/{slug}/reuniones/horario/{blockId}', 'MeetingDisplayController', 'schedule');
+
+// Live Match Scanner (PWA)
+$router->get('/eventos/{slug}/match', 'Frontend\\LiveMatchController', 'index');
+$router->get('/eventos/{slug}/match-manifest.json', 'Frontend\\LiveMatchController', 'manifest');
+$router->post('/eventos/{slug}/match/identify', 'Frontend\\LiveMatchController', 'identifySponsor');
+$router->post('/eventos/{slug}/match/scan-company', 'Frontend\\LiveMatchController', 'scanCompany');
+$router->post('/eventos/{slug}/match/select-slot', 'Frontend\\LiveMatchController', 'selectSlot');
+$router->get('/eventos/{slug}/match/meetings', 'Frontend\\LiveMatchController', 'getMeetings');
 
 // Public Sponsor Pages
 $router->get('/sponsors/{slug}', 'EventsController', 'sponsorPage');

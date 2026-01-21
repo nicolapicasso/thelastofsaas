@@ -21,8 +21,10 @@ foreach ($events as $evt) {
     </div>
     <div class="page-header-actions">
         <?php if ($currentEventSlug): ?>
+            <a href="/eventos/<?= htmlspecialchars($currentEventSlug) ?>/match" class="btn btn-primary" target="_blank"><i class="fas fa-qrcode"></i> Match en Vivo</a>
             <a href="/eventos/<?= htmlspecialchars($currentEventSlug) ?>/reuniones" class="btn btn-outline" target="_blank"><i class="fas fa-external-link-alt"></i> Ver Público</a>
         <?php endif; ?>
+        <a href="/admin/meetings/badges?event_id=<?= $currentEventId ?>" class="btn btn-outline"><i class="fas fa-id-badge"></i> Badges QR</a>
         <a href="/admin/meetings/assignments?event_id=<?= $currentEventId ?>" class="btn btn-outline"><i class="fas fa-calendar-check"></i> Reuniones</a>
         <a href="/admin/meetings/matching?event_id=<?= $currentEventId ?>" class="btn btn-outline"><i class="fas fa-handshake"></i> Matching</a>
     </div>
