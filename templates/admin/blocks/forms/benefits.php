@@ -129,6 +129,17 @@
                 </label>
             </div>
         </div>
+
+        <div class="form-row" id="icon-style-options">
+            <div class="form-group">
+                <label>Estilo de icono</label>
+                <select data-setting="icon_style">
+                    <option value="gradient" <?= ($settings['icon_style'] ?? 'gradient') === 'gradient' ? 'selected' : '' ?>>Degradado (colores marca)</option>
+                    <option value="light" <?= ($settings['icon_style'] ?? 'gradient') === 'light' ? 'selected' : '' ?>>Claro (icono negro sobre blanco)</option>
+                    <option value="dark" <?= ($settings['icon_style'] ?? 'gradient') === 'dark' ? 'selected' : '' ?>>Oscuro (icono blanco sobre negro)</option>
+                </select>
+            </div>
+        </div>
     </div>
 
     <?php include TEMPLATES_PATH . '/admin/partials/text-color-settings.php'; ?>
