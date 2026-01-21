@@ -497,6 +497,12 @@
                 <a href="/sponsor/matches/<?= $event['id'] ?>" class="nav-item">
                     <i class="fas fa-heart"></i> Mis Matches
                 </a>
+                <a href="/sponsor/codigos/<?= $event['id'] ?>" class="nav-item">
+                    <i class="fas fa-ticket-alt"></i> Mis Codigos
+                </a>
+                <a href="/sponsor/invitados/<?= $event['id'] ?>" class="nav-item">
+                    <i class="fas fa-users"></i> Mis Invitados
+                </a>
                 <a href="/sponsor/mensajes/<?= $event['id'] ?>" class="nav-item">
                     <i class="fas fa-envelope"></i> Mensajes
                 </a>
