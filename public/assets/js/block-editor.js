@@ -57,7 +57,16 @@
 
                     if (!imagesInput || !imagesList) return;
 
-                    // Use multiple selection mode for galleries
+                    // Debug logging
+                    console.log('=== IMAGE PICKER DEBUG ===');
+                    console.log('window.imagePicker exists:', !!window.imagePicker);
+                    console.log('window.imagePicker:', window.imagePicker);
+                    if (window.imagePicker) {
+                        console.log('openForMultipleSelection exists:', typeof window.imagePicker.openForMultipleSelection);
+                        console.log('openForEditor exists:', typeof window.imagePicker.openForEditor);
+                    }
+
+                    // Use multiple selection mode for galleries (with fallback to single)
                     if (window.imagePicker && window.imagePicker.openForMultipleSelection) {
                         window.imagePicker.openForMultipleSelection(function(urls) {
                             var images = [];
@@ -77,8 +86,26 @@
 
                             self.renderGalleryImages(imagesList, images);
                         });
+                    } else if (window.imagePicker && window.imagePicker.openForEditor) {
+                        // Fallback to single selection if multiple not available
+                        console.log('Fallback: using single selection mode');
+                        window.imagePicker.openForEditor(function(url) {
+                            var images = [];
+                            try {
+                                images = JSON.parse(imagesInput.value) || [];
+                            } catch (err) {
+                                images = [];
+                            }
+
+                            images.push({ url: url, alt: '' });
+
+                            imagesInput.value = JSON.stringify(images);
+                            imagesInput.dispatchEvent(new Event('change', { bubbles: true }));
+
+                            self.renderGalleryImages(imagesList, images);
+                        });
                     } else {
-                        alert('Selector de imágenes no disponible');
+                        alert('Selector de imágenes no disponible. Por favor, recargue la página.');
                     }
                 }
             });
