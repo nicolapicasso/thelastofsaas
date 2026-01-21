@@ -1,0 +1,2195 @@
+{
+  "collection": {
+    "info": {
+      "_postman_id": "87d70d02-32f8-4abf-8934-73f4e2b61ad8",
+      "name": "Omniwallet API V1",
+      "description": "### Url\n\n``` bash\nhttps://api.omniwallet.cloud/v1\n ```",
+      "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+      "createdAt": "2025-07-15T10:55:01.000Z",
+      "updatedAt": "2025-09-22T09:11:08.000Z",
+      "lastUpdatedBy": "41854426",
+      "uid": "41854426-87d70d02-32f8-4abf-8934-73f4e2b61ad8"
+    },
+    "item": [
+      {
+        "name": "Customers",
+        "item": [
+          {
+            "name": "Get customers data",
+            "event": [
+              {
+                "listen": "test",
+                "script": {
+                  "id": "5351b0b0-bdce-4775-a87f-989791f2ebaa",
+                  "exec": [
+                    "pm.test(\"Status code is 200\", function () {",
+                    "    pm.response.to.have.status(200);",
+                    "});"
+                  ],
+                  "type": "text/javascript",
+                  "packages": {}
+                }
+              },
+              {
+                "listen": "prerequest",
+                "script": {
+                  "id": "5bc1c455-f336-40ef-b356-ae9256f4f431",
+                  "exec": [
+                    ""
+                  ],
+                  "type": "text/javascript",
+                  "packages": {}
+                }
+              }
+            ],
+            "id": "5e652ec4-f0b0-429a-93c7-1a0c4f4a92d6",
+            "protocolProfileBehavior": {
+              "disableBodyPruning": true
+            },
+            "request": {
+              "method": "GET",
+              "header": [],
+              "url": {
+                "raw": "{{base_url}}/customers?page[size]=99&page[number]=1",
+                "host": [
+                  "{{base_url}}"
+                ],
+                "path": [
+                  "customers"
+                ],
+                "query": [
+                  {
+                    "key": "page[size]",
+                    "value": "99",
+                    "description": "Page size"
+                  },
+                  {
+                    "key": "page[number]",
+                    "value": "1",
+                    "description": "Page number"
+                  },
+                  {
+                    "key": "filter[createdAt]",
+                    "value": "{date}",
+                    "description": "Order by field: createdAt, updatedAt\n\n",
+                    "disabled": true
+                  },
+                  {
+                    "key": "sort",
+                    "value": "-createdAt",
+                    "description": "Allowed sorts: name, email, last_name, points, createdAt, updatedAt\n\n",
+                    "disabled": true
+                  }
+                ]
+              },
+              "description": "Get all customers, optionally filtered"
+            },
+            "response": [
+              {
+                "id": "e3543246-f4ee-475a-8e4a-d36b034dabc5",
+                "name": "OK",
+                "originalRequest": {
+                  "method": "GET",
+                  "header": [],
+                  "url": {
+                    "raw": "{{base_url}}/customers",
+                    "host": [
+                      "{{base_url}}"
+                    ],
+                    "path": [
+                      "customers"
+                    ],
+                    "query": [
+                      {
+                        "key": "page[size]",
+                        "value": "100",
+                        "description": "Page size",
+                        "disabled": true
+                      },
+                      {
+                        "key": "page[number]",
+                        "value": "1",
+                        "description": "Page number",
+                        "disabled": true
+                      },
+                      {
+                        "key": "filter[createdAt]",
+                        "value": "{date}",
+                        "description": "Order by field: createdAt, updatedAt\n\n",
+                        "disabled": true
+                      },
+                      {
+                        "key": "sort",
+                        "value": "-createdAt",
+                        "description": "Allowed sorts: name, email, last_name, points, createdAt, updatedAt\n\n",
+                        "disabled": true
+                      }
+                    ]
+                  }
+                },
+                "status": "OK",
+                "code": 200,
+                "_postman_previewlanguage": null,
+                "header": null,
+                "cookie": [],
+                "responseTime": null,
+                "body": "{\r\n  \"meta\": {\r\n    \"page\": {\r\n      \"currentPage\": \"integer\",\r\n      \"from\": \"integer\",\r\n      \"lastPage\": \"integer\",\r\n      \"perPage\": \"integer\",\r\n      \"to\": \"integer\",\r\n      \"total\": \"integer\"\r\n    }\r\n  },\r\n  \"json_api\": {\r\n    \"version\": \"string\"\r\n    },\r\n    \"links\": {\r\n      \"first\": \"string\",\r\n      \"last\": \"string\",\r\n      \"next\": \"string\"\r\n    }\r\n  },\r\n  \"data\": [\r\n    {\r\n      \"type\": \"string (default: customers)\",\r\n      \"id\": \"string (Customer email)\",\r\n      \"attributes\": {\r\n        \"name\": \"string\",\r\n        \"last_name\": \"string\",\r\n        \"email\": \"string\",\r\n        \"card\": \"string\",\r\n        \"phone\": \"string\",\r\n        \"points\": \"number\",\r\n        \"level\": \"string\",\r\n        \"updatedAt\": \"datetime\",\r\n        \"createdAt\": \"datetime\"\r\n      },\r\n      \"relationships\": \"object (Links object with customer relations)\",\r\n      \"links\": \"object (Action links for customer)\"\r\n    }\r\n  ]\r\n}\r\n",
+                "createdAt": "2025-08-06T07:26:57.000Z",
+                "updatedAt": "2025-08-06T08:23:34.000Z",
+                "uid": "41854426-e3543246-f4ee-475a-8e4a-d36b034dabc5"
+              }
+            ],
+            "createdAt": "2025-07-15T10:55:01.000Z",
+            "updatedAt": "2025-08-13T12:41:56.000Z",
+            "uid": "41854426-5e652ec4-f0b0-429a-93c7-1a0c4f4a92d6"
+          },
+          {
+            "name": "Create customer",
+            "event": [
+              {
+                "listen": "test",
+                "script": {
+                  "id": "3c3a6d1a-e8cf-4aec-8b9d-68524e74336f",
+                  "exec": [
+                    "pm.test(\"Status code is 200\", function () {",
+                    "    pm.response.to.have.status(200);",
+                    "});"
+                  ],
+                  "type": "text/javascript",
+                  "packages": {},
+                  "requests": {}
+                }
+              },
+              {
+                "listen": "prerequest",
+                "script": {
+                  "id": "797ee001-c941-4212-adf5-e3b6bed579d1",
+                  "exec": [
+                    ""
+                  ],
+                  "type": "text/javascript",
+                  "packages": {},
+                  "requests": {}
+                }
+              }
+            ],
+            "id": "610a234d-0af2-47a0-828f-7773aa3a8b1b",
+            "protocolProfileBehavior": {
+              "disableBodyPruning": true
+            },
+            "request": {
+              "method": "POST",
+              "header": [],
+              "body": {
+                "mode": "raw",
+                "raw": "{\r\n    \"data\": { \r\n        \"type\": \"string (required, default: customers)\",\r\n        \"attributes\": {\r\n            \"name\": \"string (required)\",\r\n            \"last_name\": \"string\",\r\n            \"email\": \"string (required)\",\r\n            \"phone\": \"string\",\r\n            \"card\": \"string (auto-generated if not provided)\",\r\n            \"points\": \"number\",\r\n            \"level\": \"string\"\r\n        }\r\n    }\r\n}",
+                "options": {
+                  "raw": {
+                    "language": "json"
+                  }
+                }
+              },
+              "url": {
+                "raw": "{{base_url}}/customers",
+                "host": [
+                  "{{base_url}}"
+                ],
+                "path": [
+                  "customers"
+                ]
+              }
+            },
+            "response": [
+              {
+                "id": "7219dedb-5bdd-42b7-960d-b73bb7795e01",
+                "name": "Create customer",
+                "originalRequest": {
+                  "method": "POST",
+                  "header": [],
+                  "body": {
+                    "mode": "raw",
+                    "raw": "{\r\n    \"data\": {\r\n        \"type\": \"string (required, default: customers)\",\r\n        \"attributes\": {\r\n            \"name\": \"string (required)\",\r\n            \"last_name\": \"string\",\r\n            \"email\": \"string (required)\",\r\n            \"phone\": \"string\",\r\n            \"card\": \"string (auto-generated if not provided)\",\r\n            \"points\": \"number\",\r\n            \"level\": \"string\"\r\n        }\r\n    }\r\n}",
+                    "options": {
+                      "raw": {
+                        "language": "json"
+                      }
+                    }
+                  },
+                  "url": {
+                    "raw": "{{base_url}}/customers",
+                    "host": [
+                      "{{base_url}}"
+                    ],
+                    "path": [
+                      "customers"
+                    ]
+                  }
+                },
+                "status": "Created",
+                "code": 201,
+                "_postman_previewlanguage": null,
+                "header": [],
+                "cookie": [],
+                "responseTime": null,
+                "body": "{\n  \"json_api\": {\n    \"version\": \"string\",\n    \"links\": {\n      \"self\": \"string\"\n    }\n  },\n  \"data\": {\n    \"type\": \"string (default: customers)\",\n    \"id\": \"string (Customer email)\",\n    \"attributes\": {\n      \"name\": \"string\",\n      \"last_name\": \"string\",\n      \"email\": \"string\",\n      \"card\": \"string\",\n      \"phone\": \"string\",\n      \"points\": \"number\",\n      \"level\": \"string\",\n      \"updatedAt\": \"datetime\",\n      \"createdAt\": \"datetime\"\n    },\n    \"relationships\": \"object (Links object with customer relations)\",\n    \"links\": \"object (Action links for customer)\"\n  }\n}\n",
+                "createdAt": "2025-07-31T07:32:23.000Z",
+                "updatedAt": "2025-08-06T07:37:56.000Z",
+                "uid": "41854426-7219dedb-5bdd-42b7-960d-b73bb7795e01"
+              }
+            ],
+            "createdAt": "2025-07-15T10:55:01.000Z",
+            "updatedAt": "2025-11-25T11:26:49.000Z",
+            "uid": "41854426-610a234d-0af2-47a0-828f-7773aa3a8b1b"
+          },
+          {
+            "name": "Update customer barcode",
+            "event": [
+              {
+                "listen": "test",
+                "script": {
+                  "id": "70b47aaa-ce47-4ab0-8700-d0c78145d56b",
+                  "exec": [
+                    "pm.test(\"Status code is 200\", function () {",
+                    "    pm.response.to.have.status(200);",
+                    "});"
+                  ],
+                  "type": "text/javascript",
+                  "packages": {}
+                }
+              },
+              {
+                "listen": "prerequest",
+                "script": {
+                  "id": "9a781ab3-6876-41c1-a2e1-5914880be504",
+                  "exec": [
+                    ""
+                  ],
+                  "type": "text/javascript",
+                  "packages": {}
+                }
+              }
+            ],
+            "id": "c9d8d053-a77a-4b09-87d3-a63dba10a719",
+            "protocolProfileBehavior": {
+              "disableBodyPruning": true
+            },
+            "request": {
+              "method": "POST",
+              "header": [],
+              "body": {
+                "mode": "raw",
+                "raw": "{\r\n    \"type\": \"CQR\"\r\n}",
+                "options": {
+                  "raw": {
+                    "language": "json"
+                  }
+                }
+              },
+              "url": {
+                "raw": "{{base_url}}/customers/:customer_email/barcode",
+                "host": [
+                  "{{base_url}}"
+                ],
+                "path": [
+                  "customers",
+                  ":customer_email",
+                  "barcode"
+                ],
+                "variable": [
+                  {
+                    "key": "customer_email",
+                    "value": ""
+                  }
+                ]
+              }
+            },
+            "response": [
+              {
+                "id": "98341f22-cea1-4a19-b7dd-6410241892e3",
+                "name": "OK",
+                "originalRequest": {
+                  "method": "POST",
+                  "header": [],
+                  "body": {
+                    "mode": "raw",
+                    "raw": "{\r\n    \"type\": \"CQR: For QR type | C128: For barcode type\"\r\n}",
+                    "options": {
+                      "raw": {
+                        "language": "json"
+                      }
+                    }
+                  },
+                  "url": {
+                    "raw": "{{base_url}}/customers/:customer_email/barcode",
+                    "host": [
+                      "{{base_url}}"
+                    ],
+                    "path": [
+                      "customers",
+                      ":customer_email",
+                      "barcode"
+                    ],
+                    "variable": [
+                      {
+                        "key": "customer_email",
+                        "value": ""
+                      }
+                    ]
+                  }
+                },
+                "code": 200,
+                "_postman_previewlanguage": null,
+                "header": null,
+                "cookie": [],
+                "responseTime": null,
+                "body": "{\r\n    \"data\":\"image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIIAAACCCAIAAAAFYYeqAAAACXBIWXMAAA7EAAAOxAGVKw4bAAACSUlEQVR4nO3dwW7DIBAAUVPl/3/ZPfTGIWK9CwzuvGubxNEIIbAdt/u+L+32s/sAdF1mgDADghkQzIBgBgQzIJgBwQwIZkAwA8Jn5J9aa7OP40/hBld3zN07076RowHBDAhmQDADwtAU3Zk3kWZemzmq7d/I0YBgBgQzIJgB4ckU3QlNSvMuBClcGK//Ro4GBDMgmAHBDAgFU/Q8oXXyrq3sEo4GBDMgmAHBDAjoKbpTuLNN42hAMAOCGRDMgFAwRc+bKkMLY+ap6UGOBgQzIJgBwQwIT6boZXvIoauyQ3/9/kHrORoQzIBgBgQzILQ3bRefy9GAYAYEMyCYAaHgvujQJD/vYunCje7C7zvI0YBgBgQzIJgB4ckqOjSDZWbOeZvVobdasNHgaEAwA4IZEMyAULDRnVlzFv4GWOZMdeitQocxyNGAYAYEMyCYAaF+Fd2BLJszFuy3OxoQzIBgBgQzIDw5F124Xg2Z90GZu7tKOBoQzIBgBgQzIKCv6F5201Xoc2e81tGAYAYEMyCYAeHgJ10tm7E739/Kc9EHMwOCGRDMgHDwk646mV/w3n6HlqMBwQwIZkAwAwL6SVeZy8V2nTB3FX0wMyCYAcEMCO95jEb318wlX6EFeQlHA4IZEMyAYAaEk6bowrmx8KdL3Oh+DzMgmAHBDAjoJ13N+yHO0CVfmX8e5GhAMAOCGRDMgIB+0lXIvAvCMjP2IEcDghkQzIBgBgT0fdH/h6MBwQwIZkAwA4IZEMyAYAYEMyCYAcEMCGZAMAPCLwwDBgYSjAkQAAAAAElFTkSuQmCC\"\r\n}",
+                "createdAt": "2025-08-06T09:01:57.000Z",
+                "updatedAt": "2025-08-06T09:06:35.000Z",
+                "uid": "41854426-98341f22-cea1-4a19-b7dd-6410241892e3"
+              }
+            ],
+            "createdAt": "2025-07-15T10:55:01.000Z",
+            "updatedAt": "2025-08-06T09:04:47.000Z",
+            "uid": "41854426-c9d8d053-a77a-4b09-87d3-a63dba10a719"
+          },
+          {
+            "name": "Get customer transactions",
+            "event": [
+              {
+                "listen": "test",
+                "script": {
+                  "id": "e5cf0b80-3d12-42a0-a4eb-f687828553a6",
+                  "exec": [
+                    "pm.test(\"Status code is 200\", function () {",
+                    "    pm.response.to.have.status(200);",
+                    "});"
+                  ],
+                  "type": "text/javascript",
+                  "packages": {}
+                }
+              }
+            ],
+            "id": "be12fe05-10c5-44dd-a0c6-9b3ba0de66e4",
+            "protocolProfileBehavior": {
+              "disableBodyPruning": true
+            },
+            "request": {
+              "method": "GET",
+              "header": [],
+              "url": {
+                "raw": "{{base_url}}/customers/:customer_email/transactions",
+                "host": [
+                  "{{base_url}}"
+                ],
+                "path": [
+                  "customers",
+                  ":customer_email",
+                  "transactions"
+                ],
+                "query": [
+                  {
+                    "key": "page[size]",
+                    "value": "15",
+                    "description": "Page size",
+                    "disabled": true
+                  },
+                  {
+                    "key": "page[number]",
+                    "value": "1",
+                    "description": "Page number",
+                    "disabled": true
+                  },
+                  {
+                    "key": "sort",
+                    "value": "external_id ",
+                    "description": "Allowed sorts: external_id, order_id, action, type, amount, points, exchange, total_points, created_at\n\n",
+                    "disabled": true
+                  },
+                  {
+                    "key": "filter[action]",
+                    "value": "addition",
+                    "description": "Order by field: external_id, type, action, order_id\n\n",
+                    "disabled": true
+                  }
+                ],
+                "variable": [
+                  {
+                    "key": "customer_email",
+                    "value": "example@example.com",
+                    "description": "Customer email"
+                  }
+                ]
+              }
+            },
+            "response": [
+              {
+                "id": "196af00d-0a3a-4495-9780-3785a6496739",
+                "name": "OK",
+                "originalRequest": {
+                  "method": "GET",
+                  "header": [],
+                  "url": {
+                    "raw": "http/tenant.base_omniwallet.test/v1/customers/:customer_email/transactions",
+                    "host": [
+                      "http"
+                    ],
+                    "path": [
+                      "tenant.base_omniwallet.test",
+                      "v1",
+                      "customers",
+                      ":customer_email",
+                      "transactions"
+                    ],
+                    "query": [
+                      {
+                        "key": "page[size]",
+                        "value": "15",
+                        "description": "Page size",
+                        "disabled": true
+                      },
+                      {
+                        "key": "page[number]",
+                        "value": "1",
+                        "description": "Page number",
+                        "disabled": true
+                      },
+                      {
+                        "key": "sort",
+                        "value": "-created_at",
+                        "description": "Allowed sorts: external_id, order_id, action, type, amount, points, exchange, total_points, created_at\n\n",
+                        "disabled": true
+                      },
+                      {
+                        "key": "filter[order_id]",
+                        "value": "test",
+                        "description": "Order by field: external_id, type, action, order_id\n\n",
+                        "disabled": true
+                      }
+                    ],
+                    "variable": [
+                      {
+                        "key": "customer_email",
+                        "value": "xavier@xavier.com"
+                      }
+                    ]
+                  }
+                },
+                "status": "OK",
+                "code": 200,
+                "_postman_previewlanguage": null,
+                "header": null,
+                "cookie": [],
+                "responseTime": null,
+                "body": "{\r\n  \"meta\": {\r\n    \"page\": {\r\n      \"currentPage\": \"integer\",\r\n      \"from\": \"integer\",\r\n      \"lastPage\": \"integer\",\r\n      \"perPage\": \"integer\",\r\n      \"to\": \"integer\",\r\n      \"total\": \"integer\"\r\n    }\r\n  },\r\n  \"json_api\": {\r\n    \"version\": \"string\"\r\n  },\r\n  \"links\": {\r\n      \"first\": \"string\",\r\n      \"last\": \"string\",\r\n      \"next\": \"string\"\r\n   },\r\n  \"data\": [\r\n    {\r\n      \"type\": \"string (default: transactions)\",\r\n      \"id\": \"string (Transaction ID)\",\r\n      \"attributes\": {\r\n        \"external_id\": \"string (must be unique, used to identify specific point registration)\",\r\n        \"order_id\": \"string (if not set, uses external_id)\",\r\n        \"action\": \"string (allowed: addition, subtraction)\",\r\n        \"type\": \"string (custom value identifying external service, e.g., 'Shop ecommerce purchase')\",\r\n        \"points\": \"number (points added or subtracted)\",\r\n        \"amount\": \"number (float value to exchange to points)\",\r\n        \"exchange\": \"number (value representing how much float = 1 point)\",\r\n        \"total_points\": \"number (customer total points after transaction)\",\r\n        \"created_at\": \"datetime\"\r\n      }\r\n    }\r\n  ]\r\n}",
+                "createdAt": "2025-08-06T09:10:05.000Z",
+                "updatedAt": "2025-08-06T09:16:23.000Z",
+                "uid": "41854426-196af00d-0a3a-4495-9780-3785a6496739"
+              }
+            ],
+            "createdAt": "2025-07-15T10:55:01.000Z",
+            "updatedAt": "2025-08-06T12:54:54.000Z",
+            "uid": "41854426-be12fe05-10c5-44dd-a0c6-9b3ba0de66e4"
+          },
+          {
+            "name": "Subtract points to customer",
+            "event": [
+              {
+                "listen": "test",
+                "script": {
+                  "id": "47b99658-2b77-4eb0-99a1-6d52fe818fd3",
+                  "exec": [
+                    "pm.test(\"Status code is 200\", function () {",
+                    "    pm.response.to.have.status(200);",
+                    "});"
+                  ],
+                  "type": "text/javascript",
+                  "packages": {}
+                }
+              }
+            ],
+            "id": "d47a131e-1c21-4722-8a41-29c6c0ffc9f4",
+            "protocolProfileBehavior": {
+              "disableBodyPruning": true
+            },
+            "request": {
+              "method": "POST",
+              "header": [],
+              "body": {
+                "mode": "raw",
+                "raw": "{\r\n  \"points\": \"number (required)\",\r\n  \"type\": \"string (required, maxLength: 255, custom value identifying external service, e.g., 'Shop ecommerce purchase')\",\r\n  \"external_id\": \"string (optional, maxLength: 255, must be unique, used to identify specific points registration of external service)\",\r\n  \"order_id\": \"string (maxLength: 255, optional, defaults to external_id if not provided)\",\r\n  \"content\": \"object (custom metadata)\"\r\n}\r\n",
+                "options": {
+                  "raw": {
+                    "language": "json"
+                  }
+                }
+              },
+              "url": {
+                "raw": "{{base_url}}/customers/:email/subtract-points",
+                "host": [
+                  "{{base_url}}"
+                ],
+                "path": [
+                  "customers",
+                  ":email",
+                  "subtract-points"
+                ],
+                "variable": [
+                  {
+                    "key": "email",
+                    "value": "example@example.com"
+                  }
+                ]
+              }
+            },
+            "response": [
+              {
+                "id": "446065aa-153e-4d4e-8a0e-a35b281d1b03",
+                "name": "OK",
+                "originalRequest": {
+                  "method": "POST",
+                  "header": [],
+                  "body": {
+                    "mode": "raw",
+                    "raw": "{\r\n  \"points\": \"number (required)\",\r\n  \"type\": \"string (required, maxLength: 255, custom value identifying external service, e.g., 'Shop ecommerce purchase')\",\r\n  \"external_id\": \"string (optional, maxLength: 255, must be unique, used to identify specific points registration of external service)\",\r\n  \"order_id\": \"string (maxLength: 255, optional, defaults to external_id if not provided)\",\r\n  \"content\": \"object (custom metadata)\"\r\n}\r\n",
+                    "options": {
+                      "raw": {
+                        "language": "json"
+                      }
+                    }
+                  },
+                  "url": {
+                    "raw": "{{base_url}}/customers/:email/subtract-points",
+                    "host": [
+                      "{{base_url}}"
+                    ],
+                    "path": [
+                      "customers",
+                      ":email",
+                      "subtract-points"
+                    ],
+                    "variable": [
+                      {
+                        "key": "email",
+                        "value": "xavier@xavier.com"
+                      }
+                    ]
+                  }
+                },
+                "status": "OK",
+                "code": 200,
+                "_postman_previewlanguage": null,
+                "header": null,
+                "cookie": [],
+                "responseTime": null,
+                "body": "{\r\n  \"type\": \"string (default: customers)\",\r\n  \"id\": \"string (Customer email)\",\r\n  \"attributes\": {\r\n    \"name\": \"string\",\r\n    \"last_name\": \"string\",\r\n    \"email\": \"string\",\r\n    \"card\": \"string\",\r\n    \"phone\": \"string\",\r\n    \"points\": \"number\",\r\n    \"level\": \"string\",\r\n    \"updatedAt\": \"datetime\",\r\n    \"createdAt\": \"datetime\"\r\n  },\r\n  \"relationships\": \"object (Links object with customer relations)\",\r\n  \"links\": \"object (Action links for customer)\"\r\n}\r\n",
+                "createdAt": "2025-08-06T09:20:04.000Z",
+                "updatedAt": "2025-08-07T08:52:11.000Z",
+                "uid": "41854426-446065aa-153e-4d4e-8a0e-a35b281d1b03"
+              }
+            ],
+            "createdAt": "2025-07-15T10:55:01.000Z",
+            "updatedAt": "2025-08-07T08:52:27.000Z",
+            "uid": "41854426-d47a131e-1c21-4722-8a41-29c6c0ffc9f4"
+          },
+          {
+            "name": "Add points to customer",
+            "event": [
+              {
+                "listen": "test",
+                "script": {
+                  "id": "f3cf67f8-520d-4f9e-ad0d-56ed28fa8229",
+                  "exec": [
+                    "pm.test(\"Status code is 200\", function () {",
+                    "    pm.response.to.have.status(200);",
+                    "});"
+                  ],
+                  "type": "text/javascript",
+                  "packages": {}
+                }
+              }
+            ],
+            "id": "b45efddb-15b6-4247-bcf2-625ca14a9e06",
+            "protocolProfileBehavior": {
+              "disableBodyPruning": true
+            },
+            "request": {
+              "method": "POST",
+              "header": [],
+              "body": {
+                "mode": "raw",
+                "raw": "{\r\n  \"points\": \"integer (required)\",\r\n  \"type\": \"string (required, custom value identifying external service, e.g., 'Custom integration')\",\r\n  \"external_id\": \"string (optional, maxLength: 255, must be unique, used to identify specific points registration of external service, e.g., '42227616-1c7b-11ee-be56-0242ac120002')\",\r\n  \"order_id\": \"string (optional)\",\r\n  \"content\": \"object (custom metadata, e.g., 'integration_transaction_url': 'url')\"\r\n}\r\n",
+                "options": {
+                  "raw": {
+                    "language": "json"
+                  }
+                }
+              },
+              "url": {
+                "raw": "{{base_url}}/customers/:email/add-points",
+                "host": [
+                  "{{base_url}}"
+                ],
+                "path": [
+                  "customers",
+                  ":email",
+                  "add-points"
+                ],
+                "variable": [
+                  {
+                    "key": "email",
+                    "value": "example@example.com"
+                  }
+                ]
+              }
+            },
+            "response": [
+              {
+                "id": "72450ceb-1547-4a97-b10d-fed6f7ee0297",
+                "name": "OK",
+                "originalRequest": {
+                  "method": "POST",
+                  "header": [],
+                  "body": {
+                    "mode": "raw",
+                    "raw": "{\r\n  \"points\": \"integer (required)\",\r\n  \"type\": \"string (Custom value identifying external service, e.g., 'Custom integration')\",\r\n  \"external_id\": \"string (optional, maxLength: 255, must be unique, used to identify specific points registration of external service, e.g., '42227616-1c7b-11ee-be56-0242ac120002')\",\r\n  \"order_id\": \"string (optional)\",\r\n  \"content\": \"object (custom metadata, e.g., 'integration_transaction_url': 'url')\"\r\n}\r\n",
+                    "options": {
+                      "raw": {
+                        "language": "json"
+                      }
+                    }
+                  },
+                  "url": {
+                    "raw": "{{base_url}}/customers/:email/add-points",
+                    "host": [
+                      "{{base_url}}"
+                    ],
+                    "path": [
+                      "customers",
+                      ":email",
+                      "add-points"
+                    ],
+                    "variable": [
+                      {
+                        "key": "email",
+                        "value": "example@example.com"
+                      }
+                    ]
+                  }
+                },
+                "code": 200,
+                "_postman_previewlanguage": null,
+                "header": null,
+                "cookie": [],
+                "responseTime": null,
+                "body": "{\r\n  \"type\": \"string (default: customers)\",\r\n  \"id\": \"string (Customer email)\",\r\n  \"attributes\": {\r\n    \"name\": \"string\",\r\n    \"last_name\": \"string\",\r\n    \"email\": \"string\",\r\n    \"card\": \"string\",\r\n    \"phone\": \"string\",\r\n    \"points\": \"number\",\r\n    \"level\": \"string\",\r\n    \"updatedAt\": \"datetime\",\r\n    \"createdAt\": \"datetime\"\r\n  },\r\n  \"relationships\": \"object (Links object with customer relations)\",\r\n  \"links\": \"object (Action links for customer)\"\r\n}\r\n",
+                "createdAt": "2025-08-06T09:28:34.000Z",
+                "updatedAt": "2025-08-07T08:51:53.000Z",
+                "uid": "41854426-72450ceb-1547-4a97-b10d-fed6f7ee0297"
+              }
+            ],
+            "createdAt": "2025-07-15T10:55:01.000Z",
+            "updatedAt": "2025-08-07T08:52:00.000Z",
+            "uid": "41854426-b45efddb-15b6-4247-bcf2-625ca14a9e06"
+          },
+          {
+            "name": "Add points from value to customer",
+            "event": [
+              {
+                "listen": "test",
+                "script": {
+                  "id": "293b6d86-d516-4ad4-b5d9-96b5f167f707",
+                  "exec": [
+                    "pm.test(\"Status code is 200\", function () {",
+                    "    pm.response.to.have.status(200);",
+                    "});"
+                  ],
+                  "type": "text/javascript",
+                  "packages": {},
+                  "requests": {}
+                }
+              }
+            ],
+            "id": "b145e5de-740a-4371-8fd2-215e3c7a07a3",
+            "protocolProfileBehavior": {
+              "disableBodyPruning": true
+            },
+            "request": {
+              "method": "POST",
+              "header": [],
+              "body": {
+                "mode": "raw",
+                "raw": "{\r\n    \"value\": \"number (required)\",\r\n    \"type\": \"string (required, maxLength: 255, custom value identifying external service, e.g., 'Shop ecommerce purchase')\",\r\n    \"external_id\": \"string (optional, maxLength: 255, must be unique, used to identify specific points registration of external service)\",\r\n    \"order_id\": \"string (optional, maxLength: 255, if not set, external_id will be used)\",\r\n    \"items\": [\r\n      \"Item (array of product SKUs or IDs that compose the order)\"\r\n    ],\r\n    \"metadata\": \"object (custom metadata)\",\r\n    \"source\": \"string (optional, enum: OFFLINE_PURCHASE | ONLINE_PURCHASE | BACKOFFICE | CATALOG_ORDER | POINTS_EXCHANGE | ACTIONS | GAME | REFERRAL | COUPONS | CANCELLATION | REVIEWS)\"\r\n  }",
+                "options": {
+                  "raw": {
+                    "language": "json"
+                  }
+                }
+              },
+              "url": {
+                "raw": "{{base_url}}/customers/:email/add-points-from-value",
+                "host": [
+                  "{{base_url}}"
+                ],
+                "path": [
+                  "customers",
+                  ":email",
+                  "add-points-from-value"
+                ],
+                "variable": [
+                  {
+                    "key": "email",
+                    "value": "example@example.com"
+                  }
+                ]
+              },
+              "description": "Add points with a decimal value. The conversion to points will be done automatically."
+            },
+            "response": [
+              {
+                "id": "f6808e45-b070-43b0-ad02-60a62a16ffe8",
+                "name": "OK",
+                "originalRequest": {
+                  "method": "POST",
+                  "header": [],
+                  "body": {
+                    "mode": "raw",
+                    "raw": "{\r\n  \"value\": \"number (required)\",\r\n  \"type\": \"string (required, maxLength: 255, custom value identifying external service, e.g., 'Shop ecommerce purchase')\",\r\n  \"external_id\": \"string (optional, maxLength: 255, must be unique, used to identify specific points registration of external service)\",\r\n  \"order_id\": \"string (optional, maxLength: 255, if not set, external_id will be used)\",\r\n  \"items\": [\r\n    \"Item (array of product SKUs or IDs that compose the order)\"\r\n  ],\r\n  \"metadata\": \"object (custom metadata)\"\r\n}\r\n",
+                    "options": {
+                      "raw": {
+                        "language": "json"
+                      }
+                    }
+                  },
+                  "url": {
+                    "raw": "{{base_url}}/customers/:email/add-points-from-value",
+                    "host": [
+                      "{{base_url}}"
+                    ],
+                    "path": [
+                      "customers",
+                      ":email",
+                      "add-points-from-value"
+                    ],
+                    "variable": [
+                      {
+                        "key": "email",
+                        "value": "example@example.com"
+                      }
+                    ]
+                  }
+                },
+                "status": "OK",
+                "code": 200,
+                "_postman_previewlanguage": null,
+                "header": null,
+                "cookie": [],
+                "responseTime": null,
+                "body": "{\r\n  \"type\": \"string (default: customers)\",\r\n  \"id\": \"string (Customer email)\",\r\n  \"attributes\": {\r\n    \"name\": \"string\",\r\n    \"last_name\": \"string\",\r\n    \"email\": \"string\",\r\n    \"card\": \"string\",\r\n    \"phone\": \"string\",\r\n    \"points\": \"number\",\r\n    \"level\": \"string\",\r\n    \"updatedAt\": \"datetime\",\r\n    \"createdAt\": \"datetime\"\r\n  },\r\n  \"relationships\": \"object (Links object with customer relations)\",\r\n  \"links\": \"object (Action links for customer)\"\r\n}\r\n",
+                "createdAt": "2025-08-06T09:50:05.000Z",
+                "updatedAt": "2025-08-06T09:50:33.000Z",
+                "uid": "41854426-f6808e45-b070-43b0-ad02-60a62a16ffe8"
+              }
+            ],
+            "createdAt": "2025-07-15T10:55:01.000Z",
+            "updatedAt": "2025-11-27T10:10:44.000Z",
+            "uid": "41854426-b145e5de-740a-4371-8fd2-215e3c7a07a3"
+          },
+          {
+            "name": "Generate customer token",
+            "event": [
+              {
+                "listen": "test",
+                "script": {
+                  "id": "aafa45eb-c1aa-4a3d-a876-a18cc72a6cd4",
+                  "exec": [
+                    "pm.test(\"Status code is 200\", function () {",
+                    "    pm.response.to.have.status(200);",
+                    "});"
+                  ],
+                  "type": "text/javascript",
+                  "packages": {}
+                }
+              },
+              {
+                "listen": "prerequest",
+                "script": {
+                  "id": "c67161c2-eca4-4a82-835a-e78ddff9bb0e",
+                  "exec": [
+                    ""
+                  ],
+                  "type": "text/javascript",
+                  "packages": {}
+                }
+              }
+            ],
+            "id": "cd7bfd75-65f0-499b-b9ec-7962c2b3a101",
+            "protocolProfileBehavior": {
+              "disableBodyPruning": true
+            },
+            "request": {
+              "method": "POST",
+              "header": [],
+              "body": {
+                "mode": "raw",
+                "raw": "{\r\n    \"email\": \"string\",\r\n    \"expiration_minutes\": \"integer\"\r\n}",
+                "options": {
+                  "raw": {
+                    "language": "json"
+                  }
+                }
+              },
+              "url": {
+                "raw": "{{base_url}}/customers/token",
+                "host": [
+                  "{{base_url}}"
+                ],
+                "path": [
+                  "customers",
+                  "token"
+                ]
+              }
+            },
+            "response": [
+              {
+                "id": "c85c7135-410b-4b71-bde7-2954f103ebf7",
+                "name": "OK",
+                "originalRequest": {
+                  "method": "POST",
+                  "header": [],
+                  "body": {
+                    "mode": "raw",
+                    "raw": "{\r\n    \"email\": \"string\",\r\n    \"expiration_minutes\": \"integer\"\r\n}",
+                    "options": {
+                      "raw": {
+                        "language": "json"
+                      }
+                    }
+                  },
+                  "url": {
+                    "raw": "{{base_url}}/customers/token",
+                    "host": [
+                      "{{base_url}}"
+                    ],
+                    "path": [
+                      "customers",
+                      "token"
+                    ]
+                  }
+                },
+                "status": "OK",
+                "code": 200,
+                "_postman_previewlanguage": "",
+                "header": [],
+                "cookie": [],
+                "responseTime": null,
+                "body": "{\r\n  \"type\": \"string (fixed value: auth_token)\",\r\n  \"email\": \"string (user's email address)\",\r\n  \"expires_at\": \"datetime (ISO 8601 timestamp when the token expires)\",\r\n  \"token\": \"string (authentication token)\"\r\n}\r\n",
+                "createdAt": "2025-08-06T10:06:43.000Z",
+                "updatedAt": "2025-08-07T08:17:56.000Z",
+                "uid": "41854426-c85c7135-410b-4b71-bde7-2954f103ebf7"
+              }
+            ],
+            "createdAt": "2025-07-15T10:55:01.000Z",
+            "updatedAt": "2025-08-07T08:17:46.000Z",
+            "uid": "41854426-cd7bfd75-65f0-499b-b9ec-7962c2b3a101"
+          },
+          {
+            "name": "Delete customer token",
+            "event": [
+              {
+                "listen": "test",
+                "script": {
+                  "id": "b879d143-8959-4667-b317-d077016e4376",
+                  "exec": [
+                    "pm.test(\"Status code is 200\", function () {",
+                    "    pm.response.to.have.status(200);",
+                    "});"
+                  ],
+                  "type": "text/javascript",
+                  "packages": {}
+                }
+              }
+            ],
+            "id": "76134399-4739-4b35-8989-dd458e98e1bf",
+            "protocolProfileBehavior": {
+              "disableBodyPruning": true
+            },
+            "request": {
+              "method": "DELETE",
+              "header": [],
+              "body": {
+                "mode": "raw",
+                "raw": "{\r\n    \"email\": \"string\"\r\n}",
+                "options": {
+                  "raw": {
+                    "language": "json"
+                  }
+                }
+              },
+              "url": {
+                "raw": "{{base_url}}/customers/token",
+                "host": [
+                  "{{base_url}}"
+                ],
+                "path": [
+                  "customers",
+                  "token"
+                ]
+              }
+            },
+            "response": [
+              {
+                "id": "49b48945-7752-49d7-9216-22f5b6f8d432",
+                "name": "OK",
+                "originalRequest": {
+                  "method": "DELETE",
+                  "header": [],
+                  "body": {
+                    "mode": "raw",
+                    "raw": "{\r\n    \"email\": \"string\"\r\n}",
+                    "options": {
+                      "raw": {
+                        "language": "json"
+                      }
+                    }
+                  },
+                  "url": {
+                    "raw": "{{base_url}}/customers/token",
+                    "host": [
+                      "{{base_url}}"
+                    ],
+                    "path": [
+                      "customers",
+                      "token"
+                    ]
+                  }
+                },
+                "status": "OK",
+                "code": 200,
+                "_postman_previewlanguage": null,
+                "header": null,
+                "cookie": [],
+                "responseTime": null,
+                "body": "Token deleted.",
+                "createdAt": "2025-08-06T10:10:56.000Z",
+                "updatedAt": "2025-08-07T08:18:33.000Z",
+                "uid": "41854426-49b48945-7752-49d7-9216-22f5b6f8d432"
+              }
+            ],
+            "createdAt": "2025-07-15T10:55:01.000Z",
+            "updatedAt": "2025-08-07T08:18:26.000Z",
+            "uid": "41854426-76134399-4739-4b35-8989-dd458e98e1bf"
+          },
+          {
+            "name": "Get customer data",
+            "event": [
+              {
+                "listen": "test",
+                "script": {
+                  "id": "b9eea322-9798-42c8-87d2-9d23df2fdbf5",
+                  "exec": [
+                    "pm.test(\"Status code is 200\", function () {",
+                    "    pm.response.to.have.status(200);",
+                    "});"
+                  ],
+                  "type": "text/javascript",
+                  "packages": {}
+                }
+              }
+            ],
+            "id": "4383abb1-aa68-45c9-a905-86c20c7069c0",
+            "protocolProfileBehavior": {
+              "disableBodyPruning": true
+            },
+            "request": {
+              "method": "GET",
+              "header": [],
+              "url": {
+                "raw": "{{base_url}}/customers/:customer_email",
+                "host": [
+                  "{{base_url}}"
+                ],
+                "path": [
+                  "customers",
+                  ":customer_email"
+                ],
+                "variable": [
+                  {
+                    "key": "customer_email",
+                    "value": "postman@test.com"
+                  }
+                ]
+              }
+            },
+            "response": [
+              {
+                "id": "583243a1-c310-4db4-9511-c34880f9e9d4",
+                "name": "Get customer data",
+                "originalRequest": {
+                  "method": "GET",
+                  "header": [],
+                  "url": {
+                    "raw": "{{base_url}}/customers/:customer_email",
+                    "host": [
+                      "{{base_url}}"
+                    ],
+                    "path": [
+                      "customers",
+                      ":customer_email"
+                    ],
+                    "variable": [
+                      {
+                        "key": "customer_email",
+                        "value": "example@example.com"
+                      }
+                    ]
+                  }
+                },
+                "status": "OK",
+                "code": 200,
+                "_postman_previewlanguage": null,
+                "header": [],
+                "cookie": [],
+                "responseTime": null,
+                "body": "{\n  \"json_api\": {\n    \"version\": \"string - JSON:API version\"\n  },\n  \"links\": {\n    \"self\": \"string - URL to this customer resource\"\n  },\n  \"data\": {\n    \"type\": \"string - default: customers\",\n    \"id\": \"string - Customer email\",\n    \"attributes\": {\n      \"name\": \"string - Customer first name\",\n      \"last_name\": \"string|null - Customer last name\",\n      \"card\": \"string - Customer card number\",\n      \"email\": \"string - Customer email\",\n      \"phone\": \"string|null - Customer phone number\",\n      \"points\": \"number - Current point balance\",\n      \"birthday\": \"string|null - Birthday (YYYY-MM-DD)\",\n      \"updatedAt\": \"datetime - Last update timestamp (ISO 8601)\",\n      \"createdAt\": \"datetime - Creation timestamp (ISO 8601)\",\n      \"level\": \"string - Customer level (e.g., Gold, Silver)\"\n    },\n    \"relationships\": {\n      \"transactions\": {\n        \"links\": {\n          \"related\": \"string - URL to related customer transactions\",\n          \"self\": \"string - URL to manage this relationship\"\n        }\n      }\n    },\n    \"links\": {\n      \"add-points\": \"string - Endpoint to add points to customer\",\n      \"add-points-from-value\": \"string - Convert monetary value to points\",\n      \"barcode\": \"string - Barcode endpoint for customer pass\",\n      \"downloadGoogleWallet\": \"string - Download link for Google Wallet\",\n      \"downloadPassAndroid\": \"string - Download link for Android Pass\",\n      \"downloadPassApple\": \"string - Download link for Apple Wallet Pass\",\n      \"self\": \"string - Link to this customer resource\",\n      \"send-pass\": \"string - Endpoint to send digital pass\",\n      \"subtract-points\": \"string - Endpoint to subtract points\"\n    }\n  }\n}\n",
+                "createdAt": "2025-07-31T07:35:03.000Z",
+                "updatedAt": "2025-08-07T08:15:48.000Z",
+                "uid": "41854426-583243a1-c310-4db4-9511-c34880f9e9d4"
+              }
+            ],
+            "createdAt": "2025-07-15T10:55:01.000Z",
+            "updatedAt": "2025-07-31T07:48:49.000Z",
+            "uid": "41854426-4383abb1-aa68-45c9-a905-86c20c7069c0"
+          },
+          {
+            "name": "Update customer data",
+            "event": [
+              {
+                "listen": "test",
+                "script": {
+                  "id": "9eaa18fb-2ecc-4d81-84b3-583e76ea53a9",
+                  "exec": [
+                    "pm.test(\"Status code is 200\", function () {",
+                    "    pm.response.to.have.status(200);",
+                    "});"
+                  ],
+                  "type": "text/javascript",
+                  "packages": {}
+                }
+              }
+            ],
+            "id": "98dccdb7-4007-4b4c-8a90-68f6e66a5fe2",
+            "protocolProfileBehavior": {
+              "disableBodyPruning": true
+            },
+            "request": {
+              "method": "PATCH",
+              "header": [],
+              "body": {
+                "mode": "raw",
+                "raw": "{\r\n    \"data\": {\r\n        \"type\": \"string (required, default: customers)\",\r\n        \"id\": \"string (required, Customer email)\",\r\n        \"attributes\": {\r\n            \"name\": \"string\",\r\n            \"last_name\": \"string\",\r\n            \"email\": \"string\",\r\n            \"phone\": \"string\",\r\n            \"card\": \"string (auto-generated if not provided)\",\r\n            \"points\": \"number\",\r\n            \"level\": \"string\"\r\n        }\r\n    }\r\n}",
+                "options": {
+                  "raw": {
+                    "language": "json"
+                  }
+                }
+              },
+              "url": {
+                "raw": "{{base_url}}/customers/:customer_email",
+                "host": [
+                  "{{base_url}}"
+                ],
+                "path": [
+                  "customers",
+                  ":customer_email"
+                ],
+                "variable": [
+                  {
+                    "key": "customer_email",
+                    "value": "example@example.com"
+                  }
+                ]
+              }
+            },
+            "response": [
+              {
+                "id": "74220457-acdc-40d5-a84c-2f30b36d2acd",
+                "name": "Update customer data",
+                "originalRequest": {
+                  "method": "PATCH",
+                  "header": [],
+                  "body": {
+                    "mode": "raw",
+                    "raw": "{\r\n    \"data\": {\r\n        \"type\": \"string (required, default: customers)\",\r\n        \"id\": \"string (required, Customer email)\",\r\n        \"attributes\": {\r\n            \"name\": \"string\",\r\n            \"last_name\": \"string\",\r\n            \"email\": \"string\",\r\n            \"phone\": \"string\",\r\n            \"card\": \"string (auto-generated if not provided)\",\r\n            \"points\": \"number\",\r\n            \"level\": \"string\"\r\n        }\r\n    }\r\n}",
+                    "options": {
+                      "raw": {
+                        "language": "json"
+                      }
+                    }
+                  },
+                  "url": {
+                    "raw": "{{base_url}}/customers/:customer_email",
+                    "host": [
+                      "{{base_url}}"
+                    ],
+                    "path": [
+                      "customers",
+                      ":customer_email"
+                    ],
+                    "variable": [
+                      {
+                        "key": "customer_email",
+                        "value": "postman@test.com"
+                      }
+                    ]
+                  }
+                },
+                "status": "OK",
+                "code": 200,
+                "_postman_previewlanguage": null,
+                "header": [],
+                "cookie": [],
+                "responseTime": null,
+                "body": "{\n    \"jsonapi\": {\n        \"version\": \"1.0\"\n    },\n    \"links\": {\n        \"self\": \"string (URL to this resource)\"\n    },\n    \"data\": {\n          \"type\": \"string (default: customers)\",\n            \"id\": \"string (Customer email)\",\n            \"attributes\": {\n                \"name\": \"string\",\n                \"last_name\": \"string\",\n                \"email\": \"string\",\n                \"card\": \"string\",\n                \"phone\": \"string\",\n                \"points\": \"number\",\n                \"level\": \"string\",\n                \"updatedAt\": \"datetime\",\n                \"createdAt\": \"datetime\"\n            },\n            \"relationships\": \"object (Links object with customer relations)\",\n            \"links\": \"object (Action links for customer)\"\n        },\n    }\n}",
+                "createdAt": "2025-07-31T07:34:42.000Z",
+                "updatedAt": "2025-08-06T07:54:02.000Z",
+                "uid": "41854426-74220457-acdc-40d5-a84c-2f30b36d2acd"
+              }
+            ],
+            "createdAt": "2025-07-15T10:55:01.000Z",
+            "updatedAt": "2025-08-06T07:51:44.000Z",
+            "uid": "41854426-98dccdb7-4007-4b4c-8a90-68f6e66a5fe2"
+          },
+          {
+            "name": "Delete customer",
+            "id": "e4ff434a-febf-4503-9daf-6b15a5adc2d0",
+            "protocolProfileBehavior": {
+              "disableBodyPruning": true
+            },
+            "request": {
+              "method": "DELETE",
+              "header": [],
+              "url": {
+                "raw": "{{base_url}}/customers/:customer_email",
+                "host": [
+                  "{{base_url}}"
+                ],
+                "path": [
+                  "customers",
+                  ":customer_email"
+                ],
+                "variable": [
+                  {
+                    "key": "customer_email",
+                    "value": ""
+                  }
+                ]
+              }
+            },
+            "response": [
+              {
+                "id": "67274836-088e-475c-924d-50baaebe7eab",
+                "name": "OK",
+                "originalRequest": {
+                  "method": "DELETE",
+                  "header": [],
+                  "url": {
+                    "raw": "{{base_url}}/customers/:customer_email",
+                    "host": [
+                      "{{base_url}}"
+                    ],
+                    "path": [
+                      "customers",
+                      ":customer_email"
+                    ],
+                    "variable": [
+                      {
+                        "key": "customer_email",
+                        "value": ""
+                      }
+                    ]
+                  }
+                },
+                "status": "No Content",
+                "code": 204,
+                "_postman_previewlanguage": null,
+                "header": null,
+                "cookie": [],
+                "responseTime": null,
+                "body": null,
+                "createdAt": "2025-08-06T07:56:53.000Z",
+                "updatedAt": "2025-08-06T07:57:37.000Z",
+                "uid": "41854426-67274836-088e-475c-924d-50baaebe7eab"
+              }
+            ],
+            "createdAt": "2025-08-06T07:55:05.000Z",
+            "updatedAt": "2025-08-06T07:56:53.000Z",
+            "uid": "41854426-e4ff434a-febf-4503-9daf-6b15a5adc2d0"
+          }
+        ],
+        "id": "9815a013-4407-4512-98b6-76f7c1dd20e9",
+        "createdAt": "2025-07-15T10:55:01.000Z",
+        "updatedAt": "2025-09-15T08:07:13.000Z",
+        "uid": "41854426-9815a013-4407-4512-98b6-76f7c1dd20e9"
+      },
+      {
+        "name": "Settings",
+        "item": [
+          {
+            "name": "Get settings",
+            "event": [
+              {
+                "listen": "test",
+                "script": {
+                  "id": "17d460d9-a9ee-40dc-9e4b-f1feeff1d5ca",
+                  "exec": [
+                    "pm.test(\"Status code is 200\", function () {",
+                    "    pm.response.to.have.status(200);",
+                    "});"
+                  ],
+                  "type": "text/javascript",
+                  "packages": {}
+                }
+              }
+            ],
+            "id": "7564f92b-6946-4f5d-940c-d15887df7e24",
+            "protocolProfileBehavior": {
+              "disableBodyPruning": true
+            },
+            "request": {
+              "method": "GET",
+              "header": [],
+              "url": {
+                "raw": "{{base_url}}/settings",
+                "host": [
+                  "{{base_url}}"
+                ],
+                "path": [
+                  "settings"
+                ],
+                "query": [
+                  {
+                    "key": "page[size]",
+                    "value": "100",
+                    "description": "Page size",
+                    "type": "text",
+                    "disabled": true
+                  },
+                  {
+                    "key": "page[number]",
+                    "value": "1",
+                    "description": "Page number",
+                    "type": "text",
+                    "disabled": true
+                  },
+                  {
+                    "key": "filter[key]",
+                    "value": "POINTS_VALUE",
+                    "description": "Order by field: key",
+                    "type": "text",
+                    "disabled": true
+                  }
+                ]
+              }
+            },
+            "response": [
+              {
+                "id": "e576e777-43ed-4b41-897d-632627bdd895",
+                "name": "Get settings",
+                "originalRequest": {
+                  "method": "GET",
+                  "header": [],
+                  "url": {
+                    "raw": "{{base_url}}/settings",
+                    "host": [
+                      "{{base_url}}"
+                    ],
+                    "path": [
+                      "settings"
+                    ]
+                  }
+                },
+                "status": "OK",
+                "code": 200,
+                "_postman_previewlanguage": "",
+                "header": [],
+                "cookie": [],
+                "responseTime": null,
+                "body": "{\r\n  \"meta\": {\r\n    \"page\": {\r\n      \"currentPage\": \"integer\",\r\n      \"from\": \"integer\",\r\n      \"lastPage\": \"integer\",\r\n      \"perPage\": \"integer\",\r\n      \"to\": \"integer\",\r\n      \"total\": \"integer\"\r\n    }\r\n  },\r\n  \"json_api\": {\r\n    \"version\": \"string\",\r\n    \"links\": {\r\n      \"first\": \"string\",\r\n      \"last\": \"string\",\r\n      \"next\": \"string\"\r\n    }\r\n  },\r\n  \"data\": [\r\n    {\r\n      \"type\": \"string (default: settings)\",\r\n      \"id\": \"string (setting identification key)\",\r\n      \"attributes\": {\r\n        \"value\": \"string (configuration value)\"\r\n      }\r\n    }\r\n  ]\r\n}\r\n",
+                "createdAt": "2025-08-06T10:15:14.000Z",
+                "updatedAt": "2025-08-06T10:16:02.000Z",
+                "uid": "41854426-e576e777-43ed-4b41-897d-632627bdd895"
+              }
+            ],
+            "createdAt": "2025-07-15T10:55:01.000Z",
+            "updatedAt": "2025-08-06T11:15:20.000Z",
+            "uid": "41854426-7564f92b-6946-4f5d-940c-d15887df7e24"
+          },
+          {
+            "name": "Get settings by key",
+            "event": [
+              {
+                "listen": "test",
+                "script": {
+                  "id": "bd861825-4e6e-4525-8831-829dff594f94",
+                  "exec": [
+                    "pm.test(\"Status code is 200\", function () {",
+                    "    pm.response.to.have.status(200);",
+                    "});"
+                  ],
+                  "type": "text/javascript",
+                  "packages": {}
+                }
+              }
+            ],
+            "id": "4801520c-094b-4344-8a05-3d02470b574e",
+            "protocolProfileBehavior": {
+              "disableBodyPruning": true
+            },
+            "request": {
+              "method": "GET",
+              "header": [],
+              "url": {
+                "raw": "{{base_url}}/settings/:setting",
+                "host": [
+                  "{{base_url}}"
+                ],
+                "path": [
+                  "settings",
+                  ":setting"
+                ],
+                "variable": [
+                  {
+                    "key": "setting",
+                    "value": "POINTS_VALUE",
+                    "description": "Key to search by"
+                  }
+                ]
+              }
+            },
+            "response": [
+              {
+                "id": "c08c4a0a-d836-4b12-b7ad-c46695848cf7",
+                "name": "OK",
+                "originalRequest": {
+                  "method": "GET",
+                  "header": [],
+                  "url": {
+                    "raw": "{{base_url}}/settings/:setting",
+                    "host": [
+                      "{{base_url}}"
+                    ],
+                    "path": [
+                      "settings",
+                      ":setting"
+                    ],
+                    "variable": [
+                      {
+                        "key": "setting",
+                        "value": "POINTS_VALUE"
+                      }
+                    ]
+                  }
+                },
+                "status": "OK",
+                "code": 200,
+                "_postman_previewlanguage": null,
+                "header": null,
+                "cookie": [],
+                "responseTime": null,
+                "body": "{\r\n  \"json_api\": {\r\n    \"version\": \"string\"\r\n   },\r\n   \"links\": {\r\n      \"self\": \"string (URL to this specific setting resource)\"\r\n    },\r\n   \"data\": {\r\n    \"type\": \"string (default: settings)\",\r\n    \"id\": \"string (setting identification key)\",\r\n    \"attributes\": {\r\n      \"value\": \"string (configuration value)\"\r\n    }\r\n  }\r\n}\r\n",
+                "createdAt": "2025-08-06T10:34:50.000Z",
+                "updatedAt": "2025-08-06T10:38:34.000Z",
+                "uid": "41854426-c08c4a0a-d836-4b12-b7ad-c46695848cf7"
+              }
+            ],
+            "createdAt": "2025-07-15T10:55:01.000Z",
+            "updatedAt": "2025-08-06T12:54:59.000Z",
+            "uid": "41854426-4801520c-094b-4344-8a05-3d02470b574e"
+          }
+        ],
+        "id": "b22d03b2-fba6-43c7-a814-147c6e117877",
+        "createdAt": "2025-07-15T10:55:01.000Z",
+        "updatedAt": "2025-08-06T11:15:20.000Z",
+        "uid": "41854426-b22d03b2-fba6-43c7-a814-147c6e117877"
+      },
+      {
+        "name": "Orders",
+        "item": [
+          {
+            "name": "Get orders data",
+            "event": [
+              {
+                "listen": "test",
+                "script": {
+                  "id": "fe180e35-899f-4150-a5fb-bf20a67d3851",
+                  "exec": [
+                    "pm.test(\"Status code is 200\", function () {",
+                    "    pm.response.to.have.status(200);",
+                    "});"
+                  ],
+                  "type": "text/javascript",
+                  "packages": {}
+                }
+              }
+            ],
+            "id": "2efefed4-9c29-41d7-b6f8-ec722160b7dc",
+            "protocolProfileBehavior": {
+              "disableBodyPruning": true
+            },
+            "request": {
+              "method": "GET",
+              "header": [],
+              "url": {
+                "raw": "{{base_url}}/orders?filter[status]=pending&sort=-created_at",
+                "host": [
+                  "{{base_url}}"
+                ],
+                "path": [
+                  "orders"
+                ],
+                "query": [
+                  {
+                    "key": "page[size]",
+                    "value": "100",
+                    "description": "Page size",
+                    "disabled": true
+                  },
+                  {
+                    "key": "page[number]",
+                    "value": "1",
+                    "description": "Page number",
+                    "disabled": true
+                  },
+                  {
+                    "key": "filter[status]",
+                    "value": "pending",
+                    "description": "Filter by field: created_at, updated_at, status"
+                  },
+                  {
+                    "key": "sort",
+                    "value": "-created_at",
+                    "description": "Allowed sorts: customer, status, home_delivery, total_points, created_at, updated_at"
+                  }
+                ]
+              }
+            },
+            "response": [
+              {
+                "id": "0d31d641-44d4-4096-9a56-4b91407bc8ab",
+                "name": "OK",
+                "originalRequest": {
+                  "method": "GET",
+                  "header": [],
+                  "url": {
+                    "raw": "{{base_url}}/orders",
+                    "host": [
+                      "{{base_url}}"
+                    ],
+                    "path": [
+                      "orders"
+                    ],
+                    "query": [
+                      {
+                        "key": "page[number]",
+                        "value": "1",
+                        "description": "Page number",
+                        "disabled": true
+                      },
+                      {
+                        "key": "page[size]",
+                        "value": "2",
+                        "description": "Number of customers to fetch",
+                        "disabled": true
+                      },
+                      {
+                        "key": "sort",
+                        "value": "-created_at",
+                        "description": "All attributes are sortables",
+                        "disabled": true
+                      },
+                      {
+                        "key": "filter[phone]",
+                        "value": "999888777",
+                        "description": "All attributes are filterables",
+                        "type": "text",
+                        "disabled": true
+                      }
+                    ]
+                  }
+                },
+                "status": "OK",
+                "code": 200,
+                "_postman_previewlanguage": "",
+                "header": [],
+                "cookie": [],
+                "responseTime": null,
+                "body": "{\n  \"meta\": {\n    \"page\": {\n      \"currentPage\": \"integer\",\n      \"from\": \"integer\",\n      \"lastPage\": \"integer\",\n      \"perPage\": \"integer\",\n      \"to\": \"integer\",\n      \"total\": \"integer\"\n    }\n  },\n  \"jsonapi\": {\n    \"version\": \"string\"\n  },\n  \"links\": {\n    \"first\": \"string (url)\",\n    \"last\": \"string (url)\",\n    \"next\": \"string (url)\"\n  },\n  \"data\": [\n    {\n      \"type\": \"string (default: orders)\",\n      \"id\": \"string\",\n      \"attributes\": {\n        \"customer\": \"string (email)\",\n        \"status\": \"string (one of: pending, completed, sent, cancelled)\",\n        \"home_delivery\": \"boolean\",\n        \"shipping_address\": {\n          \"address\": \"string\",\n          \"city\": \"string\",\n          \"province\": \"string\",\n          \"postal_code\": \"string\",\n          \"country\": \"string (ISO 3166)\"\n        },\n        \"invoice_address\": {\n          \"address\": \"string\",\n          \"city\": \"string\",\n          \"province\": \"string\",\n          \"postal_code\": \"string\",\n          \"country\": \"string (ISO 3166)\"\n        },\n        \"products\": [\n          {\n            \"sku\": \"string\",\n            \"quantity\": \"number\",\n            \"points\": \"number\",\n            \"total_points\": \"number\"\n          }\n        ],\n        \"total_points\": \"number\",\n        \"comments\": \"string (maxLength: 1000)\",\n        \"updated_at\": \"datetime (ISO 8601)\",\n        \"created_at\": \"datetime (ISO 8601)\"\n      }\n    }\n  ]\n}\n",
+                "createdAt": "2025-07-31T08:30:03.000Z",
+                "updatedAt": "2025-07-31T11:33:21.000Z",
+                "uid": "41854426-0d31d641-44d4-4096-9a56-4b91407bc8ab"
+              }
+            ],
+            "createdAt": "2025-07-15T10:55:01.000Z",
+            "updatedAt": "2025-08-26T12:16:10.000Z",
+            "uid": "41854426-2efefed4-9c29-41d7-b6f8-ec722160b7dc"
+          },
+          {
+            "name": "Create order",
+            "event": [
+              {
+                "listen": "test",
+                "script": {
+                  "id": "c04f819f-9b77-4bce-bb89-429071b27e5b",
+                  "exec": [
+                    "pm.test(\"Successful POST request\", function () {",
+                    "    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+                    "});",
+                    ""
+                  ],
+                  "type": "text/javascript",
+                  "packages": {}
+                }
+              },
+              {
+                "listen": "prerequest",
+                "script": {
+                  "id": "781d12b3-1eb5-40b3-8ed4-93961de27840",
+                  "exec": [
+                    ""
+                  ],
+                  "type": "text/javascript",
+                  "packages": {}
+                }
+              }
+            ],
+            "id": "575209d5-6341-4dad-861a-f2e7bedad918",
+            "protocolProfileBehavior": {
+              "disableBodyPruning": true
+            },
+            "request": {
+              "method": "POST",
+              "header": [],
+              "body": {
+                "mode": "raw",
+                "raw": "{\n  \"data\": {\n    \"type\": \"string (default: orders)\",\n    \"attributes\": {\n      \"comments\": \"string (maxLength: 1000)\",\n      \"customer\": \"string (email)\",\n      \"home_delivery\": \"boolean\",\n      \"invoice_address\": {\n        \"address\": \"string\",\n        \"city\": \"string\",\n        \"country\": \"string (ISO 3166)\",\n        \"postal_code\": \"string\",\n        \"province\": \"string\"\n      },\n      \"products\": [\n        {\n          \"points\": \"number\",\n          \"quantity\": \"number\",\n          \"sku\": \"string\",\n          \"total_points\": \"number (points * quantity)\"\n        }\n      ],\n      \"shipping_address\": {\n        \"address\": \"string\",\n        \"city\": \"string\",\n        \"country\": \"string (ISO 3166)\",\n        \"postal_code\": \"string\",\n        \"province\": \"string\"\n      },\n      \"total_points\": \"number\"\n    }\n  }\n}\n",
+                "options": {
+                  "raw": {
+                    "language": "json"
+                  }
+                }
+              },
+              "url": {
+                "raw": "{{base_url}}/orders",
+                "host": [
+                  "{{base_url}}"
+                ],
+                "path": [
+                  "orders"
+                ]
+              }
+            },
+            "response": [
+              {
+                "id": "1cd10c84-450f-4af4-8b16-f382e0e9ea49",
+                "name": "OK",
+                "originalRequest": {
+                  "method": "POST",
+                  "header": [],
+                  "body": {
+                    "mode": "raw",
+                    "raw": "{\n  \"data\": {\n    \"type\": \"string (default: orders)\",\n    \"attributes\": {\n      \"comments\": \"string (maxLength: 1000)\",\n      \"customer\": \"string (email)\",\n      \"home_delivery\": \"boolean\",\n      \"invoice_address\": {\n        \"address\": \"string\",\n        \"city\": \"string\",\n        \"country\": \"string (ISO 3166)\",\n        \"postal_code\": \"string\",\n        \"province\": \"string\"\n      },\n      \"products\": [\n        {\n          \"points\": \"number\",\n          \"quantity\": \"number\",\n          \"sku\": \"string\",\n          \"total_points\": \"number (points * quantity)\"\n        }\n      ],\n      \"shipping_address\": {\n        \"address\": \"string\",\n        \"city\": \"string\",\n        \"country\": \"string (ISO 3166)\",\n        \"postal_code\": \"string\",\n        \"province\": \"string\"\n      },\n      \"total_points\": \"number\"\n    }\n  }\n}\n",
+                    "options": {
+                      "raw": {
+                        "language": "json"
+                      }
+                    }
+                  },
+                  "url": {
+                    "raw": "{{base_url}}/orders",
+                    "host": [
+                      "{{base_url}}"
+                    ],
+                    "path": [
+                      "orders"
+                    ]
+                  }
+                },
+                "status": "Created",
+                "code": 201,
+                "_postman_previewlanguage": null,
+                "header": [],
+                "cookie": [],
+                "responseTime": null,
+                "body": "{\n  \"jsonapi\": {\n    \"version\": \"string\"\n  },\n  \"data\": {\n    \"type\": \"string (default: orders)\",\n    \"id\": \"string\",\n    \"attributes\": {\n      \"customer\": \"string (email)\",\n      \"status\": \"string (one of: pending, completed, sent, cancelled)\",\n      \"home_delivery\": \"boolean\",\n      \"shipping_address\": {\n        \"address\": \"string\",\n        \"city\": \"string\",\n        \"province\": \"string\",\n        \"postal_code\": \"string\",\n        \"country\": \"string (ISO 3166)\"\n      },\n      \"invoice_address\": {\n        \"address\": \"string\",\n        \"city\": \"string\",\n        \"province\": \"string\",\n        \"postal_code\": \"string\",\n        \"country\": \"string (ISO 3166)\"\n      },\n      \"products\": [\n        {\n          \"sku\": \"string\",\n          \"quantity\": \"number\",\n          \"points\": \"number\",\n          \"total_points\": \"number (points * quantity)\"\n        }\n      ],\n      \"total_points\": \"number\",\n      \"comments\": \"string (maxLength: 1000)\",\n      \"updated_at\": \"datetime (ISO 8601)\",\n      \"created_at\": \"datetime (ISO 8601)\"\n    }\n  }\n}\n",
+                "createdAt": "2025-07-31T07:48:37.000Z",
+                "updatedAt": "2025-08-06T07:09:25.000Z",
+                "uid": "41854426-1cd10c84-450f-4af4-8b16-f382e0e9ea49"
+              }
+            ],
+            "createdAt": "2025-07-15T10:55:01.000Z",
+            "updatedAt": "2025-08-06T11:15:26.000Z",
+            "uid": "41854426-575209d5-6341-4dad-861a-f2e7bedad918"
+          },
+          {
+            "name": "Update an order data",
+            "event": [
+              {
+                "listen": "test",
+                "script": {
+                  "id": "1eb53633-87f0-47dd-90e7-e5dc5c8822b7",
+                  "exec": [
+                    "pm.test(\"Successful PUT request\", function () {",
+                    "    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204]);",
+                    "});",
+                    ""
+                  ],
+                  "type": "text/javascript",
+                  "packages": {}
+                }
+              }
+            ],
+            "id": "bde0a7da-f79a-4d84-896d-9e7b74540d8c",
+            "protocolProfileBehavior": {
+              "disableBodyPruning": true
+            },
+            "request": {
+              "method": "PATCH",
+              "header": [],
+              "body": {
+                "mode": "raw",
+                "raw": "{\n    \"data\": {\n        \"id\": \"1690\",\n        \"type\": \"orders\",\n        \"attributes\": {\n            \"shipping_address\": {\n                \"address\": \"postman order edit\",\n                \"city\": \"postman order edit\",\n                \"province\": \"postman order edit\",\n                \"postal_code\": \"postman order edit\",\n                \"country\": \"postman order edit\"\n            },\n            \"invoice_address\": {\n                \"address\": \"postman order edit\",\n                \"city\": \"postman order edit\",\n                \"province\": \"postman order edit\",\n                \"postal_code\": \"postman order edit\",\n                \"country\": \"postman order edit\"\n            },\n            \"comments\": \"Api postman order edit\",\n            \"total_points\": 184,\n            \"products\": [\n                {\n                    \"sku\": \"24309\",\n                    \"quantity\": 3,\n                    \"points\": 134,\n                    \"total_points\": 134\n                }\n            ]\n        }\n    }\n}",
+                "options": {
+                  "raw": {
+                    "language": "json"
+                  }
+                }
+              },
+              "url": {
+                "raw": "{{base_url}}/orders/:order_id",
+                "host": [
+                  "{{base_url}}"
+                ],
+                "path": [
+                  "orders",
+                  ":order_id"
+                ],
+                "variable": [
+                  {
+                    "key": "order_id",
+                    "value": "1690"
+                  }
+                ]
+              }
+            },
+            "response": [
+              {
+                "id": "460610e4-52a6-4d0f-b76c-69837089a2a3",
+                "name": "OK",
+                "originalRequest": {
+                  "method": "PATCH",
+                  "header": [],
+                  "body": {
+                    "mode": "raw",
+                    "raw": "{ \"data\": {\n        \"type\": \"string (required, default: orders)\",\n        \"id\": \"string (required, Order ID)\",\n        \"attributes\": {\n            \"home_delivery\": \"boolean (true = home address, false = shop address)\",\n            \"status\": \"string (default: pending, allowed: pending, completed, sent, cancelled)\",\n            \"shipping_address\": {\n                \"address\": \"string\",\n                \"city\": \"string\",\n                \"province\": \"string\",\n                \"postal_code\": \"string\",\n                \"country\": \"string (ISO 3166)\"\n            },\n            \"invoice_address\": {\n                \"address\": \"string\",\n                \"city\": \"string\",\n                \"province\": \"string\",\n                \"postal_code\": \"string\",\n                \"country\": \"string (ISO 3166)\"\n            },\n            \"total_points\": \"number\",\n            \"comments\": \"string (maxLength: 1000)\"\n        }\n    }\n}",
+                    "options": {
+                      "raw": {
+                        "language": "json"
+                      }
+                    }
+                  },
+                  "url": {
+                    "raw": "{{base_url}}/orders/:order_id",
+                    "host": [
+                      "{{base_url}}"
+                    ],
+                    "path": [
+                      "orders",
+                      ":order_id"
+                    ],
+                    "variable": [
+                      {
+                        "key": "order_id",
+                        "value": ""
+                      }
+                    ]
+                  }
+                },
+                "status": "OK",
+                "code": 200,
+                "_postman_previewlanguage": "",
+                "header": [],
+                "cookie": [],
+                "responseTime": null,
+                "body": "{\n  \"json_api\": {\n    \"version\": \"string\"\n    },\n    \"links\": {\n      \"self\": \"string (URL to this resource)\"\n    }\n  },\n  \"data\": {\n    \"type\": \"string (default: orders)\",\n    \"id\": \"string (Order ID)\",\n    \"attributes\": {\n      \"customer\": \"string (Customer email)\",\n      \"status\": \"string (default: pending, allowed: pending, completed, sent, cancelled)\",\n      \"home_delivery\": \"boolean (true = home address, false = shop address)\",\n      \"shipping_address\": {\n        \"address\": \"string\",\n        \"city\": \"string\",\n        \"province\": \"string\",\n        \"postal_code\": \"string\",\n        \"country\": \"string (ISO 3166)\"\n      },\n      \"invoice_address\": {\n        \"address\": \"string\",\n        \"city\": \"string\",\n        \"province\": \"string\",\n        \"postal_code\": \"string\",\n        \"country\": \"string (ISO 3166)\"\n      },\n      \"products\": [\n        {\n          \"sku\": \"string (must exist within platform products)\",\n          \"quantity\": \"number\",\n          \"points\": \"number (unit point value of the product)\",\n          \"total_points\": \"number (quantity * points)\"\n        }\n      ],\n      \"total_points\": \"number (sum of all product total_points)\",\n      \"updated_at\": \"datetime\",\n      \"created_at\": \"datetime\",\n      \"comments\": \"string (maxLength: 1000)\"\n    }\n  }\n}\n",
+                "createdAt": "2025-07-31T08:18:31.000Z",
+                "updatedAt": "2025-08-06T07:56:13.000Z",
+                "uid": "41854426-460610e4-52a6-4d0f-b76c-69837089a2a3"
+              }
+            ],
+            "createdAt": "2025-07-15T10:55:01.000Z",
+            "updatedAt": "2025-08-06T11:15:26.000Z",
+            "uid": "41854426-bde0a7da-f79a-4d84-896d-9e7b74540d8c"
+          },
+          {
+            "name": "Get an order data",
+            "event": [
+              {
+                "listen": "test",
+                "script": {
+                  "id": "3bb82063-134f-4e5b-8500-909ccff630c2",
+                  "exec": [
+                    "pm.test(\"Status code is 200\", function () {",
+                    "    pm.response.to.have.status(200);",
+                    "});"
+                  ],
+                  "type": "text/javascript",
+                  "packages": {}
+                }
+              },
+              {
+                "listen": "prerequest",
+                "script": {
+                  "id": "c2b4e42d-ac86-476e-91dd-35a510f020e9",
+                  "exec": [
+                    ""
+                  ],
+                  "type": "text/javascript",
+                  "packages": {}
+                }
+              }
+            ],
+            "id": "27f7e187-0c00-40fe-9bad-6a27badd39ef",
+            "protocolProfileBehavior": {
+              "disableBodyPruning": true
+            },
+            "request": {
+              "method": "GET",
+              "header": [],
+              "url": {
+                "raw": "{{base_url}}/orders/:order_id",
+                "host": [
+                  "{{base_url}}"
+                ],
+                "path": [
+                  "orders",
+                  ":order_id"
+                ],
+                "variable": [
+                  {
+                    "key": "order_id",
+                    "value": "1690",
+                    "description": "Order ID "
+                  }
+                ]
+              }
+            },
+            "response": [
+              {
+                "id": "33a53605-6c20-4d26-8a63-514c12d74eed",
+                "name": "OK",
+                "originalRequest": {
+                  "method": "GET",
+                  "header": [],
+                  "url": {
+                    "raw": "{{base_url}}/orders/:order_id",
+                    "host": [
+                      "{{base_url}}"
+                    ],
+                    "path": [
+                      "orders",
+                      ":order_id"
+                    ],
+                    "variable": [
+                      {
+                        "key": "order_id",
+                        "value": "1690"
+                      }
+                    ]
+                  }
+                },
+                "status": "OK",
+                "code": 200,
+                "_postman_previewlanguage": "",
+                "header": [],
+                "cookie": [],
+                "responseTime": null,
+                "body": "{\n  \"json_api\": {\n    \"version\": \"string\"\n    },\n    \"links\": {\n      \"self\": \"string (URL to this resource)\"\n    }\n  },\n  \"data\": {\n    \"type\": \"string (default: orders)\",\n    \"id\": \"string (Order ID)\",\n    \"attributes\": {\n      \"customer\": \"string (Customer email)\",\n      \"status\": \"string (default: pending, allowed: pending, completed, sent, cancelled)\",\n      \"home_delivery\": \"boolean (true = home address, false = shop address)\",\n      \"shipping_address\": {\n        \"address\": \"string\",\n        \"city\": \"string\",\n        \"province\": \"string\",\n        \"postal_code\": \"string\",\n        \"country\": \"string (ISO 3166)\"\n      },\n      \"invoice_address\": {\n        \"address\": \"string\",\n        \"city\": \"string\",\n        \"province\": \"string\",\n        \"postal_code\": \"string\",\n        \"country\": \"string (ISO 3166)\"\n      },\n      \"products\": [\n        {\n          \"sku\": \"string (must exist within platform products)\",\n          \"quantity\": \"number\",\n          \"points\": \"number (unit point value of the product)\",\n          \"total_points\": \"number (quantity * points)\"\n        }\n      ],\n      \"total_points\": \"number (sum of all product total_points)\",\n      \"updated_at\": \"datetime\",\n      \"created_at\": \"datetime\",\n      \"comments\": \"string (maxLength: 1000)\"\n    }\n  }\n}\n",
+                "createdAt": "2025-07-31T08:24:28.000Z",
+                "updatedAt": "2025-08-06T08:21:24.000Z",
+                "uid": "41854426-33a53605-6c20-4d26-8a63-514c12d74eed"
+              }
+            ],
+            "createdAt": "2025-07-15T10:55:01.000Z",
+            "updatedAt": "2025-08-06T12:54:58.000Z",
+            "uid": "41854426-27f7e187-0c00-40fe-9bad-6a27badd39ef"
+          }
+        ],
+        "id": "f2654c5e-70ad-45ca-b9c9-1386210e05c0",
+        "createdAt": "2025-07-15T10:55:01.000Z",
+        "updatedAt": "2025-08-06T11:15:26.000Z",
+        "uid": "41854426-f2654c5e-70ad-45ca-b9c9-1386210e05c0"
+      },
+      {
+        "name": "Transactions",
+        "item": [
+          {
+            "name": "Get transactions",
+            "event": [
+              {
+                "listen": "test",
+                "script": {
+                  "id": "ad0b3801-96ba-4a05-8d0d-b882a0449ad4",
+                  "exec": [
+                    "pm.test(\"Status code is 200\", function () {",
+                    "    pm.response.to.have.status(200);",
+                    "});"
+                  ],
+                  "type": "text/javascript",
+                  "packages": {},
+                  "requests": {}
+                }
+              }
+            ],
+            "id": "e61f8dd9-3e4a-4026-ba84-f921cc261329",
+            "protocolProfileBehavior": {
+              "disableBodyPruning": true
+            },
+            "request": {
+              "method": "GET",
+              "header": [],
+              "url": {
+                "raw": "{{base_url}}/transactions?page[size]=15&page[number]=1&sort=-created_at",
+                "host": [
+                  "{{base_url}}"
+                ],
+                "path": [
+                  "transactions"
+                ],
+                "query": [
+                  {
+                    "key": "page[size]",
+                    "value": "15",
+                    "description": "Page size"
+                  },
+                  {
+                    "key": "page[number]",
+                    "value": "1",
+                    "description": "Page number"
+                  },
+                  {
+                    "key": "filter[order_id]",
+                    "value": "{id}",
+                    "description": "Order by field: id, external_id, order_id, points, total_points, exchange, amount, action, type",
+                    "disabled": true
+                  },
+                  {
+                    "key": "sort",
+                    "value": "-created_at",
+                    "description": "Allowed sorts: external_id, order_id, action, type, amount, points, exchange, total_points, created_at"
+                  }
+                ]
+              }
+            },
+            "response": [
+              {
+                "id": "68fc7f07-00dd-4e21-8106-efc03f26cedb",
+                "name": "OK",
+                "originalRequest": {
+                  "method": "GET",
+                  "header": [],
+                  "url": {
+                    "raw": "{{base_url}}/transactions?page[size]=15&page[number]=1",
+                    "host": [
+                      "{{base_url}}"
+                    ],
+                    "path": [
+                      "transactions"
+                    ],
+                    "query": [
+                      {
+                        "key": "page[size]",
+                        "value": "15",
+                        "description": "Page size"
+                      },
+                      {
+                        "key": "page[number]",
+                        "value": "1",
+                        "description": "Page number"
+                      },
+                      {
+                        "key": "filter[order_id]",
+                        "value": "7",
+                        "description": "Order by field: id, external_id, order_id, points, total_points, exchange, amount, action, type",
+                        "disabled": true
+                      },
+                      {
+                        "key": "sort",
+                        "value": "-created_at",
+                        "description": "Allowed sorts: external_id, order_id, action, type, amount, points, exchange, total_points, created_at",
+                        "disabled": true
+                      }
+                    ]
+                  }
+                },
+                "status": "OK",
+                "code": 200,
+                "_postman_previewlanguage": "",
+                "header": [],
+                "cookie": [],
+                "responseTime": null,
+                "body": "{\r\n    \"meta\": {\r\n        \"page\": {\r\n            \"currentPage\": \"integer\",\r\n            \"from\": \"integer\",\r\n            \"lastPage\": \"integer\",\r\n            \"perPage\": \"integer\",\r\n            \"to\": \"integer\",\r\n            \"total\": \"integer\"\r\n        }\r\n    },\r\n    \"jsonapi\": {\r\n        \"version\": \"string\"\r\n    },\r\n    \"links\": {\r\n        \"first\": \"string (url)\",\r\n        \"last\": \"string (url)\"\r\n    },\r\n    \"data\": [\r\n        {\r\n            \"type\": \"string\",\r\n            \"id\": \"string | integer\",\r\n            \"attributes\": {\r\n                \"external_id\": \"string | null\",\r\n                \"order_id\": \"string | integer\",\r\n                \"action\": \"string\",\r\n                \"type\": \"string\",\r\n                \"amount\": \"number | null\",\r\n                \"points\": \"integer\",\r\n                \"exchange\": \"string | null\",\r\n                \"total_points\": \"integer\",\r\n                \"delay\": \"integer | null\",\r\n                \"content\": {\r\n                    \"items\": {\r\n                        \"metadata\": {\r\n                            \"source\": \"string\"\r\n                        },\r\n                        \"products\": {\r\n                            \"id\": \"integer\",\r\n                            \"sku\": \"string\",\r\n                            \"stock\": \"integer\",\r\n                            \"value\": \"number\",\r\n                            \"category_id\": \"integer\"\r\n                        }\r\n                    },\r\n                    \"version\": \"string\",\r\n                    \"features\": {\r\n                        \"POINTS\": {\r\n                            \"POINTS_MODIFIED_FROM\": \"string\"\r\n                        }\r\n                    }\r\n                },\r\n                \"created_at\": \"datetime (YYYY-MM-DD HH:MM:SS)\"\r\n            }\r\n        }\r\n    ]\r\n}\r\n",
+                "createdAt": "2025-09-22T11:13:09.000Z",
+                "updatedAt": "2025-09-23T08:05:39.000Z",
+                "uid": "41854426-68fc7f07-00dd-4e21-8106-efc03f26cedb"
+              }
+            ],
+            "createdAt": "2025-07-15T10:55:01.000Z",
+            "updatedAt": "2025-12-11T12:16:44.000Z",
+            "uid": "41854426-e61f8dd9-3e4a-4026-ba84-f921cc261329"
+          },
+          {
+            "name": "Delay transaction",
+            "event": [
+              {
+                "listen": "test",
+                "script": {
+                  "id": "fda5e308-3080-464e-b04d-6f06d32fbfe8",
+                  "exec": [
+                    "pm.test(\"Status code is 200\", function () {",
+                    "    pm.response.to.have.status(200);",
+                    "});"
+                  ],
+                  "type": "text/javascript",
+                  "packages": {},
+                  "requests": {}
+                }
+              }
+            ],
+            "id": "b7e8e937-08f4-48e3-b0c7-ffdd99228b03",
+            "protocolProfileBehavior": {
+              "disableBodyPruning": true
+            },
+            "request": {
+              "method": "POST",
+              "header": [],
+              "body": {
+                "mode": "raw",
+                "raw": "{\r\n    \"action\": \"apply\"\r\n}",
+                "options": {
+                  "raw": {
+                    "language": "json"
+                  }
+                }
+              },
+              "url": {
+                "raw": "{{base_url}}/transactions/:transaction_id/delay",
+                "host": [
+                  "{{base_url}}"
+                ],
+                "path": [
+                  "transactions",
+                  ":transaction_id",
+                  "delay"
+                ],
+                "variable": [
+                  {
+                    "key": "transaction_id",
+                    "value": "5935",
+                    "description": "Transaction ID"
+                  }
+                ]
+              }
+            },
+            "response": [
+              {
+                "id": "9188038a-af8b-49b8-acd2-5526f1323dda",
+                "name": "OK",
+                "originalRequest": {
+                  "method": "POST",
+                  "header": [],
+                  "body": {
+                    "mode": "raw",
+                    "raw": "{\r\n    \"action\": \"apply | cancel\"\r\n}",
+                    "options": {
+                      "raw": {
+                        "language": "json"
+                      }
+                    }
+                  },
+                  "url": {
+                    "raw": "{{base_url}}/transactions/:transaction_id/delay",
+                    "host": [
+                      "{{base_url}}"
+                    ],
+                    "path": [
+                      "transactions",
+                      ":transaction_id",
+                      "delay"
+                    ],
+                    "variable": [
+                      {
+                        "key": "transaction_id",
+                        "value": "",
+                        "description": "Transaction ID"
+                      }
+                    ]
+                  }
+                },
+                "status": "OK",
+                "code": 200,
+                "_postman_previewlanguage": "",
+                "header": [],
+                "cookie": [],
+                "responseTime": null,
+                "body": "{\r\n    \"jsonapi\": {\r\n        \"version\": \"string\"\r\n    },\r\n    \"data\": {\r\n        \"type\": \"string\",\r\n        \"id\": \"string | integer\",\r\n        \"attributes\": {\r\n            \"external_id\": \"string | null\",\r\n            \"order_id\": \"string | integer | null\",\r\n            \"action\": \"string\",\r\n            \"type\": \"string\",\r\n            \"amount\": \"number | null\",\r\n            \"points\": \"integer\",\r\n            \"exchange\": \"string | null\",\r\n            \"total_points\": \"integer\",\r\n            \"delay\": {\r\n                \"id\": \"integer\",\r\n                \"record_id\": \"integer\",\r\n                \"status\": \"string\",\r\n                \"created_at\": \"datetime (ISO 8601)\",\r\n                \"updated_at\": \"datetime (ISO 8601)\"\r\n            },\r\n            \"content\": {\r\n                \"items\": {\r\n                    \"metadata\": \"array\",\r\n                    \"products\": \"array\"\r\n                },\r\n                \"version\": \"string\",\r\n                \"features\": {\r\n                    \"POINTS\": {\r\n                        \"ALLOW_DELAY\": \"boolean\",\r\n                        \"ALLOW_EVENTS\": \"boolean\",\r\n                        \"POINTS_MODIFIED_FROM\": \"string\"\r\n                    },\r\n                    \"customer_level\": {\r\n                        \"factor\": \"integer\",\r\n                        \"operator\": \"string\",\r\n                        \"new_points\": \"integer\",\r\n                        \"original_points\": \"integer\"\r\n                    }\r\n                }\r\n            },\r\n            \"created_at\": \"datetime (YYYY-MM-DD HH:MM:SS)\"\r\n        }\r\n    }\r\n}\r\n",
+                "createdAt": "2025-09-22T11:14:29.000Z",
+                "updatedAt": "2025-09-23T08:05:50.000Z",
+                "uid": "41854426-9188038a-af8b-49b8-acd2-5526f1323dda"
+              }
+            ],
+            "createdAt": "2025-07-15T10:55:01.000Z",
+            "updatedAt": "2025-09-22T11:48:16.000Z",
+            "uid": "41854426-b7e8e937-08f4-48e3-b0c7-ffdd99228b03"
+          },
+          {
+            "name": "Get transaction by ID",
+            "event": [
+              {
+                "listen": "test",
+                "script": {
+                  "id": "67d90bf0-d29c-42a1-a810-c2cc144668b0",
+                  "exec": [
+                    "pm.test(\"Status code is 200\", function () {",
+                    "    pm.response.to.have.status(200);",
+                    "});"
+                  ],
+                  "type": "text/javascript",
+                  "packages": {},
+                  "requests": {}
+                }
+              }
+            ],
+            "id": "0b7b0dd8-457d-43b5-9e8b-5bfedbd64c27",
+            "protocolProfileBehavior": {
+              "disableBodyPruning": true
+            },
+            "request": {
+              "method": "GET",
+              "header": [],
+              "url": {
+                "raw": "{{base_url}}/transactions/:transaction_id",
+                "host": [
+                  "{{base_url}}"
+                ],
+                "path": [
+                  "transactions",
+                  ":transaction_id"
+                ],
+                "variable": [
+                  {
+                    "key": "transaction_id",
+                    "value": "5935",
+                    "description": "Transaction ID"
+                  }
+                ]
+              }
+            },
+            "response": [
+              {
+                "id": "c76d6983-9eb7-49d6-b711-4f517423a2af",
+                "name": "OK",
+                "originalRequest": {
+                  "method": "GET",
+                  "header": [],
+                  "url": {
+                    "raw": "{{base_url}}/transactions/:transaction_id",
+                    "host": [
+                      "{{base_url}}"
+                    ],
+                    "path": [
+                      "transactions",
+                      ":transaction_id"
+                    ],
+                    "variable": [
+                      {
+                        "key": "transaction_id",
+                        "value": "5935",
+                        "description": "Transaction ID"
+                      }
+                    ]
+                  }
+                },
+                "status": "OK",
+                "code": 200,
+                "_postman_previewlanguage": null,
+                "header": [],
+                "cookie": [],
+                "responseTime": null,
+                "body": "{\n  \"data\": {\n    \"attributes\": {\n      \"action\": \"string\",\n      \"amount\": \"number | null\",\n      \"content\": {\n        \"features\": {\n          \"POINTS\": {\n            \"ALLOW_DELAY\": \"boolean\",\n            \"ALLOW_EVENTS\": \"boolean\",\n            \"POINTS_MODIFIED_FROM\": \"string\"\n          },\n          \"customer_level\": {\n            \"factor\": \"integer\",\n            \"new_points\": \"integer\",\n            \"operator\": \"string\",\n            \"original_points\": \"integer\"\n          }\n        },\n        \"items\": {\n          \"metadata\": \"array\",\n          \"products\": \"array\"\n        },\n        \"version\": \"string\"\n      },\n      \"created_at\": \"datetime (YYYY-MM-DD HH:MM:SS)\",\n      \"delay\": {\n        \"created_at\": \"datetime (ISO 8601)\",\n        \"id\": \"integer\",\n        \"record_id\": \"integer\",\n        \"status\": \"string\",\n        \"updated_at\": \"datetime (ISO 8601)\"\n      },\n      \"exchange\": \"string | null\",\n      \"external_id\": \"string | null\",\n      \"order_id\": \"string | integer | null\",\n      \"points\": \"integer\",\n      \"total_points\": \"integer\",\n      \"type\": \"string\"\n    },\n    \"id\": \"string | integer\",\n    \"type\": \"string\"\n  },\n  \"jsonapi\": {\n    \"version\": \"string\"\n  }\n}",
+                "createdAt": "2025-09-23T08:11:21.000Z",
+                "updatedAt": "2025-09-23T08:12:17.000Z",
+                "uid": "41854426-c76d6983-9eb7-49d6-b711-4f517423a2af"
+              }
+            ],
+            "createdAt": "2025-07-15T10:55:01.000Z",
+            "updatedAt": "2025-09-23T08:11:31.000Z",
+            "uid": "41854426-0b7b0dd8-457d-43b5-9e8b-5bfedbd64c27"
+          }
+        ],
+        "id": "8745159d-a11b-45f5-9b43-3eaacfff6a69",
+        "createdAt": "2025-07-15T10:55:01.000Z",
+        "updatedAt": "2025-09-22T09:11:08.000Z",
+        "uid": "41854426-8745159d-a11b-45f5-9b43-3eaacfff6a69"
+      }
+    ],
+    "auth": {
+      "type": "bearer",
+      "bearer": [
+        {
+          "key": "token",
+          "value": "{{apiToken}}",
+          "type": "string"
+        }
+      ]
+    },
+    "event": [
+      {
+        "listen": "prerequest",
+        "script": {
+          "id": "65f9e738-b2de-4f31-a9fb-8d1587da7f7c",
+          "type": "text/javascript",
+          "exec": [
+            "pm.request.headers.add({",
+            "    key: 'Accept',",
+            "    value: 'application/vnd.api+json'",
+            "})",
+            "pm.request.headers.add({",
+            "    key: 'Content-Type',",
+            "    value: 'application/vnd.api+json'",
+            "})",
+            "pm.request.headers.add({",
+            "    key: 'X-Omniwallet-Account',",
+            "    value: '{{subdomain}}'",
+            "})"
+          ]
+        }
+      },
+      {
+        "listen": "test",
+        "script": {
+          "id": "825d8593-7c77-40ac-b37a-93a5891e2bc9",
+          "type": "text/javascript",
+          "exec": [
+            ""
+          ]
+        }
+      }
+    ],
+    "variable": [
+      {
+        "key": "base_url",
+        "value": "https://api.omniwallet.cloud/v1/"
+      }
+    ]
+  }
+}

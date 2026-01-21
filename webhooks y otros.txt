@@ -1,0 +1,128 @@
+API V1 Reference
+Welcome to the Omniwallet API! This documentation will help you integrate your applications and systems with our loyalty platform quickly and easily.
+
+Our API is designed following REST principles and uses the JSON:API standard to format requests and responses, ensuring a predictable and standardized experience.
+
+Key Features
+Manage your customer's lifecycle.
+Add or subtract points for purchases and other actions.
+Check a customer's transaction history.
+Automate the creation and management of orders redeemed with points.
+Base URL
+All API requests must be made to the following base URL:
+
+https://api.omniwallet.cloud/{v1|v2}
+
+To interact with the Omniwallet API, all your requests must be properly authenticated and include the required headers.
+
+1. Authorization Token (API Key) 🔑
+We use Bearer Token authentication. You must include your API token in the Authorization header of every request. You can generate and find your token in the Omniwallet admin panel, in the "Integrations" section.
+
+Authorization: Bearer {your-api-token}
+
+2. Required Headers 📋
+In addition to the token, all requests must include the following headers to specify the content format and the Omniwallet account you are connecting to:
+
+Accept: application/vnd.api+json
+Content-Type: application/vnd.api+json
+X-Omniwallet-Account: {your-subdomain}
+This header indicates which Omniwallet account the request belongs to. The value is the subdomain you use to access your admin panel (e.g., 'mycompany' if you access it via mycompany.omniwallet.cloud).
+3. Request Example (cURL)
+Here is a complete example of how to query a customer using cURL, including all headers:
+
+curl --location --request GET 'https://api.omniwallet.cloud/v1/customers/customer@example.com' \
+--header 'Authorization: Bearer {your-api-token}' \
+--header 'X-Omniwallet-Account: {your-subdomain}' \
+--header 'Accept: application/vnd.api+json' \
+--header 'Content-Type: application/vnd.api+json'
+
+To make handling large sets of data easier, our API supports pagination, sorting, and filtering on endpoints that return a list of resources (like /customers or /orders).
+
+Pagination
+We use a page-based pagination strategy. You can control the results you receive using the following query parameters:
+
+page[size]: The number of results to return per page.
+page[number]: The specific page number you want to retrieve.
+Example Request: Get the second page of customers, with 15 results per page.
+
+GET /v1/customers?page[size]=15&page[number]=2
+The API response will include meta and links objects to help you navigate through the pages easily.
+
+{
+  "meta": {
+    "page": {
+      "currentPage": 2,
+      "from": 16,
+      "lastPage": 10,
+      "perPage": 15,
+      "to": 30,
+      "total": 150
+    }
+  },
+  "links": {
+    "first": "/v1/customers?page[number]=1",
+    "last": "/v1/customers?page[number]=10",
+    "next": "/v1/customers?page[number]=3"
+  },
+  "data": [...]
+}
+Sorting
+You can sort collections using the sort parameter. Provide a comma-separated list of fields to sort by. To sort in descending order, prefix the field name with a hyphen (-).
+
+Example Request: Get customers sorted by creation date (newest first), and then by name (A-Z).
+
+GET /v1/customers?sort=-createdAt,name
+Allowed sort fields for /customers include: name, email, last_name, points, createdAt, updatedAt.
+
+Filtering
+You can filter results using the filter[field_name] parameter. This allows you to retrieve a specific subset of resources.
+
+Example Request 1: Get all orders with a "pending" status.
+
+GET /v1/orders?filter[status]=pending
+Example Request 2: Get all customers created on a specific date.
+
+GET /v1/customers?filter[createdAt]=2025-08-12%
+The filter expects an exact date in the format yyyy-mm-dd hh:mm:ss. If you want to apply a partial filter, you can use the wildcard symbol %.
+
+Examples:
+
+?filter[createdAt]=yyyy-mm-dd%
+?filter[createdAt]=yyyy-mm%
+?filter[createdAt]=yyyy%
+
+"REST Hooks" allow you to receive real-time event notifications through HTTP calls to your server. This is ideal for synchronizing data or executing actions when specific events occur in Omniwallet, such as the creation of a new customer.
+
+How It Works
+The flow for using webhooks is simple:
+
+You create a webhook in your Omniwallet panel, specifying an event to subscribe to (e.g., customer.created) and the url of your server that will receive the notification.
+An event occurs on the platform that matches your subscription.
+We send a POST request to your URL with a "Skinny Payload" that contains the ID of the affected resource.
+Your server responds with a 2XX status code to confirm successful receipt.
+(Optional) Your server makes a request to our API using the received ID to get the full details of the resource.
+The Payload
+When an event occurs, we will send a POST request to your URL with a JSON payload containing the resource's ID. We call this a "Skinny Payload" because it is intentionally lightweight.
+
+{
+  "event": "customer.created",
+  "data": {
+    "customer_id": "customerF6V94@email.test"
+  }
+}
+Security: Signature Verification
+To ensure that requests originate from Omniwallet, each webhook includes a digital signature. We recommend validating this signature in your production environment.
+
+The signature is calculated using HMAC with SHA-256. These are the elements you should verify:
+
+X-Omniwallet-Signature
+The header containing the signature.
+X-Omniwallet-Timestamp
+The header containing the timestamp of when the request was sent. You should verify that it is not too old (e.g., a 5-minute tolerance).
+To validate the signature, you must build a string by concatenating the timestamp, a period, and the request body. Then, sign that string with your Secret Key and compare the result with the value of the X-Omniwallet-Signature header.
+
+const stringToSign = timestamp + "." + requestBody; const expectedSignature = sign(stringToSign, yourSecretKey);
+Handling Requests: Idempotency and Retries
+To avoid processing the same event multiple times (for example, during a retry), each webhook request includes the X-Omniwallet-Hook-Id header. This is a unique identifier for each delivery. Save it and check if you have already processed an event with this ID before executing your logic.
+
+Your server must respond with a 2XX status code. If the response is different, we will consider it a failure and will retry the delivery for up to one day using an exponential backoff system.

@@ -1,0 +1,318 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Omniwallet API V2",
+    "description": "### Url\n\n``` bash\nhttps://api.omniwallet.cloud/v2\n ```",
+    "version": "1.0.0",
+    "contact": {}
+  },
+  "servers": [
+    {
+      "url": "{{base_url}}"
+    }
+  ],
+  "paths": {
+    "/stamps/{customer_email}": {
+      "get": {
+        "tags": [
+          "Stamps"
+        ],
+        "summary": "Get customer stamps",
+        "description": "Get customer stamps",
+        "operationId": "getCustomerStamps",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "current_stamps": {
+                      "type": "string",
+                      "example": "integer"
+                    },
+                    "enabled": {
+                      "type": "string",
+                      "example": "boolean"
+                    },
+                    "object": {
+                      "type": "string",
+                      "example": "string (defaullt: stamps)"
+                    },
+                    "total_stamps": {
+                      "type": "string",
+                      "example": "integer"
+                    }
+                  }
+                },
+                "examples": {
+                  "OK": {
+                    "value": {
+                      "current_stamps": "integer",
+                      "enabled": "boolean",
+                      "object": "string (defaullt: stamps)",
+                      "total_stamps": "integer"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "parameters": [
+        {
+          "name": "customer_email",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "example": "example@example.com"
+          },
+          "description": "Customer email"
+        }
+      ]
+    },
+    "/stamps/{customer_email}/images": {
+      "get": {
+        "tags": [
+          "Stamps"
+        ],
+        "summary": "Get customer stamp images",
+        "description": "Get customer stamp images",
+        "operationId": "getCustomerStampImages",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "background": {
+                      "type": "object",
+                      "properties": {
+                        "name": {
+                          "type": "string",
+                          "example": "string"
+                        },
+                        "url": {
+                          "type": "string",
+                          "example": "string, e.g., 'tenant./stamps/backgrounds/blue.png'"
+                        }
+                      }
+                    },
+                    "icon": {
+                      "type": "object",
+                      "properties": {
+                        "name": {
+                          "type": "string",
+                          "example": "string"
+                        },
+                        "url": {
+                          "type": "string",
+                          "example": "string, e.g., 'tenant./stamps/backgrounds/blue.png'"
+                        }
+                      }
+                    },
+                    "object": {
+                      "type": "string",
+                      "example": "string (default: stamps_images)"
+                    }
+                  }
+                },
+                "examples": {
+                  "OK": {
+                    "value": {
+                      "background": {
+                        "name": "string",
+                        "url": "string, e.g., 'tenant./stamps/backgrounds/blue.png'"
+                      },
+                      "icon": {
+                        "name": "string",
+                        "url": "string, e.g., 'tenant./stamps/backgrounds/blue.png'"
+                      },
+                      "object": "string (default: stamps_images)"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "parameters": [
+        {
+          "name": "customer_email",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "example": "example@example.com"
+          },
+          "description": "Customer email"
+        }
+      ]
+    },
+    "/customers/{customer}/data": {
+      "get": {
+        "tags": [
+          "Customers"
+        ],
+        "summary": "Get customer_data",
+        "description": "Get customer_data",
+        "operationId": "getCustomerData",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "examples": {
+                  "OK": {
+                    "value": "{\r\n    \"data\": [\r\n        {\r\n            \"object\": \"string (default: customer_data)\",\r\n            \"key\": \"string | null\",\r\n            \"content\": \"string | null\",\r\n            \"url\": \"string | null\"\r\n            \"created_at\": \"date\"\r\n        },\r\n        {\r\n            \"object\": \"string (default: customer_data)\",\r\n            \"key\": \"string | null\",\r\n            \"content\": \"string | null\",\r\n            \"url\": \"string | null\"\r\n            \"created_at\": \"date\"\r\n        },\r\n    ]\r\n}"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "parameters": [
+        {
+          "name": "customer",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "example": "example@example.com"
+          },
+          "description": "Customer email"
+        }
+      ]
+    },
+    "/customers/{customer}/data/{key}": {
+      "get": {
+        "tags": [
+          "Customers"
+        ],
+        "summary": "Get customer_data by key",
+        "description": "Get customer_data by key",
+        "operationId": "getCustomerDataByKey",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "content": {
+                          "type": "string",
+                          "example": "string | null"
+                        },
+                        "created_at": {
+                          "type": "string",
+                          "example": "date"
+                        },
+                        "key": {
+                          "type": "string",
+                          "example": "string, e.g., 'shop'"
+                        },
+                        "object": {
+                          "type": "string",
+                          "example": "string (default: customer_data)"
+                        },
+                        "url": {
+                          "type": "string",
+                          "example": "string | null"
+                        }
+                      }
+                    }
+                  }
+                },
+                "examples": {
+                  "OK": {
+                    "value": {
+                      "data": {
+                        "content": "string | null",
+                        "created_at": "date",
+                        "key": "string, e.g., 'shop'",
+                        "object": "string (default: customer_data)",
+                        "url": "string | null"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "parameters": [
+        {
+          "name": "customer",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "example": "example@example.com"
+          },
+          "description": "Customer email"
+        },
+        {
+          "name": "key",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "example": "shop"
+          },
+          "description": "Key to search by"
+        }
+      ]
+    },
+    "/account": {
+      "get": {
+        "tags": [
+          "Account"
+        ],
+        "summary": "Get account information",
+        "description": "Get account information",
+        "operationId": "getAccountInformation",
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer"
+      }
+    }
+  },
+  "security": [
+    {
+      "bearerAuth": []
+    }
+  ],
+  "tags": [
+    {
+      "name": "Stamps"
+    },
+    {
+      "name": "Customers"
+    },
+    {
+      "name": "Account"
+    }
+  ]
+}
