@@ -27,11 +27,31 @@
 
     # Prevent caching of dynamic PHP content
     <FilesMatch "\.php$">
-        Header set Cache-Control "no-cache, no-store, must-revalidate, private"
+        Header set Cache-Control "no-cache, no-store, must-revalidate, private, max-age=0"
         Header set Pragma "no-cache"
-        Header set Expires "0"
+        Header set Expires "Thu, 01 Jan 1970 00:00:00 GMT"
+        Header unset ETag
+        Header unset Last-Modified
     </FilesMatch>
 </IfModule>
+
+# Prevent caching of admin routes
+<IfModule mod_headers.c>
+    SetEnvIf Request_URI "^/admin" no_cache
+    SetEnvIf Request_URI "^/sponsor/" no_cache
+    SetEnvIf Request_URI "^/empresa/" no_cache
+    Header set Cache-Control "no-cache, no-store, must-revalidate, private, max-age=0" env=no_cache
+    Header set Pragma "no-cache" env=no_cache
+    Header set Expires "Thu, 01 Jan 1970 00:00:00 GMT" env=no_cache
+    Header set Vary "Cookie" env=no_cache
+    Header unset ETag env=no_cache
+</IfModule>
+
+# Disable ETags globally (they can cause caching issues)
+<IfModule mod_headers.c>
+    Header unset ETag
+</IfModule>
+FileETag None
 
 # Disable directory listing
 Options -Indexes

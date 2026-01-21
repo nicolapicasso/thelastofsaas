@@ -53,6 +53,12 @@ class View
         include $templatePath;
         $content = ob_get_clean();
 
+        // Inject cache prevention script for panel templates (before </body>)
+        if (strpos($template, 'sponsor-panel/') === 0 || strpos($template, 'company-panel/') === 0) {
+            $cacheScript = $this->getCachePreventionScript();
+            $content = str_replace('</body>', $cacheScript . '</body>', $content);
+        }
+
         if ($this->layout) {
             $layoutPath = TEMPLATES_PATH . '/' . str_replace('.', '/', $this->layout) . '.php';
             $this->data['_content'] = $content;
@@ -62,6 +68,35 @@ class View
         } else {
             echo $content;
         }
+    }
+
+    /**
+     * Get cache prevention JavaScript
+     */
+    private function getCachePreventionScript(): string
+    {
+        $instanceId = bin2hex(random_bytes(8));
+        return <<<HTML
+<script>
+(function() {
+    var pageInstanceId = '{$instanceId}';
+    var pageLoadTime = Date.now();
+    var storageKey = 'page_' + window.location.pathname;
+    var storedInstance = sessionStorage.getItem(storageKey);
+    if (storedInstance && storedInstance !== pageInstanceId) {
+        sessionStorage.setItem(storageKey, pageInstanceId);
+        window.location.reload(true);
+    } else {
+        sessionStorage.setItem(storageKey, pageInstanceId);
+    }
+    window.addEventListener('pageshow', function(e) { if (e.persisted) window.location.reload(true); });
+    window.addEventListener('popstate', function() { window.location.reload(true); });
+    document.addEventListener('visibilitychange', function() {
+        if (document.visibilityState === 'visible' && Date.now() - pageLoadTime > 30000) window.location.reload(true);
+    });
+})();
+</script>
+HTML;
     }
 
     /**

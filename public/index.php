@@ -82,9 +82,45 @@ if (file_exists(ROOT_PATH . '/.env')) {
 // Set timezone
 date_default_timezone_set('Europe/Madrid');
 
-// Start session
+// Start session with secure cookie settings
 if (session_status() === PHP_SESSION_NONE) {
+    // Configure session cookie to prevent caching issues
+    session_set_cookie_params([
+        'lifetime' => 0,           // Session cookie (deleted on browser close)
+        'path' => '/',
+        'domain' => '',
+        'secure' => isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off',
+        'httponly' => true,
+        'samesite' => 'Lax'
+    ]);
     session_start();
+
+    // Regenerate session ID periodically to prevent fixation
+    if (!isset($_SESSION['_created'])) {
+        $_SESSION['_created'] = time();
+    } elseif (time() - $_SESSION['_created'] > 1800) {
+        // Regenerate session ID every 30 minutes
+        session_regenerate_id(true);
+        $_SESSION['_created'] = time();
+    }
+}
+
+// Prevent caching for admin and authenticated routes
+$requestUri = $_SERVER['REQUEST_URI'] ?? '/';
+$isAdminRoute = strpos($requestUri, '/admin') === 0;
+$isSponsorPanel = strpos($requestUri, '/sponsor/') === 0;
+$isCompanyPanel = strpos($requestUri, '/empresa/') === 0;
+$isAuthenticatedRoute = $isAdminRoute || $isSponsorPanel || $isCompanyPanel;
+
+if ($isAuthenticatedRoute && !$isAjaxRequest) {
+    // Strong anti-cache headers for all authenticated routes
+    header('Cache-Control: no-cache, no-store, must-revalidate, private, max-age=0');
+    header('Pragma: no-cache');
+    header('Expires: Thu, 01 Jan 1970 00:00:00 GMT');
+    header('Vary: Cookie');
+    // Prevent ETags from causing 304 responses
+    header_remove('ETag');
+    header_remove('Last-Modified');
 }
 
 // Initialize application
