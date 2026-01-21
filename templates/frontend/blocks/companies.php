@@ -324,15 +324,15 @@ $blockId = 'companies-' . uniqid();
     flex-wrap: nowrap;
     gap: 2rem;
     width: max-content;
-    animation: companies-scroll-<?= $blockId ?> 25s linear infinite;
+    animation: companies-scroll-<?= $blockId ?> 50s linear infinite;
 }
 
 #<?= $blockId ?> .companies-carousel-autoplay[data-speed="slow"] .companies-carousel-track-autoplay {
-    animation-duration: 40s;
+    animation-duration: 80s;
 }
 
 #<?= $blockId ?> .companies-carousel-autoplay[data-speed="fast"] .companies-carousel-track-autoplay {
-    animation-duration: 15s;
+    animation-duration: 30s;
 }
 
 #<?= $blockId ?> .companies-carousel-autoplay:hover .companies-carousel-track-autoplay {
