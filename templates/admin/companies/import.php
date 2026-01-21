@@ -93,6 +93,11 @@
                     <td>URL del sitio web</td>
                 </tr>
                 <tr>
+                    <td><code>logo_url</code></td>
+                    <td>No</td>
+                    <td>URL del logo. Si es una URL externa (http/https), se descargará automáticamente y se guardará en el servidor. Formatos soportados: PNG, JPG, GIF, SVG, WebP, ICO</td>
+                </tr>
+                <tr>
                     <td><code>contacts</code></td>
                     <td>No</td>
                     <td>Contactos de la empresa. Formato: <code>nombre|cargo|email|telefono</code>. Para varios contactos, separar con <code>;</code>. Ejemplo: <code>Juan Perez|CEO|juan@empresa.com|+34666111222;Maria Garcia|CTO|maria@empresa.com</code></td>
@@ -124,14 +129,17 @@
                 </tr>
             </tbody>
         </table>
-        <p class="mt-3"><strong>Nota:</strong> Tambien se aceptan las columnas <code>saas_usage</code>, <code>saas que utiliza</code> o <code>herramientas</code> como alternativas a <code>saas</code>.</p>
-        <p class="mt-3"><strong>Ejemplo basico:</strong></p>
-        <pre class="bg-light p-3"><code>name;description;sector;employees;contact_email;saas
-"Tech Solutions";"Empresa de tecnologia";"Tecnologia";"51-200";"info@techsol.com";"Slack, HubSpot, Salesforce"
-"Innovate Corp";"Servicios digitales";"Servicios";"11-50";"contacto@innovate.io";"Notion, Figma"</code></pre>
-        <p class="mt-3"><strong>Ejemplo con multiples contactos:</strong></p>
-        <pre class="bg-light p-3"><code>name;description;sector;contacts;saas
-"Tech Solutions";"Empresa de tecnologia";"Tecnologia";"Juan Perez|CEO|juan@tech.com|+34666111222;Maria Garcia|CTO|maria@tech.com";"Slack, HubSpot"
-"Innovate Corp";"Servicios digitales";"Servicios";"Pedro Lopez|Director|pedro@innovate.io";"Notion, Figma"</code></pre>
+        <p class="mt-3"><strong>Nota:</strong> También se aceptan las columnas <code>saas_usage</code>, <code>saas que utiliza</code> o <code>herramientas</code> como alternativas a <code>saas</code>.</p>
+        <div class="alert alert-info mt-3">
+            <i class="fas fa-info-circle"></i> <strong>Descarga automática de logos:</strong> Si incluyes una URL externa en la columna <code>logo_url</code>, el sistema descargará automáticamente la imagen y la guardará en el servidor. Al finalizar la importación se mostrará el número de logos descargados.
+        </div>
+        <p class="mt-3"><strong>Ejemplo básico:</strong></p>
+        <pre class="bg-light p-3"><code>name;description;sector;employees;logo_url;contact_email;saas
+"Tech Solutions";"Empresa de tecnologia";"Tecnologia";"51-200";"https://techsol.com/logo.png";"info@techsol.com";"Slack, HubSpot, Salesforce"
+"Innovate Corp";"Servicios digitales";"Servicios";"11-50";"https://innovate.io/brand/logo.svg";"contacto@innovate.io";"Notion, Figma"</code></pre>
+        <p class="mt-3"><strong>Ejemplo con múltiples contactos:</strong></p>
+        <pre class="bg-light p-3"><code>name;description;sector;logo_url;contacts;saas
+"Tech Solutions";"Empresa de tecnologia";"Tecnologia";"https://techsol.com/logo.png";"Juan Perez|CEO|juan@tech.com|+34666111222;Maria Garcia|CTO|maria@tech.com";"Slack, HubSpot"
+"Innovate Corp";"Servicios digitales";"Servicios";"";"Pedro Lopez|Director|pedro@innovate.io";"Notion, Figma"</code></pre>
     </div>
 </div>
