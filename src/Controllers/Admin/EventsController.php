@@ -122,7 +122,7 @@ class EventsController extends Controller
         $sponsors = $this->eventModel->getSponsors((int) $id);
         $companies = $this->eventModel->getCompanies((int) $id);
         $features = $this->eventModel->getFeatures((int) $id);
-        $allSponsors = $this->sponsorModel->getActive();
+        $allSponsors = $this->sponsorModel->getAllActive();
         $allCompanies = $this->companyModel->getActive();
         $stats = $this->eventModel->getStats((int) $id);
 
