@@ -159,9 +159,10 @@
 }
 
 /* Ensure sticky can work - no overflow hidden on parents */
+.site-main,
 .section,
 .section > .container {
-    overflow: visible;
+    overflow: visible !important;
 }
 
 /* Blog Layout */

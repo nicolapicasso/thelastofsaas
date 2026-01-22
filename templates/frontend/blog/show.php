@@ -300,9 +300,11 @@
 }
 
 /* Ensure sticky can work - no overflow hidden on parents */
+.site-main,
 .blog-post,
+.post-body,
 .post-body .container {
-    overflow: visible;
+    overflow: visible !important;
 }
 
 /* Post Layout */
