@@ -746,5 +746,76 @@ document.addEventListener('DOMContentLoaded', function() {
     } else if (tocWidget) {
         tocWidget.style.display = 'none';
     }
+
+    // Sticky sidebar with JavaScript (fallback for CSS sticky issues)
+    const sidebar = document.querySelector('.post-sidebar');
+    const postLayout = document.querySelector('.post-layout');
+
+    if (sidebar && postLayout && window.innerWidth > 1024) {
+        const sidebarTop = 100; // Distance from top when sticky
+        let sidebarOriginalTop = null;
+        let isSticky = false;
+
+        function initStickyPosition() {
+            // Get original position
+            sidebar.style.position = 'relative';
+            sidebar.style.top = 'auto';
+            sidebarOriginalTop = sidebar.getBoundingClientRect().top + window.scrollY;
+        }
+
+        function updateStickyPosition() {
+            if (window.innerWidth <= 1024) {
+                sidebar.style.position = '';
+                sidebar.style.top = '';
+                sidebar.style.width = '';
+                return;
+            }
+
+            const scrollY = window.scrollY;
+            const layoutRect = postLayout.getBoundingClientRect();
+            const sidebarHeight = sidebar.offsetHeight;
+            const layoutBottom = layoutRect.bottom + scrollY;
+            const sidebarWidth = sidebar.offsetWidth;
+
+            // When to start sticking
+            const startSticky = sidebarOriginalTop - sidebarTop;
+            // When to stop sticking (so sidebar doesn't go past layout)
+            const stopSticky = layoutBottom - sidebarHeight - sidebarTop;
+
+            if (scrollY >= startSticky && scrollY < stopSticky) {
+                // Sticky mode
+                if (!isSticky) {
+                    sidebar.style.position = 'fixed';
+                    sidebar.style.top = sidebarTop + 'px';
+                    sidebar.style.width = sidebarWidth + 'px';
+                    isSticky = true;
+                }
+            } else if (scrollY >= stopSticky) {
+                // Bottom mode - stick to bottom of layout
+                sidebar.style.position = 'absolute';
+                sidebar.style.top = (stopSticky - sidebarOriginalTop + sidebarTop) + 'px';
+                sidebar.style.width = sidebarWidth + 'px';
+                isSticky = false;
+            } else {
+                // Normal mode
+                sidebar.style.position = 'relative';
+                sidebar.style.top = 'auto';
+                sidebar.style.width = '';
+                isSticky = false;
+            }
+        }
+
+        // Make post-layout position relative for absolute positioning
+        postLayout.style.position = 'relative';
+
+        initStickyPosition();
+        updateStickyPosition();
+
+        window.addEventListener('scroll', updateStickyPosition, { passive: true });
+        window.addEventListener('resize', function() {
+            initStickyPosition();
+            updateStickyPosition();
+        });
+    }
 });
 </script>
