@@ -37,14 +37,20 @@ class BlogController extends BaseController
         }
 
         $result = $this->postModel->getPublished($page, 12, $categoryId);
-        $allCategories = $this->categoryModel->getWithPostCount();
+        $allCategories = $this->categoryModel->getWithPostCount() ?? [];
         $categories = array_filter($allCategories, fn($c) => $c['post_count'] > 0);
-        $featuredPosts = $this->postModel->getFeatured(3);
+        $featuredPosts = $this->postModel->getFeatured(3) ?? [];
 
-        // Translate posts
-        $this->translator->translateEntities('post', $result['items']);
-        $this->translator->translateEntities('post', $featuredPosts);
-        $this->translator->translateEntities('category', $categories);
+        // Translate posts (ensure arrays are not null)
+        if (!empty($result['items'])) {
+            $this->translator->translateEntities('post', $result['items']);
+        }
+        if (!empty($featuredPosts)) {
+            $this->translator->translateEntities('post', $featuredPosts);
+        }
+        if (!empty($categories)) {
+            $this->translator->translateEntities('category', $categories);
+        }
 
         // SEO
         $title = $currentCategory
@@ -89,15 +95,17 @@ class BlogController extends BaseController
         }
 
         // Get related posts
-        $relatedPosts = $this->postModel->getRelated($post['id'], $post['category_id'], 3);
+        $relatedPosts = $this->postModel->getRelated($post['id'], $post['category_id'], 3) ?? [];
 
         // Get categories with post count (only those with posts)
-        $allCategories = $this->categoryModel->getWithPostCount();
+        $allCategories = $this->categoryModel->getWithPostCount() ?? [];
         $categories = array_filter($allCategories, fn($c) => $c['post_count'] > 0);
 
         // Translate post and related posts
         $this->translator->translateEntity('post', $post);
-        $this->translator->translateEntities('post', $relatedPosts);
+        if (!empty($relatedPosts)) {
+            $this->translator->translateEntities('post', $relatedPosts);
+        }
 
         // SEO
         $this->seo->setTitle($post['meta_title'] ?? $post['title'] . ' | Observatorio SaaS');

@@ -419,10 +419,13 @@
 
 /* Sidebar */
 .post-sidebar {
+    position: -webkit-sticky;
     position: sticky;
-    top: calc(var(--header-height) + var(--spacing-lg));
+    top: 100px;
     height: fit-content;
     align-self: start;
+    max-height: calc(100vh - 120px);
+    overflow-y: auto;
 }
 
 .sidebar-widget {
