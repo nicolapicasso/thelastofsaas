@@ -276,8 +276,6 @@
 .blog-sidebar {
     position: sticky;
     top: 100px;
-    max-height: calc(100vh - 120px);
-    overflow-y: auto;
 }
 
 .sidebar-widget {
@@ -349,8 +347,7 @@
     }
 
     .blog-sidebar {
-        position: static;
-        order: -1;
+        display: none;
     }
 }
 

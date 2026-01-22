@@ -459,8 +459,6 @@
 .post-sidebar {
     position: sticky;
     top: 100px;
-    max-height: calc(100vh - 120px);
-    overflow-y: auto;
 }
 
 .sidebar-widget {
@@ -663,14 +661,14 @@
     }
 
     .post-sidebar {
-        position: static;
-        display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        gap: var(--spacing-lg);
+        display: none;
     }
 
-    .toc-widget {
-        display: none;
+    /* Tables responsive */
+    .post-text table {
+        display: block;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
     }
 }
 
@@ -682,10 +680,6 @@
     .post-header .post-meta {
         flex-direction: column;
         gap: var(--spacing-sm);
-    }
-
-    .post-sidebar {
-        grid-template-columns: 1fr;
     }
 
     .related-posts .posts-grid {
