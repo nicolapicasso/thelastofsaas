@@ -75,6 +75,7 @@ class Category extends Model
 
     /**
      * Get category with all related content counts
+     * Handles missing tables gracefully
      */
     public function getWithContentCounts(int $id): ?array
     {
@@ -82,29 +83,49 @@ class Category extends Model
         if (!$category) return null;
 
         // Get posts count
-        $sql = "SELECT COUNT(*) as count FROM posts WHERE category_id = ? AND status = 'published'";
-        $result = $this->db->fetch($sql, [$id]);
-        $category['posts_count'] = (int) ($result['count'] ?? 0);
+        try {
+            $sql = "SELECT COUNT(*) as count FROM posts WHERE category_id = ? AND status = 'published'";
+            $result = $this->db->fetch($sql, [$id]);
+            $category['posts_count'] = (int) ($result['count'] ?? 0);
+        } catch (\PDOException $e) {
+            $category['posts_count'] = 0;
+        }
 
-        // Get services count
-        $sql = "SELECT COUNT(*) as count FROM services WHERE category_id = ? AND is_active = 1";
-        $result = $this->db->fetch($sql, [$id]);
-        $category['services_count'] = (int) ($result['count'] ?? 0);
+        // Get services count (table may not exist)
+        try {
+            $sql = "SELECT COUNT(*) as count FROM services WHERE category_id = ? AND is_active = 1";
+            $result = $this->db->fetch($sql, [$id]);
+            $category['services_count'] = (int) ($result['count'] ?? 0);
+        } catch (\PDOException $e) {
+            $category['services_count'] = 0;
+        }
 
-        // Get cases count
-        $sql = "SELECT COUNT(*) as count FROM success_cases WHERE category_id = ? AND status = 'published'";
-        $result = $this->db->fetch($sql, [$id]);
-        $category['cases_count'] = (int) ($result['count'] ?? 0);
+        // Get cases count (table may not exist)
+        try {
+            $sql = "SELECT COUNT(*) as count FROM success_cases WHERE category_id = ? AND status = 'published'";
+            $result = $this->db->fetch($sql, [$id]);
+            $category['cases_count'] = (int) ($result['count'] ?? 0);
+        } catch (\PDOException $e) {
+            $category['cases_count'] = 0;
+        }
 
-        // Get tools count
-        $sql = "SELECT COUNT(*) as count FROM tools WHERE category_id = ? AND is_active = 1";
-        $result = $this->db->fetch($sql, [$id]);
-        $category['tools_count'] = (int) ($result['count'] ?? 0);
+        // Get tools count (table may not exist)
+        try {
+            $sql = "SELECT COUNT(*) as count FROM tools WHERE category_id = ? AND is_active = 1";
+            $result = $this->db->fetch($sql, [$id]);
+            $category['tools_count'] = (int) ($result['count'] ?? 0);
+        } catch (\PDOException $e) {
+            $category['tools_count'] = 0;
+        }
 
-        // Get FAQs count
-        $sql = "SELECT COUNT(*) as count FROM faqs WHERE category_id = ? AND is_active = 1";
-        $result = $this->db->fetch($sql, [$id]);
-        $category['faqs_count'] = (int) ($result['count'] ?? 0);
+        // Get FAQs count (table may not exist)
+        try {
+            $sql = "SELECT COUNT(*) as count FROM faqs WHERE category_id = ? AND is_active = 1";
+            $result = $this->db->fetch($sql, [$id]);
+            $category['faqs_count'] = (int) ($result['count'] ?? 0);
+        } catch (\PDOException $e) {
+            $category['faqs_count'] = 0;
+        }
 
         $category['total_content'] = $category['posts_count'] + $category['services_count'] +
                                      $category['cases_count'] + $category['tools_count'] +
