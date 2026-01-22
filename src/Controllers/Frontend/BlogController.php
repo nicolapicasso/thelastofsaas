@@ -36,7 +36,7 @@ class BlogController extends BaseController
             $categoryId = $currentCategory ? $currentCategory['id'] : null;
         }
 
-        $result = $this->postModel->getPublished($page, 12, $categoryId);
+        $result = $this->postModel->getPaginated($page, 12, $categoryId);
         $allCategories = $this->categoryModel->getWithPostCount() ?? [];
         $categories = array_filter($allCategories, fn($c) => $c['post_count'] > 0);
         $featuredPosts = $this->postModel->getFeatured(3) ?? [];
