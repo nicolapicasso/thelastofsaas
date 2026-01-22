@@ -1224,13 +1224,14 @@ a:hover {
         gap: var(--spacing-md);
     }
 
-    .block-column-half,
-    .block-column-third,
-    .block-column-two-thirds,
-    .block-column-quarter,
-    .block-column-three-quarters {
+    .block-row > .block-column-half,
+    .block-row > .block-column-third,
+    .block-row > .block-column-two-thirds,
+    .block-row > .block-column-quarter,
+    .block-row > .block-column-three-quarters {
         flex: 0 0 100%;
         max-width: 100%;
+        width: 100%;
     }
 }
 

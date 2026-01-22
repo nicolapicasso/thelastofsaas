@@ -112,6 +112,9 @@ $router->post('/admin/blocks/{id}/clone', 'Admin\\BlocksController', 'clone');
 // Posts
 $router->get('/admin/posts', 'Admin\\PostsController', 'index');
 $router->get('/admin/posts/create', 'Admin\\PostsController', 'create');
+$router->get('/admin/posts/import', 'Admin\\PostsController', 'importForm');
+$router->post('/admin/posts/import/analyze', 'Admin\\PostsController', 'analyzeImport');
+$router->post('/admin/posts/import/execute', 'Admin\\PostsController', 'executeImport');
 $router->post('/admin/posts', 'Admin\\PostsController', 'store');
 $router->get('/admin/posts/{id}/edit', 'Admin\\PostsController', 'edit');
 $router->post('/admin/posts/{id}', 'Admin\\PostsController', 'update');
