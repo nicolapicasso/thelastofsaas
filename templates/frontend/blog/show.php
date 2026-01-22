@@ -22,6 +22,9 @@
 
                 <div class="post-title-pill">
                     <h1><?= htmlspecialchars($post['title']) ?></h1>
+                    <?php if (!empty($post['subtitle'])): ?>
+                        <p class="post-subtitle"><?= htmlspecialchars($post['subtitle']) ?></p>
+                    <?php endif; ?>
                 </div>
 
                 <div class="post-meta">
@@ -229,6 +232,14 @@
     color: var(--color-gray-900);
 }
 
+.post-subtitle {
+    font-size: var(--font-size-lg);
+    color: var(--color-gray-600);
+    margin: var(--spacing-sm) 0 0 0;
+    line-height: 1.4;
+    font-weight: 400;
+}
+
 .post-header .post-meta {
     display: flex;
     justify-content: center;
@@ -266,6 +277,10 @@
 
     .post-title-pill h1 {
         font-size: var(--font-size-2xl);
+    }
+
+    .post-subtitle {
+        font-size: var(--font-size-base);
     }
 
     .post-header .post-meta {
@@ -407,6 +422,7 @@
     position: sticky;
     top: calc(var(--header-height) + var(--spacing-lg));
     height: fit-content;
+    align-self: start;
 }
 
 .sidebar-widget {
