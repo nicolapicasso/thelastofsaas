@@ -22,6 +22,9 @@
     <!-- Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
+    <!-- Main site styles (for header/nav) -->
+    <link rel="stylesheet" href="/assets/css/frontend.css">
+
     <style>
         /* ============================================
            THE LAST OF SAAS - Event Page Styles
@@ -114,109 +117,6 @@
         .btn-lg {
             padding: 1.25rem 3rem;
             font-size: 16px;
-        }
-
-        /* ============================================
-           HEADER
-           ============================================ */
-        .site-header {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            z-index: 1000;
-            background: rgba(0, 0, 0, 0.95);
-            backdrop-filter: blur(10px);
-            padding: 1rem 0;
-            border-bottom: 1px solid var(--border-light);
-        }
-
-        .site-header .container-wide {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .site-header .logo {
-            font-family: var(--font-heading);
-            font-weight: 800;
-            font-size: 16px;
-            color: var(--text-light);
-            text-decoration: none;
-            text-transform: uppercase;
-            letter-spacing: 0.15em;
-        }
-
-        .site-header .logo-img {
-            display: flex;
-            align-items: center;
-        }
-
-        .site-header .logo-img img {
-            height: 40px;
-            width: auto;
-            max-width: 180px;
-            object-fit: contain;
-        }
-
-        .site-header .main-nav-menu {
-            display: flex;
-            align-items: center;
-            gap: 2.5rem;
-        }
-
-        .site-header .main-nav-menu a {
-            font-family: var(--font-mono);
-            font-size: 12px;
-            color: var(--text-grey);
-            text-decoration: none;
-            text-transform: uppercase;
-            letter-spacing: 0.15em;
-            transition: var(--transition);
-        }
-
-        .site-header .main-nav-menu a:hover {
-            color: var(--text-light);
-        }
-
-        .header-actions {
-            display: flex;
-            gap: 1rem;
-            align-items: center;
-        }
-
-        .btn-header {
-            background: var(--text-light);
-            color: var(--bg-dark);
-            padding: 0.6rem 1.25rem;
-            font-size: 12px;
-        }
-
-        .btn-header:hover {
-            background: transparent;
-            color: var(--text-light);
-            border-color: var(--text-light);
-        }
-
-        .mobile-menu-toggle {
-            display: none;
-            flex-direction: column;
-            justify-content: center;
-            gap: 5px;
-            width: 30px;
-            height: 30px;
-            background: none;
-            border: none;
-            cursor: pointer;
-            padding: 0;
-        }
-
-        .mobile-menu-toggle span {
-            display: block;
-            width: 100%;
-            height: 2px;
-            background: var(--text-light);
-            transition: var(--transition);
         }
 
         /* ============================================
@@ -1390,30 +1290,6 @@
         }
 
         @media (max-width: 768px) {
-            .site-header .main-nav-menu {
-                display: none;
-                position: absolute;
-                top: 100%;
-                left: 0;
-                right: 0;
-                background: rgba(0, 0, 0, 0.98);
-                flex-direction: column;
-                padding: 1.5rem;
-                gap: 1rem;
-            }
-
-            .site-header .main-nav-menu.active {
-                display: flex;
-            }
-
-            .header-actions {
-                display: none;
-            }
-
-            .mobile-menu-toggle {
-                display: flex;
-            }
-
             .event-hero-minimal,
             .event-hero-parallax {
                 padding: 120px 0 60px;
@@ -1515,44 +1391,135 @@
     </style>
 </head>
 <body>
-    <!-- Header -->
+    <!-- Header (same as main site) -->
     <header class="site-header">
-        <div class="container-wide">
-            <?php if (!empty($logoHeader) && file_exists(PUBLIC_PATH . $logoHeader)): ?>
-                <a href="/" class="logo logo-img">
-                    <img src="<?= htmlspecialchars($logoHeader) ?>" alt="The Last of SaaS" height="40">
+        <div class="container">
+            <nav class="main-nav">
+                <?php
+                // Check if logo is a GIF (for hover animation)
+                $isAnimatedLogo = !empty($logoHeader) && preg_match('/\.gif$/i', $logoHeader);
+                $logoClass = $isAnimatedLogo ? 'logo has-animated-logo' : 'logo';
+                ?>
+                <a href="/" class="<?= $logoClass ?>" <?= $isAnimatedLogo ? 'data-animated-src="' . htmlspecialchars($logoHeader) . '"' : '' ?>>
+                    <?php if (!empty($logoHeader)): ?>
+                        <?php if ($isAnimatedLogo): ?>
+                            <canvas class="logo-static" height="40"></canvas>
+                            <img src="<?= htmlspecialchars($logoHeader) ?>" alt="The Last of SaaS" height="40" class="logo-animated">
+                        <?php else: ?>
+                            <img src="<?= htmlspecialchars($logoHeader) ?>" alt="The Last of SaaS" height="40">
+                        <?php endif; ?>
+                    <?php else: ?>
+                        THE LAST OF SAAS
+                    <?php endif; ?>
                 </a>
-            <?php else: ?>
-                <a href="/" class="logo">THE LAST OF SAAS</a>
-            <?php endif; ?>
-            <nav class="main-nav-menu">
-                <?php if (!empty($mainNav)): ?>
-                    <?php foreach ($mainNav as $item): ?>
-                        <a href="<?= $item['url'] ?>"><?= htmlspecialchars($item['label']) ?></a>
-                    <?php endforeach; ?>
-                <?php else: ?>
-                    <a href="/">Inicio</a>
-                    <a href="/eventos">Eventos</a>
-                    <a href="/sponsor/login">Sponsors</a>
-                    <a href="/empresa/login">Empresas</a>
-                <?php endif; ?>
-            </nav>
-            <?php if (!empty($headerButtons)): ?>
-                <div class="header-actions">
-                    <?php foreach ($headerButtons as $btn): ?>
-                        <a href="<?= $btn['url'] ?>" class="btn btn-header"<?= ($btn['target'] ?? '_self') === '_blank' ? ' target="_blank" rel="noopener"' : '' ?>>
-                            <?= htmlspecialchars($btn['title']) ?>
-                        </a>
-                    <?php endforeach; ?>
+
+                <ul class="nav-menu" id="navMenu">
+                    <?php if (!empty($mainNav)): ?>
+                        <?php foreach ($mainNav as $item): ?>
+                            <?php $hasChildren = !empty($item['children']); ?>
+                            <li class="<?= $hasChildren ? 'has-submenu' : '' ?>">
+                                <a href="<?= $item['url'] ?>" class="<?= strpos($_SERVER['REQUEST_URI'], $item['url']) === 0 && $item['url'] !== '/' ? 'active' : '' ?>">
+                                    <?= htmlspecialchars($item['label']) ?>
+                                    <?php if ($hasChildren): ?>
+                                        <i class="fas fa-chevron-down submenu-arrow"></i>
+                                    <?php endif; ?>
+                                </a>
+                                <?php if ($hasChildren): ?>
+                                    <ul class="submenu">
+                                        <?php foreach ($item['children'] as $child): ?>
+                                            <?php $hasGrandchildren = !empty($child['children']); ?>
+                                            <li class="<?= $hasGrandchildren ? 'has-submenu' : '' ?>">
+                                                <a href="<?= $child['url'] ?>">
+                                                    <?php if (!empty($child['icon'])): ?>
+                                                        <i class="<?= htmlspecialchars($child['icon']) ?>"></i>
+                                                    <?php endif; ?>
+                                                    <?= htmlspecialchars($child['label']) ?>
+                                                    <?php if ($hasGrandchildren): ?>
+                                                        <i class="fas fa-chevron-right submenu-arrow-right"></i>
+                                                    <?php endif; ?>
+                                                </a>
+                                                <?php if ($hasGrandchildren): ?>
+                                                    <ul class="submenu submenu-level-3">
+                                                        <?php foreach ($child['children'] as $grandchild): ?>
+                                                            <li>
+                                                                <a href="<?= $grandchild['url'] ?>">
+                                                                    <?php if (!empty($grandchild['icon'])): ?>
+                                                                        <i class="<?= htmlspecialchars($grandchild['icon']) ?>"></i>
+                                                                    <?php endif; ?>
+                                                                    <?= htmlspecialchars($grandchild['label']) ?>
+                                                                </a>
+                                                            </li>
+                                                        <?php endforeach; ?>
+                                                    </ul>
+                                                <?php endif; ?>
+                                            </li>
+                                        <?php endforeach; ?>
+                                    </ul>
+                                <?php endif; ?>
+                            </li>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
+                </ul>
+
+                <div class="nav-actions">
+                    <?php if (!empty($headerButtons)): ?>
+                        <?php foreach ($headerButtons as $btn): ?>
+                            <a href="<?= $btn['url'] ?>" class="btn btn-<?= $btn['button_style'] ?? 'primary' ?>"<?= ($btn['target'] ?? '_self') === '_blank' ? ' target="_blank" rel="noopener"' : '' ?>>
+                                <?= htmlspecialchars($btn['title']) ?>
+                            </a>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
+
+                    <?php if (!empty($sidebarMenu)): ?>
+                        <button class="sidebar-toggle" id="sidebarToggle" aria-label="<?= htmlspecialchars($sidebarMenu['name'] ?? 'Menu') ?>">
+                            <span><?= htmlspecialchars($sidebarMenu['name'] ?? 'Services') ?></span>
+                            <span class="sidebar-toggle-icon">
+                                <span></span>
+                                <span></span>
+                            </span>
+                        </button>
+                    <?php endif; ?>
                 </div>
-            <?php endif; ?>
-            <button class="mobile-menu-toggle" id="mobileMenuToggle" aria-label="Menu">
-                <span></span>
-                <span></span>
-                <span></span>
-            </button>
+
+                <button class="mobile-toggle" id="mobileToggle" aria-label="Menú">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
+            </nav>
         </div>
     </header>
+
+    <?php if (!empty($sidebarMenu)): ?>
+    <!-- Sidebar Menu -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+    <aside class="sidebar-menu" id="sidebarMenu">
+        <nav class="sidebar-nav">
+            <?php foreach ($sidebarMenu['items'] as $item): ?>
+                <?php if (!empty($item['children'])): ?>
+                    <div class="sidebar-section">
+                        <span class="sidebar-section-title"><?= htmlspecialchars($item['label']) ?></span>
+                        <?php foreach ($item['children'] as $child): ?>
+                            <a href="<?= $child['url'] ?>" class="sidebar-link">
+                                <?php if (!empty($child['icon'])): ?>
+                                    <i class="<?= htmlspecialchars($child['icon']) ?>"></i>
+                                <?php endif; ?>
+                                <?= htmlspecialchars($child['label']) ?>
+                            </a>
+                        <?php endforeach; ?>
+                    </div>
+                <?php else: ?>
+                    <a href="<?= $item['url'] ?>" class="sidebar-link">
+                        <?php if (!empty($item['icon'])): ?>
+                            <i class="<?= htmlspecialchars($item['icon']) ?>"></i>
+                        <?php endif; ?>
+                        <?= htmlspecialchars($item['label']) ?>
+                    </a>
+                <?php endif; ?>
+            <?php endforeach; ?>
+        </nav>
+    </aside>
+    <?php endif; ?>
 
     <!-- Main Content -->
     <main>
@@ -1598,19 +1565,7 @@
         </div>
     </footer>
 
-    <!-- Mobile Menu Script -->
-    <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const mobileToggle = document.getElementById('mobileMenuToggle');
-        const navMenu = document.querySelector('.main-nav-menu');
-
-        if (mobileToggle && navMenu) {
-            mobileToggle.addEventListener('click', function() {
-                navMenu.classList.toggle('active');
-                mobileToggle.classList.toggle('active');
-            });
-        }
-    });
-    </script>
+    <!-- Main site scripts (for header/nav) -->
+    <script src="/assets/js/frontend.js"></script>
 </body>
 </html>
