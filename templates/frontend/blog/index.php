@@ -379,18 +379,25 @@ document.addEventListener('DOMContentLoaded', function() {
     if (sidebar && blogLayout && window.innerWidth > 1024) {
         const sidebarTop = 100;
         let sidebarOriginalTop = null;
+        let sidebarOriginalLeft = null;
         let isSticky = false;
 
         function initStickyPosition() {
             sidebar.style.position = 'relative';
             sidebar.style.top = 'auto';
-            sidebarOriginalTop = sidebar.getBoundingClientRect().top + window.scrollY;
+            sidebar.style.left = 'auto';
+            sidebar.style.width = '';
+
+            const rect = sidebar.getBoundingClientRect();
+            sidebarOriginalTop = rect.top + window.scrollY;
+            sidebarOriginalLeft = rect.left;
         }
 
         function updateStickyPosition() {
             if (window.innerWidth <= 1024) {
                 sidebar.style.position = '';
                 sidebar.style.top = '';
+                sidebar.style.left = '';
                 sidebar.style.width = '';
                 return;
             }
@@ -408,17 +415,21 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (!isSticky) {
                     sidebar.style.position = 'fixed';
                     sidebar.style.top = sidebarTop + 'px';
+                    sidebar.style.left = sidebarOriginalLeft + 'px';
                     sidebar.style.width = sidebarWidth + 'px';
                     isSticky = true;
                 }
             } else if (scrollY >= stopSticky) {
                 sidebar.style.position = 'absolute';
                 sidebar.style.top = (stopSticky - sidebarOriginalTop + sidebarTop) + 'px';
+                sidebar.style.left = 'auto';
+                sidebar.style.right = '0';
                 sidebar.style.width = sidebarWidth + 'px';
                 isSticky = false;
             } else {
                 sidebar.style.position = 'relative';
                 sidebar.style.top = 'auto';
+                sidebar.style.left = 'auto';
                 sidebar.style.width = '';
                 isSticky = false;
             }
@@ -430,6 +441,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         window.addEventListener('scroll', updateStickyPosition, { passive: true });
         window.addEventListener('resize', function() {
+            isSticky = false;
             initStickyPosition();
             updateStickyPosition();
         });
