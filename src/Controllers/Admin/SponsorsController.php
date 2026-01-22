@@ -39,11 +39,15 @@ class SponsorsController extends Controller
 
         $page = (int) ($this->getQuery('page', 1));
         $active = $this->getQuery('active');
+        $hidden = $this->getQuery('hidden');
         $search = trim($this->getQuery('search', ''));
 
         $conditions = [];
         if ($active !== null && $active !== '') {
             $conditions['active'] = (int) $active;
+        }
+        if ($hidden !== null && $hidden !== '') {
+            $conditions['is_hidden'] = (int) $hidden;
         }
 
         // Use search or regular pagination
@@ -58,6 +62,7 @@ class SponsorsController extends Controller
             'sponsors' => $result['data'],
             'pagination' => $result['pagination'],
             'currentActive' => $active,
+            'currentHidden' => $hidden,
             'currentSearch' => $search,
             'flash' => $this->getFlash(),
             'csrf_token' => $this->generateCsrf(),
@@ -491,6 +496,7 @@ class SponsorsController extends Controller
         $contactEmail = Sanitizer::string($this->getPost('contact_email'));
         $contactPhone = Sanitizer::string($this->getPost('contact_phone'));
         $active = Sanitizer::bool($this->getPost('active'));
+        $isHidden = Sanitizer::bool($this->getPost('is_hidden'));
         $maxSimultaneousMeetings = Sanitizer::int($this->getPost('max_simultaneous_meetings')) ?: 1;
         $linkedinUrl = Sanitizer::url($this->getPost('linkedin_url'));
         $twitterUrl = Sanitizer::url($this->getPost('twitter_url'));
@@ -523,6 +529,7 @@ class SponsorsController extends Controller
             'contact_email' => $contactEmail ?: null,
             'contact_phone' => $contactPhone ?: null,
             'active' => $active ? 1 : 0,
+            'is_hidden' => $isHidden ? 1 : 0,
             'max_simultaneous_meetings' => $maxSimultaneousMeetings,
             'linkedin_url' => $linkedinUrl ?: null,
             'twitter_url' => $twitterUrl ?: null,

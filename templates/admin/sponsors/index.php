@@ -44,6 +44,14 @@
                 <option value="0" <?= ($currentActive ?? '') === '0' ? 'selected' : '' ?>>Inactivos</option>
             </select>
         </div>
+        <div class="filter-group">
+            <label>Visibilidad</label>
+            <select name="hidden" onchange="this.form.submit()">
+                <option value="">Todos</option>
+                <option value="0" <?= ($currentHidden ?? '') === '0' ? 'selected' : '' ?>>Visibles</option>
+                <option value="1" <?= ($currentHidden ?? '') === '1' ? 'selected' : '' ?>>Ocultos</option>
+            </select>
+        </div>
         <div class="filter-group" style="align-self: flex-end;">
             <button type="submit" class="btn btn-primary btn-sm"><i class="fas fa-search"></i> Buscar</button>
         </div>
@@ -116,6 +124,11 @@
                                 <span class="badge badge-<?= $sponsor['active'] ? 'success' : 'secondary' ?>">
                                     <?= $sponsor['active'] ? 'Activo' : 'Inactivo' ?>
                                 </span>
+                                <?php if (!empty($sponsor['is_hidden'])): ?>
+                                    <span class="badge badge-warning" title="No visible en listados publicos">
+                                        <i class="fas fa-eye-slash"></i> Oculto
+                                    </span>
+                                <?php endif; ?>
                             </td>
                             <td>
                                 <div class="btn-group">
