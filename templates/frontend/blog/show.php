@@ -296,6 +296,13 @@
 /* Post Body - spacing from header */
 .post-body {
     padding-top: 40px;
+    overflow: visible;
+}
+
+/* Ensure sticky can work - no overflow hidden on parents */
+.blog-post,
+.post-body .container {
+    overflow: visible;
 }
 
 /* Post Layout */

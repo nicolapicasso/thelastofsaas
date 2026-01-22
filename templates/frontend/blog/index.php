@@ -158,6 +158,12 @@
     font-size: var(--font-size-lg);
 }
 
+/* Ensure sticky can work - no overflow hidden on parents */
+.section,
+.section > .container {
+    overflow: visible;
+}
+
 /* Blog Layout */
 .blog-layout {
     display: grid;
