@@ -90,6 +90,10 @@ class BlogController extends BaseController
         // Get related posts
         $relatedPosts = $this->postModel->getRelated($post['id'], $post['category_id'], 3);
 
+        // Get categories with post count (only those with posts)
+        $allCategories = $this->categoryModel->getWithPostCount();
+        $categories = array_filter($allCategories, fn($c) => $c['post_count'] > 0);
+
         // Translate post and related posts
         $this->translator->translateEntity('post', $post);
         $this->translator->translateEntities('post', $relatedPosts);
@@ -126,6 +130,7 @@ class BlogController extends BaseController
         $this->view('blog/show', [
             'post' => $post,
             'relatedPosts' => $relatedPosts,
+            'categories' => $categories,
             'adminEditUrl' => '/admin/posts/' . $post['id'] . '/edit'
         ]);
     }
