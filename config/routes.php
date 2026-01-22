@@ -18,9 +18,12 @@ use App\Core\Router;
 // Home
 $router->get('/', 'Frontend\\PageController', 'home');
 
-// Blog
-$router->get('/blog', 'Frontend\\BlogController', 'index');
-$router->get('/blog/{slug}', 'Frontend\\BlogController', 'show');
+// Observatorio SaaS (Blog)
+$router->get('/observatorio-saas', 'Frontend\\BlogController', 'index');
+$router->get('/observatorio-saas/{slug}', 'Frontend\\BlogController', 'show');
+// Legacy redirects from /blog to /observatorio-saas
+$router->get('/blog', 'Frontend\\BlogController', 'redirectToObservatorio');
+$router->get('/blog/{slug}', 'Frontend\\BlogController', 'redirectPostToObservatorio');
 
 // Success Cases
 $router->get('/casos-de-exito', 'Frontend\\CasesController', 'index');

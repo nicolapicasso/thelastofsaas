@@ -37,7 +37,8 @@ class BlogController extends BaseController
         }
 
         $result = $this->postModel->getPublished($page, 12, $categoryId);
-        $categories = $this->categoryModel->getByType('blog');
+        $allCategories = $this->categoryModel->getWithPostCount();
+        $categories = array_filter($allCategories, fn($c) => $c['post_count'] > 0);
         $featuredPosts = $this->postModel->getFeatured(3);
 
         // Translate posts
@@ -47,19 +48,19 @@ class BlogController extends BaseController
 
         // SEO
         $title = $currentCategory
-            ? "Blog: {$currentCategory['name']} | Omniwallet"
-            : 'Blog | Omniwallet - Noticias y Artículos sobre Fintech';
+            ? "Observatorio SaaS: {$currentCategory['name']} | The Last of SaaS"
+            : 'Observatorio SaaS | The Last of SaaS';
 
         $this->seo->setTitle($title);
-        $this->seo->setDescription('Descubre las últimas noticias, guías y artículos sobre fintech, pagos digitales y gestión empresarial en el blog de Omniwallet.');
-        $this->seo->setCanonical('/blog');
+        $this->seo->setDescription('Descubre las últimas noticias, guías y artículos sobre SaaS, herramientas digitales y tendencias del sector en el Observatorio SaaS.');
+        $this->seo->setCanonical('/observatorio-saas');
 
         // Blog list schema
         $this->seo->addSchema([
             '@type' => 'Blog',
-            'name' => 'Blog de Omniwallet',
-            'description' => 'Noticias y artículos sobre fintech y pagos digitales',
-            'url' => 'https://omniwallet.es/blog'
+            'name' => 'Observatorio SaaS - The Last of SaaS',
+            'description' => 'Noticias y artículos sobre SaaS y herramientas digitales',
+            'url' => 'https://thelastofsaas.es/observatorio-saas'
         ]);
 
         $this->view('blog/index', [
@@ -99,9 +100,9 @@ class BlogController extends BaseController
         $this->translator->translateEntities('post', $relatedPosts);
 
         // SEO
-        $this->seo->setTitle($post['meta_title'] ?? $post['title'] . ' | Blog Omniwallet');
+        $this->seo->setTitle($post['meta_title'] ?? $post['title'] . ' | Observatorio SaaS');
         $this->seo->setDescription($post['meta_description'] ?? $post['excerpt'] ?? '');
-        $this->seo->setCanonical("/blog/{$slug}");
+        $this->seo->setCanonical("/observatorio-saas/{$slug}");
         $this->seo->setImage($post['hero_image'] ?? '');
         $this->seo->setType('article');
 
@@ -115,14 +116,14 @@ class BlogController extends BaseController
             'dateModified' => $post['updated_at'] ?? $post['created_at'],
             'author' => [
                 '@type' => 'Organization',
-                'name' => 'Omniwallet'
+                'name' => 'The Last of SaaS'
             ],
             'publisher' => [
                 '@type' => 'Organization',
-                'name' => 'Omniwallet',
+                'name' => 'The Last of SaaS',
                 'logo' => [
                     '@type' => 'ImageObject',
-                    'url' => 'https://omniwallet.es/assets/images/logo.png'
+                    'url' => 'https://thelastofsaas.es/assets/images/logo.png'
                 ]
             ]
         ]);
@@ -133,6 +134,24 @@ class BlogController extends BaseController
             'categories' => $categories,
             'adminEditUrl' => '/admin/posts/' . $post['id'] . '/edit'
         ]);
+    }
+
+    /**
+     * Redirect /blog to /observatorio-saas (301)
+     */
+    public function redirectToObservatorio(): void
+    {
+        header('Location: /observatorio-saas', true, 301);
+        exit;
+    }
+
+    /**
+     * Redirect /blog/{slug} to /observatorio-saas/{slug} (301)
+     */
+    public function redirectPostToObservatorio(string $slug): void
+    {
+        header('Location: /observatorio-saas/' . $slug, true, 301);
+        exit;
     }
 
     /**

@@ -15,7 +15,7 @@
         <div class="container">
             <div class="post-header-content">
                 <?php if ($post['category_name'] ?? false): ?>
-                    <a href="/blog?categoria=<?= htmlspecialchars($post['category_slug']) ?>" class="post-category">
+                    <a href="/observatorio-saas?categoria=<?= htmlspecialchars($post['category_slug']) ?>" class="post-category">
                         <?= htmlspecialchars($post['category_name']) ?>
                     </a>
                 <?php endif; ?>
@@ -63,7 +63,7 @@
                         <div class="post-tags">
                             <span>Tags:</span>
                             <?php foreach (explode(',', $post['tags']) as $tag): ?>
-                                <a href="/blog?tag=<?= urlencode(trim($tag)) ?>" class="tag">
+                                <a href="/observatorio-saas?tag=<?= urlencode(trim($tag)) ?>" class="tag">
                                     <?= htmlspecialchars(trim($tag)) ?>
                                 </a>
                             <?php endforeach; ?>
@@ -91,7 +91,7 @@
                             <ul class="categories-list">
                                 <?php foreach ($categories as $category): ?>
                                     <li>
-                                        <a href="/blog?categoria=<?= htmlspecialchars($category['slug']) ?>">
+                                        <a href="/observatorio-saas?categoria=<?= htmlspecialchars($category['slug']) ?>">
                                             <?= htmlspecialchars($category['name']) ?>
                                             <span class="post-count"><?= $category['post_count'] ?></span>
                                         </a>
@@ -124,14 +124,14 @@
                     <?php foreach ($relatedPosts as $related): ?>
                         <article class="post-card">
                             <?php if ($related['thumbnail']): ?>
-                                <a href="/blog/<?= htmlspecialchars($related['slug']) ?>" class="post-image">
+                                <a href="/observatorio-saas/<?= htmlspecialchars($related['slug']) ?>" class="post-image">
                                     <img src="<?= htmlspecialchars($related['thumbnail']) ?>"
                                          alt="<?= htmlspecialchars($related['title']) ?>">
                                 </a>
                             <?php endif; ?>
                             <div class="post-content">
                                 <h3>
-                                    <a href="/blog/<?= htmlspecialchars($related['slug']) ?>">
+                                    <a href="/observatorio-saas/<?= htmlspecialchars($related['slug']) ?>">
                                         <?= htmlspecialchars($related['title']) ?>
                                     </a>
                                 </h3>

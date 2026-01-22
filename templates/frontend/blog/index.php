@@ -25,7 +25,7 @@
                         <?php foreach ($featuredPosts as $i => $post): ?>
                             <article class="post-card <?= $i === 0 ? 'featured' : '' ?>">
                                 <?php if ($post['thumbnail'] || $post['hero_image']): ?>
-                                    <a href="<?= _url('/blog/' . htmlspecialchars($post['slug'])) ?>" class="post-image">
+                                    <a href="<?= _url('/observatorio-saas/' . htmlspecialchars($post['slug'])) ?>" class="post-image">
                                         <img src="<?= htmlspecialchars($post['hero_image'] ?? $post['thumbnail']) ?>"
                                              alt="<?= htmlspecialchars($post['title']) ?>">
                                     </a>
@@ -35,7 +35,7 @@
                                         <span class="post-category"><?= htmlspecialchars($post['category_name']) ?></span>
                                     <?php endif; ?>
                                     <h2>
-                                        <a href="<?= _url('/blog/' . htmlspecialchars($post['slug'])) ?>">
+                                        <a href="<?= _url('/observatorio-saas/' . htmlspecialchars($post['slug'])) ?>">
                                             <?= htmlspecialchars($post['title']) ?>
                                         </a>
                                     </h2>
@@ -61,7 +61,7 @@
                         <?php foreach ($posts as $post): ?>
                             <article class="post-card">
                                 <?php if ($post['thumbnail']): ?>
-                                    <a href="<?= _url('/blog/' . htmlspecialchars($post['slug'])) ?>" class="post-image">
+                                    <a href="<?= _url('/observatorio-saas/' . htmlspecialchars($post['slug'])) ?>" class="post-image">
                                         <img src="<?= htmlspecialchars($post['thumbnail']) ?>"
                                              alt="<?= htmlspecialchars($post['title']) ?>">
                                     </a>
@@ -71,7 +71,7 @@
                                         <span class="post-category"><?= htmlspecialchars($post['category_name']) ?></span>
                                     <?php endif; ?>
                                     <h3>
-                                        <a href="<?= _url('/blog/' . htmlspecialchars($post['slug'])) ?>">
+                                        <a href="<?= _url('/observatorio-saas/' . htmlspecialchars($post['slug'])) ?>">
                                             <?= htmlspecialchars($post['title']) ?>
                                         </a>
                                     </h3>
@@ -122,13 +122,13 @@
                     <h4>Categorías</h4>
                     <ul class="category-list">
                         <li>
-                            <a href="<?= _url('/blog') ?>" class="<?= !$currentCategory ? 'active' : '' ?>">
+                            <a href="<?= _url('/observatorio-saas') ?>" class="<?= !$currentCategory ? 'active' : '' ?>">
                                 Todos los artículos
                             </a>
                         </li>
                         <?php foreach ($categories as $category): ?>
                             <li>
-                                <a href="<?= _url('/blog') ?>?categoria=<?= htmlspecialchars($category['slug']) ?>"
+                                <a href="<?= _url('/observatorio-saas') ?>?categoria=<?= htmlspecialchars($category['slug']) ?>"
                                    class="<?= $currentCategory && $currentCategory['id'] === $category['id'] ? 'active' : '' ?>">
                                     <?= htmlspecialchars($category['name']) ?>
                                 </a>
