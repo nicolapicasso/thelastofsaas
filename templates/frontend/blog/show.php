@@ -419,11 +419,11 @@
 
 /* Sidebar */
 .post-sidebar {
-    position: -webkit-sticky;
-    position: sticky;
-    top: 100px;
-    height: fit-content;
-    align-self: start;
+    position: -webkit-sticky !important;
+    position: sticky !important;
+    top: 100px !important;
+    height: fit-content !important;
+    align-self: start !important;
     max-height: calc(100vh - 120px);
     overflow-y: auto;
 }
