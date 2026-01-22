@@ -7,45 +7,44 @@
 
 <!-- Post Header -->
 <article class="blog-post">
-    <header class="post-header">
+    <header class="post-header <?= $post['hero_image'] ? 'has-hero-image' : '' ?>"
+            <?php if ($post['hero_image']): ?>
+            style="background-image: url('<?= htmlspecialchars($post['hero_image']) ?>');"
+            <?php endif; ?>>
+        <div class="post-header-overlay"></div>
         <div class="container">
-            <?php if ($post['category_name'] ?? false): ?>
-                <a href="/blog?categoria=<?= htmlspecialchars($post['category_slug']) ?>" class="post-category">
-                    <?= htmlspecialchars($post['category_name']) ?>
-                </a>
-            <?php endif; ?>
-
-            <h1><?= htmlspecialchars($post['title']) ?></h1>
-
-            <div class="post-meta">
-                <span>
-                    <i class="far fa-calendar"></i>
-                    <?= date('d M Y', strtotime($post['published_at'] ?? $post['created_at'])) ?>
-                </span>
-                <?php if ($post['author_name'] ?? false): ?>
-                    <span>
-                        <i class="far fa-user"></i>
-                        <?= htmlspecialchars($post['author_name']) ?>
-                    </span>
+            <div class="post-header-content">
+                <?php if ($post['category_name'] ?? false): ?>
+                    <a href="/blog?categoria=<?= htmlspecialchars($post['category_slug']) ?>" class="post-category">
+                        <?= htmlspecialchars($post['category_name']) ?>
+                    </a>
                 <?php endif; ?>
-                <?php if ($post['read_time'] ?? false): ?>
+
+                <div class="post-title-pill">
+                    <h1><?= htmlspecialchars($post['title']) ?></h1>
+                </div>
+
+                <div class="post-meta">
                     <span>
-                        <i class="far fa-clock"></i>
-                        <?= $post['read_time'] ?> min de lectura
+                        <i class="far fa-calendar"></i>
+                        <?= date('d M Y', strtotime($post['published_at'] ?? $post['created_at'])) ?>
                     </span>
-                <?php endif; ?>
+                    <?php if ($post['author_name'] ?? false): ?>
+                        <span>
+                            <i class="far fa-user"></i>
+                            <?= htmlspecialchars($post['author_name']) ?>
+                        </span>
+                    <?php endif; ?>
+                    <?php if ($post['read_time'] ?? false): ?>
+                        <span>
+                            <i class="far fa-clock"></i>
+                            <?= $post['read_time'] ?> min de lectura
+                        </span>
+                    <?php endif; ?>
+                </div>
             </div>
         </div>
     </header>
-
-    <?php if ($post['hero_image']): ?>
-        <div class="post-hero">
-            <div class="container">
-                <img src="<?= htmlspecialchars($post['hero_image']) ?>"
-                     alt="<?= htmlspecialchars($post['title']) ?>">
-            </div>
-        </div>
-    <?php endif; ?>
 
     <div class="post-body">
         <div class="container">
@@ -181,9 +180,45 @@
 <style>
 /* Post Header */
 .post-header {
-    padding: calc(var(--spacing-3xl) + var(--header-height)) 0 var(--spacing-xl);
-    background-color: var(--color-gray-50);
+    position: relative;
+    padding: calc(var(--spacing-3xl) + var(--header-height)) 0 var(--spacing-3xl);
+    background-color: var(--color-gray-900);
     text-align: center;
+    min-height: 400px;
+    display: flex;
+    align-items: center;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+.post-header.has-hero-image {
+    min-height: 500px;
+}
+
+.post-header-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(
+        to bottom,
+        rgba(0, 0, 0, 0.4) 0%,
+        rgba(0, 0, 0, 0.6) 50%,
+        rgba(0, 0, 0, 0.7) 100%
+    );
+    z-index: 1;
+}
+
+.post-header .container {
+    position: relative;
+    z-index: 2;
+}
+
+.post-header-content {
+    max-width: 900px;
+    margin: 0 auto;
 }
 
 .post-header .post-category {
@@ -194,41 +229,80 @@
     border-radius: var(--radius-full);
     font-size: var(--font-size-sm);
     font-weight: 600;
-    margin-bottom: var(--spacing-md);
+    margin-bottom: var(--spacing-lg);
+    text-decoration: none;
+    transition: transform 0.2s ease, background-color 0.2s ease;
 }
 
-.post-header h1 {
+.post-header .post-category:hover {
+    background-color: var(--color-primary-dark, var(--color-primary));
+    transform: translateY(-2px);
+}
+
+/* Title Pill - White background for readability */
+.post-title-pill {
+    background: rgba(255, 255, 255, 0.95);
+    padding: var(--spacing-xl) var(--spacing-2xl);
+    border-radius: var(--radius-xl);
+    margin-bottom: var(--spacing-xl);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+    backdrop-filter: blur(10px);
+}
+
+.post-title-pill h1 {
     font-size: var(--font-size-4xl);
-    max-width: 900px;
-    margin: 0 auto var(--spacing-lg);
+    margin: 0;
     line-height: 1.2;
+    color: var(--color-gray-900);
 }
 
 .post-header .post-meta {
     display: flex;
     justify-content: center;
+    flex-wrap: wrap;
     gap: var(--spacing-lg);
-    color: var(--color-gray-500);
+    color: rgba(255, 255, 255, 0.9);
     font-size: var(--font-size-sm);
+}
+
+.post-header .post-meta span {
+    background: rgba(255, 255, 255, 0.15);
+    padding: var(--spacing-xs) var(--spacing-md);
+    border-radius: var(--radius-full);
+    backdrop-filter: blur(5px);
 }
 
 .post-header .post-meta i {
     margin-right: var(--spacing-xs);
 }
 
-/* Post Hero */
-.post-hero {
-    margin-top: calc(-1 * var(--spacing-xl));
-    margin-bottom: var(--spacing-2xl);
-}
+/* Mobile adjustments for header */
+@media (max-width: 768px) {
+    .post-header {
+        min-height: 350px;
+        padding: calc(var(--spacing-2xl) + var(--header-height)) var(--spacing-md) var(--spacing-2xl);
+    }
 
-.post-hero img {
-    width: 100%;
-    max-width: 900px;
-    margin: 0 auto;
-    display: block;
-    border-radius: var(--radius-xl);
-    box-shadow: var(--shadow-lg);
+    .post-header.has-hero-image {
+        min-height: 400px;
+    }
+
+    .post-title-pill {
+        padding: var(--spacing-lg) var(--spacing-xl);
+    }
+
+    .post-title-pill h1 {
+        font-size: var(--font-size-2xl);
+    }
+
+    .post-header .post-meta {
+        gap: var(--spacing-sm);
+    }
+
+    .post-header .post-meta span {
+        padding: var(--spacing-xs) var(--spacing-sm);
+        font-size: var(--font-size-xs);
+    }
 }
 
 /* Post Layout */
