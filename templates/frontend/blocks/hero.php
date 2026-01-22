@@ -202,9 +202,12 @@ $parallaxClass = $parallaxEnabled ? 'parallax-enabled' : '';
 
 <style>
 .block-hero {
+    position: relative;
+    z-index: 1;
     padding-top: var(--hero-margin-top, var(--header-height));
     margin-bottom: var(--hero-margin-bottom, 0);
     overflow: hidden;
+    background-color: #000;
 }
 
 .hero-slide,
@@ -463,6 +466,15 @@ $parallaxClass = $parallaxEnabled ? 'parallax-enabled' : '';
         order: -1;
         max-width: 80%;
         margin: 0 auto;
+    }
+
+    /* Disable parallax extension on mobile to prevent overlap */
+    .block-hero.parallax-enabled .hero-slide::after,
+    .block-hero.parallax-enabled .hero-single::after,
+    .block-hero.parallax-enabled .hero-slide::before,
+    .block-hero.parallax-enabled .hero-single::before {
+        top: 0;
+        bottom: 0;
     }
 }
 </style>
