@@ -29,7 +29,7 @@
            ============================================ */
 
         :root {
-            --bg-dark: #000000;
+            --bg-dark: #1A1A1A;
             --bg-light: #FFFFFF;
             --text-light: #FFFFFF;
             --text-dark: #000000;
