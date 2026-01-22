@@ -192,42 +192,63 @@ class Category extends Model
 
     /**
      * Get all content for a category
+     * Handles missing tables gracefully
      */
     public function getAllContent(int $categoryId): array
     {
         $content = [];
 
         // Posts
-        $sql = "SELECT id, title, slug, thumbnail, excerpt, published_at, 'post' as type
-                FROM posts WHERE category_id = ? AND status = 'published'
-                ORDER BY published_at DESC LIMIT 10";
-        $content['posts'] = $this->db->fetchAll($sql, [$categoryId]);
+        try {
+            $sql = "SELECT id, title, slug, thumbnail, excerpt, published_at, 'post' as type
+                    FROM posts WHERE category_id = ? AND status = 'published'
+                    ORDER BY published_at DESC LIMIT 10";
+            $content['posts'] = $this->db->fetchAll($sql, [$categoryId]);
+        } catch (\PDOException $e) {
+            $content['posts'] = [];
+        }
 
-        // Services
-        $sql = "SELECT id, title, slug, image, icon_class as icon, short_description, 'service' as type
-                FROM services WHERE category_id = ? AND is_active = 1
-                ORDER BY display_order ASC LIMIT 10";
-        $content['services'] = $this->db->fetchAll($sql, [$categoryId]);
+        // Services (table may not exist)
+        try {
+            $sql = "SELECT id, title, slug, image, icon_class as icon, short_description, 'service' as type
+                    FROM services WHERE category_id = ? AND is_active = 1
+                    ORDER BY display_order ASC LIMIT 10";
+            $content['services'] = $this->db->fetchAll($sql, [$categoryId]);
+        } catch (\PDOException $e) {
+            $content['services'] = [];
+        }
 
-        // Success Cases
-        $sql = "SELECT sc.id, sc.title, sc.slug, sc.featured_image, cl.name as client_name, 'case' as type
-                FROM success_cases sc
-                LEFT JOIN clients cl ON cl.id = sc.client_id
-                WHERE sc.category_id = ? AND sc.status = 'published'
-                ORDER BY sc.is_featured DESC, sc.display_order ASC LIMIT 10";
-        $content['cases'] = $this->db->fetchAll($sql, [$categoryId]);
+        // Success Cases (table may not exist)
+        try {
+            $sql = "SELECT sc.id, sc.title, sc.slug, sc.featured_image, cl.name as client_name, 'case' as type
+                    FROM success_cases sc
+                    LEFT JOIN clients cl ON cl.id = sc.client_id
+                    WHERE sc.category_id = ? AND sc.status = 'published'
+                    ORDER BY sc.is_featured DESC, sc.display_order ASC LIMIT 10";
+            $content['cases'] = $this->db->fetchAll($sql, [$categoryId]);
+        } catch (\PDOException $e) {
+            $content['cases'] = [];
+        }
 
-        // Tools
-        $sql = "SELECT id, title, slug, logo, subtitle, 'tool' as type
-                FROM tools WHERE category_id = ? AND is_active = 1
-                ORDER BY display_order ASC LIMIT 10";
-        $content['tools'] = $this->db->fetchAll($sql, [$categoryId]);
+        // Tools (table may not exist)
+        try {
+            $sql = "SELECT id, title, slug, logo, subtitle, 'tool' as type
+                    FROM tools WHERE category_id = ? AND is_active = 1
+                    ORDER BY display_order ASC LIMIT 10";
+            $content['tools'] = $this->db->fetchAll($sql, [$categoryId]);
+        } catch (\PDOException $e) {
+            $content['tools'] = [];
+        }
 
-        // FAQs
-        $sql = "SELECT id, question, answer, 'faq' as type
-                FROM faqs WHERE category_id = ? AND is_active = 1
-                ORDER BY display_order ASC LIMIT 10";
-        $content['faqs'] = $this->db->fetchAll($sql, [$categoryId]);
+        // FAQs (table may not exist)
+        try {
+            $sql = "SELECT id, question, answer, 'faq' as type
+                    FROM faqs WHERE category_id = ? AND is_active = 1
+                    ORDER BY display_order ASC LIMIT 10";
+            $content['faqs'] = $this->db->fetchAll($sql, [$categoryId]);
+        } catch (\PDOException $e) {
+            $content['faqs'] = [];
+        }
 
         return $content;
     }
