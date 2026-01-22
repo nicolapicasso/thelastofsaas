@@ -163,6 +163,7 @@
     display: grid;
     grid-template-columns: 1fr 300px;
     gap: var(--spacing-2xl);
+    align-items: start;
 }
 
 .section-title {
@@ -273,11 +274,8 @@
 
 /* Sidebar */
 .blog-sidebar {
-    position: -webkit-sticky !important;
-    position: sticky !important;
-    top: 100px !important;
-    height: fit-content !important;
-    align-self: start !important;
+    position: sticky;
+    top: 100px;
     max-height: calc(100vh - 120px);
     overflow-y: auto;
 }
