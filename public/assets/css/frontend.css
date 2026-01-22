@@ -237,15 +237,17 @@ a:hover {
     text-decoration: none;
 }
 
-/* Primary Button - Pill style */
+/* Primary Button - Solid black style */
 .btn-primary {
-    background-color: var(--primaryblue-sinapsis);
+    background-color: var(--black-sinapsis);
     color: var(--color-white);
+    border: none;
     border-radius: var(--radius-pill);
+    font-weight: var(--font-weight-bold);
 }
 
 .btn-primary:hover {
-    background-color: var(--color-primary);
+    background-color: var(--color-dark);
     color: var(--color-white);
     transform: translateY(-2px);
     box-shadow: var(--shadow-md);
@@ -265,17 +267,18 @@ a:hover {
     box-shadow: var(--shadow-md);
 }
 
-/* Outline Button - Border style */
+/* Outline Button - White with black border */
 .btn-outline {
-    background-color: transparent;
-    border: 1px solid currentColor;
-    color: var(--color-primary);
-    border-radius: var(--radius-lg);
+    background-color: var(--color-white);
+    border: 1px solid var(--black-sinapsis);
+    color: var(--black-sinapsis);
+    border-radius: var(--radius-pill);
+    font-weight: var(--font-weight-medium);
 }
 
 .btn-outline:hover {
-    background-color: var(--color-primary);
-    border-color: var(--color-primary);
+    background-color: var(--black-sinapsis);
+    border-color: var(--black-sinapsis);
     color: var(--color-white);
 }
 
