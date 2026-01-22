@@ -136,16 +136,6 @@
                         <?php endforeach; ?>
                     </ul>
                 </div>
-
-                <!-- Newsletter -->
-                <div class="sidebar-widget newsletter-widget">
-                    <h4>Newsletter</h4>
-                    <p>Recibe las últimas novedades en tu email</p>
-                    <form class="newsletter-form">
-                        <input type="email" placeholder="tu@email.com" required>
-                        <button type="submit" class="btn btn-primary">Suscribirse</button>
-                    </form>
-                </div>
             </aside>
         </div>
     </div>
@@ -282,6 +272,14 @@
 }
 
 /* Sidebar */
+.blog-sidebar {
+    position: -webkit-sticky;
+    position: sticky;
+    top: 100px;
+    height: fit-content;
+    align-self: start;
+}
+
 .sidebar-widget {
     background-color: var(--color-white);
     border-radius: var(--radius-lg);
@@ -319,34 +317,6 @@
     color: var(--color-primary);
 }
 
-.newsletter-widget {
-    background-color: var(--color-primary);
-    color: var(--color-white);
-}
-
-.newsletter-widget h4 {
-    color: var(--color-white);
-    border-bottom-color: rgba(255,255,255,0.3);
-}
-
-.newsletter-widget p {
-    color: rgba(255,255,255,0.9);
-    font-size: var(--font-size-sm);
-}
-
-.newsletter-form {
-    display: flex;
-    flex-direction: column;
-    gap: var(--spacing-sm);
-}
-
-.newsletter-form input {
-    padding: var(--spacing-sm) var(--spacing-md);
-    border: none;
-    border-radius: var(--radius-md);
-    font-size: var(--font-size-base);
-}
-
 /* Pagination */
 .pagination {
     display: flex;
@@ -379,6 +349,7 @@
     }
 
     .blog-sidebar {
+        position: static;
         order: -1;
     }
 }

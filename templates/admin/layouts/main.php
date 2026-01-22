@@ -157,6 +157,12 @@ $_pendingTicketsCount = $_ticketModel->count(['status' => 'pending']);
                         </a>
                     </li>
                     <li>
+                        <a href="/admin/categories" class="<?= strpos($_SERVER['REQUEST_URI'], '/admin/categories') !== false ? 'active' : '' ?>">
+                            <span class="nav-icon"><i class="fas fa-folder"></i></span>
+                            Categorías
+                        </a>
+                    </li>
+                    <li>
                         <a href="/admin/faqs" class="<?= strpos($_SERVER['REQUEST_URI'], '/admin/faqs') !== false ? 'active' : '' ?>">
                             <span class="nav-icon"><i class="fas fa-question-circle"></i></span>
                             FAQs
