@@ -5,7 +5,7 @@
 
 -- Add assignment fields to tickets table
 ALTER TABLE tickets
-ADD COLUMN assigned_company_id INT UNSIGNED NULL AFTER invited_by_type,
+ADD COLUMN assigned_company_id INT UNSIGNED NULL AFTER notes,
 ADD COLUMN assigned_sponsor_id INT UNSIGNED NULL AFTER assigned_company_id,
 ADD COLUMN assigned_at DATETIME NULL AFTER assigned_sponsor_id;
 
