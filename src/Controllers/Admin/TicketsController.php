@@ -10,6 +10,8 @@ use App\Models\TicketType;
 use App\Models\Event;
 use App\Models\Sponsor;
 use App\Models\Company;
+use App\Models\SponsorContact;
+use App\Models\CompanyContact;
 use App\Helpers\Sanitizer;
 use App\Services\OmniwalletService;
 use App\Services\EmailService;
@@ -25,6 +27,8 @@ class TicketsController extends Controller
     private Event $eventModel;
     private Sponsor $sponsorModel;
     private Company $companyModel;
+    private SponsorContact $sponsorContactModel;
+    private CompanyContact $companyContactModel;
 
     public function __construct()
     {
@@ -34,6 +38,8 @@ class TicketsController extends Controller
         $this->eventModel = new Event();
         $this->sponsorModel = new Sponsor();
         $this->companyModel = new Company();
+        $this->sponsorContactModel = new SponsorContact();
+        $this->companyContactModel = new CompanyContact();
     }
 
     /**
@@ -1149,19 +1155,41 @@ class TicketsController extends Controller
      */
     private function addContactToCompany(array $company, array $ticket): void
     {
-        // Check if email already exists in company contacts
-        $emails = $this->companyModel->getEmailsArray($company);
         $ticketEmail = strtolower(trim($ticket['attendee_email']));
 
-        foreach ($emails as $email) {
-            if (strtolower(trim($email)) === $ticketEmail) {
-                return; // Already exists
+        // Check if email already exists in company_contacts table
+        $existingContacts = $this->companyContactModel->getByCompany((int) $company['id']);
+        foreach ($existingContacts as $contact) {
+            if (strtolower(trim($contact['email'])) === $ticketEmail) {
+                return; // Already exists in contacts table
             }
         }
 
-        // Add email to contact_email (comma separated)
-        $newEmails = $company['contact_email'] ? $company['contact_email'] . ', ' . $ticketEmail : $ticketEmail;
-        $this->companyModel->update($company['id'], ['contact_email' => $newEmails]);
+        // Create contact record in company_contacts table
+        $contactName = trim($ticket['attendee_name'] ?? '');
+        $this->companyContactModel->create([
+            'company_id' => (int) $company['id'],
+            'name' => $contactName ?: 'Sin nombre',
+            'email' => $ticketEmail,
+            'position' => trim($ticket['attendee_position'] ?? ''),
+            'phone' => trim($ticket['attendee_phone'] ?? ''),
+            'is_primary' => empty($existingContacts) ? 1 : 0, // Primary if first contact
+            'notes' => 'Añadido desde ticket: ' . ($ticket['code'] ?? ''),
+        ]);
+
+        // Also update legacy contact_email field for backward compatibility
+        $emails = $this->companyModel->getEmailsArray($company);
+        $emailExists = false;
+        foreach ($emails as $email) {
+            if (strtolower(trim($email)) === $ticketEmail) {
+                $emailExists = true;
+                break;
+            }
+        }
+        if (!$emailExists) {
+            $newEmails = $company['contact_email'] ? $company['contact_email'] . ', ' . $ticketEmail : $ticketEmail;
+            $this->companyModel->update($company['id'], ['contact_email' => $newEmails]);
+        }
     }
 
     /**
@@ -1169,19 +1197,41 @@ class TicketsController extends Controller
      */
     private function addContactToSponsor(array $sponsor, array $ticket): void
     {
-        // Check if email already exists in sponsor contacts
-        $emails = $this->sponsorModel->getEmailsArray($sponsor);
         $ticketEmail = strtolower(trim($ticket['attendee_email']));
 
-        foreach ($emails as $email) {
-            if (strtolower(trim($email)) === $ticketEmail) {
-                return; // Already exists
+        // Check if email already exists in sponsor_contacts table
+        $existingContacts = $this->sponsorContactModel->getBySponsor((int) $sponsor['id']);
+        foreach ($existingContacts as $contact) {
+            if (strtolower(trim($contact['email'])) === $ticketEmail) {
+                return; // Already exists in contacts table
             }
         }
 
-        // Add email to contact_email (comma separated)
-        $newEmails = $sponsor['contact_email'] ? $sponsor['contact_email'] . ', ' . $ticketEmail : $ticketEmail;
-        $this->sponsorModel->update($sponsor['id'], ['contact_email' => $newEmails]);
+        // Create contact record in sponsor_contacts table
+        $contactName = trim($ticket['attendee_name'] ?? '');
+        $this->sponsorContactModel->create([
+            'sponsor_id' => (int) $sponsor['id'],
+            'name' => $contactName ?: 'Sin nombre',
+            'email' => $ticketEmail,
+            'position' => trim($ticket['attendee_position'] ?? ''),
+            'phone' => trim($ticket['attendee_phone'] ?? ''),
+            'is_primary' => empty($existingContacts) ? 1 : 0, // Primary if first contact
+            'notes' => 'Añadido desde ticket: ' . ($ticket['code'] ?? ''),
+        ]);
+
+        // Also update legacy contact_email field for backward compatibility
+        $emails = $this->sponsorModel->getEmailsArray($sponsor);
+        $emailExists = false;
+        foreach ($emails as $email) {
+            if (strtolower(trim($email)) === $ticketEmail) {
+                $emailExists = true;
+                break;
+            }
+        }
+        if (!$emailExists) {
+            $newEmails = $sponsor['contact_email'] ? $sponsor['contact_email'] . ', ' . $ticketEmail : $ticketEmail;
+            $this->sponsorModel->update($sponsor['id'], ['contact_email' => $newEmails]);
+        }
     }
 
     /**
