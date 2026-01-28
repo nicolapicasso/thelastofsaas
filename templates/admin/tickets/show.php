@@ -597,6 +597,10 @@
 <!-- QRCode.js library -->
 <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
 <script>
+// Global variables for assignment modal (must be declared first to avoid TDZ)
+let searchTimeout = null;
+let currentTab = 'company';
+
 // Generate QR code
 QRCode.toCanvas(document.createElement('canvas'), '<?= $ticket['code'] ?>', { width: 180 }, function(error, canvas) {
     if (!error) {
@@ -709,8 +713,6 @@ document.addEventListener('keydown', function(e) {
 });
 
 // ====== Assignment Functions ======
-let searchTimeout = null;
-let currentTab = 'company';
 
 function openAssignModal() {
     document.getElementById('assign-modal').style.display = 'flex';
