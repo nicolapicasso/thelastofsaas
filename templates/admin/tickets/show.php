@@ -242,7 +242,14 @@
                 <h3>Código QR</h3>
             </div>
             <div class="card-body" style="text-align: center;">
-                <div id="qrcode" style="display: inline-block; padding: 1rem; background: white; border-radius: 8px;"></div>
+                <div style="display: inline-block; padding: 1rem; background: white; border-radius: 8px;">
+                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=<?= urlencode($ticket['code']) ?>&margin=1"
+                         alt="QR Code"
+                         width="180"
+                         height="180"
+                         style="display: block;"
+                         onerror="this.parentElement.innerHTML='<div style=\'padding: 1rem; text-align: center; color: var(--color-gray-500);\'><i class=\'fas fa-qrcode\' style=\'font-size: 4rem; opacity: 0.3;\'></i><br><small>QR no disponible</small></div>'">
+                </div>
                 <p style="margin-top: 1rem;">
                     <code style="font-size: 1.1rem;"><?= $ticket['code'] ?></code>
                 </p>
@@ -254,7 +261,7 @@
             <div class="card-header">
                 <h3>Acciones</h3>
             </div>
-            <div class="card-body">
+            <div class="card-body" style="display: flex; flex-direction: column; gap: 0.5rem;">
                 <?php if ($ticket['status'] === 'pending'): ?>
                     <button type="button" class="btn btn-success btn-block" onclick="approveTicket()">
                         <i class="fas fa-check"></i> Aprobar Ticket
@@ -273,7 +280,7 @@
                     </button>
                 <?php endif; ?>
 
-                <hr style="margin: 1rem 0; border-color: var(--color-gray-200);">
+                <hr style="margin: 0.5rem 0; border-color: var(--color-gray-200);">
 
                 <button type="button" class="btn btn-outline btn-block" onclick="openChangeStatusModal()">
                     <i class="fas fa-exchange-alt"></i> Cambiar Estado
@@ -287,7 +294,7 @@
                     <i class="fas fa-download"></i> Descargar PDF
                 </a>
 
-                <hr style="margin: 1rem 0; border-color: var(--color-gray-200);">
+                <hr style="margin: 0.5rem 0; border-color: var(--color-gray-200);">
 
                 <button type="button" class="btn btn-danger btn-block" onclick="deleteTicket()">
                     <i class="fas fa-trash"></i> Eliminar Ticket
@@ -594,39 +601,10 @@
     </div>
 </div>
 
-<!-- QRCode.js library -->
-<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
 <script>
 // Global variables for assignment modal (must be declared first to avoid TDZ)
 let searchTimeout = null;
 let currentTab = 'company';
-
-// Generate QR code (with fallback if library fails to load)
-function generateQRCode() {
-    if (typeof QRCode !== 'undefined') {
-        QRCode.toCanvas(document.createElement('canvas'), '<?= $ticket['code'] ?>', { width: 180 }, function(error, canvas) {
-            if (!error) {
-                document.getElementById('qrcode').appendChild(canvas);
-            } else {
-                showQRFallback();
-            }
-        });
-    } else {
-        showQRFallback();
-    }
-}
-
-function showQRFallback() {
-    const container = document.getElementById('qrcode');
-    container.innerHTML = '<div style="padding: 1rem; text-align: center; color: var(--color-gray-500);"><i class="fas fa-qrcode" style="font-size: 4rem; opacity: 0.3;"></i><br><small>QR no disponible</small></div>';
-}
-
-// Try to generate QR code on load
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', generateQRCode);
-} else {
-    generateQRCode();
-}
 
 function approveTicket() {
     if (!confirm('¿Aprobar este ticket?')) return;
