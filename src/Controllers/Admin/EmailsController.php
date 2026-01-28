@@ -16,12 +16,9 @@ use App\Services\EmailService;
  */
 class EmailsController extends Controller
 {
-    private Database $db;
-
     public function __construct()
     {
         parent::__construct();
-        $this->db = Database::getInstance();
     }
 
     /**

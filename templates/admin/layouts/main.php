@@ -207,6 +207,12 @@ $_pendingTicketsCount = $_ticketModel->count(['status' => 'pending']);
                             Configuración General
                         </a>
                     </li>
+                    <li>
+                        <a href="/admin/emails" class="<?= strpos($_SERVER['REQUEST_URI'], '/admin/emails') !== false ? 'active' : '' ?>">
+                            <span class="nav-icon"><i class="fas fa-envelope"></i></span>
+                            Configuración Emails
+                        </a>
+                    </li>
                 </ul>
             </nav>
 

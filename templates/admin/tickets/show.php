@@ -123,30 +123,8 @@
             </div>
         </div>
 
-        <!-- Sponsor Info (if applicable) -->
-        <?php if (!empty($sponsor)): ?>
-        <div class="card">
-            <div class="card-header">
-                <h3>Sponsor Asociado</h3>
-            </div>
-            <div class="card-body">
-                <div style="display: flex; align-items: center; gap: 1rem;">
-                    <?php if (!empty($sponsor['logo_url'])): ?>
-                        <img src="<?= htmlspecialchars($sponsor['logo_url']) ?>" alt="" style="width: 60px; height: 60px; object-fit: contain; border-radius: 8px;">
-                    <?php endif; ?>
-                    <div>
-                        <strong><?= htmlspecialchars($sponsor['name'] ?? '') ?></strong>
-                        <?php if (!empty($sponsor['code'])): ?>
-                            <br><small class="text-muted">Código: <?= htmlspecialchars($sponsor['code']) ?></small>
-                        <?php endif; ?>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <?php endif; ?>
-
         <!-- Assignment to Company/SaaS -->
-        <div class="card" style="border: 2px solid var(--color-primary); border-style: dashed;">
+        <div class="card" style="border: 2px solid var(--color-primary); border-style: dashed; margin-top: 1.5rem;">
             <div class="card-header" style="background: rgba(79, 70, 229, 0.1);">
                 <h3><i class="fas fa-user-plus"></i> Asignación a Empresa/SaaS</h3>
             </div>
@@ -199,6 +177,28 @@
                 <?php endif; ?>
             </div>
         </div>
+
+        <!-- Sponsor Info (if applicable) -->
+        <?php if (!empty($sponsor)): ?>
+        <div class="card" style="margin-top: 1.5rem;">
+            <div class="card-header">
+                <h3>Sponsor Asociado</h3>
+            </div>
+            <div class="card-body">
+                <div style="display: flex; align-items: center; gap: 1rem;">
+                    <?php if (!empty($sponsor['logo_url'])): ?>
+                        <img src="<?= htmlspecialchars($sponsor['logo_url']) ?>" alt="" style="width: 60px; height: 60px; object-fit: contain; border-radius: 8px;">
+                    <?php endif; ?>
+                    <div>
+                        <strong><?= htmlspecialchars($sponsor['name'] ?? '') ?></strong>
+                        <?php if (!empty($sponsor['code'])): ?>
+                            <br><small class="text-muted">Código: <?= htmlspecialchars($sponsor['code']) ?></small>
+                        <?php endif; ?>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <?php endif; ?>
 
         <!-- Payment Info (if paid) -->
         <?php if ($ticket['price'] > 0 && $ticket['stripe_payment_id']): ?>
