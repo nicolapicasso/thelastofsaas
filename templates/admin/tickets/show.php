@@ -949,10 +949,29 @@ function removeAssignment() {
     .then(r => r.json())
     .then(d => {
         if (d.success) {
-            location.reload();
+            // Update UI immediately without full page reload
+            const assignmentCard = document.querySelector('.card[style*="dashed"]');
+            if (assignmentCard) {
+                const cardBody = assignmentCard.querySelector('.card-body');
+                if (cardBody) {
+                    cardBody.innerHTML = `
+                        <p class="text-muted" style="margin-bottom: 1rem; font-size: 0.9rem;">
+                            Este usuario aún no está asignado a ninguna empresa o SaaS. Asígnalo para darle acceso al portal correspondiente.
+                        </p>
+                        <button type="button" class="btn btn-primary btn-block" onclick="openAssignModal()">
+                            <i class="fas fa-user-plus"></i> Asignar a Empresa/SaaS
+                        </button>
+                    `;
+                }
+            }
+            alert(d.message || 'Asignación eliminada correctamente');
         } else {
             alert(d.error || 'Error al quitar asignación');
         }
+    })
+    .catch(e => {
+        console.error('Error:', e);
+        alert('Error de conexión. Intenta de nuevo.');
     });
 }
 </script>

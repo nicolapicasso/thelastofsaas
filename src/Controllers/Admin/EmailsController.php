@@ -7,6 +7,9 @@ namespace App\Controllers\Admin;
 use App\Core\Controller;
 use App\Core\Database;
 use App\Services\EmailService;
+use App\Models\Event;
+use App\Models\Sponsor;
+use App\Models\Company;
 
 /**
  * Emails Controller
@@ -348,5 +351,454 @@ class EmailsController extends Controller
         }
 
         return $defaults;
+    }
+
+    /**
+     * Bulk email composer page
+     */
+    public function bulk(): void
+    {
+        $this->requireAuth();
+
+        $eventModel = new Event();
+        $events = $eventModel->all(['start_date' => 'DESC']);
+
+        $this->renderAdmin('emails/bulk', [
+            'title' => 'Email Masivo',
+            'events' => $events,
+            'variables' => EmailService::getAvailableVariables(),
+            'csrf_token' => $this->generateCsrf(),
+            'flash' => $this->getFlash(),
+        ]);
+    }
+
+    /**
+     * Get recipients for bulk email (AJAX)
+     */
+    public function getRecipients(): void
+    {
+        $this->requireAuth();
+
+        $eventId = (int) $this->getQuery('event_id');
+        $recipientType = $this->getQuery('recipient_type', 'sponsors'); // 'sponsors' or 'companies'
+
+        if (!$eventId) {
+            $this->json(['recipients' => [], 'count' => 0]);
+            return;
+        }
+
+        $recipients = [];
+
+        if ($recipientType === 'sponsors') {
+            $sponsorModel = new Sponsor();
+            $sponsors = $sponsorModel->getAllByEvent($eventId);
+
+            foreach ($sponsors as $sponsor) {
+                if (!empty($sponsor['contact_email'])) {
+                    // Handle multiple emails
+                    $emails = array_filter(array_map('trim', explode(',', $sponsor['contact_email'])));
+                    foreach ($emails as $email) {
+                        if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                            $recipients[] = [
+                                'id' => $sponsor['id'],
+                                'name' => $sponsor['name'],
+                                'email' => $email,
+                                'type' => 'sponsor',
+                                'code' => $sponsor['code'] ?? '',
+                                'logo_url' => $sponsor['logo_url'] ?? null,
+                            ];
+                        }
+                    }
+                }
+            }
+        } else {
+            $companyModel = new Company();
+            $companies = $companyModel->getByEvent($eventId);
+
+            foreach ($companies as $company) {
+                if (!empty($company['contact_email'])) {
+                    // Handle multiple emails
+                    $emails = array_filter(array_map('trim', explode(',', $company['contact_email'])));
+                    foreach ($emails as $email) {
+                        if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                            $recipients[] = [
+                                'id' => $company['id'],
+                                'name' => $company['name'],
+                                'email' => $email,
+                                'type' => 'company',
+                                'code' => $company['code'] ?? '',
+                                'logo_url' => $company['logo_url'] ?? null,
+                            ];
+                        }
+                    }
+                }
+            }
+        }
+
+        $this->json([
+            'recipients' => $recipients,
+            'count' => count($recipients),
+        ]);
+    }
+
+    /**
+     * Preview bulk email
+     */
+    public function previewBulk(): void
+    {
+        $this->requireAuth();
+
+        $contentType = $_SERVER['CONTENT_TYPE'] ?? '';
+        if (strpos($contentType, 'application/json') === false) {
+            $this->jsonError('Content-Type debe ser application/json');
+            return;
+        }
+
+        $json = json_decode(file_get_contents('php://input'), true);
+        if (!$json) {
+            $this->jsonError('JSON invalido');
+            return;
+        }
+
+        $subject = $json['subject'] ?? '';
+        $bodyHtml = $json['body_html'] ?? '';
+        $eventId = (int) ($json['event_id'] ?? 0);
+
+        if (empty($subject) || empty($bodyHtml)) {
+            $this->jsonError('Asunto y contenido son obligatorios');
+            return;
+        }
+
+        // Get event data for variables
+        $eventModel = new Event();
+        $event = $eventId ? $eventModel->find($eventId) : null;
+
+        // Sample data for preview
+        $sampleData = [
+            'event_name' => $event['name'] ?? 'Nombre del Evento',
+            'event_date' => $event ? $this->formatDate($event['start_date']) : '15 de Febrero, 2026',
+            'event_time' => $event['start_time'] ?? '09:00',
+            'event_location' => $event['location'] ?? 'Madrid, Espana',
+            'event_address' => $event['address'] ?? 'Calle Example 123',
+            'entity_name' => 'Empresa de Ejemplo S.L.',
+            'entity_type' => 'Empresa',
+            'access_code' => 'EJEMPLO2026',
+            'portal_url' => url('/empresa/login'),
+            'contact_name' => 'Juan Garcia',
+            'contact_email' => 'juan@ejemplo.com',
+        ];
+
+        $emailService = new EmailService();
+        $renderedSubject = $emailService->renderTemplateWithData($subject, $sampleData);
+        $renderedBody = $emailService->renderTemplateWithData($bodyHtml, $sampleData);
+        $fullHtml = $emailService->wrapInEmailLayout($renderedBody, $renderedSubject);
+
+        $this->json([
+            'success' => true,
+            'subject' => $renderedSubject,
+            'html' => $fullHtml,
+        ]);
+    }
+
+    /**
+     * Send bulk email
+     */
+    public function sendBulk(): void
+    {
+        $this->requireAuth();
+
+        $contentType = $_SERVER['CONTENT_TYPE'] ?? '';
+        if (strpos($contentType, 'application/json') === false) {
+            $this->jsonError('Content-Type debe ser application/json');
+            return;
+        }
+
+        $json = json_decode(file_get_contents('php://input'), true);
+        if (!$json) {
+            $this->jsonError('JSON invalido');
+            return;
+        }
+
+        $subject = trim($json['subject'] ?? '');
+        $bodyHtml = $json['body_html'] ?? '';
+        $eventId = (int) ($json['event_id'] ?? 0);
+        $recipientType = $json['recipient_type'] ?? 'sponsors';
+        $bccEmail = trim($json['bcc_email'] ?? '');
+
+        if (empty($subject) || empty($bodyHtml) || !$eventId) {
+            $this->jsonError('Asunto, contenido y evento son obligatorios');
+            return;
+        }
+
+        // Get event
+        $eventModel = new Event();
+        $event = $eventModel->find($eventId);
+
+        if (!$event) {
+            $this->jsonError('Evento no encontrado');
+            return;
+        }
+
+        // Get recipients
+        $recipients = [];
+        if ($recipientType === 'sponsors') {
+            $sponsorModel = new Sponsor();
+            $sponsors = $sponsorModel->getAllByEvent($eventId);
+            foreach ($sponsors as $sponsor) {
+                if (!empty($sponsor['contact_email'])) {
+                    $emails = array_filter(array_map('trim', explode(',', $sponsor['contact_email'])));
+                    foreach ($emails as $email) {
+                        if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                            $recipients[] = [
+                                'entity' => $sponsor,
+                                'email' => $email,
+                                'type' => 'sponsor',
+                            ];
+                        }
+                    }
+                }
+            }
+        } else {
+            $companyModel = new Company();
+            $companies = $companyModel->getByEvent($eventId);
+            foreach ($companies as $company) {
+                if (!empty($company['contact_email'])) {
+                    $emails = array_filter(array_map('trim', explode(',', $company['contact_email'])));
+                    foreach ($emails as $email) {
+                        if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                            $recipients[] = [
+                                'entity' => $company,
+                                'email' => $email,
+                                'type' => 'company',
+                            ];
+                        }
+                    }
+                }
+            }
+        }
+
+        if (empty($recipients)) {
+            $this->jsonError('No hay destinatarios validos');
+            return;
+        }
+
+        $emailService = new EmailService();
+        $sent = 0;
+        $failed = 0;
+        $errors = [];
+
+        // Create bulk email log entry
+        $bulkEmailId = $this->logBulkEmail($eventId, $recipientType, $subject, $bodyHtml, count($recipients), $bccEmail);
+
+        foreach ($recipients as $recipient) {
+            $entity = $recipient['entity'];
+            $email = $recipient['email'];
+
+            // Prepare variables for this recipient
+            $variables = [
+                'event_name' => $event['name'],
+                'event_date' => $this->formatDate($event['start_date']),
+                'event_time' => $event['start_time'] ?? '',
+                'event_location' => $event['location'] ?? '',
+                'event_address' => $event['address'] ?? '',
+                'entity_name' => $entity['name'],
+                'entity_type' => $recipientType === 'sponsors' ? 'SaaS' : 'Empresa',
+                'access_code' => $entity['code'] ?? '',
+                'portal_url' => $recipientType === 'sponsors' ? url('/sponsor/login') : url('/empresa/login'),
+                'contact_name' => $entity['contact_name'] ?? $entity['name'],
+                'contact_email' => $email,
+            ];
+
+            // Render subject and body
+            $renderedSubject = $emailService->renderTemplateWithData($subject, $variables);
+            $renderedBody = $emailService->renderTemplateWithData($bodyHtml, $variables);
+            $fullHtml = $emailService->wrapInEmailLayout($renderedBody, $renderedSubject);
+
+            try {
+                $result = $emailService->send($email, $renderedSubject, $fullHtml);
+
+                // Send BCC if configured
+                if ($result && !empty($bccEmail) && filter_var($bccEmail, FILTER_VALIDATE_EMAIL)) {
+                    $emailService->send($bccEmail, "[CCO] " . $renderedSubject, $fullHtml);
+                }
+
+                if ($result) {
+                    $sent++;
+                    $this->logBulkEmailRecipient($bulkEmailId, $entity['id'], $recipientType, $email, 'sent');
+                } else {
+                    $failed++;
+                    $errors[] = $email;
+                    $this->logBulkEmailRecipient($bulkEmailId, $entity['id'], $recipientType, $email, 'failed');
+                }
+            } catch (\Exception $e) {
+                $failed++;
+                $errors[] = $email . ' (' . $e->getMessage() . ')';
+                $this->logBulkEmailRecipient($bulkEmailId, $entity['id'], $recipientType, $email, 'failed', $e->getMessage());
+            }
+
+            // Small delay to avoid overwhelming the mail server
+            usleep(100000); // 100ms
+        }
+
+        // Update bulk email status
+        $this->updateBulkEmailStatus($bulkEmailId, $sent, $failed);
+
+        $message = "Email enviado a $sent destinatarios";
+        if ($failed > 0) {
+            $message .= ". Fallidos: $failed";
+        }
+
+        $this->jsonSuccess([
+            'message' => $message,
+            'sent' => $sent,
+            'failed' => $failed,
+            'errors' => $errors,
+        ]);
+    }
+
+    /**
+     * Email history page
+     */
+    public function history(): void
+    {
+        $this->requireAuth();
+
+        $eventId = (int) $this->getQuery('event_id');
+        $page = (int) ($this->getQuery('page', 1));
+        $perPage = 20;
+
+        $eventModel = new Event();
+        $events = $eventModel->all(['start_date' => 'DESC']);
+
+        // Get bulk emails
+        $whereClause = $eventId ? "WHERE event_id = ?" : "";
+        $params = $eventId ? [$eventId] : [];
+
+        $totalQuery = $this->db->query(
+            "SELECT COUNT(*) as total FROM bulk_emails $whereClause",
+            $params
+        )->fetch();
+        $total = (int) ($totalQuery['total'] ?? 0);
+
+        $offset = ($page - 1) * $perPage;
+        $bulkEmails = $this->db->query(
+            "SELECT be.*, e.name as event_name
+             FROM bulk_emails be
+             LEFT JOIN events e ON e.id = be.event_id
+             $whereClause
+             ORDER BY be.created_at DESC
+             LIMIT $perPage OFFSET $offset",
+            $params
+        )->fetchAll();
+
+        $pagination = [
+            'current_page' => $page,
+            'per_page' => $perPage,
+            'total' => $total,
+            'total_pages' => ceil($total / $perPage),
+        ];
+
+        $this->renderAdmin('emails/history', [
+            'title' => 'Historial de Emails',
+            'bulkEmails' => $bulkEmails,
+            'events' => $events,
+            'currentEventId' => $eventId,
+            'pagination' => $pagination,
+            'csrf_token' => $this->generateCsrf(),
+            'flash' => $this->getFlash(),
+        ]);
+    }
+
+    /**
+     * Log bulk email to database
+     */
+    private function logBulkEmail(int $eventId, string $recipientType, string $subject, string $bodyHtml, int $totalRecipients, string $bccEmail = ''): int
+    {
+        // Ensure table exists
+        $this->ensureBulkEmailTables();
+
+        $this->db->query(
+            "INSERT INTO bulk_emails (event_id, recipient_type, subject, body_html, total_recipients, bcc_email, status, created_at)
+             VALUES (?, ?, ?, ?, ?, ?, 'sending', NOW())",
+            [$eventId, $recipientType, $subject, $bodyHtml, $totalRecipients, $bccEmail]
+        );
+
+        return (int) $this->db->lastInsertId();
+    }
+
+    /**
+     * Log individual recipient status
+     */
+    private function logBulkEmailRecipient(int $bulkEmailId, int $entityId, string $entityType, string $email, string $status, ?string $errorMessage = null): void
+    {
+        $this->db->query(
+            "INSERT INTO bulk_email_recipients (bulk_email_id, entity_id, entity_type, email, status, error_message, sent_at)
+             VALUES (?, ?, ?, ?, ?, ?, NOW())",
+            [$bulkEmailId, $entityId, $entityType, $email, $status, $errorMessage]
+        );
+    }
+
+    /**
+     * Update bulk email final status
+     */
+    private function updateBulkEmailStatus(int $bulkEmailId, int $sent, int $failed): void
+    {
+        $status = $failed === 0 ? 'completed' : ($sent === 0 ? 'failed' : 'partial');
+        $this->db->query(
+            "UPDATE bulk_emails SET status = ?, sent_count = ?, failed_count = ?, completed_at = NOW() WHERE id = ?",
+            [$status, $sent, $failed, $bulkEmailId]
+        );
+    }
+
+    /**
+     * Ensure bulk email tables exist
+     */
+    private function ensureBulkEmailTables(): void
+    {
+        // Create bulk_emails table if not exists
+        $this->db->query("
+            CREATE TABLE IF NOT EXISTS bulk_emails (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                event_id INT NOT NULL,
+                recipient_type VARCHAR(20) NOT NULL,
+                subject VARCHAR(500) NOT NULL,
+                body_html TEXT NOT NULL,
+                total_recipients INT DEFAULT 0,
+                sent_count INT DEFAULT 0,
+                failed_count INT DEFAULT 0,
+                bcc_email VARCHAR(255) DEFAULT NULL,
+                status ENUM('sending', 'completed', 'partial', 'failed') DEFAULT 'sending',
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                completed_at DATETIME DEFAULT NULL,
+                INDEX idx_event_id (event_id),
+                INDEX idx_created_at (created_at)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+        ");
+
+        // Create bulk_email_recipients table if not exists
+        $this->db->query("
+            CREATE TABLE IF NOT EXISTS bulk_email_recipients (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                bulk_email_id INT NOT NULL,
+                entity_id INT NOT NULL,
+                entity_type VARCHAR(20) NOT NULL,
+                email VARCHAR(255) NOT NULL,
+                status ENUM('sent', 'failed') DEFAULT 'sent',
+                error_message VARCHAR(500) DEFAULT NULL,
+                sent_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                INDEX idx_bulk_email_id (bulk_email_id),
+                INDEX idx_status (status)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+        ");
+    }
+
+    /**
+     * Format date for display
+     */
+    private function formatDate(string $date): string
+    {
+        $dt = new \DateTime($date);
+        $months = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+        return $dt->format('j') . ' de ' . $months[$dt->format('n') - 1] . ' de ' . $dt->format('Y');
     }
 }

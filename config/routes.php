@@ -421,6 +421,13 @@ $router->get('/admin/emails/templates/{id}/edit', 'Admin\\EmailsController', 'ed
 $router->post('/admin/emails/templates/{id}/update', 'Admin\\EmailsController', 'updateTemplate');
 $router->post('/admin/emails/templates/{id}/reset', 'Admin\\EmailsController', 'resetTemplate');
 $router->get('/admin/emails/templates/{id}/preview', 'Admin\\EmailsController', 'previewTemplate');
+// Bulk/Mass Email
+$router->get('/admin/emails/bulk', 'Admin\\EmailsController', 'bulk');
+$router->post('/admin/emails/bulk/send', 'Admin\\EmailsController', 'sendBulk');
+$router->post('/admin/emails/bulk/preview', 'Admin\\EmailsController', 'previewBulk');
+$router->get('/admin/emails/bulk/recipients', 'Admin\\EmailsController', 'getRecipients');
+// Email History
+$router->get('/admin/emails/history', 'Admin\\EmailsController', 'history');
 
 // Rooms
 $router->get('/admin/rooms', 'Admin\\RoomsController', 'index');

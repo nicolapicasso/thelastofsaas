@@ -23,8 +23,14 @@
     <a href="/admin/emails" class="tab">
         <i class="fas fa-file-alt"></i> Plantillas
     </a>
+    <a href="/admin/emails/bulk" class="tab">
+        <i class="fas fa-paper-plane"></i> Email Masivo
+    </a>
+    <a href="/admin/emails/history" class="tab">
+        <i class="fas fa-history"></i> Historial
+    </a>
     <a href="/admin/emails/smtp" class="tab active">
-        <i class="fas fa-cog"></i> Configuracion SMTP
+        <i class="fas fa-cog"></i> SMTP
     </a>
 </div>
 
