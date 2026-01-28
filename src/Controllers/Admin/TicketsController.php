@@ -9,8 +9,10 @@ use App\Models\Ticket;
 use App\Models\TicketType;
 use App\Models\Event;
 use App\Models\Sponsor;
+use App\Models\Company;
 use App\Helpers\Sanitizer;
 use App\Services\OmniwalletService;
+use App\Services\EmailService;
 
 /**
  * Tickets Controller
@@ -22,6 +24,7 @@ class TicketsController extends Controller
     private TicketType $ticketTypeModel;
     private Event $eventModel;
     private Sponsor $sponsorModel;
+    private Company $companyModel;
 
     public function __construct()
     {
@@ -30,6 +33,7 @@ class TicketsController extends Controller
         $this->ticketTypeModel = new TicketType();
         $this->eventModel = new Event();
         $this->sponsorModel = new Sponsor();
+        $this->companyModel = new Company();
     }
 
     /**
@@ -91,12 +95,36 @@ class TicketsController extends Controller
         $sponsorId = $ticket['sponsor_id'] ?? $ticket['invited_by_sponsor_id'] ?? null;
         $sponsor = $sponsorId ? $this->sponsorModel->find($sponsorId) : null;
 
+        // Get assigned company/sponsor for this ticket
+        $assignedCompany = null;
+        $assignedSponsor = null;
+        if (!empty($ticket['assigned_company_id'])) {
+            $assignedCompany = $this->companyModel->find($ticket['assigned_company_id']);
+        }
+        if (!empty($ticket['assigned_sponsor_id'])) {
+            $assignedSponsor = $this->sponsorModel->find($ticket['assigned_sponsor_id']);
+        }
+
+        // Get all sponsors and companies for the event (for assignment dropdown)
+        $eventSponsors = $this->sponsorModel->getAllByEvent($ticket['event_id']);
+        $eventCompanies = $this->companyModel->getByEvent($ticket['event_id']);
+
+        // Also get all active sponsors and companies (not just those in event)
+        $allSponsors = $this->sponsorModel->getAllActive();
+        $allCompanies = $this->companyModel->getActive();
+
         $this->renderAdmin('tickets/show', [
             'title' => 'Detalle de Entrada',
             'ticket' => $ticket,
             'event' => $event,
             'ticketType' => $ticketType,
             'sponsor' => $sponsor,
+            'assignedCompany' => $assignedCompany,
+            'assignedSponsor' => $assignedSponsor,
+            'eventSponsors' => $eventSponsors,
+            'eventCompanies' => $eventCompanies,
+            'allSponsors' => $allSponsors,
+            'allCompanies' => $allCompanies,
             'statusOptions' => Ticket::getStatusOptions(),
             'csrf_token' => $this->generateCsrf(),
             'flash' => $_SESSION['flash'] ?? null,
@@ -742,5 +770,428 @@ class TicketsController extends Controller
                 'ticket' => $ticketData,
             ]);
         }
+    }
+
+    /**
+     * Assign ticket attendee to a Company or Sponsor (SaaS)
+     */
+    public function assignToEntity(string $id): void
+    {
+        $this->requireAuth();
+
+        $contentType = $_SERVER['CONTENT_TYPE'] ?? '';
+        if (strpos($contentType, 'application/json') === false) {
+            $this->jsonError('Content-Type debe ser application/json');
+            return;
+        }
+
+        $json = json_decode(file_get_contents('php://input'), true);
+        if (!$json) {
+            $this->jsonError('JSON inválido');
+            return;
+        }
+
+        $ticket = $this->ticketModel->find((int) $id);
+        if (!$ticket) {
+            $this->jsonError('Ticket no encontrado.');
+            return;
+        }
+
+        $entityType = $json['entity_type'] ?? ''; // 'company' or 'sponsor'
+        $entityId = (int) ($json['entity_id'] ?? 0);
+        $sendWelcomeEmail = (bool) ($json['send_welcome_email'] ?? true);
+
+        if (!in_array($entityType, ['company', 'sponsor'])) {
+            $this->jsonError('Tipo de entidad no válido. Debe ser "company" o "sponsor".');
+            return;
+        }
+
+        if (!$entityId) {
+            $this->jsonError('ID de entidad no proporcionado.');
+            return;
+        }
+
+        try {
+            $entity = null;
+            $updateData = [];
+
+            if ($entityType === 'company') {
+                $entity = $this->companyModel->find($entityId);
+                if (!$entity) {
+                    $this->jsonError('Empresa no encontrada.');
+                    return;
+                }
+                $updateData = [
+                    'assigned_company_id' => $entityId,
+                    'assigned_sponsor_id' => null,
+                    'assigned_at' => date('Y-m-d H:i:s'),
+                ];
+
+                // Add contact to company if not exists (using email as pivot)
+                $this->addContactToCompany($entity, $ticket);
+
+                // Register company in event if not registered
+                $this->companyModel->registerForEvent($entityId, $ticket['event_id']);
+
+            } else {
+                $entity = $this->sponsorModel->find($entityId);
+                if (!$entity) {
+                    $this->jsonError('SaaS/Sponsor no encontrado.');
+                    return;
+                }
+                $updateData = [
+                    'assigned_sponsor_id' => $entityId,
+                    'assigned_company_id' => null,
+                    'assigned_at' => date('Y-m-d H:i:s'),
+                ];
+
+                // Add contact to sponsor if not exists
+                $this->addContactToSponsor($entity, $ticket);
+
+                // Register sponsor in event if not registered
+                if (!$this->sponsorModel->participatesInEvent($entityId, $ticket['event_id'])) {
+                    $this->registerSponsorInEvent($entityId, $ticket['event_id']);
+                }
+            }
+
+            // Update ticket with assignment
+            $this->ticketModel->update((int) $id, $updateData);
+
+            // Send welcome email with portal access
+            if ($sendWelcomeEmail) {
+                $event = $this->eventModel->find($ticket['event_id']);
+                $emailService = new EmailService();
+                $emailService->sendPortalWelcomeEmail($entityType, $entity, $ticket, $event);
+            }
+
+            $this->jsonSuccess([
+                'message' => 'Usuario asignado correctamente a ' . htmlspecialchars($entity['name']),
+                'entity_type' => $entityType,
+                'entity_name' => $entity['name'],
+            ]);
+
+        } catch (\Exception $e) {
+            $this->jsonError('Error al asignar: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Create a new Company from ticket data and assign
+     */
+    public function createCompanyFromTicket(string $id): void
+    {
+        $this->requireAuth();
+
+        $contentType = $_SERVER['CONTENT_TYPE'] ?? '';
+        if (strpos($contentType, 'application/json') === false) {
+            $this->jsonError('Content-Type debe ser application/json');
+            return;
+        }
+
+        $json = json_decode(file_get_contents('php://input'), true);
+
+        $ticket = $this->ticketModel->find((int) $id);
+        if (!$ticket) {
+            $this->jsonError('Ticket no encontrado.');
+            return;
+        }
+
+        try {
+            // Create company with ticket data
+            $companyName = $json['name'] ?? $ticket['attendee_company_name'] ?? $ticket['attendee_company'] ?? '';
+            if (empty($companyName)) {
+                $this->jsonError('El nombre de la empresa es obligatorio.');
+                return;
+            }
+
+            $slug = Sanitizer::slug($companyName);
+            $code = Company::generateUniqueCode();
+
+            $contactName = $ticket['attendee_first_name'] . ' ' . $ticket['attendee_last_name'];
+            if (empty(trim($contactName))) {
+                $contactName = $ticket['attendee_name'] ?? '';
+            }
+
+            $companyId = $this->companyModel->create([
+                'name' => $companyName,
+                'slug' => $slug,
+                'code' => $code,
+                'contact_name' => trim($contactName),
+                'contact_email' => $ticket['attendee_email'],
+                'contact_phone' => $ticket['attendee_phone'] ?? null,
+                'contact_position' => $ticket['attendee_job_title'] ?? $ticket['attendee_position'] ?? null,
+                'sector' => $json['sector'] ?? null,
+                'employees' => $json['employees'] ?? $ticket['attendee_company_size'] ?? null,
+                'website' => $json['website'] ?? null,
+                'active' => 1,
+            ]);
+
+            // Register company in event
+            $this->companyModel->registerForEvent($companyId, $ticket['event_id']);
+
+            // Assign ticket to company
+            $this->ticketModel->update((int) $id, [
+                'assigned_company_id' => $companyId,
+                'assigned_sponsor_id' => null,
+                'assigned_at' => date('Y-m-d H:i:s'),
+            ]);
+
+            // Send welcome email
+            $company = $this->companyModel->find($companyId);
+            $event = $this->eventModel->find($ticket['event_id']);
+            $emailService = new EmailService();
+            $emailService->sendPortalWelcomeEmail('company', $company, $ticket, $event);
+
+            $this->jsonSuccess([
+                'message' => 'Empresa "' . htmlspecialchars($companyName) . '" creada y asignada correctamente.',
+                'company_id' => $companyId,
+                'company_code' => $code,
+            ]);
+
+        } catch (\Exception $e) {
+            $this->jsonError('Error al crear empresa: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Create a new Sponsor (SaaS) from ticket data and assign
+     */
+    public function createSponsorFromTicket(string $id): void
+    {
+        $this->requireAuth();
+
+        $contentType = $_SERVER['CONTENT_TYPE'] ?? '';
+        if (strpos($contentType, 'application/json') === false) {
+            $this->jsonError('Content-Type debe ser application/json');
+            return;
+        }
+
+        $json = json_decode(file_get_contents('php://input'), true);
+
+        $ticket = $this->ticketModel->find((int) $id);
+        if (!$ticket) {
+            $this->jsonError('Ticket no encontrado.');
+            return;
+        }
+
+        try {
+            // Create sponsor with ticket data
+            $sponsorName = $json['name'] ?? $ticket['attendee_company_name'] ?? $ticket['attendee_company'] ?? '';
+            if (empty($sponsorName)) {
+                $this->jsonError('El nombre del SaaS es obligatorio.');
+                return;
+            }
+
+            $slug = Sanitizer::slug($sponsorName);
+            $code = Sponsor::generateUniqueCode();
+
+            $contactName = $ticket['attendee_first_name'] . ' ' . $ticket['attendee_last_name'];
+            if (empty(trim($contactName))) {
+                $contactName = $ticket['attendee_name'] ?? '';
+            }
+
+            $sponsorId = $this->sponsorModel->create([
+                'name' => $sponsorName,
+                'slug' => $slug,
+                'code' => $code,
+                'tagline' => $json['tagline'] ?? null,
+                'description' => $json['description'] ?? null,
+                'website' => $json['website'] ?? null,
+                'contact_name' => trim($contactName),
+                'contact_email' => $ticket['attendee_email'],
+                'contact_phone' => $ticket['attendee_phone'] ?? null,
+                'active' => 1,
+                'is_hidden' => 0,
+            ]);
+
+            // Register sponsor in event
+            $this->registerSponsorInEvent($sponsorId, $ticket['event_id'], $json['level'] ?? 'bronze');
+
+            // Assign ticket to sponsor
+            $this->ticketModel->update((int) $id, [
+                'assigned_sponsor_id' => $sponsorId,
+                'assigned_company_id' => null,
+                'assigned_at' => date('Y-m-d H:i:s'),
+            ]);
+
+            // Send welcome email
+            $sponsor = $this->sponsorModel->find($sponsorId);
+            $event = $this->eventModel->find($ticket['event_id']);
+            $emailService = new EmailService();
+            $emailService->sendPortalWelcomeEmail('sponsor', $sponsor, $ticket, $event);
+
+            $this->jsonSuccess([
+                'message' => 'SaaS "' . htmlspecialchars($sponsorName) . '" creado y asignado correctamente.',
+                'sponsor_id' => $sponsorId,
+                'sponsor_code' => $code,
+            ]);
+
+        } catch (\Exception $e) {
+            $this->jsonError('Error al crear SaaS: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Remove assignment from ticket
+     */
+    public function removeAssignment(string $id): void
+    {
+        $this->requireAuth();
+
+        $ticket = $this->ticketModel->find((int) $id);
+        if (!$ticket) {
+            $this->jsonError('Ticket no encontrado.');
+            return;
+        }
+
+        try {
+            $this->ticketModel->update((int) $id, [
+                'assigned_company_id' => null,
+                'assigned_sponsor_id' => null,
+                'assigned_at' => null,
+            ]);
+
+            $this->jsonSuccess(['message' => 'Asignación eliminada correctamente.']);
+        } catch (\Exception $e) {
+            $this->jsonError('Error al eliminar asignación: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Search sponsors for assignment (AJAX)
+     */
+    public function searchSponsors(): void
+    {
+        $this->requireAuth();
+
+        $query = $this->getQuery('q', '');
+        $eventId = (int) $this->getQuery('event_id', 0);
+
+        if (strlen($query) < 2) {
+            $this->json(['results' => []]);
+            return;
+        }
+
+        $result = $this->sponsorModel->searchByName($query, 1, 20, ['active' => 1]);
+
+        $sponsors = array_map(function($s) {
+            return [
+                'id' => $s['id'],
+                'name' => $s['name'],
+                'contact_email' => $s['contact_email'],
+                'logo_url' => $s['logo_url'] ?? null,
+            ];
+        }, $result['data']);
+
+        $this->json(['results' => $sponsors]);
+    }
+
+    /**
+     * Search companies for assignment (AJAX)
+     */
+    public function searchCompanies(): void
+    {
+        $this->requireAuth();
+
+        $query = $this->getQuery('q', '');
+        $eventId = (int) $this->getQuery('event_id', 0);
+
+        if (strlen($query) < 2) {
+            $this->json(['results' => []]);
+            return;
+        }
+
+        $result = $this->companyModel->searchByName($query, 1, 20, ['active' => 1]);
+
+        $companies = array_map(function($c) {
+            return [
+                'id' => $c['id'],
+                'name' => $c['name'],
+                'contact_email' => $c['contact_email'],
+                'logo_url' => $c['logo_url'] ?? null,
+            ];
+        }, $result['data']);
+
+        $this->json(['results' => $companies]);
+    }
+
+    /**
+     * Resend confirmation email
+     */
+    public function resendEmail(string $id): void
+    {
+        $this->requireAuth();
+
+        if (!$this->validateCsrf()) {
+            $this->jsonError('Sesión expirada.');
+            return;
+        }
+
+        $ticket = $this->ticketModel->find((int) $id);
+        if (!$ticket) {
+            $this->jsonError('Ticket no encontrado.');
+            return;
+        }
+
+        try {
+            $event = $this->eventModel->find($ticket['event_id']);
+            $emailService = new EmailService();
+            $emailService->sendTicketConfirmation($ticket, $event);
+
+            $this->jsonSuccess(['message' => 'Email reenviado correctamente.']);
+        } catch (\Exception $e) {
+            $this->jsonError('Error al enviar email: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Add contact to company if not exists (by email)
+     */
+    private function addContactToCompany(array $company, array $ticket): void
+    {
+        // Check if email already exists in company contacts
+        $emails = $this->companyModel->getEmailsArray($company);
+        $ticketEmail = strtolower(trim($ticket['attendee_email']));
+
+        foreach ($emails as $email) {
+            if (strtolower(trim($email)) === $ticketEmail) {
+                return; // Already exists
+            }
+        }
+
+        // Add email to contact_email (comma separated)
+        $newEmails = $company['contact_email'] ? $company['contact_email'] . ', ' . $ticketEmail : $ticketEmail;
+        $this->companyModel->update($company['id'], ['contact_email' => $newEmails]);
+    }
+
+    /**
+     * Add contact to sponsor if not exists (by email)
+     */
+    private function addContactToSponsor(array $sponsor, array $ticket): void
+    {
+        // Check if email already exists in sponsor contacts
+        $emails = $this->sponsorModel->getEmailsArray($sponsor);
+        $ticketEmail = strtolower(trim($ticket['attendee_email']));
+
+        foreach ($emails as $email) {
+            if (strtolower(trim($email)) === $ticketEmail) {
+                return; // Already exists
+            }
+        }
+
+        // Add email to contact_email (comma separated)
+        $newEmails = $sponsor['contact_email'] ? $sponsor['contact_email'] . ', ' . $ticketEmail : $ticketEmail;
+        $this->sponsorModel->update($sponsor['id'], ['contact_email' => $newEmails]);
+    }
+
+    /**
+     * Register sponsor in event
+     */
+    private function registerSponsorInEvent(int $sponsorId, int $eventId, string $level = 'bronze'): void
+    {
+        $db = \App\Core\Database::getInstance();
+        $sql = "INSERT IGNORE INTO event_sponsors (event_id, sponsor_id, level, display_order)
+                VALUES (?, ?, ?, (SELECT COALESCE(MAX(display_order), 0) + 1 FROM event_sponsors es2 WHERE es2.event_id = ?))";
+        $db->query($sql, [$eventId, $sponsorId, $level, $eventId]);
     }
 }

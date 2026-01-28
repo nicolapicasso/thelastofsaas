@@ -460,6 +460,13 @@ class SponsorPanelController extends Controller
 
         // Get mutual matches
         $matches = $this->sponsorModel->getMutualMatches($sponsor['id'], $event['id']);
+        $matchedCompanyIds = array_column($matches, 'id');
+
+        // Get "likes" received - companies who selected this sponsor but sponsor hasn't selected back
+        $interestedCompanies = $this->sponsorModel->getInterestedCompanies($sponsor['id'], $event['id']);
+        $likesReceived = array_filter($interestedCompanies, function($company) use ($matchedCompanyIds) {
+            return !in_array($company['id'], $matchedCompanyIds);
+        });
 
         // Get scheduled meetings
         $meetings = $this->sponsorModel->getScheduledMeetings($sponsor['id'], $event['id']);
@@ -472,7 +479,9 @@ class SponsorPanelController extends Controller
             'event' => $event,
             'events' => $events,
             'matches' => $matches,
+            'likesReceived' => array_values($likesReceived),
             'meetings' => $meetings,
+            'csrf_token' => $this->generateCsrf(),
             'meta_title' => 'Tus Matches - ' . $event['name']
         ]);
     }

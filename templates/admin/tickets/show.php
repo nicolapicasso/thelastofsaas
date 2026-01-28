@@ -145,6 +145,61 @@
         </div>
         <?php endif; ?>
 
+        <!-- Assignment to Company/SaaS -->
+        <div class="card" style="border: 2px solid var(--color-primary); border-style: dashed;">
+            <div class="card-header" style="background: rgba(79, 70, 229, 0.1);">
+                <h3><i class="fas fa-user-plus"></i> Asignación a Empresa/SaaS</h3>
+            </div>
+            <div class="card-body">
+                <?php if (!empty($assignedCompany)): ?>
+                    <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;">
+                        <?php if (!empty($assignedCompany['logo_url'])): ?>
+                            <img src="<?= htmlspecialchars($assignedCompany['logo_url']) ?>" alt="" style="width: 50px; height: 50px; object-fit: contain; border-radius: 8px; background: #f5f5f5;">
+                        <?php else: ?>
+                            <div style="width: 50px; height: 50px; background: #e5e7eb; border-radius: 8px; display: flex; align-items: center; justify-content: center;"><i class="fas fa-building" style="color: #9ca3af;"></i></div>
+                        <?php endif; ?>
+                        <div style="flex: 1;">
+                            <span class="badge badge-info" style="margin-bottom: 0.25rem;">EMPRESA</span>
+                            <br><strong><?= htmlspecialchars($assignedCompany['name']) ?></strong>
+                            <br><small class="text-muted">Código: <?= htmlspecialchars($assignedCompany['code']) ?></small>
+                        </div>
+                        <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeAssignment()" title="Quitar asignación">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <a href="/admin/companies/<?= $assignedCompany['id'] ?>/edit" class="btn btn-sm btn-outline" style="width: 100%;">
+                        <i class="fas fa-external-link-alt"></i> Ver Empresa
+                    </a>
+                <?php elseif (!empty($assignedSponsor)): ?>
+                    <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;">
+                        <?php if (!empty($assignedSponsor['logo_url'])): ?>
+                            <img src="<?= htmlspecialchars($assignedSponsor['logo_url']) ?>" alt="" style="width: 50px; height: 50px; object-fit: contain; border-radius: 8px; background: #f5f5f5;">
+                        <?php else: ?>
+                            <div style="width: 50px; height: 50px; background: #e5e7eb; border-radius: 8px; display: flex; align-items: center; justify-content: center;"><i class="fas fa-rocket" style="color: #9ca3af;"></i></div>
+                        <?php endif; ?>
+                        <div style="flex: 1;">
+                            <span class="badge badge-success" style="margin-bottom: 0.25rem;">SAAS</span>
+                            <br><strong><?= htmlspecialchars($assignedSponsor['name']) ?></strong>
+                            <br><small class="text-muted">Código: <?= htmlspecialchars($assignedSponsor['code']) ?></small>
+                        </div>
+                        <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeAssignment()" title="Quitar asignación">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <a href="/admin/sponsors/<?= $assignedSponsor['id'] ?>/edit" class="btn btn-sm btn-outline" style="width: 100%;">
+                        <i class="fas fa-external-link-alt"></i> Ver SaaS
+                    </a>
+                <?php else: ?>
+                    <p class="text-muted" style="margin-bottom: 1rem; font-size: 0.9rem;">
+                        Este usuario aún no está asignado a ninguna empresa o SaaS. Asígnalo para darle acceso al portal correspondiente.
+                    </p>
+                    <button type="button" class="btn btn-primary btn-block" onclick="openAssignModal()">
+                        <i class="fas fa-user-plus"></i> Asignar a Empresa/SaaS
+                    </button>
+                <?php endif; ?>
+            </div>
+        </div>
+
         <!-- Payment Info (if paid) -->
         <?php if ($ticket['price'] > 0 && $ticket['stripe_payment_id']): ?>
         <div class="card">
@@ -318,6 +373,93 @@
             padding: 1rem 1.25rem;
             border-top: 1px solid var(--color-gray-200);
         }
+        .assign-tabs {
+            display: flex;
+            border-bottom: 2px solid var(--color-gray-200);
+            margin-bottom: 1rem;
+        }
+        .assign-tab {
+            flex: 1;
+            padding: 0.75rem 1rem;
+            text-align: center;
+            cursor: pointer;
+            border: none;
+            background: none;
+            font-weight: 500;
+            color: var(--color-gray-500);
+            border-bottom: 2px solid transparent;
+            margin-bottom: -2px;
+            transition: all 0.2s;
+        }
+        .assign-tab:hover {
+            color: var(--color-gray-700);
+        }
+        .assign-tab.active {
+            color: var(--color-primary);
+            border-bottom-color: var(--color-primary);
+        }
+        .assign-panel {
+            display: none;
+        }
+        .assign-panel.active {
+            display: block;
+        }
+        .entity-search-results {
+            max-height: 200px;
+            overflow-y: auto;
+            border: 1px solid var(--color-gray-200);
+            border-radius: 6px;
+            margin-top: 0.5rem;
+        }
+        .entity-search-results:empty {
+            display: none;
+        }
+        .entity-result {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem;
+            cursor: pointer;
+            border-bottom: 1px solid var(--color-gray-100);
+        }
+        .entity-result:last-child {
+            border-bottom: none;
+        }
+        .entity-result:hover {
+            background: var(--color-gray-50);
+        }
+        .entity-result.selected {
+            background: rgba(79, 70, 229, 0.1);
+        }
+        .entity-result img {
+            width: 36px;
+            height: 36px;
+            object-fit: contain;
+            border-radius: 4px;
+            background: #f5f5f5;
+        }
+        .entity-result .placeholder-icon {
+            width: 36px;
+            height: 36px;
+            background: var(--color-gray-200);
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--color-gray-400);
+        }
+        .create-new-section {
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px dashed var(--color-gray-300);
+        }
+        .create-form-fields {
+            display: none;
+            margin-top: 1rem;
+        }
+        .create-form-fields.active {
+            display: block;
+        }
         </style>
 
         <!-- Activity Log -->
@@ -338,6 +480,117 @@
             </div>
         </div>
         <?php endif; ?>
+    </div>
+</div>
+
+<!-- Assignment Modal -->
+<div id="assign-modal" class="status-modal" style="display: none;">
+    <div class="status-modal-backdrop" onclick="closeAssignModal()"></div>
+    <div class="status-modal-content" style="max-width: 500px;">
+        <div class="status-modal-header">
+            <h4><i class="fas fa-user-plus"></i> Asignar a Empresa/SaaS</h4>
+            <button type="button" onclick="closeAssignModal()">&times;</button>
+        </div>
+        <div class="status-modal-body">
+            <!-- Tabs -->
+            <div class="assign-tabs">
+                <button type="button" class="assign-tab active" data-tab="company" onclick="switchAssignTab('company')">
+                    <i class="fas fa-building"></i> Empresa
+                </button>
+                <button type="button" class="assign-tab" data-tab="sponsor" onclick="switchAssignTab('sponsor')">
+                    <i class="fas fa-rocket"></i> SaaS
+                </button>
+            </div>
+
+            <!-- Company Panel -->
+            <div id="panel-company" class="assign-panel active">
+                <div class="form-group">
+                    <label>Buscar Empresa</label>
+                    <input type="text" id="search-company" class="form-control" placeholder="Escribe para buscar..." oninput="searchEntities('company', this.value)">
+                    <div id="results-company" class="entity-search-results"></div>
+                </div>
+                <input type="hidden" id="selected-company-id" value="">
+
+                <div class="create-new-section">
+                    <button type="button" class="btn btn-outline btn-sm" onclick="toggleCreateForm('company')">
+                        <i class="fas fa-plus"></i> Crear Nueva Empresa
+                    </button>
+                    <div id="create-form-company" class="create-form-fields">
+                        <div class="form-group">
+                            <label>Nombre de la Empresa *</label>
+                            <input type="text" id="new-company-name" class="form-control" value="<?= htmlspecialchars($ticket['attendee_company_name'] ?? $ticket['attendee_company'] ?? '') ?>">
+                        </div>
+                        <div class="form-group">
+                            <label>Sector</label>
+                            <input type="text" id="new-company-sector" class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label>Sitio Web</label>
+                            <input type="url" id="new-company-website" class="form-control" placeholder="https://...">
+                        </div>
+                        <button type="button" class="btn btn-success btn-block" onclick="createAndAssign('company')">
+                            <i class="fas fa-check"></i> Crear Empresa y Asignar
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sponsor (SaaS) Panel -->
+            <div id="panel-sponsor" class="assign-panel">
+                <div class="form-group">
+                    <label>Buscar SaaS</label>
+                    <input type="text" id="search-sponsor" class="form-control" placeholder="Escribe para buscar..." oninput="searchEntities('sponsor', this.value)">
+                    <div id="results-sponsor" class="entity-search-results"></div>
+                </div>
+                <input type="hidden" id="selected-sponsor-id" value="">
+
+                <div class="create-new-section">
+                    <button type="button" class="btn btn-outline btn-sm" onclick="toggleCreateForm('sponsor')">
+                        <i class="fas fa-plus"></i> Crear Nuevo SaaS
+                    </button>
+                    <div id="create-form-sponsor" class="create-form-fields">
+                        <div class="form-group">
+                            <label>Nombre del SaaS *</label>
+                            <input type="text" id="new-sponsor-name" class="form-control" value="<?= htmlspecialchars($ticket['attendee_company_name'] ?? $ticket['attendee_company'] ?? '') ?>">
+                        </div>
+                        <div class="form-group">
+                            <label>Tagline</label>
+                            <input type="text" id="new-sponsor-tagline" class="form-control" placeholder="Una frase que describe tu producto">
+                        </div>
+                        <div class="form-group">
+                            <label>Sitio Web</label>
+                            <input type="url" id="new-sponsor-website" class="form-control" placeholder="https://...">
+                        </div>
+                        <div class="form-group">
+                            <label>Nivel</label>
+                            <select id="new-sponsor-level" class="form-control">
+                                <option value="bronze">Bronze</option>
+                                <option value="silver">Silver</option>
+                                <option value="gold">Gold</option>
+                                <option value="platinum">Platinum</option>
+                            </select>
+                        </div>
+                        <button type="button" class="btn btn-success btn-block" onclick="createAndAssign('sponsor')">
+                            <i class="fas fa-check"></i> Crear SaaS y Asignar
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Send Email Option -->
+            <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--color-gray-200);">
+                <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                    <input type="checkbox" id="send-welcome-email" checked>
+                    <span>Enviar email de bienvenida con datos de acceso al portal</span>
+                </label>
+            </div>
+        </div>
+        <div class="status-modal-footer">
+            <button type="button" class="btn btn-outline" onclick="closeAssignModal()">Cancelar</button>
+            <button type="button" class="btn btn-primary" id="btn-assign" onclick="assignToEntity()" disabled>
+                <i class="fas fa-check"></i> Asignar
+            </button>
+        </div>
     </div>
 </div>
 
@@ -451,6 +704,234 @@ function saveStatusChange() {
 document.addEventListener('keydown', function(e) {
     if (e.key === 'Escape') {
         closeChangeStatusModal();
+        closeAssignModal();
     }
 });
+
+// ====== Assignment Functions ======
+let searchTimeout = null;
+let currentTab = 'company';
+
+function openAssignModal() {
+    document.getElementById('assign-modal').style.display = 'flex';
+}
+
+function closeAssignModal() {
+    document.getElementById('assign-modal').style.display = 'none';
+    // Reset form
+    document.getElementById('search-company').value = '';
+    document.getElementById('search-sponsor').value = '';
+    document.getElementById('results-company').innerHTML = '';
+    document.getElementById('results-sponsor').innerHTML = '';
+    document.getElementById('selected-company-id').value = '';
+    document.getElementById('selected-sponsor-id').value = '';
+    document.getElementById('create-form-company').classList.remove('active');
+    document.getElementById('create-form-sponsor').classList.remove('active');
+    document.getElementById('btn-assign').disabled = true;
+}
+
+function switchAssignTab(tab) {
+    currentTab = tab;
+    document.querySelectorAll('.assign-tab').forEach(t => t.classList.remove('active'));
+    document.querySelector(`.assign-tab[data-tab="${tab}"]`).classList.add('active');
+    document.querySelectorAll('.assign-panel').forEach(p => p.classList.remove('active'));
+    document.getElementById(`panel-${tab}`).classList.add('active');
+
+    // Update button state
+    updateAssignButton();
+}
+
+function searchEntities(type, query) {
+    clearTimeout(searchTimeout);
+
+    if (query.length < 2) {
+        document.getElementById(`results-${type}`).innerHTML = '';
+        return;
+    }
+
+    searchTimeout = setTimeout(() => {
+        const url = type === 'company'
+            ? '/admin/tickets/search-companies?q=' + encodeURIComponent(query)
+            : '/admin/tickets/search-sponsors?q=' + encodeURIComponent(query);
+
+        fetch(url)
+            .then(r => r.json())
+            .then(data => {
+                renderSearchResults(type, data.results || []);
+            });
+    }, 300);
+}
+
+function renderSearchResults(type, results) {
+    const container = document.getElementById(`results-${type}`);
+    const selectedId = document.getElementById(`selected-${type}-id`).value;
+
+    if (results.length === 0) {
+        container.innerHTML = '<div style="padding: 1rem; text-align: center; color: var(--color-gray-500);">No se encontraron resultados</div>';
+        return;
+    }
+
+    container.innerHTML = results.map(item => `
+        <div class="entity-result ${item.id == selectedId ? 'selected' : ''}" onclick="selectEntity('${type}', ${item.id}, '${item.name.replace(/'/g, "\\'")}')">
+            ${item.logo_url
+                ? `<img src="${item.logo_url}" alt="">`
+                : `<div class="placeholder-icon"><i class="fas fa-${type === 'company' ? 'building' : 'rocket'}"></i></div>`
+            }
+            <div>
+                <strong>${item.name}</strong>
+                ${item.contact_email ? `<br><small class="text-muted">${item.contact_email}</small>` : ''}
+            </div>
+        </div>
+    `).join('');
+}
+
+function selectEntity(type, id, name) {
+    document.getElementById(`selected-${type}-id`).value = id;
+
+    // Update visual selection
+    document.querySelectorAll(`#results-${type} .entity-result`).forEach(el => {
+        el.classList.remove('selected');
+    });
+    event.currentTarget.classList.add('selected');
+
+    // Hide create form if open
+    document.getElementById(`create-form-${type}`).classList.remove('active');
+
+    updateAssignButton();
+}
+
+function toggleCreateForm(type) {
+    const form = document.getElementById(`create-form-${type}`);
+    form.classList.toggle('active');
+
+    // Clear selection when showing create form
+    if (form.classList.contains('active')) {
+        document.getElementById(`selected-${type}-id`).value = '';
+        document.querySelectorAll(`#results-${type} .entity-result`).forEach(el => {
+            el.classList.remove('selected');
+        });
+    }
+
+    updateAssignButton();
+}
+
+function updateAssignButton() {
+    const btn = document.getElementById('btn-assign');
+    const selectedId = document.getElementById(`selected-${currentTab}-id`).value;
+    const createFormActive = document.getElementById(`create-form-${currentTab}`).classList.contains('active');
+
+    btn.disabled = !selectedId && !createFormActive;
+}
+
+function assignToEntity() {
+    const selectedId = document.getElementById(`selected-${currentTab}-id`).value;
+    const createFormActive = document.getElementById(`create-form-${currentTab}`).classList.contains('active');
+
+    if (createFormActive) {
+        createAndAssign(currentTab);
+        return;
+    }
+
+    if (!selectedId) {
+        alert('Selecciona una entidad primero');
+        return;
+    }
+
+    const sendEmail = document.getElementById('send-welcome-email').checked;
+
+    fetch('/admin/tickets/<?= $ticket['id'] ?>/assign', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-Token': '<?= $csrf_token ?>'
+        },
+        body: JSON.stringify({
+            entity_type: currentTab,
+            entity_id: parseInt(selectedId),
+            send_welcome_email: sendEmail
+        })
+    })
+    .then(r => r.json())
+    .then(d => {
+        if (d.success) {
+            alert(d.message);
+            location.reload();
+        } else {
+            alert(d.error || 'Error al asignar');
+        }
+    })
+    .catch(e => alert('Error de conexión'));
+}
+
+function createAndAssign(type) {
+    let data = {};
+
+    if (type === 'company') {
+        data = {
+            name: document.getElementById('new-company-name').value,
+            sector: document.getElementById('new-company-sector').value,
+            website: document.getElementById('new-company-website').value
+        };
+
+        if (!data.name) {
+            alert('El nombre de la empresa es obligatorio');
+            return;
+        }
+    } else {
+        data = {
+            name: document.getElementById('new-sponsor-name').value,
+            tagline: document.getElementById('new-sponsor-tagline').value,
+            website: document.getElementById('new-sponsor-website').value,
+            level: document.getElementById('new-sponsor-level').value
+        };
+
+        if (!data.name) {
+            alert('El nombre del SaaS es obligatorio');
+            return;
+        }
+    }
+
+    const endpoint = type === 'company'
+        ? '/admin/tickets/<?= $ticket['id'] ?>/create-company'
+        : '/admin/tickets/<?= $ticket['id'] ?>/create-sponsor';
+
+    fetch(endpoint, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-Token': '<?= $csrf_token ?>'
+        },
+        body: JSON.stringify(data)
+    })
+    .then(r => r.json())
+    .then(d => {
+        if (d.success) {
+            alert(d.message);
+            location.reload();
+        } else {
+            alert(d.error || 'Error al crear');
+        }
+    })
+    .catch(e => alert('Error de conexión'));
+}
+
+function removeAssignment() {
+    if (!confirm('¿Quitar la asignación de este usuario?')) return;
+
+    fetch('/admin/tickets/<?= $ticket['id'] ?>/remove-assignment', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-Token': '<?= $csrf_token ?>'
+        }
+    })
+    .then(r => r.json())
+    .then(d => {
+        if (d.success) {
+            location.reload();
+        } else {
+            alert(d.error || 'Error al quitar asignación');
+        }
+    });
+}
 </script>

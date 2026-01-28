@@ -349,10 +349,17 @@ $router->get('/admin/tickets/types', 'Admin\\TicketsController', 'types');
 $router->post('/admin/tickets/types', 'Admin\\TicketsController', 'createType');
 $router->post('/admin/tickets/types/{id}', 'Admin\\TicketsController', 'updateType');
 $router->post('/admin/tickets/types/{id}/delete', 'Admin\\TicketsController', 'deleteType');
+$router->get('/admin/tickets/search-sponsors', 'Admin\\TicketsController', 'searchSponsors');
+$router->get('/admin/tickets/search-companies', 'Admin\\TicketsController', 'searchCompanies');
 $router->get('/admin/tickets/{id}', 'Admin\\TicketsController', 'show');
 $router->post('/admin/tickets/{id}/check-in', 'Admin\\TicketsController', 'checkIn');
 $router->post('/admin/tickets/{id}/approve', 'Admin\\TicketsController', 'approve');
 $router->post('/admin/tickets/{id}/cancel', 'Admin\\TicketsController', 'cancel');
+$router->post('/admin/tickets/{id}/assign', 'Admin\\TicketsController', 'assignToEntity');
+$router->post('/admin/tickets/{id}/create-company', 'Admin\\TicketsController', 'createCompanyFromTicket');
+$router->post('/admin/tickets/{id}/create-sponsor', 'Admin\\TicketsController', 'createSponsorFromTicket');
+$router->post('/admin/tickets/{id}/remove-assignment', 'Admin\\TicketsController', 'removeAssignment');
+$router->post('/admin/tickets/{id}/resend-email', 'Admin\\TicketsController', 'resendEmail');
 $router->get('/admin/tickets/{id}/download', 'Admin\\TicketsController', 'download');
 
 // Meetings
@@ -404,6 +411,16 @@ $router->post('/admin/tlos-settings/set', 'Admin\\TlosSettingsController', 'set'
 $router->post('/admin/tlos-settings/test-email', 'Admin\\TlosSettingsController', 'testEmail');
 $router->post('/admin/tlos-settings/test-stripe', 'Admin\\TlosSettingsController', 'testStripe');
 $router->post('/admin/tlos-settings/test-omniwallet', 'Admin\\TlosSettingsController', 'testOmniwallet');
+
+// Email Configuration
+$router->get('/admin/emails', 'Admin\\EmailsController', 'index');
+$router->get('/admin/emails/smtp', 'Admin\\EmailsController', 'smtpSettings');
+$router->post('/admin/emails/smtp', 'Admin\\EmailsController', 'updateSmtpSettings');
+$router->post('/admin/emails/test-smtp', 'Admin\\EmailsController', 'testSmtp');
+$router->get('/admin/emails/templates/{id}/edit', 'Admin\\EmailsController', 'editTemplate');
+$router->post('/admin/emails/templates/{id}/update', 'Admin\\EmailsController', 'updateTemplate');
+$router->post('/admin/emails/templates/{id}/reset', 'Admin\\EmailsController', 'resetTemplate');
+$router->get('/admin/emails/templates/{id}/preview', 'Admin\\EmailsController', 'previewTemplate');
 
 // Rooms
 $router->get('/admin/rooms', 'Admin\\RoomsController', 'index');
