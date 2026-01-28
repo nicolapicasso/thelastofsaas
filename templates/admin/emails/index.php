@@ -3,7 +3,6 @@
  * Admin - Email Configuration
  * TLOS - The Last of SaaS
  */
-$this->layout('admin/layouts/main', ['title' => $title]);
 ?>
 
 <div class="page-header">
