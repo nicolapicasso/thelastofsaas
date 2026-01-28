@@ -601,12 +601,32 @@
 let searchTimeout = null;
 let currentTab = 'company';
 
-// Generate QR code
-QRCode.toCanvas(document.createElement('canvas'), '<?= $ticket['code'] ?>', { width: 180 }, function(error, canvas) {
-    if (!error) {
-        document.getElementById('qrcode').appendChild(canvas);
+// Generate QR code (with fallback if library fails to load)
+function generateQRCode() {
+    if (typeof QRCode !== 'undefined') {
+        QRCode.toCanvas(document.createElement('canvas'), '<?= $ticket['code'] ?>', { width: 180 }, function(error, canvas) {
+            if (!error) {
+                document.getElementById('qrcode').appendChild(canvas);
+            } else {
+                showQRFallback();
+            }
+        });
+    } else {
+        showQRFallback();
     }
-});
+}
+
+function showQRFallback() {
+    const container = document.getElementById('qrcode');
+    container.innerHTML = '<div style="padding: 1rem; text-align: center; color: var(--color-gray-500);"><i class="fas fa-qrcode" style="font-size: 4rem; opacity: 0.3;"></i><br><small>QR no disponible</small></div>';
+}
+
+// Try to generate QR code on load
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', generateQRCode);
+} else {
+    generateQRCode();
+}
 
 function approveTicket() {
     if (!confirm('¿Aprobar este ticket?')) return;
@@ -756,10 +776,31 @@ function searchEntities(type, query) {
             ? '/admin/tickets/search-companies?q=' + encodeURIComponent(query)
             : '/admin/tickets/search-sponsors?q=' + encodeURIComponent(query);
 
-        fetch(url)
-            .then(r => r.json())
+        fetch(url, {
+            credentials: 'include',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+            .then(r => {
+                if (!r.ok) {
+                    throw new Error('Error de servidor');
+                }
+                const contentType = r.headers.get('content-type');
+                if (!contentType || !contentType.includes('application/json')) {
+                    throw new Error('Sesión expirada. Por favor, recarga la página.');
+                }
+                return r.json();
+            })
             .then(data => {
+                if (data.error) {
+                    throw new Error(data.error);
+                }
                 renderSearchResults(type, data.results || []);
+            })
+            .catch(err => {
+                const container = document.getElementById(`results-${type}`);
+                container.innerHTML = `<div style="padding: 1rem; text-align: center; color: var(--color-danger);">${err.message}</div>`;
             });
     }, 300);
 }

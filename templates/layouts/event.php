@@ -74,6 +74,22 @@
             line-height: 1.1;
         }
 
+        /* Ensure h2 inherits correct color from parent sections */
+        .event-description h2,
+        .event-agenda h2,
+        .event-details h2,
+        .event-cta--dark h2 {
+            color: var(--text-light);
+        }
+
+        .event-companies h2,
+        .event-speakers h2,
+        .event-sponsors-section h2,
+        .event-content-section h2,
+        .event-cta--light h2 {
+            color: var(--text-dark);
+        }
+
         /* Buttons - No border radius */
         .btn {
             display: inline-flex;
