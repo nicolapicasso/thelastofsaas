@@ -663,6 +663,9 @@ class EmailsController extends Controller
     {
         $this->requireAuth();
 
+        // Ensure tables exist before querying
+        $this->ensureBulkEmailTables();
+
         $eventId = (int) $this->getQuery('event_id');
         $page = (int) ($this->getQuery('page', 1));
         $perPage = 20;
@@ -671,11 +674,11 @@ class EmailsController extends Controller
         $events = $eventModel->all(['start_date' => 'DESC']);
 
         // Get bulk emails
-        $whereClause = $eventId ? "WHERE event_id = ?" : "";
+        $whereClause = $eventId ? "WHERE be.event_id = ?" : "";
         $params = $eventId ? [$eventId] : [];
 
         $totalQuery = $this->db->query(
-            "SELECT COUNT(*) as total FROM bulk_emails $whereClause",
+            "SELECT COUNT(*) as total FROM bulk_emails be $whereClause",
             $params
         )->fetch();
         $total = (int) ($totalQuery['total'] ?? 0);
