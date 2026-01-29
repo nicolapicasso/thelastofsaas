@@ -124,6 +124,7 @@ $blockId = 'pricing-' . uniqid();
 <style>
 .block-pricing {
     padding: var(--spacing-3xl) 0;
+    font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
 /* Custom background support */
@@ -192,7 +193,7 @@ $blockId = 'pricing-' . uniqid();
 }
 
 .pricing-card.style-bordered {
-    border: 1px solid var(--color-gray-200);
+    border: 2px solid #1a1a1a;
 }
 
 .pricing-card.style-shadow {
@@ -206,8 +207,8 @@ $blockId = 'pricing-' . uniqid();
 
 /* Highlighted Card */
 .pricing-card.highlighted {
-    border-color: var(--color-primary);
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+    border-color: #1a1a1a;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
     transform: scale(1.02);
     z-index: 1;
 }
@@ -241,7 +242,7 @@ $blockId = 'pricing-' . uniqid();
     top: -12px;
     left: 50%;
     transform: translateX(-50%);
-    background: var(--color-primary);
+    background: #1a1a1a;
     color: white;
     padding: var(--spacing-xs) var(--spacing-md);
     border-radius: var(--radius-full);
@@ -254,7 +255,7 @@ $blockId = 'pricing-' . uniqid();
 
 /* Header */
 .pricing-header {
-    text-align: left;
+    text-align: center;
     margin-bottom: var(--spacing-lg);
 }
 
@@ -267,8 +268,8 @@ $blockId = 'pricing-' . uniqid();
     background: var(--color-primary-light, #e8f4f6);
     border-radius: var(--radius-lg);
     font-size: 24px;
-    color: var(--color-primary);
-    margin-bottom: var(--spacing-md);
+    color: #1a1a1a;
+    margin: 0 auto var(--spacing-md);
 }
 
 .pricing-card.enterprise .pricing-icon {
@@ -279,7 +280,7 @@ $blockId = 'pricing-' . uniqid();
 .pricing-name {
     font-size: var(--font-size-xl);
     font-weight: 700;
-    color: var(--color-gray-900);
+    color: #1a1a1a;
     margin: 0 0 var(--spacing-xs);
 }
 
@@ -294,13 +295,15 @@ $blockId = 'pricing-' . uniqid();
     margin-bottom: var(--spacing-lg);
     display: flex;
     align-items: baseline;
+    justify-content: center;
     gap: var(--spacing-xs);
+    text-align: center;
 }
 
 .price-amount {
     font-size: clamp(2rem, 5vw, 3rem);
     font-weight: 800;
-    color: var(--color-primary, #1a365d);
+    color: #1a1a1a;
     line-height: 1;
 }
 
@@ -323,12 +326,12 @@ $blockId = 'pricing-' . uniqid();
     gap: var(--spacing-sm);
     padding: var(--spacing-sm) 0;
     font-size: var(--font-size-sm);
-    color: var(--color-gray-700);
+    color: #1a1a1a;
     line-height: 1.5;
 }
 
 .pricing-features li i {
-    color: var(--color-primary);
+    color: #1a1a1a;
     font-size: 14px;
     margin-top: 3px;
     flex-shrink: 0;
@@ -372,11 +375,11 @@ $blockId = 'pricing-' . uniqid();
 }
 
 .pricing-card.highlighted .btn-pricing {
-    background: var(--color-primary);
+    background: #1a1a1a;
 }
 
 .pricing-card.highlighted .btn-pricing:hover {
-    background: var(--color-primary-dark, #0a2540);
+    background: #333;
 }
 
 /* Hover Effect */
