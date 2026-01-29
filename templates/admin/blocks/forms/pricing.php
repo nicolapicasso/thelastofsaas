@@ -22,6 +22,42 @@ $plans = $content['plans'] ?? [];
     </div>
 
     <div class="form-section">
+        <h4>Diseño</h4>
+        <div class="form-row">
+            <div class="form-group">
+                <label>Columnas</label>
+                <select data-setting="columns">
+                    <option value="2" <?= ($settings['columns'] ?? 3) == 2 ? 'selected' : '' ?>>2 columnas</option>
+                    <option value="3" <?= ($settings['columns'] ?? 3) == 3 ? 'selected' : '' ?>>3 columnas</option>
+                    <option value="4" <?= ($settings['columns'] ?? 3) == 4 ? 'selected' : '' ?>>4 columnas</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Estilo de tarjetas</label>
+                <select data-setting="card_style">
+                    <option value="bordered" <?= ($settings['card_style'] ?? 'bordered') == 'bordered' ? 'selected' : '' ?>>Con borde</option>
+                    <option value="shadow" <?= ($settings['card_style'] ?? 'bordered') == 'shadow' ? 'selected' : '' ?>>Con sombra</option>
+                    <option value="minimal" <?= ($settings['card_style'] ?? 'bordered') == 'minimal' ? 'selected' : '' ?>>Minimalista</option>
+                </select>
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="form-group">
+                <label class="checkbox-label">
+                    <input type="checkbox" data-setting="show_icon" <?= !empty($settings['show_icon']) ? 'checked' : '' ?>>
+                    <span>Mostrar iconos</span>
+                </label>
+            </div>
+            <div class="form-group">
+                <label class="checkbox-label">
+                    <input type="checkbox" data-setting="equal_height" <?= ($settings['equal_height'] ?? true) ? 'checked' : '' ?>>
+                    <span>Altura uniforme</span>
+                </label>
+            </div>
+        </div>
+    </div>
+
+    <div class="form-section">
         <h4>Planes de Precios</h4>
         <p class="form-help">Configura cada plan con su precio, descripción y características.</p>
 
