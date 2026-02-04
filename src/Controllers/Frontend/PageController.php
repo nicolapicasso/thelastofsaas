@@ -94,6 +94,15 @@ class PageController extends BaseController
     }
 
     /**
+     * Redirect old event URL to home (301 permanent)
+     */
+    public function redirectToHome(): void
+    {
+        header('Location: /', true, 301);
+        exit;
+    }
+
+    /**
      * 404 Not Found
      */
     protected function notFound(): void

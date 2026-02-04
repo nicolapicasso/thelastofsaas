@@ -537,6 +537,13 @@ $router->get('/api/search', 'Api\\SearchController', 'search');
 $router->post('/api/contact/submit', 'Api\\ContactController', 'submit');
 
 // ============================================
+// Legacy Redirects
+// ============================================
+
+// Old event URL from previous system
+$router->get('/the-last-of-saas-barcelona-2025', 'Frontend\\PageController', 'redirectToHome');
+
+// ============================================
 // Catch-all Route (MUST be last!)
 // ============================================
 
