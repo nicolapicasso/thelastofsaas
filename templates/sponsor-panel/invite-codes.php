@@ -3,6 +3,8 @@
  * Sponsor Panel - Invite Codes Template
  * TLOS - The Last of SaaS
  */
+
+use App\Helpers\UrlHelper;
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -522,16 +524,15 @@
                     <tbody>
                         <?php foreach ($codes as $code): ?>
                             <?php
-                            $baseUrl = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http') . '://' . ($_SERVER['HTTP_HOST'] ?? 'localhost');
-                            $fullUrl = $baseUrl . '/eventos/' . htmlspecialchars($event['slug']) . '/registro?code=' . htmlspecialchars($code['code']);
+                            $fullUrl = UrlHelper::sponsorCodeUrl($event, $code);
                             ?>
                             <tr>
                                 <td>
                                     <span class="code-value" onclick="copyCode('<?= htmlspecialchars($code['code']) ?>')" title="Click para copiar codigo">
                                         <?= htmlspecialchars($code['code']) ?>
                                     </span>
-                                    <span class="code-url" onclick="copyUrl('<?= $fullUrl ?>')" title="Click para copiar URL completa">
-                                        <i class="fas fa-link"></i> <?= $fullUrl ?>
+                                    <span class="code-url" onclick="copyUrl('<?= htmlspecialchars($fullUrl, ENT_QUOTES, 'UTF-8') ?>')" title="Click para copiar URL completa">
+                                        <i class="fas fa-link"></i> <?= htmlspecialchars($fullUrl) ?>
                                     </span>
                                 </td>
                                 <td>
