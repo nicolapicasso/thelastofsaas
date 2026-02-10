@@ -39,8 +39,8 @@
                                     <img src="<?= htmlspecialchars($member['photo']) ?>"
                                          alt="<?= htmlspecialchars($member['name']) ?>"
                                          class="photo-main">
-                                    <?php if (!empty($member['photo_hover'])): ?>
-                                        <img src="<?= htmlspecialchars($member['photo_hover']) ?>"
+                                    <?php if (!empty($member['photo_animated'])): ?>
+                                        <img src="<?= htmlspecialchars($member['photo_animated']) ?>"
                                              alt="<?= htmlspecialchars($member['name']) ?>"
                                              class="photo-hover">
                                     <?php endif; ?>

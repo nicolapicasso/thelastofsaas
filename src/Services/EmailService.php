@@ -244,6 +244,47 @@ class EmailService
     }
 
     /**
+     * Send portal welcome email with access credentials
+     */
+    public function sendPortalWelcomeEmail(string $entityType, array $entity, array $ticket, array $event): bool
+    {
+        $isCompany = $entityType === 'company';
+        $portalUrl = $isCompany ? url('/empresa/login') : url('/sponsor/login');
+        $entityLabel = $isCompany ? 'Empresa' : 'SaaS';
+        $code = $entity['code'] ?? '';
+
+        $subject = "Bienvenido al portal de {$entityLabel}s - {$event['name']}";
+
+        $attendeeName = $ticket['attendee_first_name'] ?? '';
+        if (empty($attendeeName)) {
+            $attendeeName = $ticket['attendee_name'] ?? 'Usuario';
+        }
+
+        $variables = [
+            'attendee_name' => $attendeeName,
+            'entity_name' => $entity['name'],
+            'entity_type' => $entityLabel,
+            'event_name' => $event['name'],
+            'event_date' => $this->formatDate($event['start_date']),
+            'event_location' => $event['location'] ?? '',
+            'access_code' => $code,
+            'portal_url' => $portalUrl,
+            'contact_email' => $entity['contact_email'] ?? $ticket['attendee_email'],
+        ];
+
+        $html = $this->renderTemplate('portal_welcome', $variables);
+
+        $sent = $this->send($ticket['attendee_email'], $subject, $html);
+
+        $this->logNotification($event['id'], 'portal_welcome', $ticket['attendee_email'], $sent, [
+            'entity_type' => $entityType,
+            'entity_id' => $entity['id'],
+        ]);
+
+        return $sent;
+    }
+
+    /**
      * Send event reminder
      */
     public function sendEventReminder(array $ticket, array $event): bool
@@ -504,6 +545,41 @@ class EmailService
                 <p style="margin-top: 30px;">
                     <a href="{{{panel_url}}}" style="background: #4F46E5; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px;">Ver mensaje</a>
                 </p>
+            ',
+
+            'portal_welcome' => '
+                <h2>Bienvenido al Portal de {{entity_type}}s</h2>
+                <p>Hola {{attendee_name}},</p>
+                <p>Te damos la bienvenida al portal de <strong>{{entity_name}}</strong> para el evento <strong>{{event_name}}</strong>.</p>
+                <div style="background: #f3f4f6; padding: 20px; border-radius: 6px; margin: 20px 0;">
+                    <p style="margin: 0 0 10px 0;"><strong>Evento:</strong> {{event_name}}</p>
+                    <p style="margin: 0 0 10px 0;"><strong>Fecha:</strong> {{event_date}}</p>
+                    <p style="margin: 0 0 10px 0;"><strong>Lugar:</strong> {{event_location}}</p>
+                </div>
+                <div style="background: #059669; color: white; padding: 20px; border-radius: 6px; margin: 20px 0; text-align: center;">
+                    <p style="margin: 0 0 10px 0; font-size: 14px;">TU CODIGO DE ACCESO</p>
+                    <p style="margin: 0; font-size: 28px; font-family: monospace; letter-spacing: 3px; font-weight: bold;">{{access_code}}</p>
+                </div>
+                <p>Con este codigo podras acceder al portal y:</p>
+                <ul style="padding-left: 20px; color: #4b5563;">
+                    <li>Explorar empresas y SaaS participantes</li>
+                    <li>Seleccionar tus favoritos para hacer match</li>
+                    <li>Programar reuniones durante el evento</li>
+                    <li>Enviar y recibir mensajes</li>
+                </ul>
+                <p style="margin-top: 30px;">
+                    <a href="{{{portal_url}}}" style="background: #4F46E5; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px;">Acceder al Portal</a>
+                </p>
+            ',
+
+            'like_received' => '
+                <h2>{{selector_name}} esta interesado en ti</h2>
+                <p>Hola {{recipient_name}},</p>
+                <p><strong>{{selector_name}}</strong> te ha dado like en el evento <strong>{{event_name}}</strong>.</p>
+                <p>Si tu tambien le das like, se creara un match y podreis programar una reunion.</p>
+                <p style="margin-top: 30px;">
+                    <a href="{{{panel_url}}}" style="background: #4F46E5; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px;">Ver en el Portal</a>
+                </p>
             '
         ];
 
@@ -581,5 +657,104 @@ class EmailService
         } catch (\Exception $e) {
             error_log('Failed to log email notification: ' . $e->getMessage());
         }
+    }
+
+    /**
+     * Get default template content by name (for admin reset feature)
+     */
+    public function getDefaultTemplateContent(string $name): ?string
+    {
+        $content = $this->getDefaultTemplate($name);
+        return $content !== '<p>Template not found</p>' ? $content : null;
+    }
+
+    /**
+     * Render template with provided data (for previews)
+     */
+    public function renderTemplateWithData(string $template, array $data): string
+    {
+        $html = $template;
+
+        foreach ($data as $key => $value) {
+            // Handle triple braces (no escaping)
+            $html = str_replace('{{{' . $key . '}}}', (string)$value, $html);
+            // Handle double braces (escaped)
+            $html = str_replace('{{' . $key . '}}', htmlspecialchars((string)$value), $html);
+        }
+
+        return $html;
+    }
+
+    /**
+     * Wrap content in email layout (public for preview)
+     */
+    public function wrapInEmailLayout(string $content, string $subject = ''): string
+    {
+        return $this->wrapInBaseTemplate($content);
+    }
+
+    /**
+     * Send test email to verify SMTP configuration
+     */
+    public function sendTestEmail(string $toEmail): bool
+    {
+        $subject = 'Email de prueba - The Last of SaaS';
+        $content = '
+            <h2>Email de prueba</h2>
+            <p>Este es un email de prueba para verificar la configuracion SMTP.</p>
+            <p>Si estas leyendo este mensaje, significa que la configuracion funciona correctamente.</p>
+            <div style="background: #10B981; color: white; padding: 20px; border-radius: 6px; text-align: center; margin: 20px 0;">
+                <p style="margin: 0; font-size: 18px; font-weight: bold;">Configuracion SMTP correcta</p>
+            </div>
+            <p style="color: #6b7280; font-size: 12px;">Enviado: ' . date('d/m/Y H:i:s') . '</p>
+        ';
+
+        $html = $this->wrapInBaseTemplate($content);
+
+        return $this->send($toEmail, $subject, $html);
+    }
+
+    /**
+     * Get available template variables documentation
+     */
+    public static function getAvailableVariables(): array
+    {
+        return [
+            'common' => [
+                'event_name' => 'Nombre del evento',
+                'event_date' => 'Fecha del evento formateada',
+                'event_time' => 'Hora del evento',
+                'event_location' => 'Ciudad/lugar del evento',
+                'event_address' => 'Direccion completa del evento',
+            ],
+            'ticket' => [
+                'attendee_name' => 'Nombre completo del asistente',
+                'ticket_code' => 'Codigo unico de la entrada',
+                'qr_code' => 'URL del codigo QR (usar con {{{qr_code}}})',
+                'ticket_url' => 'URL para ver la entrada',
+            ],
+            'portal' => [
+                'entity_name' => 'Nombre de la empresa o SaaS',
+                'entity_type' => 'Tipo: Empresa o SaaS',
+                'access_code' => 'Codigo de acceso al portal',
+                'portal_url' => 'URL de acceso al portal',
+            ],
+            'matching' => [
+                'recipient_name' => 'Nombre del destinatario',
+                'selector_name' => 'Nombre de quien selecciono',
+                'match_name' => 'Nombre del match',
+                'panel_url' => 'URL del panel',
+            ],
+            'meeting' => [
+                'other_party_name' => 'Nombre de la otra parte',
+                'meeting_date' => 'Fecha de la reunion',
+                'meeting_time' => 'Hora de la reunion',
+                'meeting_location' => 'Ubicacion/sala de la reunion',
+            ],
+            'messaging' => [
+                'sender_name' => 'Nombre de quien envia',
+                'message_preview' => 'Vista previa del mensaje',
+            ],
+        ];
     }
 }

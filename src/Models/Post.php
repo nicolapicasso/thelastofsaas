@@ -54,6 +54,45 @@ class Post extends Model
     }
 
     /**
+     * Get published posts with pagination and optional category filter
+     */
+    public function getPaginated(int $page = 1, int $perPage = 12, ?int $categoryId = null): array
+    {
+        $offset = ($page - 1) * $perPage;
+        $params = [];
+        $whereCategory = '';
+
+        if ($categoryId) {
+            $whereCategory = ' AND p.category_id = ?';
+            $params[] = $categoryId;
+        }
+
+        // Get total count
+        $countSql = "SELECT COUNT(*) as total FROM `{$this->table}` p WHERE p.status = 'published'" . $whereCategory;
+        $countResult = $this->db->fetch($countSql, $params);
+        $total = (int)($countResult['total'] ?? 0);
+
+        // Get items
+        $sql = "SELECT p.*, c.name as category_name, c.slug as category_slug, u.name as author_name
+                FROM `{$this->table}` p
+                LEFT JOIN categories c ON p.category_id = c.id
+                LEFT JOIN users u ON p.author_id = u.id
+                WHERE p.status = 'published'" . $whereCategory . "
+                ORDER BY p.published_at DESC
+                LIMIT {$perPage} OFFSET {$offset}";
+
+        $items = $this->db->fetchAll($sql, $params);
+
+        return [
+            'items' => $items,
+            'total' => $total,
+            'current_page' => $page,
+            'total_pages' => $total > 0 ? (int)ceil($total / $perPage) : 1,
+            'per_page' => $perPage
+        ];
+    }
+
+    /**
      * Get featured posts
      */
     public function getFeatured(int $limit = 3): array

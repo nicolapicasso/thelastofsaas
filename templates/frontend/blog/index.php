@@ -25,7 +25,7 @@
                         <?php foreach ($featuredPosts as $i => $post): ?>
                             <article class="post-card <?= $i === 0 ? 'featured' : '' ?>">
                                 <?php if ($post['thumbnail'] || $post['hero_image']): ?>
-                                    <a href="<?= _url('/blog/' . htmlspecialchars($post['slug'])) ?>" class="post-image">
+                                    <a href="<?= _url('/observatorio-saas/' . htmlspecialchars($post['slug'])) ?>" class="post-image">
                                         <img src="<?= htmlspecialchars($post['hero_image'] ?? $post['thumbnail']) ?>"
                                              alt="<?= htmlspecialchars($post['title']) ?>">
                                     </a>
@@ -35,7 +35,7 @@
                                         <span class="post-category"><?= htmlspecialchars($post['category_name']) ?></span>
                                     <?php endif; ?>
                                     <h2>
-                                        <a href="<?= _url('/blog/' . htmlspecialchars($post['slug'])) ?>">
+                                        <a href="<?= _url('/observatorio-saas/' . htmlspecialchars($post['slug'])) ?>">
                                             <?= htmlspecialchars($post['title']) ?>
                                         </a>
                                     </h2>
@@ -61,7 +61,7 @@
                         <?php foreach ($posts as $post): ?>
                             <article class="post-card">
                                 <?php if ($post['thumbnail']): ?>
-                                    <a href="<?= _url('/blog/' . htmlspecialchars($post['slug'])) ?>" class="post-image">
+                                    <a href="<?= _url('/observatorio-saas/' . htmlspecialchars($post['slug'])) ?>" class="post-image">
                                         <img src="<?= htmlspecialchars($post['thumbnail']) ?>"
                                              alt="<?= htmlspecialchars($post['title']) ?>">
                                     </a>
@@ -71,7 +71,7 @@
                                         <span class="post-category"><?= htmlspecialchars($post['category_name']) ?></span>
                                     <?php endif; ?>
                                     <h3>
-                                        <a href="<?= _url('/blog/' . htmlspecialchars($post['slug'])) ?>">
+                                        <a href="<?= _url('/observatorio-saas/' . htmlspecialchars($post['slug'])) ?>">
                                             <?= htmlspecialchars($post['title']) ?>
                                         </a>
                                     </h3>
@@ -122,29 +122,19 @@
                     <h4>Categorías</h4>
                     <ul class="category-list">
                         <li>
-                            <a href="<?= _url('/blog') ?>" class="<?= !$currentCategory ? 'active' : '' ?>">
+                            <a href="<?= _url('/observatorio-saas') ?>" class="<?= !$currentCategory ? 'active' : '' ?>">
                                 Todos los artículos
                             </a>
                         </li>
                         <?php foreach ($categories as $category): ?>
                             <li>
-                                <a href="<?= _url('/blog') ?>?categoria=<?= htmlspecialchars($category['slug']) ?>"
+                                <a href="<?= _url('/observatorio-saas') ?>?categoria=<?= htmlspecialchars($category['slug']) ?>"
                                    class="<?= $currentCategory && $currentCategory['id'] === $category['id'] ? 'active' : '' ?>">
                                     <?= htmlspecialchars($category['name']) ?>
                                 </a>
                             </li>
                         <?php endforeach; ?>
                     </ul>
-                </div>
-
-                <!-- Newsletter -->
-                <div class="sidebar-widget newsletter-widget">
-                    <h4>Newsletter</h4>
-                    <p>Recibe las últimas novedades en tu email</p>
-                    <form class="newsletter-form">
-                        <input type="email" placeholder="tu@email.com" required>
-                        <button type="submit" class="btn btn-primary">Suscribirse</button>
-                    </form>
                 </div>
             </aside>
         </div>
@@ -168,11 +158,19 @@
     font-size: var(--font-size-lg);
 }
 
+/* Ensure sticky can work - no overflow hidden on parents */
+.site-main,
+.section,
+.section > .container {
+    overflow: visible !important;
+}
+
 /* Blog Layout */
 .blog-layout {
     display: grid;
     grid-template-columns: 1fr 300px;
     gap: var(--spacing-2xl);
+    align-items: start;
 }
 
 .section-title {
@@ -282,6 +280,11 @@
 }
 
 /* Sidebar */
+.blog-sidebar {
+    position: sticky;
+    top: 100px;
+}
+
 .sidebar-widget {
     background-color: var(--color-white);
     border-radius: var(--radius-lg);
@@ -319,34 +322,6 @@
     color: var(--color-primary);
 }
 
-.newsletter-widget {
-    background-color: var(--color-primary);
-    color: var(--color-white);
-}
-
-.newsletter-widget h4 {
-    color: var(--color-white);
-    border-bottom-color: rgba(255,255,255,0.3);
-}
-
-.newsletter-widget p {
-    color: rgba(255,255,255,0.9);
-    font-size: var(--font-size-sm);
-}
-
-.newsletter-form {
-    display: flex;
-    flex-direction: column;
-    gap: var(--spacing-sm);
-}
-
-.newsletter-form input {
-    padding: var(--spacing-sm) var(--spacing-md);
-    border: none;
-    border-radius: var(--radius-md);
-    font-size: var(--font-size-base);
-}
-
 /* Pagination */
 .pagination {
     display: flex;
@@ -379,7 +354,7 @@
     }
 
     .blog-sidebar {
-        order: -1;
+        display: none;
     }
 }
 
@@ -394,3 +369,82 @@
     }
 }
 </style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Sticky sidebar with JavaScript
+    const sidebar = document.querySelector('.blog-sidebar');
+    const blogLayout = document.querySelector('.blog-layout');
+
+    if (sidebar && blogLayout && window.innerWidth > 1024) {
+        const sidebarTop = 100;
+        let sidebarOriginalTop = null;
+        let sidebarOriginalLeft = null;
+        let isSticky = false;
+
+        function initStickyPosition() {
+            sidebar.style.position = 'relative';
+            sidebar.style.top = 'auto';
+            sidebar.style.left = 'auto';
+            sidebar.style.width = '';
+
+            const rect = sidebar.getBoundingClientRect();
+            sidebarOriginalTop = rect.top + window.scrollY;
+            sidebarOriginalLeft = rect.left;
+        }
+
+        function updateStickyPosition() {
+            if (window.innerWidth <= 1024) {
+                sidebar.style.position = '';
+                sidebar.style.top = '';
+                sidebar.style.left = '';
+                sidebar.style.width = '';
+                return;
+            }
+
+            const scrollY = window.scrollY;
+            const layoutRect = blogLayout.getBoundingClientRect();
+            const sidebarHeight = sidebar.offsetHeight;
+            const layoutBottom = layoutRect.bottom + scrollY;
+            const sidebarWidth = sidebar.offsetWidth;
+
+            const startSticky = sidebarOriginalTop - sidebarTop;
+            const stopSticky = layoutBottom - sidebarHeight - sidebarTop;
+
+            if (scrollY >= startSticky && scrollY < stopSticky) {
+                if (!isSticky) {
+                    sidebar.style.position = 'fixed';
+                    sidebar.style.top = sidebarTop + 'px';
+                    sidebar.style.left = sidebarOriginalLeft + 'px';
+                    sidebar.style.width = sidebarWidth + 'px';
+                    isSticky = true;
+                }
+            } else if (scrollY >= stopSticky) {
+                sidebar.style.position = 'absolute';
+                sidebar.style.top = (stopSticky - sidebarOriginalTop + sidebarTop) + 'px';
+                sidebar.style.left = 'auto';
+                sidebar.style.right = '0';
+                sidebar.style.width = sidebarWidth + 'px';
+                isSticky = false;
+            } else {
+                sidebar.style.position = 'relative';
+                sidebar.style.top = 'auto';
+                sidebar.style.left = 'auto';
+                sidebar.style.width = '';
+                isSticky = false;
+            }
+        }
+
+        blogLayout.style.position = 'relative';
+        initStickyPosition();
+        updateStickyPosition();
+
+        window.addEventListener('scroll', updateStickyPosition, { passive: true });
+        window.addEventListener('resize', function() {
+            isSticky = false;
+            initStickyPosition();
+            updateStickyPosition();
+        });
+    }
+});
+</script>

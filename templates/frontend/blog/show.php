@@ -7,45 +7,47 @@
 
 <!-- Post Header -->
 <article class="blog-post">
-    <header class="post-header">
+    <header class="post-header <?= $post['hero_image'] ? 'has-hero-image' : '' ?>"
+            <?php if ($post['hero_image']): ?>
+            style="background-image: url('<?= htmlspecialchars($post['hero_image']) ?>');"
+            <?php endif; ?>>
+        <div class="post-header-overlay"></div>
         <div class="container">
-            <?php if ($post['category_name'] ?? false): ?>
-                <a href="/blog?categoria=<?= htmlspecialchars($post['category_slug']) ?>" class="post-category">
-                    <?= htmlspecialchars($post['category_name']) ?>
-                </a>
-            <?php endif; ?>
-
-            <h1><?= htmlspecialchars($post['title']) ?></h1>
-
-            <div class="post-meta">
-                <span>
-                    <i class="far fa-calendar"></i>
-                    <?= date('d M Y', strtotime($post['published_at'] ?? $post['created_at'])) ?>
-                </span>
-                <?php if ($post['author_name'] ?? false): ?>
-                    <span>
-                        <i class="far fa-user"></i>
-                        <?= htmlspecialchars($post['author_name']) ?>
-                    </span>
+            <div class="post-header-content">
+                <?php if ($post['category_name'] ?? false): ?>
+                    <a href="/observatorio-saas?categoria=<?= htmlspecialchars($post['category_slug']) ?>" class="post-category">
+                        <?= htmlspecialchars($post['category_name']) ?>
+                    </a>
                 <?php endif; ?>
-                <?php if ($post['read_time'] ?? false): ?>
+
+                <div class="post-title-pill">
+                    <h1><?= htmlspecialchars($post['title']) ?></h1>
+                    <?php if (!empty($post['subtitle'])): ?>
+                        <p class="post-subtitle"><?= htmlspecialchars($post['subtitle']) ?></p>
+                    <?php endif; ?>
+                </div>
+
+                <div class="post-meta">
                     <span>
-                        <i class="far fa-clock"></i>
-                        <?= $post['read_time'] ?> min de lectura
+                        <i class="far fa-calendar"></i>
+                        <?= date('d M Y', strtotime($post['published_at'] ?? $post['created_at'])) ?>
                     </span>
-                <?php endif; ?>
+                    <?php if ($post['author_name'] ?? false): ?>
+                        <span>
+                            <i class="far fa-user"></i>
+                            <?= htmlspecialchars($post['author_name']) ?>
+                        </span>
+                    <?php endif; ?>
+                    <?php if ($post['read_time'] ?? false): ?>
+                        <span>
+                            <i class="far fa-clock"></i>
+                            <?= $post['read_time'] ?> min de lectura
+                        </span>
+                    <?php endif; ?>
+                </div>
             </div>
         </div>
     </header>
-
-    <?php if ($post['hero_image']): ?>
-        <div class="post-hero">
-            <div class="container">
-                <img src="<?= htmlspecialchars($post['hero_image']) ?>"
-                     alt="<?= htmlspecialchars($post['title']) ?>">
-            </div>
-        </div>
-    <?php endif; ?>
 
     <div class="post-body">
         <div class="container">
@@ -64,70 +66,43 @@
                         <div class="post-tags">
                             <span>Tags:</span>
                             <?php foreach (explode(',', $post['tags']) as $tag): ?>
-                                <a href="/blog?tag=<?= urlencode(trim($tag)) ?>" class="tag">
+                                <a href="/observatorio-saas?tag=<?= urlencode(trim($tag)) ?>" class="tag">
                                     <?= htmlspecialchars(trim($tag)) ?>
                                 </a>
                             <?php endforeach; ?>
                         </div>
                     <?php endif; ?>
-
-                    <!-- Share -->
-                    <div class="post-share">
-                        <span>Compartir:</span>
-                        <div class="share-buttons">
-                            <a href="https://twitter.com/intent/tweet?url=<?= urlencode($currentUrl) ?>&text=<?= urlencode($post['title']) ?>"
-                               target="_blank" rel="noopener" class="share-btn twitter">
-                                <i class="fab fa-twitter"></i>
-                            </a>
-                            <a href="https://www.linkedin.com/shareArticle?mini=true&url=<?= urlencode($currentUrl) ?>&title=<?= urlencode($post['title']) ?>"
-                               target="_blank" rel="noopener" class="share-btn linkedin">
-                                <i class="fab fa-linkedin-in"></i>
-                            </a>
-                            <a href="https://www.facebook.com/sharer/sharer.php?u=<?= urlencode($currentUrl) ?>"
-                               target="_blank" rel="noopener" class="share-btn facebook">
-                                <i class="fab fa-facebook-f"></i>
-                            </a>
-                            <button class="share-btn copy" data-url="<?= htmlspecialchars($currentUrl) ?>">
-                                <i class="fas fa-link"></i>
-                            </button>
-                        </div>
-                    </div>
                 </div>
 
                 <!-- Sidebar -->
                 <aside class="post-sidebar">
-                    <!-- Author -->
-                    <?php if ($post['author_name'] ?? false): ?>
-                        <div class="sidebar-widget author-widget">
-                            <?php if ($post['author_avatar'] ?? false): ?>
-                                <img src="<?= htmlspecialchars($post['author_avatar']) ?>"
-                                     alt="<?= htmlspecialchars($post['author_name']) ?>"
-                                     class="author-avatar">
-                            <?php endif; ?>
-                            <h4><?= htmlspecialchars($post['author_name']) ?></h4>
-                            <?php if ($post['author_bio'] ?? false): ?>
-                                <p><?= htmlspecialchars($post['author_bio']) ?></p>
-                            <?php endif; ?>
-                        </div>
-                    <?php endif; ?>
-
-                    <!-- Table of Contents -->
+                    <!-- Table of Contents (Accordion) -->
                     <div class="sidebar-widget toc-widget" id="toc-widget">
-                        <h4>Contenido</h4>
-                        <nav id="table-of-contents">
+                        <button class="toc-toggle" id="toc-toggle" aria-expanded="false">
+                            <span><i class="fas fa-list-ul"></i> Contenido</span>
+                            <i class="fas fa-chevron-down toc-arrow"></i>
+                        </button>
+                        <nav id="table-of-contents" class="toc-content collapsed">
                             <!-- Generated by JavaScript -->
                         </nav>
                     </div>
 
-                    <!-- Newsletter -->
-                    <div class="sidebar-widget newsletter-widget">
-                        <h4>Newsletter</h4>
-                        <p>Recibe las últimas novedades</p>
-                        <form class="newsletter-form">
-                            <input type="email" placeholder="tu@email.com" required>
-                            <button type="submit" class="btn btn-primary">Suscribirse</button>
-                        </form>
-                    </div>
+                    <!-- Categories -->
+                    <?php if (!empty($categories)): ?>
+                        <div class="sidebar-widget categories-widget">
+                            <h4>Categorías</h4>
+                            <ul class="categories-list">
+                                <?php foreach ($categories as $category): ?>
+                                    <li>
+                                        <a href="/observatorio-saas?categoria=<?= htmlspecialchars($category['slug']) ?>">
+                                            <?= htmlspecialchars($category['name']) ?>
+                                            <span class="post-count"><?= $category['post_count'] ?></span>
+                                        </a>
+                                    </li>
+                                <?php endforeach; ?>
+                            </ul>
+                        </div>
+                    <?php endif; ?>
                 </aside>
             </div>
         </div>
@@ -152,14 +127,14 @@
                     <?php foreach ($relatedPosts as $related): ?>
                         <article class="post-card">
                             <?php if ($related['thumbnail']): ?>
-                                <a href="/blog/<?= htmlspecialchars($related['slug']) ?>" class="post-image">
+                                <a href="/observatorio-saas/<?= htmlspecialchars($related['slug']) ?>" class="post-image">
                                     <img src="<?= htmlspecialchars($related['thumbnail']) ?>"
                                          alt="<?= htmlspecialchars($related['title']) ?>">
                                 </a>
                             <?php endif; ?>
                             <div class="post-content">
                                 <h3>
-                                    <a href="/blog/<?= htmlspecialchars($related['slug']) ?>">
+                                    <a href="/observatorio-saas/<?= htmlspecialchars($related['slug']) ?>">
                                         <?= htmlspecialchars($related['title']) ?>
                                     </a>
                                 </h3>
@@ -181,9 +156,45 @@
 <style>
 /* Post Header */
 .post-header {
-    padding: calc(var(--spacing-3xl) + var(--header-height)) 0 var(--spacing-xl);
-    background-color: var(--color-gray-50);
+    position: relative;
+    padding: calc(var(--spacing-3xl) + var(--header-height)) 0 var(--spacing-3xl);
+    background-color: var(--color-gray-900);
     text-align: center;
+    min-height: 400px;
+    display: flex;
+    align-items: center;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+.post-header.has-hero-image {
+    min-height: 500px;
+}
+
+.post-header-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(
+        to bottom,
+        rgba(0, 0, 0, 0.4) 0%,
+        rgba(0, 0, 0, 0.6) 50%,
+        rgba(0, 0, 0, 0.7) 100%
+    );
+    z-index: 1;
+}
+
+.post-header .container {
+    position: relative;
+    z-index: 2;
+}
+
+.post-header-content {
+    max-width: 900px;
+    margin: 0 auto;
 }
 
 .post-header .post-category {
@@ -194,41 +205,106 @@
     border-radius: var(--radius-full);
     font-size: var(--font-size-sm);
     font-weight: 600;
-    margin-bottom: var(--spacing-md);
+    margin-bottom: var(--spacing-lg);
+    text-decoration: none;
+    transition: transform 0.2s ease, background-color 0.2s ease;
 }
 
-.post-header h1 {
+.post-header .post-category:hover {
+    background-color: var(--color-primary-dark, var(--color-primary));
+    transform: translateY(-2px);
+}
+
+/* Title Pill - White background for readability */
+.post-title-pill {
+    background: rgba(255, 255, 255, 0.95);
+    padding: var(--spacing-xl) var(--spacing-2xl);
+    border-radius: var(--radius-xl);
+    margin-bottom: var(--spacing-xl);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+    backdrop-filter: blur(10px);
+}
+
+.post-title-pill h1 {
     font-size: var(--font-size-4xl);
-    max-width: 900px;
-    margin: 0 auto var(--spacing-lg);
+    margin: 0;
     line-height: 1.2;
+    color: var(--color-gray-900);
+}
+
+.post-subtitle {
+    font-size: var(--font-size-lg);
+    color: var(--color-gray-600);
+    margin: var(--spacing-sm) 0 0 0;
+    line-height: 1.4;
+    font-weight: 400;
 }
 
 .post-header .post-meta {
     display: flex;
     justify-content: center;
+    flex-wrap: wrap;
     gap: var(--spacing-lg);
-    color: var(--color-gray-500);
+    color: rgba(255, 255, 255, 0.9);
     font-size: var(--font-size-sm);
+}
+
+.post-header .post-meta span {
+    background: rgba(255, 255, 255, 0.15);
+    padding: var(--spacing-xs) var(--spacing-md);
+    border-radius: var(--radius-full);
+    backdrop-filter: blur(5px);
 }
 
 .post-header .post-meta i {
     margin-right: var(--spacing-xs);
 }
 
-/* Post Hero */
-.post-hero {
-    margin-top: calc(-1 * var(--spacing-xl));
-    margin-bottom: var(--spacing-2xl);
+/* Mobile adjustments for header */
+@media (max-width: 768px) {
+    .post-header {
+        min-height: 350px;
+        padding: calc(var(--spacing-2xl) + var(--header-height)) var(--spacing-md) var(--spacing-2xl);
+    }
+
+    .post-header.has-hero-image {
+        min-height: 400px;
+    }
+
+    .post-title-pill {
+        padding: var(--spacing-lg) var(--spacing-xl);
+    }
+
+    .post-title-pill h1 {
+        font-size: var(--font-size-2xl);
+    }
+
+    .post-subtitle {
+        font-size: var(--font-size-base);
+    }
+
+    .post-header .post-meta {
+        gap: var(--spacing-sm);
+    }
+
+    .post-header .post-meta span {
+        padding: var(--spacing-xs) var(--spacing-sm);
+        font-size: var(--font-size-xs);
+    }
 }
 
-.post-hero img {
-    width: 100%;
-    max-width: 900px;
-    margin: 0 auto;
-    display: block;
-    border-radius: var(--radius-xl);
-    box-shadow: var(--shadow-lg);
+/* Post Body - spacing from header */
+.post-body {
+    padding-top: 40px;
+    overflow: visible;
+}
+
+/* Ensure sticky can work - no overflow hidden on parents */
+.site-main,
+.blog-post,
+.post-body,
+.post-body .container {
+    overflow: visible !important;
 }
 
 /* Post Layout */
@@ -236,11 +312,19 @@
     display: grid;
     grid-template-columns: 1fr 300px;
     gap: var(--spacing-2xl);
+    align-items: start;
 }
 
 /* Post Content */
 .post-content {
     max-width: 100%;
+    overflow-x: hidden;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+}
+
+.post-text {
+    overflow-x: auto;
 }
 
 .post-excerpt {
@@ -315,6 +399,43 @@
     margin: var(--spacing-lg) 0;
 }
 
+/* Tables */
+.post-text table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: var(--spacing-lg) 0;
+    font-size: var(--font-size-sm);
+}
+
+.post-text table,
+.post-text th,
+.post-text td {
+    border: 1px solid #000;
+}
+
+.post-text th,
+.post-text td {
+    padding: var(--spacing-sm) var(--spacing-md);
+    text-align: left;
+}
+
+.post-text th {
+    background-color: var(--color-gray-100);
+    font-weight: 600;
+}
+
+.post-text tr:nth-child(even) {
+    background-color: var(--color-gray-50);
+}
+
+.post-text figure {
+    margin: var(--spacing-lg) 0;
+}
+
+.post-text figure table {
+    margin: 0;
+}
+
 .post-text pre code {
     background: none;
     padding: 0;
@@ -350,52 +471,10 @@
     color: var(--color-white);
 }
 
-/* Share */
-.post-share {
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-md);
-    margin-top: var(--spacing-xl);
-}
-
-.post-share > span {
-    color: var(--color-gray-500);
-    font-weight: 600;
-}
-
-.share-buttons {
-    display: flex;
-    gap: var(--spacing-sm);
-}
-
-.share-btn {
-    width: 40px;
-    height: 40px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 50%;
-    color: var(--color-white);
-    transition: all var(--transition);
-    border: none;
-    cursor: pointer;
-}
-
-.share-btn.twitter { background-color: #1DA1F2; }
-.share-btn.linkedin { background-color: #0077B5; }
-.share-btn.facebook { background-color: #1877F2; }
-.share-btn.copy { background-color: var(--color-gray-400); }
-
-.share-btn:hover {
-    transform: translateY(-2px);
-    opacity: 0.9;
-}
-
 /* Sidebar */
 .post-sidebar {
     position: sticky;
-    top: calc(var(--header-height) + var(--spacing-lg));
-    height: fit-content;
+    top: 100px;
 }
 
 .sidebar-widget {
@@ -413,26 +492,56 @@
     border-bottom: 2px solid var(--color-primary);
 }
 
-/* Author Widget */
-.author-widget {
-    text-align: center;
+/* TOC Widget - Accordion */
+.toc-widget {
+    padding: 0;
+    overflow: hidden;
 }
 
-.author-avatar {
-    width: 80px;
-    height: 80px;
-    border-radius: 50%;
-    margin-bottom: var(--spacing-sm);
-}
-
-.author-widget p {
+.toc-toggle {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--spacing-md) var(--spacing-lg);
+    background: none;
+    border: none;
+    cursor: pointer;
     font-size: var(--font-size-sm);
-    color: var(--color-gray-600);
+    font-weight: 600;
+    color: var(--color-gray-700);
+    transition: all var(--transition);
 }
 
-/* TOC Widget */
-#table-of-contents {
+.toc-toggle:hover {
+    background-color: var(--color-gray-50);
+}
+
+.toc-toggle span {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+
+.toc-arrow {
+    transition: transform 0.3s ease;
+}
+
+.toc-toggle[aria-expanded="true"] .toc-arrow {
+    transform: rotate(180deg);
+}
+
+.toc-content {
     font-size: var(--font-size-sm);
+    padding: 0 var(--spacing-lg) var(--spacing-lg);
+    max-height: 400px;
+    overflow: hidden;
+    transition: max-height 0.3s ease, padding 0.3s ease;
+}
+
+.toc-content.collapsed {
+    max-height: 0;
+    padding-bottom: 0;
 }
 
 #table-of-contents a {
@@ -454,32 +563,53 @@
     padding-left: var(--spacing-lg);
 }
 
-/* Newsletter Widget */
-.newsletter-widget {
+/* Categories Widget */
+.categories-widget h4 {
+    margin-bottom: var(--spacing-md);
+    padding-bottom: var(--spacing-sm);
+    border-bottom: 2px solid var(--color-primary);
+}
+
+.categories-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.categories-list li {
+    border-bottom: 1px solid var(--color-gray-100);
+}
+
+.categories-list li:last-child {
+    border-bottom: none;
+}
+
+.categories-list a {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--spacing-sm) 0;
+    color: var(--color-gray-700);
+    transition: all var(--transition);
+}
+
+.categories-list a:hover {
+    color: var(--color-primary);
+    padding-left: var(--spacing-xs);
+}
+
+.categories-list .post-count {
+    background-color: var(--color-gray-100);
+    color: var(--color-gray-600);
+    font-size: var(--font-size-xs);
+    padding: 2px 8px;
+    border-radius: var(--radius-full);
+    font-weight: 600;
+}
+
+.categories-list a:hover .post-count {
     background-color: var(--color-primary);
     color: var(--color-white);
-}
-
-.newsletter-widget h4 {
-    color: var(--color-white);
-    border-bottom-color: rgba(255,255,255,0.3);
-}
-
-.newsletter-widget p {
-    color: rgba(255,255,255,0.9);
-    font-size: var(--font-size-sm);
-}
-
-.newsletter-form {
-    display: flex;
-    flex-direction: column;
-    gap: var(--spacing-sm);
-}
-
-.newsletter-form input {
-    padding: var(--spacing-sm) var(--spacing-md);
-    border: none;
-    border-radius: var(--radius-md);
 }
 
 /* Related Posts */
@@ -547,14 +677,14 @@
     }
 
     .post-sidebar {
-        position: static;
-        display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        gap: var(--spacing-lg);
+        display: none;
     }
 
-    .toc-widget {
-        display: none;
+    /* Tables responsive */
+    .post-text table {
+        display: block;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
     }
 }
 
@@ -568,12 +698,26 @@
         gap: var(--spacing-sm);
     }
 
-    .post-sidebar {
+    .related-posts .posts-grid {
         grid-template-columns: 1fr;
     }
 
-    .related-posts .posts-grid {
-        grid-template-columns: 1fr;
+    /* Fix mobile content overflow */
+    .post-body .container {
+        padding-left: var(--spacing-md);
+        padding-right: var(--spacing-md);
+    }
+
+    .post-content,
+    .post-text {
+        width: 100%;
+        max-width: 100%;
+        overflow-x: auto;
+    }
+
+    .post-text img {
+        max-width: 100%;
+        height: auto;
     }
 }
 </style>
@@ -583,6 +727,8 @@ document.addEventListener('DOMContentLoaded', function() {
     // Generate Table of Contents
     const postText = document.querySelector('.post-text');
     const toc = document.getElementById('table-of-contents');
+    const tocWidget = document.getElementById('toc-widget');
+    const tocToggle = document.getElementById('toc-toggle');
     const headings = postText.querySelectorAll('h2, h3');
 
     if (headings.length > 0 && toc) {
@@ -595,6 +741,13 @@ document.addEventListener('DOMContentLoaded', function() {
             link.textContent = heading.textContent;
             link.className = 'level-' + heading.tagName.toLowerCase().replace('h', '');
             toc.appendChild(link);
+        });
+
+        // TOC Accordion toggle
+        tocToggle.addEventListener('click', function() {
+            const isExpanded = this.getAttribute('aria-expanded') === 'true';
+            this.setAttribute('aria-expanded', !isExpanded);
+            toc.classList.toggle('collapsed');
         });
 
         // Highlight active TOC item on scroll
@@ -615,22 +768,90 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             });
         });
-    } else if (toc) {
-        document.getElementById('toc-widget').style.display = 'none';
+    } else if (tocWidget) {
+        tocWidget.style.display = 'none';
     }
 
-    // Copy URL button
-    const copyBtn = document.querySelector('.share-btn.copy');
-    if (copyBtn) {
-        copyBtn.addEventListener('click', function() {
-            const url = this.dataset.url;
-            navigator.clipboard.writeText(url).then(() => {
-                const icon = this.querySelector('i');
-                icon.className = 'fas fa-check';
-                setTimeout(() => {
-                    icon.className = 'fas fa-link';
-                }, 2000);
-            });
+    // Sticky sidebar with JavaScript (fallback for CSS sticky issues)
+    const sidebar = document.querySelector('.post-sidebar');
+    const postLayout = document.querySelector('.post-layout');
+
+    if (sidebar && postLayout && window.innerWidth > 1024) {
+        const sidebarTop = 100; // Distance from top when sticky
+        let sidebarOriginalTop = null;
+        let sidebarOriginalLeft = null;
+        let isSticky = false;
+
+        function initStickyPosition() {
+            // Reset styles to get original position
+            sidebar.style.position = 'relative';
+            sidebar.style.top = 'auto';
+            sidebar.style.left = 'auto';
+            sidebar.style.width = '';
+
+            const rect = sidebar.getBoundingClientRect();
+            sidebarOriginalTop = rect.top + window.scrollY;
+            sidebarOriginalLeft = rect.left;
+        }
+
+        function updateStickyPosition() {
+            if (window.innerWidth <= 1024) {
+                sidebar.style.position = '';
+                sidebar.style.top = '';
+                sidebar.style.left = '';
+                sidebar.style.width = '';
+                return;
+            }
+
+            const scrollY = window.scrollY;
+            const layoutRect = postLayout.getBoundingClientRect();
+            const sidebarHeight = sidebar.offsetHeight;
+            const layoutBottom = layoutRect.bottom + scrollY;
+            const sidebarWidth = sidebar.offsetWidth;
+
+            // When to start sticking
+            const startSticky = sidebarOriginalTop - sidebarTop;
+            // When to stop sticking (so sidebar doesn't go past layout)
+            const stopSticky = layoutBottom - sidebarHeight - sidebarTop;
+
+            if (scrollY >= startSticky && scrollY < stopSticky) {
+                // Sticky mode
+                if (!isSticky) {
+                    sidebar.style.position = 'fixed';
+                    sidebar.style.top = sidebarTop + 'px';
+                    sidebar.style.left = sidebarOriginalLeft + 'px';
+                    sidebar.style.width = sidebarWidth + 'px';
+                    isSticky = true;
+                }
+            } else if (scrollY >= stopSticky) {
+                // Bottom mode - stick to bottom of layout
+                sidebar.style.position = 'absolute';
+                sidebar.style.top = (stopSticky - sidebarOriginalTop + sidebarTop) + 'px';
+                sidebar.style.left = 'auto';
+                sidebar.style.right = '0';
+                sidebar.style.width = sidebarWidth + 'px';
+                isSticky = false;
+            } else {
+                // Normal mode
+                sidebar.style.position = 'relative';
+                sidebar.style.top = 'auto';
+                sidebar.style.left = 'auto';
+                sidebar.style.width = '';
+                isSticky = false;
+            }
+        }
+
+        // Make post-layout position relative for absolute positioning
+        postLayout.style.position = 'relative';
+
+        initStickyPosition();
+        updateStickyPosition();
+
+        window.addEventListener('scroll', updateStickyPosition, { passive: true });
+        window.addEventListener('resize', function() {
+            isSticky = false;
+            initStickyPosition();
+            updateStickyPosition();
         });
     }
 });

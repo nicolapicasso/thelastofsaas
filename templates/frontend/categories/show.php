@@ -155,7 +155,7 @@
             <div class="posts-grid">
                 <?php foreach ($content['posts'] as $post): ?>
                     <article class="post-card">
-                        <a href="<?= _url('/blog/' . $post['slug']) ?>">
+                        <a href="<?= _url('/observatorio-saas/' . $post['slug']) ?>">
                             <?php if (!empty($post['thumbnail'])): ?>
                                 <div class="post-image">
                                     <img src="<?= htmlspecialchars($post['thumbnail']) ?>" alt="">

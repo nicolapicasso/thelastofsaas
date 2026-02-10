@@ -11,6 +11,9 @@
         <p>Gestiona los artículos del blog</p>
     </div>
     <div class="page-header-actions">
+        <a href="/admin/posts/import" class="btn btn-outline">
+            <i class="fas fa-file-import"></i> Importar WordPress
+        </a>
         <a href="/admin/posts/create" class="btn btn-primary">
             <i class="fas fa-plus"></i> Nuevo Post
         </a>

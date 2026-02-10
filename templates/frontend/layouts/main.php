@@ -153,10 +153,6 @@ $googleFontsUrl = 'https://fonts.googleapis.com/css2?family=' . implode('&family
                                 <?= htmlspecialchars($btn['title']) ?>
                             </a>
                         <?php endforeach; ?>
-                    <?php else: ?>
-                        <!-- Fallback buttons -->
-                        <a href="<?= _url('/login') ?>" class="btn btn-outline">Acceder</a>
-                        <a href="<?= _url('/registro') ?>" class="btn btn-primary">Empezar Gratis</a>
                     <?php endif; ?>
 
                     <?php if (!empty($sidebarMenu)): ?>

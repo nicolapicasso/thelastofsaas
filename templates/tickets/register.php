@@ -24,16 +24,20 @@
            TLOS - Registration Page Styles
            ============================================ */
         :root {
-            --bg-dark: #000000;
-            --bg-card: #0a0a0a;
-            --bg-input: #111111;
+            --bg-dark: #0D0D0D;
+            --bg-card: #141414;
+            --bg-input: #1A1A1A;
+            --bg-section: #0A0A0A;
             --text-light: #FFFFFF;
-            --text-grey: #86868B;
-            --border-color: rgba(255, 255, 255, 0.1);
+            --text-secondary: #E0E0E0;
+            --text-muted: #B0B0B0;
+            --border-color: rgba(255, 255, 255, 0.12);
+            --border-hover: rgba(255, 255, 255, 0.25);
             --success-color: #10B981;
             --error-color: #EF4444;
             --warning-color: #F59E0B;
             --primary-color: #FFFFFF;
+            --glow-subtle: rgba(255, 255, 255, 0.03);
             --font-heading: 'Montserrat', sans-serif;
             --font-mono: 'Roboto Mono', monospace;
             --font-accent: 'Prompt', sans-serif;
@@ -58,7 +62,7 @@
 
         /* Hero Section */
         .register-hero {
-            background: var(--bg-card);
+            background: linear-gradient(180deg, #1A1A1A 0%, var(--bg-card) 100%);
             border-bottom: 1px solid var(--border-color);
             padding: 2rem 0;
         }
@@ -67,7 +71,7 @@
             display: inline-flex;
             align-items: center;
             gap: 0.75rem;
-            color: var(--text-grey);
+            color: var(--text-secondary);
             text-decoration: none;
             font-family: var(--font-mono);
             font-size: 12px;
@@ -92,7 +96,7 @@
         .register-hero .lead {
             font-family: var(--font-mono);
             font-size: 14px;
-            color: var(--text-grey);
+            color: var(--text-secondary);
             text-transform: uppercase;
             letter-spacing: 0.1em;
         }
@@ -125,6 +129,8 @@
         /* Form Section */
         .register-form-section {
             padding: 3rem 0;
+            background: linear-gradient(180deg, var(--bg-section) 0%, #1A1A1A 100%);
+            min-height: calc(100vh - 150px);
         }
 
         .register-layout {
@@ -135,9 +141,10 @@
         }
 
         .register-main {
-            background: var(--bg-card);
+            background: linear-gradient(135deg, var(--bg-card) 0%, rgba(30, 30, 30, 0.95) 100%);
             border: 1px solid var(--border-color);
             padding: 2.5rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), 0 0 0 1px var(--glow-subtle);
         }
 
         /* Form Sections */
@@ -166,7 +173,7 @@
 
         .form-section h2 small {
             font-weight: 400;
-            color: var(--text-grey);
+            color: var(--text-muted);
             font-size: 12px;
         }
 
@@ -198,16 +205,19 @@
             display: flex;
             align-items: center;
             position: relative;
-            background: var(--bg-dark);
+            background: rgba(20, 20, 20, 0.8);
         }
 
         .ticket-type-option:hover {
-            border-color: var(--text-light);
+            border-color: var(--border-hover);
+            background: rgba(30, 30, 30, 0.9);
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.2);
         }
 
         .ticket-type-option.selected {
             border-color: var(--text-light);
-            background: rgba(255, 255, 255, 0.02);
+            background: rgba(40, 40, 40, 0.9);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.05);
         }
 
         .ticket-type-option input {
@@ -232,7 +242,7 @@
         .ticket-type-info p {
             margin: 0.5rem 0 0;
             font-size: 13px;
-            color: var(--text-grey);
+            color: var(--text-secondary);
         }
 
         .ticket-type-price {
@@ -249,7 +259,7 @@
         .ticket-type-price .original-price {
             font-size: 14px;
             text-decoration: line-through;
-            color: var(--text-grey);
+            color: var(--text-muted);
         }
 
         .ticket-type-price .free-badge {
@@ -264,7 +274,7 @@
 
         .ticket-type-price small {
             font-size: 11px;
-            color: var(--text-grey);
+            color: var(--text-secondary);
             font-family: var(--font-mono);
         }
 
@@ -306,7 +316,7 @@
             font-weight: 500;
             text-transform: uppercase;
             letter-spacing: 0.1em;
-            color: var(--text-grey);
+            color: var(--text-light);
             margin-bottom: 0.75rem;
         }
 
@@ -324,22 +334,24 @@
             font-family: var(--font-heading);
             font-size: 14px;
             transition: var(--transition);
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.2);
         }
 
         .form-control::placeholder {
-            color: var(--text-grey);
+            color: var(--text-muted);
         }
 
         .form-control:focus {
             outline: none;
             border-color: var(--text-light);
-            background: var(--bg-dark);
+            background: rgba(25, 25, 25, 1);
+            box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.1), inset 0 1px 3px rgba(0, 0, 0, 0.1);
         }
 
         .form-text {
             font-family: var(--font-mono);
             font-size: 11px;
-            color: var(--text-grey);
+            color: var(--text-secondary);
             margin-top: 0.5rem;
         }
 
@@ -351,7 +363,7 @@
         .form-legal {
             font-family: var(--font-mono);
             font-size: 11px;
-            color: var(--text-grey);
+            color: var(--text-secondary);
             margin-top: 1.5rem;
             text-transform: uppercase;
             letter-spacing: 0.05em;
@@ -435,11 +447,12 @@
 
         /* Sponsor Invitation Block */
         .sponsor-invitation {
-            background: linear-gradient(135deg, var(--bg-card) 0%, rgba(255, 255, 255, 0.03) 100%);
-            border: 2px solid var(--border-color);
+            background: linear-gradient(135deg, rgba(30, 30, 30, 0.9) 0%, rgba(40, 40, 40, 0.8) 100%);
+            border: 2px solid var(--border-hover);
             padding: 2.5rem;
             margin-bottom: 2rem;
             text-align: center;
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.05);
         }
 
         .sponsor-invitation-logo {
@@ -474,7 +487,7 @@
             display: block;
             font-size: clamp(14px, 2vw, 16px);
             font-weight: 400;
-            color: var(--text-grey);
+            color: var(--text-secondary);
             margin-bottom: 0.5rem;
         }
 
@@ -492,9 +505,10 @@
         }
 
         .summary-card {
-            background: var(--bg-card);
+            background: linear-gradient(180deg, var(--bg-card) 0%, rgba(25, 25, 25, 0.95) 100%);
             border: 1px solid var(--border-color);
             padding: 2rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
         }
 
         .summary-card h3 {
@@ -533,7 +547,7 @@
         .summary-event span {
             font-family: var(--font-mono);
             font-size: 12px;
-            color: var(--text-grey);
+            color: var(--text-secondary);
         }
 
         .summary-sponsor {
@@ -545,7 +559,7 @@
         .summary-sponsor small {
             font-family: var(--font-mono);
             font-size: 10px;
-            color: var(--text-grey);
+            color: var(--text-muted);
             text-transform: uppercase;
             letter-spacing: 0.1em;
         }
@@ -576,7 +590,7 @@
             padding: 0.75rem 0;
             font-family: var(--font-mono);
             font-size: 12px;
-            color: var(--text-grey);
+            color: var(--text-light);
             text-transform: uppercase;
             letter-spacing: 0.1em;
         }
@@ -660,7 +674,7 @@
         }
 
         .error-modal-message {
-            color: var(--text-grey);
+            color: var(--text-secondary);
             font-size: 14px;
             line-height: 1.6;
             margin-bottom: 1.5rem;

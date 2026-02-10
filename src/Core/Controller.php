@@ -42,6 +42,14 @@ abstract class Controller
      */
     protected function render(string $template, array $data = []): void
     {
+        // Add anti-cache headers for authenticated panel templates
+        if (strpos($template, 'sponsor-panel/') === 0 || strpos($template, 'company-panel/') === 0) {
+            header('Cache-Control: no-cache, no-store, must-revalidate, private, max-age=0');
+            header('Pragma: no-cache');
+            header('Expires: Thu, 01 Jan 1970 00:00:00 GMT');
+            header('Vary: Cookie');
+        }
+
         $this->view->render($template, $data);
     }
 
@@ -115,12 +123,6 @@ abstract class Controller
         header('Cache-Control: no-cache, no-store, must-revalidate, private');
         header('Pragma: no-cache');
         header('Expires: 0');
-
-        // Add cache-busting parameter for admin URLs to prevent bfcache issues
-        if (strpos($url, '/admin') !== false) {
-            $separator = strpos($url, '?') !== false ? '&' : '?';
-            $url .= $separator . '_t=' . time();
-        }
 
         header("Location: {$url}", true, $statusCode);
         exit;

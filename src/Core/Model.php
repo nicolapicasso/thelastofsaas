@@ -101,6 +101,9 @@ abstract class Model
     {
         $filteredData = $this->filterFillable($data);
 
+        // Always update the updated_at timestamp
+        $filteredData['updated_at'] = date('Y-m-d H:i:s');
+
         $affected = $this->db->update(
             $this->table,
             $filteredData,

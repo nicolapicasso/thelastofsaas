@@ -37,7 +37,7 @@ $columns = $settings['columns'] ?? 3;
                 <?php foreach ($posts as $post): ?>
                     <article class="post-card">
                         <?php if ($post['thumbnail']): ?>
-                            <a href="<?= _url('/blog/' . htmlspecialchars($post['slug'])) ?>" class="post-image">
+                            <a href="<?= _url('/observatorio-saas/' . htmlspecialchars($post['slug'])) ?>" class="post-image">
                                 <img src="<?= htmlspecialchars($post['thumbnail']) ?>"
                                      alt="<?= htmlspecialchars($post['title']) ?>"
                                      loading="lazy">
@@ -48,7 +48,7 @@ $columns = $settings['columns'] ?? 3;
                                 <span class="post-category"><?= htmlspecialchars($post['category_name']) ?></span>
                             <?php endif; ?>
                             <h3>
-                                <a href="<?= _url('/blog/' . htmlspecialchars($post['slug'])) ?>">
+                                <a href="<?= _url('/observatorio-saas/' . htmlspecialchars($post['slug'])) ?>">
                                     <?= htmlspecialchars($post['title']) ?>
                                 </a>
                             </h3>

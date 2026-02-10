@@ -86,14 +86,14 @@
     --spacing-3xl: 4rem;
 
     /* ============================================
-       Border Radius - Sinapsis Style
+       Border Radius - Angular Style
        ============================================ */
-    --radius-sm: 0.25rem;      /* 4px */
-    --radius-md: 0.5rem;       /* 8px */
-    --radius-lg: 1.25rem;      /* 20px - Cards */
-    --radius-xl: 1.875rem;     /* 30px - Forms */
-    --radius-pill: 50px;       /* Buttons */
-    --radius-full: 9999px;
+    --radius-sm: 0;
+    --radius-md: 0;
+    --radius-lg: 0;
+    --radius-xl: 0;
+    --radius-pill: 0;
+    --radius-full: 9999px;     /* Keep for circular elements like avatars */
 
     /* ============================================
        Shadows
@@ -237,15 +237,17 @@ a:hover {
     text-decoration: none;
 }
 
-/* Primary Button - Pill style */
+/* Primary Button - Solid black style */
 .btn-primary {
-    background-color: var(--primaryblue-sinapsis);
+    background-color: var(--black-sinapsis);
     color: var(--color-white);
+    border: none;
     border-radius: var(--radius-pill);
+    font-weight: var(--font-weight-bold);
 }
 
 .btn-primary:hover {
-    background-color: var(--color-primary);
+    background-color: var(--color-dark);
     color: var(--color-white);
     transform: translateY(-2px);
     box-shadow: var(--shadow-md);
@@ -265,17 +267,18 @@ a:hover {
     box-shadow: var(--shadow-md);
 }
 
-/* Outline Button - Border style */
+/* Outline Button - White with black border */
 .btn-outline {
-    background-color: transparent;
-    border: 1px solid currentColor;
-    color: var(--color-primary);
-    border-radius: var(--radius-lg);
+    background-color: var(--color-white);
+    border: 1px solid var(--black-sinapsis);
+    color: var(--black-sinapsis);
+    border-radius: var(--radius-pill);
+    font-weight: var(--font-weight-medium);
 }
 
 .btn-outline:hover {
-    background-color: var(--color-primary);
-    border-color: var(--color-primary);
+    background-color: var(--black-sinapsis);
+    border-color: var(--black-sinapsis);
     color: var(--color-white);
 }
 
@@ -398,7 +401,7 @@ a:hover {
     left: 0;
     width: 0;
     height: 2px;
-    background-color: var(--yellow-sinapsis);
+    background-color: var(--color-white);
     transition: width var(--transition);
 }
 
@@ -468,7 +471,7 @@ a:hover {
     align-items: center;
     gap: var(--spacing-sm);
     padding: var(--spacing-sm) var(--spacing-lg);
-    color: var(--color-gray-700);
+    color: var(--black-sinapsis);
     font-size: var(--font-size-sm);
     white-space: nowrap;
     transition: all var(--transition);
@@ -479,14 +482,19 @@ a:hover {
 }
 
 .nav-menu .submenu a:hover {
-    background-color: var(--color-gray-50);
-    color: var(--color-primary);
+    background-color: var(--black-sinapsis);
+    color: var(--color-white);
 }
 
 .nav-menu .submenu a i {
     width: 20px;
     text-align: center;
-    color: var(--color-primary);
+    color: var(--black-sinapsis);
+    transition: color var(--transition);
+}
+
+.nav-menu .submenu a:hover i {
+    color: var(--color-white);
 }
 
 /* 3rd level submenu */
@@ -1224,13 +1232,14 @@ a:hover {
         gap: var(--spacing-md);
     }
 
-    .block-column-half,
-    .block-column-third,
-    .block-column-two-thirds,
-    .block-column-quarter,
-    .block-column-three-quarters {
+    .block-row > .block-column-half,
+    .block-row > .block-column-third,
+    .block-row > .block-column-two-thirds,
+    .block-row > .block-column-quarter,
+    .block-row > .block-column-three-quarters {
         flex: 0 0 100%;
         max-width: 100%;
+        width: 100%;
     }
 }
 

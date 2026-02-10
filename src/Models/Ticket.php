@@ -30,6 +30,9 @@ class Ticket extends Model
         'stripe_payment_id',
         'notes',
         'used_at',
+        'assigned_company_id',
+        'assigned_sponsor_id',
+        'assigned_at',
     ];
 
     /**

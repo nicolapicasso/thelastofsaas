@@ -11,6 +11,7 @@ $displayMode = $settings['display_mode'] ?? 'cards';
 $cardStyle = $settings['card_style'] ?? 'bordered';
 $hoverEffect = $settings['hover_effect'] ?? 'lift';
 $iconPosition = $settings['icon_position'] ?? 'top';
+$iconStyle = $settings['icon_style'] ?? 'gradient';
 $showIcon = $settings['show_icon'] ?? true;
 $showDescription = $settings['show_description'] ?? true;
 $items = $content['items'] ?? [];
@@ -66,7 +67,7 @@ $blockId = 'benefits-' . uniqid();
                              <?= $hasStagger ? 'data-animate="' . htmlspecialchars($settings['animation']) . '"' : '' ?>>
                             <button class="accordion-header" type="button">
                                 <?php if ($showIcon && !empty($item['icon'])): ?>
-                                    <span class="accordion-icon"><i class="<?= htmlspecialchars($item['icon']) ?>"></i></span>
+                                    <span class="accordion-icon icon-style-<?= $iconStyle ?>"><i class="<?= htmlspecialchars($item['icon']) ?>"></i></span>
                                 <?php endif; ?>
                                 <span class="accordion-title"><?= htmlspecialchars($item['title'] ?? '') ?></span>
                                 <span class="accordion-arrow"><i class="fas fa-chevron-down"></i></span>
@@ -86,7 +87,7 @@ $blockId = 'benefits-' . uniqid();
                         <div class="benefit-list-item hover-<?= $hoverEffect ?>"
                              <?= $hasStagger ? 'data-animate="' . htmlspecialchars($settings['animation']) . '"' : '' ?>>
                             <?php if ($showIcon && !empty($item['icon'])): ?>
-                                <div class="benefit-icon">
+                                <div class="benefit-icon icon-style-<?= $iconStyle ?>">
                                     <i class="<?= htmlspecialchars($item['icon']) ?>"></i>
                                 </div>
                             <?php endif; ?>
@@ -108,7 +109,7 @@ $blockId = 'benefits-' . uniqid();
                         <div class="benefit-card style-<?= $cardStyle ?> hover-<?= $hoverEffect ?>"
                              <?= $hasStagger ? 'data-animate="' . htmlspecialchars($settings['animation']) . '"' : '' ?>>
                             <?php if ($showIcon && !empty($item['icon'])): ?>
-                                <div class="benefit-icon">
+                                <div class="benefit-icon icon-style-<?= $iconStyle ?>">
                                     <i class="<?= htmlspecialchars($item['icon']) ?>"></i>
                                 </div>
                             <?php endif; ?>
@@ -285,6 +286,19 @@ $blockId = 'benefits-' . uniqid();
     margin-bottom: var(--spacing-md);
 }
 
+/* Icon Style: Light (black on white) */
+.benefit-icon.icon-style-light {
+    background: #ffffff;
+    color: #1a1a1a;
+    border: 1px solid var(--color-gray-200, #e5e7eb);
+}
+
+/* Icon Style: Dark (white on black) */
+.benefit-icon.icon-style-dark {
+    background: #1a1a1a;
+    color: #ffffff;
+}
+
 .benefits-grid.icon-left .benefit-icon,
 .benefits-grid.icon-inline .benefit-icon {
     margin-bottom: 0;
@@ -434,6 +448,19 @@ $blockId = 'benefits-' . uniqid();
     color: var(--color-primary);
     font-size: 18px;
     flex-shrink: 0;
+}
+
+/* Accordion Icon Style: Light (black on white) */
+.block-benefits .accordion-icon.icon-style-light {
+    background: #ffffff;
+    color: #1a1a1a;
+    border: 1px solid var(--color-gray-200, #e5e7eb);
+}
+
+/* Accordion Icon Style: Dark (white on black) */
+.block-benefits .accordion-icon.icon-style-dark {
+    background: #1a1a1a;
+    color: #ffffff;
 }
 
 .block-benefits .accordion-title {

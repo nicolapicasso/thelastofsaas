@@ -526,7 +526,7 @@
                 <?php endif; ?>
             </header>
 
-            <?php if (empty($matches ?? [])): ?>
+            <?php if (empty($matches ?? []) && empty($likesReceived ?? [])): ?>
                 <div class="empty-state">
                     <i class="fas fa-heart-broken"></i>
                     <h2>AUN NO TIENES MATCHES</h2>
@@ -536,6 +536,58 @@
                     </a>
                 </div>
             <?php else: ?>
+
+                <!-- Likes Received Section -->
+                <?php if (!empty($likesReceived ?? [])): ?>
+                <section class="likes-section" style="margin-bottom: 3rem;">
+                    <h2 style="font-size: 16px; font-family: var(--font-mono); text-transform: uppercase; letter-spacing: 0.15em; display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1.5rem; color: #F59E0B;">
+                        <i class="fas fa-star"></i> EMPRESAS INTERESADAS EN TI (<?= count($likesReceived) ?>)
+                    </h2>
+
+                    <div class="info-card" style="background: rgba(245, 158, 11, 0.1); border-color: #F59E0B; color: #F59E0B;">
+                        <i class="fas fa-lightbulb"></i>
+                        <p>ESTAS EMPRESAS TE HAN DADO LIKE. SI TU TAMBIEN LES DAS LIKE, SE CREARA UN MATCH Y PODREIS PROGRAMAR UNA REUNION.</p>
+                    </div>
+
+                    <div class="matches-list">
+                        <?php foreach ($likesReceived as $like): ?>
+                            <div class="match-item" style="border-left-color: #F59E0B;">
+                                <?php if (!empty($like['logo_url'])): ?>
+                                    <img src="<?= htmlspecialchars($like['logo_url']) ?>" alt="" class="match-logo">
+                                <?php else: ?>
+                                    <div class="logo-placeholder"><i class="fas fa-building"></i></div>
+                                <?php endif; ?>
+                                <div class="match-info">
+                                    <h3><?= htmlspecialchars($like['name'] ?? '') ?></h3>
+                                    <?php if (!empty($like['sector'])): ?>
+                                        <span class="sector"><?= htmlspecialchars(strtoupper($like['sector'])) ?></span>
+                                    <?php endif; ?>
+                                    <?php if (!empty($like['employees'])): ?>
+                                        <span class="sector" style="margin-left: 0.25rem;"><?= htmlspecialchars($like['employees']) ?> EMPLEADOS</span>
+                                    <?php endif; ?>
+                                    <?php if (!empty($like['created_at'])): ?>
+                                        <small class="match-date">TE DIO LIKE: <?= date('d/m/Y', strtotime($like['created_at'])) ?></small>
+                                    <?php endif; ?>
+                                </div>
+                                <div class="match-status">
+                                    <span class="status-badge" style="background: #F59E0B;"><i class="fas fa-star"></i> LIKE</span>
+                                </div>
+                                <div class="match-actions" style="display: flex; gap: 0.5rem;">
+                                    <a href="/sponsor/empresas/<?= $event['id'] ?>/<?= $like['id'] ?>" class="btn btn-outline" style="padding: 0.5rem 1rem; font-size: 10px;">
+                                        <i class="fas fa-eye"></i> VER
+                                    </a>
+                                    <button type="button" class="btn btn-primary" style="padding: 0.5rem 1rem; font-size: 10px;" onclick="giveLikeBack(<?= $like['id'] ?>, '<?= htmlspecialchars(addslashes($like['name'])) ?>')">
+                                        <i class="fas fa-heart"></i> LIKE
+                                    </button>
+                                </div>
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
+                </section>
+                <?php endif; ?>
+
+                <!-- Matches Section -->
+                <?php if (!empty($matches ?? [])): ?>
                 <div class="info-card">
                     <i class="fas fa-info-circle"></i>
                     <p>ESTOS SON TUS MATCHES MUTUOS. AMBAS PARTES SE HAN SELECCIONADO, POR LO QUE OS PONDREMOS EN CONTACTO PARA COORDINAR UNA REUNION.</p>
@@ -570,6 +622,7 @@
                         </div>
                     <?php endforeach; ?>
                 </div>
+                <?php endif; ?>
 
                 <?php if (!empty($meetings)): ?>
                     <section class="meetings-section">
@@ -600,5 +653,37 @@
             <?php endif; ?>
         </main>
     </div>
+
+    <script>
+    function giveLikeBack(companyId, companyName) {
+        if (!confirm('¿Dar like a ' + companyName + '? Se creará un match y podréis programar una reunión.')) {
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('event_id', '<?= $event['id'] ?>');
+        formData.append('company_id', companyId);
+        formData.append('_csrf_token', '<?= $csrf_token ?? '' ?>');
+
+        fetch('/sponsor/seleccionar', {
+            method: 'POST',
+            body: formData
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) {
+                if (data.is_match) {
+                    alert('¡Match creado con ' + companyName + '!');
+                }
+                location.reload();
+            } else {
+                alert(data.error || 'Error al dar like');
+            }
+        })
+        .catch(e => {
+            alert('Error de conexión');
+        });
+    }
+    </script>
 </body>
 </html>

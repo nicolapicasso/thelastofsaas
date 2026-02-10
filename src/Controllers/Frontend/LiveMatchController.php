@@ -7,11 +7,14 @@ namespace App\Controllers\Frontend;
 use App\Core\Controller;
 use App\Models\Event;
 use App\Models\Sponsor;
+use App\Models\SponsorContact;
 use App\Models\Company;
+use App\Models\CompanyContact;
 use App\Models\MeetingBlock;
 use App\Models\MeetingSlot;
 use App\Models\MeetingAssignment;
 use App\Models\TlosSetting;
+use App\Services\OmniwalletService;
 
 /**
  * Live Match Controller
@@ -341,6 +344,9 @@ class LiveMatchController extends Controller
             $slot = $this->slotModel->find($slotId);
             $block = $this->blockModel->find($slot['block_id']);
 
+            // Omniwallet integration - award points for live match with meeting
+            $this->processOmniwalletLiveMatch($company, $sponsor, $event['id'], $block['id'] ?? null);
+
             $this->jsonSuccess([
                 'assignment_id' => $assignmentId,
                 'message' => 'Reunion agendada correctamente!',
@@ -356,6 +362,40 @@ class LiveMatchController extends Controller
             ]);
         } catch (\Exception $e) {
             $this->jsonError('Error al agendar: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Process Omniwallet integration for live match with meeting
+     */
+    private function processOmniwalletLiveMatch(array $company, array $sponsor, int $eventId, ?int $meetingBlockId): void
+    {
+        try {
+            $omniwallet = new OmniwalletService();
+
+            if (!$omniwallet->isEnabled()) {
+                return;
+            }
+
+            // Get company contacts
+            $companyContactModel = new CompanyContact();
+            $companyContacts = $companyContactModel->where(['company_id' => $company['id']]);
+
+            // Get sponsor contacts
+            $sponsorContactModel = new SponsorContact();
+            $sponsorContacts = $sponsorContactModel->where(['sponsor_id' => $sponsor['id']]);
+
+            // Award points to both parties
+            $omniwallet->processLiveMatchWithMeeting(
+                $company,
+                $companyContacts,
+                $sponsor,
+                $sponsorContacts,
+                $eventId,
+                $meetingBlockId
+            );
+        } catch (\Exception $e) {
+            error_log('Omniwallet live match error: ' . $e->getMessage());
         }
     }
 

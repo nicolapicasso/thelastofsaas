@@ -283,6 +283,12 @@ class BlocksController extends Controller
             'html' => $html,
             'type' => $blockType,
             'typeName' => Block::TYPES[$blockType],
+            // Debug info
+            '_debug' => [
+                'loaded_at' => date('Y-m-d H:i:s'),
+                'block_updated' => $block['updated_at'] ?? null,
+                'block_id' => $blockId,
+            ],
         ]);
     }
 

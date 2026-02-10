@@ -76,8 +76,8 @@ class EventsController extends BaseController
             return;
         }
 
-        // Get event sponsors by level
-        $sponsors = $this->eventModel->getSponsors($event['id']);
+        // Get event sponsors by level (exclude hidden sponsors)
+        $sponsors = $this->eventModel->getSponsors($event['id'], false);
         $sponsorsByLevel = [];
         foreach ($sponsors as $sponsor) {
             $sponsorsByLevel[$sponsor['level']][] = $sponsor;
@@ -175,7 +175,7 @@ class EventsController extends BaseController
             return;
         }
 
-        $sponsors = $this->eventModel->getSponsors($event['id']);
+        $sponsors = $this->eventModel->getSponsors($event['id'], false);
         $sponsorsByLevel = [];
         foreach ($sponsors as $sponsor) {
             $sponsorsByLevel[$sponsor['level']][] = $sponsor;

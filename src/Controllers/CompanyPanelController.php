@@ -6,9 +6,11 @@ use App\Core\Controller;
 use App\Models\Event;
 use App\Models\Sponsor;
 use App\Models\Company;
+use App\Models\CompanyContact;
 use App\Models\TlosSetting;
 use App\Models\Message;
 use App\Services\EmailService;
+use App\Services\OmniwalletService;
 
 /**
  * Company Panel Controller
@@ -381,11 +383,46 @@ class CompanyPanelController extends Controller
             }
         }
 
+        // Omniwallet integration - award points for SaaS selection and match
+        $this->processOmniwalletSelection($company, $sponsor, $event, $isMatch);
+
         $this->json([
             'success' => true,
             'is_match' => $isMatch,
             'message' => $isMatch ? '¡Match mutuo!' : 'Sponsor seleccionado'
         ]);
+    }
+
+    /**
+     * Process Omniwallet integration for SaaS selection and match
+     */
+    private function processOmniwalletSelection(array $company, array $sponsor, array $event, bool $isMatch): void
+    {
+        try {
+            $omniwallet = new OmniwalletService();
+
+            if (!$omniwallet->isEnabled()) {
+                return;
+            }
+
+            // Get company contacts
+            $contactModel = new CompanyContact();
+            $contacts = $contactModel->where(['company_id' => $company['id']]);
+
+            if (empty($contacts)) {
+                return;
+            }
+
+            // Award points for SaaS selection
+            $omniwallet->processSaasSelection($company, $contacts, $sponsor);
+
+            // If it's a match, award additional points
+            if ($isMatch) {
+                $omniwallet->processMatch($company, $contacts, $sponsor, $event['id']);
+            }
+        } catch (\Exception $e) {
+            error_log('Omniwallet selection error: ' . $e->getMessage());
+        }
     }
 
     /**
@@ -436,6 +473,13 @@ class CompanyPanelController extends Controller
 
         // Get mutual matches
         $matches = $this->companyModel->getMutualMatches($company['id'], $event['id']);
+        $matchedSponsorIds = array_column($matches, 'id');
+
+        // Get "likes" received - sponsors who selected this company but company hasn't selected back
+        $interestedSponsors = $this->companyModel->getInterestedSponsors($company['id'], $event['id']);
+        $likesReceived = array_filter($interestedSponsors, function($sponsor) use ($matchedSponsorIds) {
+            return !in_array($sponsor['id'], $matchedSponsorIds);
+        });
 
         // Get scheduled meetings
         $meetings = $this->companyModel->getScheduledMeetings($company['id'], $event['id']);
@@ -448,7 +492,9 @@ class CompanyPanelController extends Controller
             'event' => $event,
             'events' => $events,
             'matches' => $matches,
+            'likesReceived' => array_values($likesReceived),
             'meetings' => $meetings,
+            'csrf_token' => $this->generateCsrf(),
             'meta_title' => 'Tus Matches - ' . $event['name']
         ]);
     }

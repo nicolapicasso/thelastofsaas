@@ -6,10 +6,12 @@ use App\Core\Controller;
 use App\Models\Event;
 use App\Models\Sponsor;
 use App\Models\Company;
+use App\Models\CompanyContact;
 use App\Models\SponsorInviteCode;
 use App\Models\TlosSetting;
 use App\Models\Message;
 use App\Services\EmailService;
+use App\Services\OmniwalletService;
 
 /**
  * Sponsor Panel Controller
@@ -371,11 +373,43 @@ class SponsorPanelController extends Controller
             }
         }
 
+        // Omniwallet integration - award points for match (company contacts only)
+        if ($isMatch) {
+            $this->processOmniwalletMatchFromSponsor($company, $sponsor, $event);
+        }
+
         $this->json([
             'success' => true,
             'is_match' => $isMatch,
             'message' => $isMatch ? '¡Match mutuo!' : 'Empresa seleccionada'
         ]);
+    }
+
+    /**
+     * Process Omniwallet integration when sponsor selection creates a match
+     */
+    private function processOmniwalletMatchFromSponsor(array $company, array $sponsor, array $event): void
+    {
+        try {
+            $omniwallet = new OmniwalletService();
+
+            if (!$omniwallet->isEnabled()) {
+                return;
+            }
+
+            // Get company contacts
+            $contactModel = new CompanyContact();
+            $contacts = $contactModel->where(['company_id' => $company['id']]);
+
+            if (empty($contacts)) {
+                return;
+            }
+
+            // Award match points to company contacts
+            $omniwallet->processMatch($company, $contacts, $sponsor, $event['id']);
+        } catch (\Exception $e) {
+            error_log('Omniwallet match error: ' . $e->getMessage());
+        }
     }
 
     /**
@@ -426,6 +460,13 @@ class SponsorPanelController extends Controller
 
         // Get mutual matches
         $matches = $this->sponsorModel->getMutualMatches($sponsor['id'], $event['id']);
+        $matchedCompanyIds = array_column($matches, 'id');
+
+        // Get "likes" received - companies who selected this sponsor but sponsor hasn't selected back
+        $interestedCompanies = $this->sponsorModel->getInterestedCompanies($sponsor['id'], $event['id']);
+        $likesReceived = array_filter($interestedCompanies, function($company) use ($matchedCompanyIds) {
+            return !in_array($company['id'], $matchedCompanyIds);
+        });
 
         // Get scheduled meetings
         $meetings = $this->sponsorModel->getScheduledMeetings($sponsor['id'], $event['id']);
@@ -438,7 +479,9 @@ class SponsorPanelController extends Controller
             'event' => $event,
             'events' => $events,
             'matches' => $matches,
+            'likesReceived' => array_values($likesReceived),
             'meetings' => $meetings,
+            'csrf_token' => $this->generateCsrf(),
             'meta_title' => 'Tus Matches - ' . $event['name']
         ]);
     }

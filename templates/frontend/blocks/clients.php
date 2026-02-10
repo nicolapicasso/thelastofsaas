@@ -270,7 +270,8 @@ a.client-logo:hover {
 
 .clients-carousel-track {
     display: flex;
-    gap: var(--spacing-lg);
+    flex-wrap: nowrap;
+    gap: var(--spacing-lg, 24px);
     transition: transform 0.5s ease;
 }
 
@@ -284,7 +285,8 @@ a.client-logo:hover {
 
 .clients-carousel-track-autoplay {
     display: flex;
-    gap: var(--spacing-xl);
+    flex-wrap: nowrap;
+    gap: var(--spacing-xl, 32px);
     width: max-content;
     animation: scroll-logos 25s linear infinite;
 }
@@ -312,8 +314,9 @@ a.client-logo:hover {
 }
 
 .clients-carousel .client-logo {
-    flex: 0 0 calc(100% / var(--carousel-items, 5) - var(--spacing-lg) * (var(--carousel-items, 5) - 1) / var(--carousel-items, 5));
-    min-width: calc(100% / var(--carousel-items, 5) - var(--spacing-lg) * (var(--carousel-items, 5) - 1) / var(--carousel-items, 5));
+    flex: 0 0 auto;
+    width: calc((100% - (var(--carousel-items, 5) - 1) * var(--spacing-lg, 24px)) / var(--carousel-items, 5));
+    min-width: 120px;
 }
 
 .carousel-nav {
@@ -379,8 +382,9 @@ a.client-logo:hover {
     }
 
     .clients-carousel .client-logo {
-        flex: 0 0 calc(100% / 4 - var(--spacing-md) * 3 / 4);
-        min-width: calc(100% / 4 - var(--spacing-md) * 3 / 4);
+        flex: 0 0 auto;
+        width: calc((100% - 3 * var(--spacing-md, 16px)) / 4);
+        min-width: 100px;
     }
 }
 
@@ -404,8 +408,10 @@ a.client-logo:hover {
     }
 
     .clients-carousel .client-logo {
-        flex: 0 0 calc(100% / 3 - var(--spacing-md) * 2 / 3);
-        min-width: calc(100% / 3 - var(--spacing-md) * 2 / 3);
+        flex: 0 0 auto;
+        width: calc((100% - 2 * var(--spacing-md, 16px)) / 3);
+        min-width: 90px;
+        scroll-snap-align: start;
     }
 
     .carousel-nav {
@@ -422,10 +428,6 @@ a.client-logo:hover {
 
     .clients-carousel::-webkit-scrollbar {
         display: none;
-    }
-
-    .clients-carousel .client-logo {
-        scroll-snap-align: start;
     }
 
     .clients-carousel-track-autoplay {
@@ -470,8 +472,9 @@ a.client-logo:hover {
     }
 
     .clients-carousel .client-logo {
-        flex: 0 0 calc(50% - var(--spacing-sm) / 2);
-        min-width: calc(50% - var(--spacing-sm) / 2);
+        flex: 0 0 auto;
+        width: calc(50% - var(--spacing-sm, 8px) / 2);
+        min-width: 80px;
     }
 
     .client-logo img {

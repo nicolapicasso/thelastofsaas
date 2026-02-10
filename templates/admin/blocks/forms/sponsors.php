@@ -10,7 +10,7 @@ use App\Models\Event;
 $sponsorModel = new Sponsor();
 $eventModel = new Event();
 
-$allSponsors = $sponsorModel->getActive();
+$allSponsors = $sponsorModel->getAllActive();
 $events = $eventModel->getActive();
 
 // Get sponsor levels

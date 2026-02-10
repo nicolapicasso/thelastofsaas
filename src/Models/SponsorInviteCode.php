@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Core\Model;
+use App\Helpers\UrlHelper;
 
 /**
  * SponsorInviteCode Model
@@ -249,5 +250,17 @@ class SponsorInviteCode extends Model
     public static function getDiscountTypes(): array
     {
         return self::DISCOUNT_TYPES;
+    }
+
+    /**
+     * Generate full registration URL for a sponsor invite code
+     *
+     * @param array $code Code data with 'code' key
+     * @param array $event Event data with 'slug' key
+     * @return string Full registration URL
+     */
+    public static function generateRegistrationUrl(array $code, array $event): string
+    {
+        return UrlHelper::sponsorCodeUrl($event, $code);
     }
 }

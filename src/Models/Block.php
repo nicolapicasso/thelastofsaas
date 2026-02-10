@@ -53,6 +53,7 @@ class Block extends Model
         'companies' => 'Empresas (TLOS)',
         'agenda' => 'Agenda de Evento (TLOS)',
         'tickets' => 'Tickets de Evento (TLOS)',
+        'pricing' => 'Planes y Precios',
     ];
 
     /**
@@ -373,6 +374,11 @@ class Block extends Model
                 'subtitle' => '',
                 'cta_text' => 'Comprar entrada',
             ],
+            'pricing' => [
+                'title' => 'Planes y Precios',
+                'subtitle' => '',
+                'plans' => [],
+            ],
         ];
 
         return $defaults[$type] ?? [];
@@ -619,6 +625,15 @@ class Block extends Model
                 'custom_price' => '',              // override ticket price display
                 'custom_limit' => '',              // override availability display
                 'background_color' => '#f8f9fa',
+            ],
+            'pricing' => [
+                'columns' => 3,                    // 2, 3, 4
+                'card_style' => 'bordered',        // bordered, shadow, minimal
+                'show_price_suffix' => true,
+                'show_description' => true,
+                'show_icon' => false,
+                'equal_height' => true,
+                'background_color' => '#ffffff',
             ],
         ];
 

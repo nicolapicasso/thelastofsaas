@@ -84,12 +84,13 @@ class Event extends Model
     /**
      * Get event sponsors with their level
      */
-    public function getSponsors(int $eventId): array
+    public function getSponsors(int $eventId, bool $includeHidden = true): array
     {
+        $hiddenFilter = $includeHidden ? '' : ' AND s.is_hidden = 0';
         $sql = "SELECT s.*, es.level, es.display_order, es.max_free_tickets
                 FROM sponsors s
                 INNER JOIN event_sponsors es ON s.id = es.sponsor_id
-                WHERE es.event_id = ?
+                WHERE es.event_id = ?{$hiddenFilter}
                 ORDER BY FIELD(es.level, 'platinum', 'gold', 'silver', 'bronze'), es.display_order ASC";
 
         return $this->db->fetchAll($sql, [$eventId]);
@@ -98,12 +99,13 @@ class Event extends Model
     /**
      * Get event sponsors by level
      */
-    public function getSponsorsByLevel(int $eventId, string $level): array
+    public function getSponsorsByLevel(int $eventId, string $level, bool $includeHidden = true): array
     {
+        $hiddenFilter = $includeHidden ? '' : ' AND s.is_hidden = 0';
         $sql = "SELECT s.*, es.level, es.display_order
                 FROM sponsors s
                 INNER JOIN event_sponsors es ON s.id = es.sponsor_id
-                WHERE es.event_id = ? AND es.level = ?
+                WHERE es.event_id = ? AND es.level = ?{$hiddenFilter}
                 ORDER BY es.display_order ASC";
 
         return $this->db->fetchAll($sql, [$eventId, $level]);

@@ -248,6 +248,14 @@ $isEdit = isset($sponsor) && $sponsor;
                                <?= ($sponsor['active'] ?? 1) ? 'checked' : '' ?>>
                         <label for="active">Sponsor Activo</label>
                     </div>
+                    <div class="form-check" style="margin-top: 0.75rem;">
+                        <input type="checkbox" id="is_hidden" name="is_hidden" value="1"
+                               <?= ($sponsor['is_hidden'] ?? 0) ? 'checked' : '' ?>>
+                        <label for="is_hidden">Oculto en portal</label>
+                        <small class="form-help" style="display: block; margin-top: 0.25rem; margin-left: 1.5rem;">
+                            El sponsor puede acceder a su panel pero no aparece en listados publicos
+                        </small>
+                    </div>
                 </div>
             </div>
 

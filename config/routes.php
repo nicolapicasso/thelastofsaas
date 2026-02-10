@@ -18,9 +18,12 @@ use App\Core\Router;
 // Home
 $router->get('/', 'Frontend\\PageController', 'home');
 
-// Blog
-$router->get('/blog', 'Frontend\\BlogController', 'index');
-$router->get('/blog/{slug}', 'Frontend\\BlogController', 'show');
+// Observatorio SaaS (Blog)
+$router->get('/observatorio-saas', 'Frontend\\BlogController', 'index');
+$router->get('/observatorio-saas/{slug}', 'Frontend\\BlogController', 'show');
+// Legacy redirects from /blog to /observatorio-saas
+$router->get('/blog', 'Frontend\\BlogController', 'redirectToObservatorio');
+$router->get('/blog/{slug}', 'Frontend\\BlogController', 'redirectPostToObservatorio');
 
 // Success Cases
 $router->get('/casos-de-exito', 'Frontend\\CasesController', 'index');
@@ -112,6 +115,9 @@ $router->post('/admin/blocks/{id}/clone', 'Admin\\BlocksController', 'clone');
 // Posts
 $router->get('/admin/posts', 'Admin\\PostsController', 'index');
 $router->get('/admin/posts/create', 'Admin\\PostsController', 'create');
+$router->get('/admin/posts/import', 'Admin\\PostsController', 'importForm');
+$router->post('/admin/posts/import/analyze', 'Admin\\PostsController', 'analyzeImport');
+$router->post('/admin/posts/import/execute', 'Admin\\PostsController', 'executeImport');
 $router->post('/admin/posts', 'Admin\\PostsController', 'store');
 $router->get('/admin/posts/{id}/edit', 'Admin\\PostsController', 'edit');
 $router->post('/admin/posts/{id}', 'Admin\\PostsController', 'update');
@@ -343,10 +349,17 @@ $router->get('/admin/tickets/types', 'Admin\\TicketsController', 'types');
 $router->post('/admin/tickets/types', 'Admin\\TicketsController', 'createType');
 $router->post('/admin/tickets/types/{id}', 'Admin\\TicketsController', 'updateType');
 $router->post('/admin/tickets/types/{id}/delete', 'Admin\\TicketsController', 'deleteType');
+$router->get('/admin/tickets/search-sponsors', 'Admin\\TicketsController', 'searchSponsors');
+$router->get('/admin/tickets/search-companies', 'Admin\\TicketsController', 'searchCompanies');
 $router->get('/admin/tickets/{id}', 'Admin\\TicketsController', 'show');
 $router->post('/admin/tickets/{id}/check-in', 'Admin\\TicketsController', 'checkIn');
 $router->post('/admin/tickets/{id}/approve', 'Admin\\TicketsController', 'approve');
 $router->post('/admin/tickets/{id}/cancel', 'Admin\\TicketsController', 'cancel');
+$router->post('/admin/tickets/{id}/assign', 'Admin\\TicketsController', 'assignToEntity');
+$router->post('/admin/tickets/{id}/create-company', 'Admin\\TicketsController', 'createCompanyFromTicket');
+$router->post('/admin/tickets/{id}/create-sponsor', 'Admin\\TicketsController', 'createSponsorFromTicket');
+$router->post('/admin/tickets/{id}/remove-assignment', 'Admin\\TicketsController', 'removeAssignment');
+$router->post('/admin/tickets/{id}/resend-email', 'Admin\\TicketsController', 'resendEmail');
 $router->get('/admin/tickets/{id}/download', 'Admin\\TicketsController', 'download');
 
 // Meetings
@@ -397,6 +410,24 @@ $router->get('/admin/tlos-settings/get', 'Admin\\TlosSettingsController', 'get')
 $router->post('/admin/tlos-settings/set', 'Admin\\TlosSettingsController', 'set');
 $router->post('/admin/tlos-settings/test-email', 'Admin\\TlosSettingsController', 'testEmail');
 $router->post('/admin/tlos-settings/test-stripe', 'Admin\\TlosSettingsController', 'testStripe');
+$router->post('/admin/tlos-settings/test-omniwallet', 'Admin\\TlosSettingsController', 'testOmniwallet');
+
+// Email Configuration
+$router->get('/admin/emails', 'Admin\\EmailsController', 'index');
+$router->get('/admin/emails/smtp', 'Admin\\EmailsController', 'smtpSettings');
+$router->post('/admin/emails/smtp', 'Admin\\EmailsController', 'updateSmtpSettings');
+$router->post('/admin/emails/test-smtp', 'Admin\\EmailsController', 'testSmtp');
+$router->get('/admin/emails/templates/{id}/edit', 'Admin\\EmailsController', 'editTemplate');
+$router->post('/admin/emails/templates/{id}/update', 'Admin\\EmailsController', 'updateTemplate');
+$router->post('/admin/emails/templates/{id}/reset', 'Admin\\EmailsController', 'resetTemplate');
+$router->get('/admin/emails/templates/{id}/preview', 'Admin\\EmailsController', 'previewTemplate');
+// Bulk/Mass Email
+$router->get('/admin/emails/bulk', 'Admin\\EmailsController', 'bulk');
+$router->post('/admin/emails/bulk/send', 'Admin\\EmailsController', 'sendBulk');
+$router->post('/admin/emails/bulk/preview', 'Admin\\EmailsController', 'previewBulk');
+$router->get('/admin/emails/bulk/recipients', 'Admin\\EmailsController', 'getRecipients');
+// Email History
+$router->get('/admin/emails/history', 'Admin\\EmailsController', 'history');
 
 // Rooms
 $router->get('/admin/rooms', 'Admin\\RoomsController', 'index');
@@ -504,6 +535,13 @@ $router->post('/webhook/stripe', 'WebhookController', 'stripe');
 $router->post('/api/translate', 'Api\\TranslationController', 'translate');
 $router->get('/api/search', 'Api\\SearchController', 'search');
 $router->post('/api/contact/submit', 'Api\\ContactController', 'submit');
+
+// ============================================
+// Legacy Redirects
+// ============================================
+
+// Old event URL from previous system
+$router->get('/the-last-of-saas-barcelona-2025', 'Frontend\\PageController', 'redirectToHome');
 
 // ============================================
 // Catch-all Route (MUST be last!)

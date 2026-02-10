@@ -260,4 +260,108 @@ class PostsController extends Controller
     {
         $this->handleGenerateQA((int) $id, Post::class, 'post', ['title', 'subtitle', 'excerpt', 'content']);
     }
+
+    /**
+     * Show WordPress import form
+     */
+    public function importForm(): void
+    {
+        $this->requireAuth();
+
+        $this->renderAdmin('posts/import', [
+            'title' => 'Importar desde WordPress',
+            'csrf_token' => $this->generateCsrf(),
+            'flash' => $this->getFlash(),
+        ]);
+    }
+
+    /**
+     * Analyze WordPress XML file
+     */
+    public function analyzeImport(): void
+    {
+        $this->requireAuth();
+
+        if (!$this->validateCsrf()) {
+            $this->json(['success' => false, 'error' => 'Token inválido'], 403);
+            return;
+        }
+
+        if (!isset($_FILES['xml_file']) || $_FILES['xml_file']['error'] !== UPLOAD_ERR_OK) {
+            $this->json(['success' => false, 'error' => 'No se ha subido ningún archivo']);
+            return;
+        }
+
+        $file = $_FILES['xml_file'];
+
+        // Validate file type
+        $extension = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+        if ($extension !== 'xml') {
+            $this->json(['success' => false, 'error' => 'El archivo debe ser XML']);
+            return;
+        }
+
+        // Move to temp location
+        $tempPath = sys_get_temp_dir() . '/wp_import_' . uniqid() . '.xml';
+        if (!move_uploaded_file($file['tmp_name'], $tempPath)) {
+            $this->json(['success' => false, 'error' => 'Error al procesar el archivo']);
+            return;
+        }
+
+        // Store path in session for later import
+        $_SESSION['wp_import_file'] = $tempPath;
+
+        // Analyze the file
+        $importer = new \App\Services\WordPressImporter();
+        $stats = $importer->analyze($tempPath);
+
+        if (isset($stats['error'])) {
+            $this->json(['success' => false, 'error' => $stats['error']]);
+            return;
+        }
+
+        $this->json([
+            'success' => true,
+            'stats' => $stats
+        ]);
+    }
+
+    /**
+     * Execute WordPress import
+     */
+    public function executeImport(): void
+    {
+        $this->requireAuth();
+
+        if (!$this->validateCsrf()) {
+            $this->json(['success' => false, 'error' => 'Token inválido'], 403);
+            return;
+        }
+
+        $tempPath = $_SESSION['wp_import_file'] ?? null;
+        if (!$tempPath || !file_exists($tempPath)) {
+            $this->json(['success' => false, 'error' => 'Archivo de importación no encontrado. Vuelve a subir el archivo.']);
+            return;
+        }
+
+        // Execute import
+        $importer = new \App\Services\WordPressImporter();
+        $result = $importer->import($tempPath);
+
+        // Clean up temp file
+        @unlink($tempPath);
+        unset($_SESSION['wp_import_file']);
+
+        if (!$result['success']) {
+            $this->json(['success' => false, 'error' => $result['error']]);
+            return;
+        }
+
+        $this->json([
+            'success' => true,
+            'imported' => $result['imported'],
+            'posts' => $result['posts'],
+            'errors' => $result['errors']
+        ]);
+    }
 }

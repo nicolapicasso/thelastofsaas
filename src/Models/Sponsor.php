@@ -26,6 +26,7 @@ class Sponsor extends Model
         'contact_phone',
         'code',
         'active',
+        'is_hidden',
         'max_simultaneous_meetings',
         'linkedin_url',
         'twitter_url',
@@ -48,9 +49,18 @@ class Sponsor extends Model
     }
 
     /**
-     * Get active sponsors
+     * Get active sponsors (excludes hidden ones)
      */
     public function getActive(): array
+    {
+        $sql = "SELECT * FROM {$this->table} WHERE active = 1 AND (is_hidden = 0 OR is_hidden IS NULL) ORDER BY name ASC";
+        return $this->db->fetchAll($sql);
+    }
+
+    /**
+     * Get all active sponsors (includes hidden ones - for admin)
+     */
+    public function getAllActive(): array
     {
         return $this->where(['active' => 1], ['name' => 'ASC']);
     }
@@ -91,9 +101,23 @@ class Sponsor extends Model
     }
 
     /**
-     * Get sponsors for an event
+     * Get sponsors for an event (excludes hidden ones for public display)
      */
     public function getByEvent(int $eventId): array
+    {
+        $sql = "SELECT s.*, es.level, es.display_order
+                FROM sponsors s
+                INNER JOIN event_sponsors es ON s.id = es.sponsor_id
+                WHERE es.event_id = ? AND s.active = 1 AND (s.is_hidden = 0 OR s.is_hidden IS NULL)
+                ORDER BY FIELD(es.level, 'platinum', 'gold', 'silver', 'bronze'), es.display_order ASC";
+
+        return $this->db->fetchAll($sql, [$eventId]);
+    }
+
+    /**
+     * Get all sponsors for an event (includes hidden ones - for admin)
+     */
+    public function getAllByEvent(int $eventId): array
     {
         $sql = "SELECT s.*, es.level, es.display_order
                 FROM sponsors s

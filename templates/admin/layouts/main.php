@@ -9,7 +9,7 @@ $_ticketModel = new \App\Models\Ticket();
 $_pendingTicketsCount = $_ticketModel->count(['status' => 'pending']);
 ?>
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" data-page-time="<?= time() ?>">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -17,6 +17,17 @@ $_pendingTicketsCount = $_ticketModel->count(['status' => 'pending']);
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
+    <!-- Immediate cache detection - runs before page renders -->
+    <script>
+    (function(){
+        var pageTime = parseInt(document.documentElement.getAttribute('data-page-time')) * 1000;
+        var now = Date.now();
+        // If page is more than 10 seconds old, it's cached - reload
+        if (now - pageTime > 10000) {
+            window.location.reload(true);
+        }
+    })();
+    </script>
     <title><?= htmlspecialchars($title ?? 'Admin') ?> - <?= htmlspecialchars($_siteName) ?></title>
     <meta name="csrf-token" content="<?= $_csrf_token ?? '' ?>">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
@@ -146,6 +157,12 @@ $_pendingTicketsCount = $_ticketModel->count(['status' => 'pending']);
                         </a>
                     </li>
                     <li>
+                        <a href="/admin/categories" class="<?= strpos($_SERVER['REQUEST_URI'], '/admin/categories') !== false ? 'active' : '' ?>">
+                            <span class="nav-icon"><i class="fas fa-folder"></i></span>
+                            Categorías
+                        </a>
+                    </li>
+                    <li>
                         <a href="/admin/faqs" class="<?= strpos($_SERVER['REQUEST_URI'], '/admin/faqs') !== false ? 'active' : '' ?>">
                             <span class="nav-icon"><i class="fas fa-question-circle"></i></span>
                             FAQs
@@ -188,6 +205,12 @@ $_pendingTicketsCount = $_ticketModel->count(['status' => 'pending']);
                         <a href="/admin/settings" class="<?= strpos($_SERVER['REQUEST_URI'], '/admin/settings') !== false ? 'active' : '' ?>">
                             <span class="nav-icon"><i class="fas fa-cog"></i></span>
                             Configuración General
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/admin/emails" class="<?= strpos($_SERVER['REQUEST_URI'], '/admin/emails') !== false ? 'active' : '' ?>">
+                            <span class="nav-icon"><i class="fas fa-envelope"></i></span>
+                            Configuración Emails
                         </a>
                     </li>
                 </ul>
@@ -233,25 +256,28 @@ $_pendingTicketsCount = $_ticketModel->count(['status' => 'pending']);
     <!-- Prevent bfcache (back-forward cache) from showing stale pages -->
     <script>
     (function() {
+        var pageLoadTime = Date.now();
+
         // Force reload when page is restored from bfcache
         window.addEventListener('pageshow', function(event) {
             if (event.persisted) {
-                window.location.reload();
+                console.log('bfcache detected, forcing reload');
+                window.location.reload(true);
             }
         });
 
-        // Also handle navigation via history API
+        // Handle navigation via history API
         window.addEventListener('popstate', function() {
-            window.location.reload();
+            window.location.reload(true);
         });
 
-        // Mark page load time to detect stale pages
-        var pageLoadTime = Date.now();
+        // Detect stale pages when tab becomes visible again
         document.addEventListener('visibilitychange', function() {
             if (document.visibilityState === 'visible') {
                 // If page has been hidden for more than 30 seconds, reload
                 if (Date.now() - pageLoadTime > 30000) {
-                    window.location.reload();
+                    console.log('Stale page detected, forcing reload');
+                    window.location.reload(true);
                 }
             }
         });
