@@ -51,7 +51,8 @@ class Translation extends Model
         'client' => 'Cliente',
         'faq' => 'FAQ',
         'success_case' => 'Caso de Éxito',
-        'block' => 'Bloque',
+        'block' => 'Bloque de Página',
+        'service_block' => 'Bloque de Servicio',
         'landing' => 'Landing',
         'landing_theme' => 'Tema Landing',
         'ui' => 'Interfaz'
@@ -172,7 +173,8 @@ class Translation extends Model
                     WHEN 'client' THEN (SELECT name FROM clients WHERE id = t.entity_id)
                     WHEN 'faq' THEN (SELECT question FROM faqs WHERE id = t.entity_id)
                     WHEN 'success_case' THEN (SELECT title FROM success_cases WHERE id = t.entity_id)
-                    WHEN 'block' THEN CONCAT('Bloque #', t.entity_id)
+                    WHEN 'block' THEN CONCAT('Bloque Página #', t.entity_id)
+                    WHEN 'service_block' THEN CONCAT('Bloque Servicio #', t.entity_id)
                     WHEN 'landing' THEN (SELECT title FROM landings WHERE id = t.entity_id)
                     WHEN 'landing_theme' THEN (SELECT title FROM landing_themes WHERE id = t.entity_id)
                     ELSE NULL

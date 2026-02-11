@@ -52,6 +52,8 @@ class ServiceBlock extends Block
         return array_map(function ($block) {
             $block['content'] = json_decode($block['content'], true) ?? [];
             $block['settings'] = json_decode($block['settings'], true) ?? [];
+            // Mark as service_block for translation system to use correct entity_type
+            $block['block_source'] = 'service_block';
             return $block;
         }, $blocks);
     }

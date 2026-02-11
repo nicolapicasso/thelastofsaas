@@ -193,21 +193,23 @@ namespace App\Helpers {
 
         /**
          * Translate block content (JSON)
-         * Handles nested content structure in page blocks
+         * Handles nested content structure in page blocks and service blocks
+         * @param string $entityType The entity type for translation lookup ('block' for page_blocks, 'service_block' for service_blocks)
          */
-        public function translateBlockContent(int $blockId, array $content): array
+        public function translateBlockContent(int $blockId, array $content, string $entityType = 'block'): array
         {
             if ($this->currentLanguage === $this->defaultLanguage) {
                 return $content;
             }
 
-            return $this->translateBlockContentRecursive($blockId, $content, '');
+            return $this->translateBlockContentRecursive($blockId, $content, '', $entityType);
         }
 
         /**
          * Recursively translate block content
+         * @param string $entityType The entity type for translation lookup
          */
-        private function translateBlockContentRecursive(int $blockId, array $content, string $prefix): array
+        private function translateBlockContentRecursive(int $blockId, array $content, string $prefix, string $entityType = 'block'): array
         {
             $translatableKeys = [
                 'title', 'subtitle', 'description', 'text', 'content', 'cta_text',
@@ -232,7 +234,7 @@ namespace App\Helpers {
                         if (in_array($key, $translatableArrayKeys) && is_string($value[0])) {
                             foreach ($value as $index => $item) {
                                 if (is_string($item) && !empty($item)) {
-                                    $result[$key][$index] = $this->get('block', $blockId, "{$fieldPath}.{$index}", $item);
+                                    $result[$key][$index] = $this->get($entityType, $blockId, "{$fieldPath}.{$index}", $item);
                                 }
                             }
                         } else {
@@ -242,18 +244,19 @@ namespace App\Helpers {
                                     $result[$key][$index] = $this->translateBlockContentRecursive(
                                         $blockId,
                                         $item,
-                                        "{$fieldPath}.{$index}"
+                                        "{$fieldPath}.{$index}",
+                                        $entityType
                                     );
                                 }
                             }
                         }
                     } else {
                         // Associative array, recurse
-                        $result[$key] = $this->translateBlockContentRecursive($blockId, $value, $fieldPath);
+                        $result[$key] = $this->translateBlockContentRecursive($blockId, $value, $fieldPath, $entityType);
                     }
                 } elseif (is_string($value) && !empty($value) && in_array($key, $translatableKeys)) {
                     // Translate this field
-                    $result[$key] = $this->get('block', $blockId, $fieldPath, $value);
+                    $result[$key] = $this->get($entityType, $blockId, $fieldPath, $value);
                 }
             }
 
