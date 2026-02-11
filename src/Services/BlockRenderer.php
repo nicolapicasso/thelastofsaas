@@ -124,7 +124,9 @@ class BlockRenderer
 
         // Translate block content if block has an ID
         if (!empty($block['id'])) {
-            $content = $this->translator->translateBlockContent((int)$block['id'], $content);
+            // Determine entity type based on block source (service_block vs page_block)
+            $entityType = $block['block_source'] ?? 'block';
+            $content = $this->translator->translateBlockContent((int)$block['id'], $content, $entityType);
         }
 
         // Look for template

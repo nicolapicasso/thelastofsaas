@@ -611,6 +611,26 @@ Text to translate:
             // Table might not exist
         }
 
+        // Service Blocks (use different entity_type to avoid ID conflicts with page_blocks)
+        try {
+            $stmt = $db->query("SELECT sb.id, sb.content, sb.type FROM service_blocks sb JOIN services s ON s.id = sb.service_id WHERE sb.is_active = 1 AND s.is_active = 1");
+            foreach ($stmt->fetchAll() as $row) {
+                $content = json_decode($row['content'], true);
+                if ($content) {
+                    $fields = $this->extractBlockTranslatableFields($content, '');
+                    if (!empty($fields)) {
+                        $entities[] = [
+                            'type' => 'service_block',
+                            'id' => $row['id'],
+                            'fields' => $fields
+                        ];
+                    }
+                }
+            }
+        } catch (\Exception $e) {
+            // Table might not exist
+        }
+
         // Landings (admin-managed fields only, not HTML content)
         try {
             $stmt = $db->query("SELECT id, title, subtitle, description, meta_title, meta_description FROM landings WHERE is_active = 1");
