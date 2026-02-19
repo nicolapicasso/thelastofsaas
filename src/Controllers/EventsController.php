@@ -254,15 +254,10 @@ class EventsController extends BaseController
         $events = $sponsorModel->getEvents($sponsor['id']);
         $this->translator->translateEntities('event', $events);
 
-        // Get activities associated with this sponsor
-        $sponsorActivities = $this->activityModel->getBySponsor($sponsor['id']);
-        $this->translator->translateEntities('activity', $sponsorActivities);
-
         $this->view->setLayout('layouts/event');
         $this->render('sponsors/show', $this->getEventData([
             'sponsor' => $sponsor,
             'events' => $events,
-            'sponsorActivities' => $sponsorActivities,
             'meta_title' => $sponsor['name'] . '' . ($this->getSiteName() ? ' - ' . $this->getSiteName() : ''),
             'meta_description' => $sponsor['description'] ?? ''
         ]));
