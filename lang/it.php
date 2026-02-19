@@ -35,7 +35,7 @@ return [
 
     // Features page
     'features_title' => 'Funzionalità',
-    'features_subtitle' => 'Scopri tutti gli strumenti che Omniwallet mette a tua disposizione per trasformare il tuo business',
+    'features_subtitle' => 'Scopri tutti gli strumenti che mettiamo a tua disposizione per trasformare il tuo business',
     'category' => 'Categoria',
     'all_categories' => 'Tutte le categorie',
     'services_in_category' => 'Servizi disponibili in questa categoria',
@@ -48,14 +48,14 @@ return [
     'features_count' => 'funzionalità',
     'no_features_found' => 'Nessuna funzionalità trovata',
     'try_different_filters' => 'Prova a cambiare i filtri',
-    'start_using_omniwallet' => 'Inizia a usare Omniwallet oggi',
+    'start_using_omniwallet' => 'Inizia a usare la piattaforma oggi',
     'all_features_available' => 'Tutte queste funzionalità disponibili dal primo giorno',
     'start_free_btn' => 'Inizia gratis',
     'contact_sales' => 'Contatta vendite',
 
     // Cases page
     'cases_title' => 'Casi di successo',
-    'cases_subtitle' => 'Scopri come aziende come la tua si sono trasformate con Omniwallet',
+    'cases_subtitle' => 'Scopri come aziende come la tua si sono trasformate con la nostra piattaforma',
     'industry' => 'Settore',
     'all_industries' => 'Tutti i settori',
     'search_cases' => 'Cerca casi di successo...',
@@ -76,7 +76,7 @@ return [
     'no_cases_available' => 'Nessun caso di successo disponibile',
     'more_cases_coming_soon' => 'Nuovi casi in arrivo presto',
     'cta_next_success_story' => 'Vuoi essere il nostro prossimo caso di successo?',
-    'cta_join_companies' => 'Unisciti alle aziende che già si fidano di Omniwallet',
+    'cta_join_companies' => 'Unisciti alle aziende che già si fidano di noi',
     'contact_now' => 'Contatta ora',
     'about' => 'Informazioni su',
     'company_size' => 'Dimensione',
@@ -125,7 +125,7 @@ return [
 
     // Integrations page
     'integrations_title' => 'Integrazioni',
-    'integrations_subtitle' => 'Connetti Omniwallet con i tuoi strumenti preferiti e potenzia il tuo business',
+    'integrations_subtitle' => 'Connetti la piattaforma con i tuoi strumenti preferiti e potenzia il tuo business',
     'integration_type' => 'Tipo',
     'all_types' => 'Tutte',
     'search_integration' => 'Cerca integrazione...',
@@ -145,7 +145,7 @@ return [
 
     // Team page
     'team_title' => 'Il nostro team',
-    'team_subtitle' => 'Le persone dietro Omniwallet',
+    'team_subtitle' => 'Scopri le persone che compongono il nostro team',
     'meet_team' => 'Conosci il team',
 
     // Contact/CTA
@@ -223,7 +223,7 @@ return [
     // Landings
     'landing_resources' => 'Risorse',
     'landing_resources_title' => 'Risorse e Casi d\'Uso',
-    'landing_resources_subtitle' => 'Scopri come sfruttare al meglio Omniwallet',
+    'landing_resources_subtitle' => 'Scopri come sfruttare al meglio la piattaforma',
     'no_content_available' => 'Nessun contenuto disponibile al momento.',
 
     // Empty states
@@ -287,6 +287,55 @@ return [
     'request_info' => 'Richiedi informazioni',
 
     // Landings Block
+    // Events
+    'upcoming_events' => 'Prossimi Eventi',
+    'upcoming_events_subtitle' => 'Scopri i migliori eventi di networking B2B e SaaS',
+    'no_events_scheduled' => 'Nessun evento programmato',
+    'no_events_hint' => 'Torna presto per scoprire nuovi eventi',
+    'featured' => 'In evidenza',
+    'seats' => 'posti',
+    'view_event' => 'Vedi evento',
+    'from_free' => 'DA GRATIS',
+    'from' => 'DA',
+    'limited_seats' => 'POSTI LIMITATI',
+    'get_ticket' => 'OTTIENI IL BIGLIETTO',
+    'about_event' => 'SULL\'EVENTO',
+    'joining_us' => 'CI ACCOMPAGNANO',
+    'agenda' => 'PROGRAMMA',
+    'our_spaces' => 'I NOSTRI SPAZI',
+    'speakers' => 'RELATORI',
+    'sponsors' => 'SPONSOR',
+    'event_details' => 'DETTAGLI DELL\'EVENTO',
+    'date' => 'DATA',
+    'time' => 'ORA',
+    'venue' => 'LUOGO',
+    'capacity' => 'CAPIENZA',
+    'people' => 'persone',
+    'get_your_ticket' => 'OTTIENI IL TUO BIGLIETTO',
+    'dont_miss_event' => 'Non perdere questo evento. I posti sono limitati.',
+    'register_now' => 'REGISTRATI ORA',
+    'at_speaker_company' => 'presso',
+    'invitation_from' => 'Invito da',
+    'free' => 'Gratis',
+    'seat_available' => 'posto disponibile',
+    'seats_available' => 'posti disponibili',
+    'sold_out' => 'Esaurito',
+    'seats_available_generic' => 'Posti disponibili',
+    'buy_ticket' => 'Acquista biglietto',
+    'activity_type_charla' => 'Conferenza',
+    'activity_type_mesa_redonda' => 'Tavola rotonda',
+    'activity_type_taller' => 'Workshop',
+    'activity_type_reuniones_1to1' => 'Incontri 1-a-1',
+    'activity_type_networking' => 'Networking',
+    'activity_type_comida' => 'Pranzo',
+    'activity_type_cafe' => 'Pausa caffè',
+    'activity_type_bienvenida' => 'Benvenuto',
+    'activity_type_cierre' => 'Chiusura',
+    'activity_type_registro' => 'Registrazione',
+    'activity_type_otro' => 'Altro',
+    'view_all_activities' => 'Vedi tutte le attività',
+    'no_activities_available' => 'Nessuna attività disponibile',
+
     'view_solutions' => 'Vedi soluzioni',
     'no_landings_available' => 'Nessuna landing page disponibile',
 
@@ -310,13 +359,13 @@ return [
     'view_partner' => 'Vedi partner',
     'related_partners' => 'Partner correlati',
     'back_to_directory' => 'Torna alla directory',
-    'become_partner_title' => 'Vuoi diventare partner di Omniwallet?',
+    'become_partner_title' => 'Vuoi diventare partner di noi?',
     'become_partner_text' => 'Unisciti al nostro programma partner e aiuta le aziende a trasformare la loro strategia di fidelizzazione.',
     'all_countries' => 'Tutti i paesi',
     'all_cities' => 'Tutte le città',
     'search_partners' => 'Cerca partner...',
     'certified_partners' => 'Partner Certificati',
-    'certified_partners_desc' => 'I nostri Partner Certificati sono professionisti e agenzie che hanno superato il nostro test di certificazione, accreditandosi come esperti in loyalty e nell\'uso di Omniwallet.',
+    'certified_partners_desc' => 'I nostri Partner Certificati sono professionisti e agenzie che hanno superato il nostro test di certificazione, accreditandosi come esperti in loyalty e nell\'uso di noi.',
     'featured_partners' => 'Partner in Evidenza',
     'no_partners_found' => 'Nessun partner trovato',
     'try_different_filters' => 'Prova a modificare i filtri di ricerca',

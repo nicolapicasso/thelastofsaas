@@ -53,6 +53,7 @@ foreach ($videos as $video) {
             'thumbnail' => $video['thumbnail'] ?? $parsed['thumbnail'] ?? '',
             'type' => $parsed['type'],
             'id' => $parsed['id'],
+            'description' => $video['description'] ?? '',
         ];
     }
 }
@@ -113,6 +114,11 @@ $blockId = 'video-gallery-' . uniqid();
                                         <i class="fas fa-play"></i>
                                     </button>
                                 </div>
+                                <?php if (!empty($video['description'])): ?>
+                                    <div class="vgallery-description">
+                                        <p><?= htmlspecialchars($video['description']) ?></p>
+                                    </div>
+                                <?php endif; ?>
                             </div>
                         <?php endforeach; ?>
                     </div>
@@ -141,6 +147,11 @@ $blockId = 'video-gallery-' . uniqid();
                                 <i class="fas fa-play"></i>
                             </button>
                         </div>
+                        <?php if (!empty($video['description'])): ?>
+                            <div class="vgallery-description">
+                                <p><?= htmlspecialchars($video['description']) ?></p>
+                            </div>
+                        <?php endif; ?>
                     </div>
                 <?php endforeach; ?>
             </div>
@@ -259,6 +270,26 @@ $blockId = 'video-gallery-' . uniqid();
 
 #<?= $blockId ?> .vgallery-play-btn i {
     margin-left: 3px;
+}
+
+/* ================================
+   VIDEO DESCRIPTION
+   ================================ */
+#<?= $blockId ?> .vgallery-description {
+    padding: 12px 16px;
+    background: var(--color-gray-100, #f3f4f6);
+    border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+}
+
+#<?= $blockId ?> .vgallery-description p {
+    margin: 0;
+    font-size: var(--font-size-sm, 14px);
+    color: var(--color-gray-700, #374151);
+    line-height: 1.5;
+}
+
+#<?= $blockId ?> .vgallery-item:has(.vgallery-description) .vgallery-thumbnail {
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
 }
 
 /* ================================

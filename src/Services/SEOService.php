@@ -19,10 +19,10 @@ class SEOService
     private array $openGraph = [];
     private array $twitterCard = [];
 
-    private string $siteName = 'Omniwallet';
-    private string $baseUrl = 'https://omniwallet.es';
+    private string $siteName = '';
+    private string $baseUrl = '';
     private string $defaultImage = '/assets/images/og-default.jpg';
-    private string $twitterHandle = '@omniwallet';
+    private string $twitterHandle = '';
 
     private array $supportedLanguages = ['es', 'en', 'it', 'fr', 'de'];
     private string $currentLanguage = 'es';
@@ -89,6 +89,50 @@ class SEOService
     {
         $this->currentLanguage = $language;
         return $this;
+    }
+
+    /**
+     * Set site name (for OG and meta tags)
+     */
+    public function setSiteName(string $name): self
+    {
+        $this->siteName = $name;
+        return $this;
+    }
+
+    /**
+     * Set base URL (for canonical, OG, sitemap)
+     */
+    public function setBaseUrl(string $url): self
+    {
+        $this->baseUrl = rtrim($url, '/');
+        return $this;
+    }
+
+    /**
+     * Set Twitter handle
+     */
+    public function setTwitterHandle(string $handle): self
+    {
+        $this->twitterHandle = $handle;
+        return $this;
+    }
+
+    /**
+     * Set default OG image
+     */
+    public function setDefaultImage(string $image): self
+    {
+        $this->defaultImage = $image;
+        return $this;
+    }
+
+    /**
+     * Get base URL
+     */
+    public function getBaseUrl(): string
+    {
+        return $this->baseUrl;
     }
 
     /**
@@ -270,10 +314,21 @@ class SEOService
     /**
      * Generate sitemap XML
      */
-    public static function generateSitemap(): string
+    public static function generateSitemap(?string $siteUrl = null): string
     {
         $db = \App\Core\Database::getInstance()->getConnection();
-        $baseUrl = 'https://omniwallet.es';
+
+        // Try to get site_url from settings if not provided
+        if (!$siteUrl) {
+            try {
+                $stmt = $db->prepare("SELECT value FROM settings WHERE `key` = 'site_url' LIMIT 1");
+                $stmt->execute();
+                $siteUrl = $stmt->fetchColumn() ?: '';
+            } catch (\Exception $e) {
+                $siteUrl = '';
+            }
+        }
+        $baseUrl = rtrim($siteUrl, '/');
 
         $xml = '<?xml version="1.0" encoding="UTF-8"?>' . "\n";
         $xml .= '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' . "\n";
@@ -293,26 +348,46 @@ class SEOService
         }
 
         // Blog posts
-        $stmt = $db->query("SELECT slug, updated_at FROM posts WHERE status = 'published'");
-        foreach ($stmt->fetchAll() as $row) {
-            $xml .= self::sitemapUrl($baseUrl . '/blog/' . $row['slug'], $row['updated_at'], 'weekly', '0.6');
+        if (self::tableExists($db, 'posts')) {
+            $stmt = $db->query("SELECT slug, updated_at FROM posts WHERE status = 'published'");
+            foreach ($stmt->fetchAll() as $row) {
+                $xml .= self::sitemapUrl($baseUrl . '/blog/' . $row['slug'], $row['updated_at'], 'weekly', '0.6');
+            }
         }
 
         // Success cases
-        $stmt = $db->query("SELECT slug, updated_at FROM success_cases WHERE status = 'published'");
-        foreach ($stmt->fetchAll() as $row) {
-            $xml .= self::sitemapUrl($baseUrl . '/casos-de-exito/' . $row['slug'], $row['updated_at'], 'monthly', '0.6');
+        if (self::tableExists($db, 'success_cases')) {
+            $stmt = $db->query("SELECT slug, updated_at FROM success_cases WHERE status = 'published'");
+            foreach ($stmt->fetchAll() as $row) {
+                $xml .= self::sitemapUrl($baseUrl . '/casos-de-exito/' . $row['slug'], $row['updated_at'], 'monthly', '0.6');
+            }
         }
 
         // Knowledge articles
-        $stmt = $db->query("SELECT slug, updated_at FROM knowledge_articles WHERE status = 'published'");
-        foreach ($stmt->fetchAll() as $row) {
-            $xml .= self::sitemapUrl($baseUrl . '/ayuda/' . $row['slug'], $row['updated_at'], 'weekly', '0.5');
+        if (self::tableExists($db, 'knowledge_articles')) {
+            $stmt = $db->query("SELECT slug, updated_at FROM knowledge_articles WHERE status = 'published'");
+            foreach ($stmt->fetchAll() as $row) {
+                $xml .= self::sitemapUrl($baseUrl . '/ayuda/' . $row['slug'], $row['updated_at'], 'weekly', '0.5');
+            }
         }
 
         $xml .= '</urlset>';
 
         return $xml;
+    }
+
+    /**
+     * Check if a table exists in the database
+     */
+    private static function tableExists(\PDO $db, string $tableName): bool
+    {
+        try {
+            $stmt = $db->prepare("SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = DATABASE() AND table_name = ?");
+            $stmt->execute([$tableName]);
+            return (int) $stmt->fetchColumn() > 0;
+        } catch (\Exception $e) {
+            return false;
+        }
     }
 
     /**

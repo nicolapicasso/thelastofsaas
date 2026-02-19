@@ -1,14 +1,38 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="<?= $currentLang ?? 'es' ?>">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?= htmlspecialchars($meta_title ?? 'Evento - The Last of SaaS') ?></title>
+
+    <!-- Cache control meta tags -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+
+    <title><?= htmlspecialchars($meta_title ?? 'Evento') ?></title>
     <?php if (!empty($meta_description)): ?>
         <meta name="description" content="<?= htmlspecialchars($meta_description) ?>">
     <?php endif; ?>
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="<?= htmlspecialchars($meta_title ?? '') ?>">
+    <?php if (!empty($meta_description)): ?>
+        <meta property="og:description" content="<?= htmlspecialchars($meta_description) ?>">
+    <?php endif; ?>
     <?php if (!empty($meta_image)): ?>
         <meta property="og:image" content="<?= htmlspecialchars($meta_image) ?>">
+    <?php endif; ?>
+    <meta property="og:url" content="<?= htmlspecialchars((isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http') . '://' . ($_SERVER['HTTP_HOST'] ?? '') . ($_SERVER['REQUEST_URI'] ?? '')) ?>">
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="<?= htmlspecialchars($meta_title ?? '') ?>">
+    <?php if (!empty($meta_description)): ?>
+        <meta name="twitter:description" content="<?= htmlspecialchars($meta_description) ?>">
+    <?php endif; ?>
+    <?php if (!empty($meta_image)): ?>
+        <meta name="twitter:image" content="<?= htmlspecialchars($meta_image) ?>">
     <?php endif; ?>
 
     <!-- Favicon -->
@@ -48,13 +72,32 @@
             --transition: all 0.3s ease-in-out;
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        html { scroll-behavior: smooth; }
+        /* Reset only for event page content, not header */
+        .event-hero-parallax *,
+        .event-cta *,
+        .event-description *,
+        .event-companies *,
+        .event-agenda *,
+        .event-speakers *,
+        .event-details *,
+        .event-sponsors-section *,
+        .event-content-section * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+            overflow-x: hidden;
+        }
 
         body {
             font-family: var(--font-body);
             line-height: 1.6;
             -webkit-font-smoothing: antialiased;
+            overflow-x: hidden;
+            width: 100%;
         }
 
         /* Container - Full width with padding */
@@ -63,6 +106,7 @@
             max-width: 1400px;
             margin: 0 auto;
             padding: 0 4rem;
+            overflow-x: hidden;
         }
 
         /* Typography */
@@ -245,6 +289,9 @@
             background-color: #fff;
             padding: 10px;
             color: #000;
+            overflow-wrap: break-word;
+            word-wrap: break-word;
+            word-break: break-word;
         }
 
         /* Legacy hero minimal support */
@@ -339,10 +386,15 @@
             font-size: 18px;
             line-height: 1.9;
             color: var(--text-light);
+            overflow-wrap: break-word;
+            word-wrap: break-word;
+            word-break: break-word;
         }
 
         .description-content p {
             margin-bottom: 1.5rem;
+            overflow-wrap: break-word;
+            word-wrap: break-word;
         }
 
         .description-content strong {
@@ -629,7 +681,11 @@
             background: var(--text-light);
             border: 1px solid var(--text-light);
             padding: 0.75rem 1.5rem;
-            margin-bottom: 1.5rem;
+            margin: 2rem 0 1.5rem 0;
+        }
+
+        .agenda-timeline .agenda-date:first-child {
+            margin-top: 0;
         }
 
         .agenda-date i {
@@ -648,6 +704,22 @@
             padding: 1.5rem 0;
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
             position: relative;
+            text-decoration: none;
+            color: inherit;
+            transition: all 0.2s ease;
+        }
+
+        .agenda-item-link {
+            cursor: pointer;
+        }
+
+        .agenda-item-link:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+
+        .agenda-item-link:hover .time-start {
+            transform: scale(1.05);
+            display: inline-block;
         }
 
         .agenda-item::before {
@@ -678,6 +750,8 @@
             font-family: var(--font-accent);
             font-size: 18px;
             font-weight: 700;
+            color: var(--text-light);
+            transition: transform 0.2s ease;
         }
 
         .agenda-time .time-end {
@@ -686,8 +760,6 @@
             font-size: 11px;
             color: var(--text-light);
         }
-
-        .agenda-content { flex: 1; }
 
         .agenda-type {
             display: inline-block;
@@ -701,11 +773,58 @@
             margin-bottom: 0.5rem;
         }
 
+        .agenda-content {
+            flex: 1;
+            position: relative;
+        }
+
         .agenda-content h4 {
             font-size: 16px;
             font-weight: 700;
             text-transform: uppercase;
             margin-bottom: 0.5rem;
+            color: var(--text-light);
+        }
+
+        .agenda-sponsor-badge {
+            position: absolute;
+            top: 0;
+            right: 0;
+            background: white;
+            padding: 0.35rem 0.6rem;
+            border-radius: 4px;
+        }
+
+        .agenda-sponsor-badge img {
+            max-height: 24px;
+            max-width: 80px;
+            object-fit: contain;
+            display: block;
+        }
+
+        .agenda-excerpt {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.7);
+            line-height: 1.5;
+            margin-bottom: 0.5rem;
+        }
+
+        .agenda-read-more {
+            display: inline-block;
+            font-size: 13px;
+            color: var(--accent-color, #FFD700);
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+        }
+
+        .agenda-read-more i {
+            font-size: 11px;
+            margin-left: 0.25rem;
+            transition: transform 0.2s;
+        }
+
+        .agenda-item-link:hover .agenda-read-more i {
+            transform: translateX(4px);
         }
 
         .agenda-content p {
@@ -1061,6 +1180,28 @@
             font-weight: 500;
         }
 
+        /* Detail item as link */
+        a.detail-item--link {
+            text-decoration: none;
+            color: inherit;
+            transition: all 0.2s ease;
+        }
+
+        a.detail-item--link:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: var(--text-light);
+        }
+
+        a.detail-item--link .detail-value i {
+            font-size: 12px;
+            margin-left: 0.5rem;
+            opacity: 0.6;
+        }
+
+        a.detail-item--link:hover .detail-value i {
+            opacity: 1;
+        }
+
         /* ============================================
            SECTION I: Sponsors (White bg)
            ============================================ */
@@ -1306,6 +1447,11 @@
         }
 
         @media (max-width: 768px) {
+            .container-wide {
+                padding: 0 1rem;
+                max-width: 100%;
+            }
+
             .event-hero-minimal,
             .event-hero-parallax {
                 padding: 120px 0 60px;
@@ -1314,7 +1460,7 @@
             }
 
             .event-hero-parallax .hero-content {
-                padding: 0 1rem;
+                padding: 0;
             }
 
             .event-hero-grid {
@@ -1324,14 +1470,37 @@
 
             .event-date-block {
                 align-self: flex-start;
+                padding: 1.5rem 2rem;
             }
 
             .event-date-block .day {
-                font-size: 56px;
+                font-size: 48px;
+            }
+
+            .event-title-block h1 {
+                font-size: 28px;
+                word-wrap: break-word;
+            }
+
+            .event-meta-inline {
+                flex-direction: column;
+                gap: 0.75rem;
             }
 
             .intro-text {
-                font-size: 16px;
+                font-size: 14px;
+            }
+
+            /* Fix text overflow on mobile */
+            .description-content,
+            .description-content p,
+            .event-title-block,
+            .event-title-block h1,
+            .event-title-block .intro-text {
+                max-width: 100%;
+                overflow-wrap: break-word;
+                word-wrap: break-word;
+                word-break: break-word;
             }
 
             .event-intro,
@@ -1341,34 +1510,24 @@
             .event-speakers,
             .event-details,
             .event-sponsors-section,
-            .event-cta--dark {
-                padding: 60px 0;
+            .event-cta--dark,
+            .event-content-section {
+                padding: 40px 0;
+            }
+
+            /* Hide 'Nuestros Espacios' block on mobile */
+            .agenda-sidebar {
+                display: none !important;
             }
 
             .agenda-layout {
                 grid-template-columns: 1fr;
-                gap: 3rem;
+                gap: 2rem;
             }
 
-            .agenda-sidebar {
-                position: static;
-                order: -1;
-            }
-
-            .rooms-gallery {
-                flex-direction: row;
-                overflow-x: auto;
-                gap: 1rem;
-                padding-bottom: 1rem;
-            }
-
-            .room-card {
-                min-width: 250px;
-                flex-shrink: 0;
-            }
-
-            .room-image {
-                height: 150px;
+            .agenda-timeline {
+                padding-left: 1rem;
+                margin-left: 0.5rem;
             }
 
             .agenda-item {
@@ -1376,24 +1535,106 @@
                 gap: 0.75rem;
             }
 
+            .agenda-item::before {
+                left: -1rem;
+            }
+
             .agenda-time {
                 text-align: left;
                 width: auto;
             }
 
+            /* Content grid responsive */
+            .content-grid {
+                grid-template-columns: 1fr;
+            }
+
+            /* Participants grid responsive */
+            .participants-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 1rem;
+            }
+
+            .participant-card {
+                padding: 1rem;
+                min-height: 80px;
+            }
+
+            /* Speakers carousel responsive */
             .speaker-card {
-                flex: 0 0 240px;
+                flex: 0 0 200px;
             }
 
             .speaker-photo {
-                height: 280px;
+                height: 240px;
+            }
+
+            .speaker-info {
+                padding: 1rem;
+            }
+
+            .speaker-info strong {
+                font-size: 14px;
             }
 
             .speakers-grid {
                 grid-template-columns: repeat(2, 1fr);
-                gap: 1.5rem;
+                gap: 1rem;
             }
 
+            /* Details grid responsive */
+            .details-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            .detail-item {
+                padding: 1.25rem;
+                gap: 1rem;
+            }
+
+            .detail-icon {
+                width: 40px;
+                height: 40px;
+                font-size: 1rem;
+            }
+
+            .detail-value {
+                font-size: 16px;
+            }
+
+            /* Sponsors responsive */
+            .sponsors-grid {
+                justify-content: center;
+            }
+
+            .sponsor-card {
+                padding: 1rem;
+            }
+
+            .sponsors-level--platinum .sponsor-card,
+            .sponsors-level--gold .sponsor-card {
+                min-width: 140px;
+                min-height: 70px;
+            }
+
+            .sponsors-level--silver .sponsor-card,
+            .sponsors-level--bronze .sponsor-card {
+                min-width: 100px;
+                min-height: 50px;
+            }
+
+            /* CTA responsive */
+            .cta-price {
+                font-size: 24px;
+            }
+
+            .btn-lg {
+                padding: 1rem 2rem;
+                font-size: 14px;
+            }
+
+            /* Footer responsive */
             .footer-content {
                 flex-direction: column;
                 text-align: center;
@@ -1402,6 +1643,7 @@
             .footer-links {
                 flex-wrap: wrap;
                 justify-content: center;
+                gap: 1rem;
             }
         }
     </style>
@@ -1420,9 +1662,9 @@
                     <?php if (!empty($logoHeader)): ?>
                         <?php if ($isAnimatedLogo): ?>
                             <canvas class="logo-static" height="40"></canvas>
-                            <img src="<?= htmlspecialchars($logoHeader) ?>" alt="The Last of SaaS" height="40" class="logo-animated">
+                            <img src="<?= htmlspecialchars($logoHeader) ?>" alt="" height="40" class="logo-animated">
                         <?php else: ?>
-                            <img src="<?= htmlspecialchars($logoHeader) ?>" alt="The Last of SaaS" height="40">
+                            <img src="<?= htmlspecialchars($logoHeader) ?>" alt="" height="40">
                         <?php endif; ?>
                     <?php else: ?>
                         THE LAST OF SAAS
@@ -1548,10 +1790,10 @@
             <div class="footer-content">
                 <?php if (!empty($logoHeader)): ?>
                     <a href="/" class="footer-logo footer-logo-img">
-                        <img src="<?= htmlspecialchars($logoHeader) ?>" alt="The Last of SaaS" height="32">
+                        <img src="<?= htmlspecialchars($logoHeader) ?>" alt="" height="32">
                     </a>
                 <?php else: ?>
-                    <a href="/" class="footer-logo">THE LAST OF SAAS</a>
+                    <a href="/" class="footer-logo"></a>
                 <?php endif; ?>
                 <div class="footer-links">
                     <?php if (!empty($mainNav)): ?>
@@ -1576,12 +1818,42 @@
             </div>
             <?php endif; ?>
             <div class="footer-bottom">
-                <p><?= !empty($footerCopyright) ? str_replace('{year}', date('Y'), htmlspecialchars($footerCopyright)) : '&copy; ' . date('Y') . ' The Last of SaaS. Todos los derechos reservados.' ?></p>
+                <p><?= !empty($footerCopyright) ? str_replace('{year}', date('Y'), htmlspecialchars($footerCopyright)) : '&copy; ' . date('Y') ?></p>
             </div>
         </div>
     </footer>
 
     <!-- Main site scripts (for header/nav) -->
     <script src="/assets/js/frontend.js"></script>
+
+    <!-- Unregister any rogue Service Workers that may be caching pages -->
+    <script>
+    (function() {
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.getRegistrations().then(function(registrations) {
+                registrations.forEach(function(registration) {
+                    if (registration.scope.indexOf('/admin/tickets/scanner') === -1) {
+                        registration.unregister().then(function(success) {
+                            if (success && 'caches' in window) {
+                                caches.keys().then(function(names) {
+                                    names.forEach(function(name) { caches.delete(name); });
+                                });
+                            }
+                        });
+                    }
+                });
+            });
+        }
+    })();
+    </script>
+
+    <!-- Prevent bfcache from serving stale content -->
+    <script>
+    window.addEventListener('pageshow', function(event) {
+        if (event.persisted) {
+            window.location.reload();
+        }
+    });
+    </script>
 </body>
 </html>

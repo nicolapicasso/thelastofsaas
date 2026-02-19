@@ -168,7 +168,8 @@ namespace App\Helpers {
                 'title', 'subtitle', 'name', 'company_name', 'description', 'short_description',
                 'full_description', 'content', 'excerpt', 'question', 'answer',
                 'meta_title', 'meta_description', 'challenge', 'solution', 'results', 'testimonial',
-                'testimonial_author', 'testimonial_role', 'theme_title', 'category_name', 'industry'
+                'testimonial_author', 'testimonial_role', 'theme_title', 'category_name', 'industry',
+                'position', 'bio', 'tagline'
             ];
 
             foreach ($translatableFields as $field) {
@@ -391,6 +392,21 @@ namespace {
             }
 
             return $baseUrl . '/' . ltrim($path, '/');
+        }
+    }
+
+    /**
+     * Global helper function for escaping HTML with double-encoding prevention
+     * Usage: _e($category['name'])
+     * This prevents &amp; from becoming &amp;amp;
+     */
+    if (!function_exists('_e')) {
+        function _e(?string $value): string
+        {
+            if ($value === null) {
+                return '';
+            }
+            return htmlspecialchars($value, ENT_QUOTES, 'UTF-8', false);
         }
     }
 }

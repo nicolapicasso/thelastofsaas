@@ -231,7 +231,7 @@ $entityTitle = $entityContent['title'] ?? $entityContent['name'] ?? $entityConte
                     <?= htmlspecialchars($seoByLanguage['es']['meta_title'] ?? $entityTitle) ?>
                 </div>
                 <div class="gp-url">
-                    https://omniwallet.es/<?= htmlspecialchars($entityContent['slug'] ?? '') ?>
+                    <?= (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http') . '://' . ($_SERVER['HTTP_HOST'] ?? 'example.com') ?>/<?= htmlspecialchars($entityContent['slug'] ?? '') ?>
                 </div>
                 <div class="gp-description" id="previewDescription">
                     <?= htmlspecialchars($seoByLanguage['es']['meta_description'] ?? 'Sin descripción') ?>

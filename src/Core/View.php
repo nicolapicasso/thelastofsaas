@@ -84,9 +84,9 @@ class View
     public function renderFrontend(string $template, array $data = []): void
     {
         // Prevent browser from serving stale cached content for dynamic pages
-        // no-cache forces browser to validate with server before using cached version
-        header('Cache-Control: no-cache, must-revalidate, private');
+        header('Cache-Control: no-cache, no-store, must-revalidate, private, max-age=0');
         header('Pragma: no-cache');
+        header('Expires: Thu, 01 Jan 1970 00:00:00 GMT');
 
         $this->layout = 'frontend/layouts/main';
         $this->render('frontend/' . $template, $data);
@@ -146,11 +146,11 @@ class View
     }
 
     /**
-     * Escape HTML
+     * Escape HTML (prevents double encoding)
      */
     public function escape(string $value): string
     {
-        return htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
+        return htmlspecialchars($value, ENT_QUOTES, 'UTF-8', false);
     }
 
     /**

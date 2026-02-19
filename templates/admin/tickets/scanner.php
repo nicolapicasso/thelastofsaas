@@ -604,7 +604,7 @@ window.addEventListener('appinstalled', () => {
 
 // Register service worker for PWA
 if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/scanner-sw.js').catch(err => {
+    navigator.serviceWorker.register('/scanner-sw.js', { scope: '/admin/tickets/scanner' }).catch(err => {
         console.log('Service worker registration failed:', err);
     });
 }

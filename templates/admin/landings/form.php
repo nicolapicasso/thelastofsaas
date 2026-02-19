@@ -827,7 +827,7 @@ REQUISITOS TÉCNICOS:
 1. HTML completo con <!DOCTYPE html>, <head> y <body>
 2. Todos los CSS dentro de etiquetas <style>
 3. NO usar archivos CSS externos (excepto Google Fonts y FontAwesome)
-4. Paleta de colores Omniwallet:
+4. Paleta de colores del sitio:
    - Primary: #3E95B0
    - Primary Dark: #255664
    - Dark: #232323

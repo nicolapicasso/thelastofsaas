@@ -21,6 +21,11 @@ $googleFontsUrl = 'https://fonts.googleapis.com/css2?family=' . implode('&family
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+    <!-- Cache control meta tags -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+
     <?php if (!empty($gtmId)): ?>
     <!-- Google Tag Manager -->
     <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
@@ -56,9 +61,9 @@ $googleFontsUrl = 'https://fonts.googleapis.com/css2?family=' . implode('&family
 
     <!-- Styles -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css">
-    <link rel="stylesheet" href="/assets/css/frontend.css?v=<?= filemtime(PUBLIC_PATH . '/assets/css/frontend.css') ?>">
-    <link rel="stylesheet" href="/assets/css/animations.css">
-    <link rel="stylesheet" href="/assets/css/cookies.css">
+    <link rel="stylesheet" href="/assets/css/frontend.css?v=<?= @filemtime(PUBLIC_PATH . '/assets/css/frontend.css') ?: time() ?>">
+    <link rel="stylesheet" href="/assets/css/animations.css?v=<?= @filemtime(PUBLIC_PATH . '/assets/css/animations.css') ?: time() ?>">
+    <link rel="stylesheet" href="/assets/css/cookies.css?v=<?= @filemtime(PUBLIC_PATH . '/assets/css/cookies.css') ?: time() ?>">
 
     <!-- Dynamic Font Variables (must come after frontend.css to override defaults) -->
     <style>
@@ -94,9 +99,9 @@ $googleFontsUrl = 'https://fonts.googleapis.com/css2?family=' . implode('&family
                 <a href="<?= _url('/') ?>" class="<?= $logoClass ?>" <?= $isAnimatedLogo ? 'data-animated-src="' . htmlspecialchars($logoHeader) . '"' : '' ?>>
                     <?php if ($isAnimatedLogo): ?>
                         <canvas class="logo-static" height="40"></canvas>
-                        <img src="<?= htmlspecialchars($logoHeader) ?>" alt="We're Sinapsis" height="40" class="logo-animated">
+                        <img src="<?= htmlspecialchars($logoHeader) ?>" alt="" height="40" class="logo-animated">
                     <?php else: ?>
-                        <img src="<?= htmlspecialchars($logoHeader) ?>" alt="We're Sinapsis" height="40">
+                        <img src="<?= htmlspecialchars($logoHeader) ?>" alt="" height="40">
                     <?php endif; ?>
                 </a>
 
@@ -266,7 +271,7 @@ $googleFontsUrl = 'https://fonts.googleapis.com/css2?family=' . implode('&family
                 <!-- Brand -->
                 <div class="footer-brand">
                     <a href="<?= _url('/') ?>" class="footer-logo">
-                        <img src="<?= htmlspecialchars($logoFooter) ?>" alt="We're Sinapsis" height="32">
+                        <img src="<?= htmlspecialchars($logoFooter) ?>" alt="" height="32">
                     </a>
                     <p><?= htmlspecialchars($footerTagline ?? 'Agencia de marketing digital que impulsa tu negocio.') ?></p>
                     <div class="social-links">
@@ -276,14 +281,6 @@ $googleFontsUrl = 'https://fonts.googleapis.com/css2?family=' . implode('&family
                                     <i class="<?= htmlspecialchars($social['icon'] ?? 'fas fa-link') ?>"></i>
                                 </a>
                             <?php endforeach; ?>
-                        <?php else: ?>
-                            <!-- Fallback social links -->
-                            <a href="https://linkedin.com/company/sinapsis" target="_blank" rel="noopener" aria-label="LinkedIn">
-                                <i class="fab fa-linkedin-in"></i>
-                            </a>
-                            <a href="https://instagram.com/weresinapsis" target="_blank" rel="noopener" aria-label="Instagram">
-                                <i class="fab fa-instagram"></i>
-                            </a>
                         <?php endif; ?>
                     </div>
                 </div>
@@ -342,7 +339,7 @@ $googleFontsUrl = 'https://fonts.googleapis.com/css2?family=' . implode('&family
                         </a>
                     <?php endforeach; ?>
                 </div>
-                <p><?= str_replace('{year}', date('Y'), htmlspecialchars($footerCopyright ?? "© {year} We're Sinapsis. Todos los derechos reservados.")) ?></p>
+                <p><?= str_replace('{year}', date('Y'), htmlspecialchars($footerCopyright ?? "© {year}")) ?></p>
             </div>
         </div>
     </footer>
@@ -360,10 +357,10 @@ $googleFontsUrl = 'https://fonts.googleapis.com/css2?family=' . implode('&family
     <?php include __DIR__ . '/../partials/language-prompt.php'; ?>
 
     <!-- Scripts -->
-    <script src="/assets/js/frontend.js"></script>
-    <script src="/assets/js/animations.js"></script>
-    <script src="/assets/js/tracking.js"></script>
-    <script src="/assets/js/cookies.js"></script>
+    <script src="/assets/js/frontend.js?v=<?= @filemtime(PUBLIC_PATH . '/assets/js/frontend.js') ?: time() ?>"></script>
+    <script src="/assets/js/animations.js?v=<?= @filemtime(PUBLIC_PATH . '/assets/js/animations.js') ?: time() ?>"></script>
+    <script src="/assets/js/tracking.js?v=<?= @filemtime(PUBLIC_PATH . '/assets/js/tracking.js') ?: time() ?>"></script>
+    <script src="/assets/js/cookies.js?v=<?= @filemtime(PUBLIC_PATH . '/assets/js/cookies.js') ?: time() ?>"></script>
     <?php if (isset($extraJs)): ?>
     <?= $extraJs ?>
     <?php endif; ?>
@@ -386,6 +383,42 @@ $googleFontsUrl = 'https://fonts.googleapis.com/css2?family=' . implode('&family
             'language': '<?= htmlspecialchars($currentLang ?? 'es') ?>'
         });
     })();
+    </script>
+
+    <!-- Unregister any rogue Service Workers that may be caching pages -->
+    <script>
+    (function() {
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.getRegistrations().then(function(registrations) {
+                registrations.forEach(function(registration) {
+                    // Only keep SW registrations scoped to the scanner
+                    if (registration.scope.indexOf('/admin/tickets/scanner') === -1) {
+                        registration.unregister().then(function(success) {
+                            if (success) {
+                                // Clear all caches left by the old SW
+                                if ('caches' in window) {
+                                    caches.keys().then(function(names) {
+                                        names.forEach(function(name) {
+                                            caches.delete(name);
+                                        });
+                                    });
+                                }
+                            }
+                        });
+                    }
+                });
+            });
+        }
+    })();
+    </script>
+
+    <!-- Prevent bfcache (back-forward cache) from serving stale content -->
+    <script>
+    window.addEventListener('pageshow', function(event) {
+        if (event.persisted) {
+            window.location.reload();
+        }
+    });
     </script>
 </body>
 </html>

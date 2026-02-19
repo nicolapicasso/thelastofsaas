@@ -232,7 +232,9 @@ class TranslationsController extends Controller
             return;
         }
 
-        $entities = $this->translationService->getEntitiesForTranslation($targetLanguage);
+        $entityType = !empty($_GET['entity_type']) ? $_GET['entity_type'] : null;
+
+        $entities = $this->translationService->getEntitiesForTranslation($targetLanguage, $entityType);
         $totalFields = 0;
         foreach ($entities as $entity) {
             $totalFields += count(array_filter($entity['fields'], fn($v) => !empty($v)));
@@ -263,13 +265,14 @@ class TranslationsController extends Controller
         $targetLanguage = $_POST['language'] ?? '';
         $offset = (int)($_POST['offset'] ?? 0);
         $batchSize = (int)($_POST['batch_size'] ?? 5);
+        $entityType = !empty($_POST['entity_type']) ? $_POST['entity_type'] : null;
 
         if (empty($targetLanguage)) {
             echo json_encode(['error' => 'Idioma no especificado']);
             return;
         }
 
-        $result = $this->translationService->translateBatch($targetLanguage, $offset, $batchSize);
+        $result = $this->translationService->translateBatch($targetLanguage, $offset, $batchSize, $entityType);
 
         echo json_encode($result);
     }

@@ -67,9 +67,9 @@
                        name="seo_title_suffix"
                        value="<?= htmlspecialchars($seoSettings['seo_title_suffix']) ?>"
                        class="form-control"
-                       placeholder=" | Omniwallet">
+                       placeholder=" | Mi Sitio">
                 <small class="help-text">
-                    Se añade al final de todos los títulos. Ej: "Mi Página | Omniwallet"
+                    Se añade al final de todos los títulos. Ej: "Mi Página | Mi Sitio"
                 </small>
             </div>
 

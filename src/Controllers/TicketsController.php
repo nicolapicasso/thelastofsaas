@@ -2,7 +2,7 @@
 
 namespace App\Controllers;
 
-use App\Core\Controller;
+use App\Controllers\Frontend\BaseController;
 use App\Models\Event;
 use App\Models\Ticket;
 use App\Models\TicketType;
@@ -19,7 +19,7 @@ use App\Services\OmniwalletService;
  *
  * Ticket registration, purchase and management
  */
-class TicketsController extends Controller
+class TicketsController extends BaseController
 {
     private Event $eventModel;
     private Ticket $ticketModel;
@@ -38,6 +38,24 @@ class TicketsController extends Controller
     }
 
     /**
+     * Get common event page data (navigation, settings, etc.)
+     */
+    private function getEventData(array $data = []): array
+    {
+        return array_merge([
+            'mainNav' => $this->getMainNavigation(),
+            'logoHeader' => $this->getSetting('logo_header', '/assets/images/logo.svg'),
+            'headerButtons' => $this->getHeaderButtons(),
+            'sidebarMenu' => $this->getSidebarMenu(),
+            'footerNav' => $this->getFooterNavigation(),
+            'footerTagline' => $this->getFooterTagline(),
+            'footerCopyright' => $this->getFooterCopyright(),
+            'socialLinks' => $this->getSocialLinks(),
+            'currentLang' => $this->currentLang,
+        ], $data);
+    }
+
+    /**
      * Show ticket registration form
      */
     public function register(string $eventSlug): void
@@ -49,17 +67,22 @@ class TicketsController extends Controller
             return;
         }
 
+        // Translate event
+        $this->translator->translateEntity('event', $event);
+
         // Check if registration is open
         if (!$this->eventModel->isRegistrationOpen($event)) {
-            $this->render('tickets/closed', [
+            $this->view->setLayout('layouts/event');
+            $this->render('tickets/closed', $this->getEventData([
                 'event' => $event,
                 'meta_title' => 'Registro Cerrado - ' . $event['name']
-            ]);
+            ]));
             return;
         }
 
         // Get available ticket types
         $ticketTypes = $this->ticketTypeModel->getAvailableForEvent($event['id']);
+        $this->translator->translateEntities('ticket_type', $ticketTypes);
 
         // Check for code in URL (can be sponsor code or invite code)
         $inputCode = $_GET['code'] ?? null;
@@ -92,7 +115,8 @@ class TicketsController extends Controller
             }
         }
 
-        $this->render('tickets/register', [
+        $this->view->setLayout('layouts/event');
+        $this->render('tickets/register', $this->getEventData([
             'event' => $event,
             'ticketTypes' => $ticketTypes,
             'sponsor' => $sponsor,
@@ -101,7 +125,7 @@ class TicketsController extends Controller
             'sponsorCode' => $inputCode,
             'csrf_token' => $this->generateCsrf(),
             'meta_title' => 'Registro - ' . $event['name']
-        ]);
+        ]));
     }
 
     /**
@@ -490,22 +514,32 @@ class TicketsController extends Controller
             return;
         }
 
+        // Translate event
+        $this->translator->translateEntity('event', $event);
+
         // Get ticket type info
         $ticketType = $this->ticketTypeModel->find($ticket['ticket_type_id']);
+        if ($ticketType) {
+            $this->translator->translateEntity('ticket_type', $ticketType);
+        }
 
         // Get sponsor info if applicable
         $sponsor = null;
         if ($ticket['sponsor_id']) {
             $sponsor = $this->sponsorModel->find($ticket['sponsor_id']);
+            if ($sponsor) {
+                $this->translator->translateEntity('sponsor', $sponsor);
+            }
         }
 
-        $this->render('tickets/show', [
+        $this->view->setLayout('layouts/event');
+        $this->render('tickets/show', $this->getEventData([
             'event' => $event,
             'ticket' => $ticket,
             'ticketType' => $ticketType,
             'sponsor' => $sponsor,
             'meta_title' => 'Tu Entrada - ' . $event['name']
-        ]);
+        ]));
     }
 
     /**

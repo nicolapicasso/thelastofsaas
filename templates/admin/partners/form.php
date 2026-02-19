@@ -224,8 +224,8 @@ $featuredImage = $partner['featured_image'] ?? '';
                     <div class="form-group">
                         <label for="testimonial">Texto del testimonio</label>
                         <textarea id="testimonial" name="testimonial" rows="4"
-                                  placeholder="Un testimonio del partner sobre Omniwallet..."><?= htmlspecialchars($partner['testimonial'] ?? '') ?></textarea>
-                        <small class="form-hint">Opcional: un testimonio o cita sobre la colaboracion con Omniwallet</small>
+                                  placeholder="Un testimonio del partner sobre la plataforma..."><?= htmlspecialchars($partner['testimonial'] ?? '') ?></textarea>
+                        <small class="form-hint">Opcional: un testimonio o cita sobre la colaboracion</small>
                     </div>
 
                     <div class="form-row">
@@ -299,7 +299,7 @@ $featuredImage = $partner['featured_image'] ?? '';
                             <input type="checkbox" name="is_certified" value="1" <?= ($partner['is_certified'] ?? false) ? 'checked' : '' ?>>
                             <span><i class="fas fa-certificate"></i> Partner certificado</span>
                         </label>
-                        <small class="form-hint">Tiene certificacion oficial de Omniwallet</small>
+                        <small class="form-hint">Tiene certificacion oficial</small>
                     </div>
 
                     <div class="form-group">

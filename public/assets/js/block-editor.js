@@ -166,7 +166,7 @@
                         videos = [];
                     }
 
-                    videos.push({ url: '', thumbnail: '' });
+                    videos.push({ url: '', thumbnail: '', description: '' });
                     videosInput.value = JSON.stringify(videos);
                     videosInput.dispatchEvent(new Event('change', { bubbles: true }));
 
@@ -344,6 +344,7 @@
                     '<div class="vgallery-video-thumbnail">' + thumbHtml + '</div>' +
                     '<div class="vgallery-video-info">' +
                         '<input type="url" class="video-url-input" value="' + (video.url || '') + '" placeholder="URL del video (YouTube/Vimeo)">' +
+                        '<input type="text" class="video-description-input" value="' + (video.description || '') + '" placeholder="Descripción del video (opcional)">' +
                         '<div class="vgallery-video-thumb-actions">' +
                             '<button type="button" class="btn btn-xs btn-outline vgallery-thumb-select">' +
                                 '<i class="fas fa-image"></i> Miniatura' +
@@ -1460,6 +1461,7 @@
                             '<div class="vgallery-video-thumbnail">' + thumbHtml + '</div>' +
                             '<div class="vgallery-video-info">' +
                                 '<input type="url" class="video-url-input" value="' + (video.url || '') + '" placeholder="URL del video (YouTube/Vimeo)">' +
+                                '<input type="text" class="video-description-input" value="' + (video.description || '') + '" placeholder="Descripción del video (opcional)">' +
                                 '<div class="vgallery-video-thumb-actions">' +
                                     '<button type="button" class="btn btn-xs btn-outline vgallery-thumb-select">' +
                                         '<i class="fas fa-image"></i> Miniatura' +
@@ -1496,6 +1498,17 @@
                                 }
                             }
 
+                            setVgalleryVideos(videos);
+                        });
+                    });
+
+                    // Description input change
+                    vgalleryVideosList.querySelectorAll('.video-description-input').forEach(function(input) {
+                        input.addEventListener('change', function() {
+                            var item = this.closest('.vgallery-video-item');
+                            var idx = parseInt(item.dataset.index);
+                            var videos = getVgalleryVideos();
+                            videos[idx].description = this.value;
                             setVgalleryVideos(videos);
                         });
                     });
@@ -1541,7 +1554,7 @@
                 addVgalleryVideoBtn.addEventListener('click', function() {
                     console.log('Add video button clicked!');
                     var videos = getVgalleryVideos();
-                    videos.push({ url: '', thumbnail: '' });
+                    videos.push({ url: '', thumbnail: '', description: '' });
                     setVgalleryVideos(videos);
                     renderVgalleryVideos();
 

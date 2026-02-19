@@ -623,6 +623,9 @@ RESPOND WITH VALID JSON ONLY:
             return $customRobots;
         }
 
+        // Get site URL from settings
+        $siteUrl = rtrim($settingModel->get('site_url') ?? '', '/');
+
         // Default robots.txt
         return "User-agent: *
 Allow: /
@@ -633,7 +636,7 @@ Disallow: /*.json$
 Disallow: /*?*
 
 # Sitemap
-Sitemap: https://weresinapsis.com/sitemap.xml
+Sitemap: {$siteUrl}/sitemap.xml
 
 # Crawl-delay (optional, for politeness)
 Crawl-delay: 1";

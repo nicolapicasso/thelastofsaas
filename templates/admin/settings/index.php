@@ -18,7 +18,7 @@
             <div class="form-group">
                 <label for="site_name">Nombre del sitio</label>
                 <input type="text" id="site_name" name="settings[site_name]"
-                       value="<?= htmlspecialchars($settings['site_name'] ?? 'Omniwallet') ?>">
+                       value="<?= htmlspecialchars($settings['site_name'] ?? '') ?>" placeholder="Nombre del sitio">
             </div>
             <div class="form-group">
                 <label for="site_tagline">Eslogan</label>
@@ -271,7 +271,7 @@
             <div class="form-group">
                 <label class="checkbox-label">
                     <input type="checkbox" name="settings[floating_form_enabled]" value="1"
-                           <?= ($settings['floating_form_enabled'] ?? true) ? 'checked' : '' ?>>
+                           <?= !isset($settings['floating_form_enabled']) || $settings['floating_form_enabled'] ? 'checked' : '' ?>>
                     <span>Activar formulario flotante</span>
                 </label>
                 <small class="form-help">Muestra un botón flotante en la esquina inferior derecha para contacto rápido.</small>

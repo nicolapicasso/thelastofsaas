@@ -110,22 +110,32 @@ class PageController extends BaseController
      */
     private function getOrganizationSchema(): array
     {
-        return [
+        $siteName = $this->getSetting('site_name', '');
+        $siteUrl = $this->getSetting('site_url', '');
+        $siteLogo = $this->getSetting('logo_header', '/assets/images/logo.svg');
+        $siteTagline = $this->getSetting('site_tagline', '');
+
+        $schema = [
             '@type' => 'Organization',
-            'name' => "We're Sinapsis",
-            'url' => 'https://sinapsis.agency',
-            'logo' => 'https://sinapsis.agency/assets/images/logo.png',
-            'description' => 'Agencia de marketing digital',
-            'sameAs' => [
-                'https://linkedin.com/company/sinapsis',
-                'https://instagram.com/weresinapsis'
-            ],
+            'name' => $siteName,
+            'url' => $siteUrl,
             'contactPoint' => [
                 '@type' => 'ContactPoint',
                 'contactType' => 'customer service',
                 'availableLanguage' => ['Spanish', 'English']
             ]
         ];
+
+        if ($siteLogo) {
+            $logoUrl = strpos($siteLogo, 'http') === 0 ? $siteLogo : rtrim($siteUrl, '/') . $siteLogo;
+            $schema['logo'] = $logoUrl;
+        }
+
+        if ($siteTagline) {
+            $schema['description'] = $siteTagline;
+        }
+
+        return $schema;
     }
 
     /**

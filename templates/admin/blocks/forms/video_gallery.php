@@ -38,6 +38,7 @@ if (is_string($videos)) {
                     </div>
                     <div class="vgallery-video-info">
                         <input type="url" class="video-url-input" value="<?= htmlspecialchars($video['url'] ?? '') ?>" placeholder="URL del video (YouTube/Vimeo)">
+                        <input type="text" class="video-description-input" value="<?= htmlspecialchars($video['description'] ?? '') ?>" placeholder="Descripción del video (opcional)">
                         <div class="vgallery-video-thumb-actions">
                             <button type="button" class="btn btn-xs btn-outline vgallery-thumb-select">
                                 <i class="fas fa-image"></i> Miniatura

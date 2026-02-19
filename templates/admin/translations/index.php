@@ -323,7 +323,7 @@
             <button type="button" class="modal-close" onclick="closeBatchModal()" id="modalCloseBtn">&times;</button>
         </div>
         <div class="modal-body">
-            <!-- Step 1: Language Selection -->
+            <!-- Step 1: Language and Entity Type Selection -->
             <div id="batchStep1">
                 <div class="form-group">
                     <label for="target_language">Idioma destino</label>
@@ -336,9 +336,19 @@
                         <?php endforeach; ?>
                     </select>
                 </div>
+                <div class="form-group">
+                    <label for="batch_entity_type">Tipo de contenido</label>
+                    <select name="entity_type" id="batch_entity_type">
+                        <option value="">Todos los tipos</option>
+                        <?php foreach ($entityTypes as $type => $name): ?>
+                            <option value="<?= $type ?>"><?= $name ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                    <small class="form-help">Selecciona un tipo para traducir solo ese contenido, o deja "Todos" para traducir todo.</small>
+                </div>
                 <div class="info-box">
-                    <p><strong>Nota:</strong> Esta acción traducirá automáticamente todo el contenido publicado que no tenga traducción.</p>
-                    <p>Las traducciones generadas quedarán pendientes de revisión.</p>
+                    <p><strong>Nota:</strong> Esta acción traducirá automáticamente el contenido publicado que no tenga traducción.</p>
+                    <p>Las traducciones generadas quedarán pendientes de revisión (excepto bloques, que se aprueban automáticamente).</p>
                 </div>
             </div>
 
@@ -924,6 +934,7 @@ function toggleContent(index) {
 let batchState = {
     isRunning: false,
     language: '',
+    entityType: '',
     offset: 0,
     batchSize: 5,
     total: 0,
@@ -938,6 +949,7 @@ function openBatchModal() {
     batchState = {
         isRunning: false,
         language: '',
+        entityType: '',
         offset: 0,
         batchSize: 5,
         total: 0,
@@ -956,6 +968,7 @@ function openBatchModal() {
     document.getElementById('finishBtn').style.display = 'none';
     document.getElementById('modalCloseBtn').style.display = 'block';
     document.getElementById('target_language').value = '';
+    document.getElementById('batch_entity_type').value = '';
     document.getElementById('progressLog').innerHTML = '';
 
     document.getElementById('batchModal').style.display = 'flex';
@@ -978,7 +991,10 @@ async function startBatchTranslation() {
         return;
     }
 
+    const entityType = document.getElementById('batch_entity_type').value;
+
     batchState.language = language;
+    batchState.entityType = entityType;
     batchState.isRunning = true;
 
     // Switch to progress view
@@ -988,11 +1004,14 @@ async function startBatchTranslation() {
     document.getElementById('cancelBtn').textContent = 'Cancelar';
     document.getElementById('modalCloseBtn').style.display = 'none';
 
-    addLogEntry('Obteniendo información...', 'info');
+    const entityLabel = entityType ? document.getElementById('batch_entity_type').selectedOptions[0].text : 'todos los tipos';
+    addLogEntry(`Obteniendo información para ${entityLabel}...`, 'info');
 
     try {
         // Get batch info first
-        const infoResponse = await fetch(`/admin/translations/batch-info?language=${language}`);
+        let batchInfoUrl = `/admin/translations/batch-info?language=${language}`;
+        if (entityType) batchInfoUrl += `&entity_type=${entityType}`;
+        const infoResponse = await fetch(batchInfoUrl);
         const info = await infoResponse.json();
 
         if (info.error) {
@@ -1029,6 +1048,9 @@ async function processBatches() {
             formData.append('offset', batchState.offset);
             formData.append('batch_size', batchState.batchSize);
             formData.append('_csrf_token', csrfToken);
+            if (batchState.entityType) {
+                formData.append('entity_type', batchState.entityType);
+            }
 
             const response = await fetch('/admin/translations/process-batch', {
                 method: 'POST',

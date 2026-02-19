@@ -269,6 +269,9 @@ Text to translate:
             $translated = $this->translateText($originalContent, $targetLanguage, $sourceLanguage);
 
             if ($translated) {
+                // Auto-approve block translations so they display immediately on frontend
+                $autoApprove = ($entityType === 'block');
+
                 $this->translationModel->saveTranslation(
                     $entityType,
                     $entityId,
@@ -277,7 +280,7 @@ Text to translate:
                     $originalContent,
                     $translated,
                     true, // is_auto_translated
-                    false // is_approved
+                    $autoApprove // is_approved - blocks auto-approved, others require manual review
                 );
 
                 $results[$fieldName] = [
@@ -298,15 +301,15 @@ Text to translate:
     /**
      * Get entities for translation (public wrapper)
      */
-    public function getEntitiesForTranslation(string $targetLanguage): array
+    public function getEntitiesForTranslation(string $targetLanguage, ?string $entityType = null): array
     {
-        return $this->getEntitiesNeedingTranslation($targetLanguage);
+        return $this->getEntitiesNeedingTranslation($targetLanguage, $entityType);
     }
 
     /**
      * Translate a batch of entities (for AJAX processing)
      */
-    public function translateBatch(string $targetLanguage, int $offset = 0, int $batchSize = 5): array
+    public function translateBatch(string $targetLanguage, int $offset = 0, int $batchSize = 5, ?string $entityType = null): array
     {
         $stats = [
             'success' => 0,
@@ -316,8 +319,8 @@ Text to translate:
             'hasMore' => false
         ];
 
-        // Get all entities
-        $allEntities = $this->getEntitiesNeedingTranslation($targetLanguage);
+        // Get all entities (filtered by type if specified)
+        $allEntities = $this->getEntitiesNeedingTranslation($targetLanguage, $entityType);
         $totalEntities = count($allEntities);
 
         // Get the batch
@@ -410,14 +413,16 @@ Text to translate:
 
     /**
      * Get entities that need translation for a language
+     * @param string $targetLanguage Target language code
+     * @param string|null $entityType Optional entity type filter (e.g., 'event', 'page', 'block')
      */
-    private function getEntitiesNeedingTranslation(string $targetLanguage): array
+    private function getEntitiesNeedingTranslation(string $targetLanguage, ?string $entityType = null): array
     {
         $entities = [];
         $db = \App\Core\Database::getInstance()->getConnection();
 
         // Pages
-        try {
+        if (!$entityType || $entityType === 'page') try {
             $stmt = $db->query("SELECT id, title, meta_title, meta_description, llm_qa_content FROM pages WHERE status = 'published'");
             foreach ($stmt->fetchAll() as $row) {
                 $fields = [
@@ -440,7 +445,7 @@ Text to translate:
         }
 
         // Posts
-        try {
+        if (!$entityType || $entityType === 'post') try {
             $stmt = $db->query("SELECT id, title, subtitle, excerpt, content, meta_title, meta_description, llm_qa_content FROM posts WHERE status = 'published'");
             foreach ($stmt->fetchAll() as $row) {
                 $fields = [
@@ -466,7 +471,7 @@ Text to translate:
         }
 
         // Features
-        try {
+        if (!$entityType || $entityType === 'feature') try {
             $stmt = $db->query("SELECT id, title, short_description, full_description, llm_qa_content FROM features WHERE is_active = 1");
             foreach ($stmt->fetchAll() as $row) {
                 $fields = [
@@ -489,7 +494,7 @@ Text to translate:
         }
 
         // FAQs
-        try {
+        if (!$entityType || $entityType === 'faq') try {
             $stmt = $db->query("SELECT id, question, answer FROM faqs WHERE is_active = 1");
             foreach ($stmt->fetchAll() as $row) {
                 $entities[] = [
@@ -506,7 +511,7 @@ Text to translate:
         }
 
         // Success Cases
-        try {
+        if (!$entityType || $entityType === 'success_case') try {
             // First check what columns exist
             $columns = $db->query("SHOW COLUMNS FROM success_cases")->fetchAll(\PDO::FETCH_COLUMN);
             $availableColumns = ['id'];
@@ -550,7 +555,7 @@ Text to translate:
         }
 
         // Categories
-        try {
+        if (!$entityType || $entityType === 'category') try {
             $stmt = $db->query("SELECT id, name, description FROM categories WHERE is_active = 1");
             foreach ($stmt->fetchAll() as $row) {
                 $entities[] = [
@@ -566,8 +571,115 @@ Text to translate:
             // Table might not exist
         }
 
+        // Events (TLOS)
+        if (!$entityType || $entityType === 'event') try {
+            $stmt = $db->query("SELECT id, name, description, short_description, meta_title, meta_description FROM events WHERE status IN ('published', 'active')");
+            foreach ($stmt->fetchAll() as $row) {
+                $entities[] = [
+                    'type' => 'event',
+                    'id' => $row['id'],
+                    'fields' => [
+                        'name' => $row['name'],
+                        'description' => $row['description'],
+                        'short_description' => $row['short_description'],
+                        'meta_title' => $row['meta_title'],
+                        'meta_description' => $row['meta_description']
+                    ]
+                ];
+            }
+        } catch (\Exception $e) {
+            $this->logError("Error loading events for translation: " . $e->getMessage());
+        }
+
+        // Activities (TLOS)
+        if (!$entityType || $entityType === 'activity') try {
+            $stmt = $db->query("SELECT id, title, description FROM activities WHERE active = 1");
+            foreach ($stmt->fetchAll() as $row) {
+                $entities[] = [
+                    'type' => 'activity',
+                    'id' => $row['id'],
+                    'fields' => [
+                        'title' => $row['title'],
+                        'description' => $row['description']
+                    ]
+                ];
+            }
+        } catch (\Exception $e) {
+            $this->logError("Error loading activities for translation: " . $e->getMessage());
+        }
+
+        // Sponsors (TLOS)
+        if (!$entityType || $entityType === 'sponsor') try {
+            $stmt = $db->query("SELECT id, name, description, tagline FROM sponsors WHERE active = 1");
+            foreach ($stmt->fetchAll() as $row) {
+                $entities[] = [
+                    'type' => 'sponsor',
+                    'id' => $row['id'],
+                    'fields' => [
+                        'name' => $row['name'],
+                        'description' => $row['description'],
+                        'tagline' => $row['tagline']
+                    ]
+                ];
+            }
+        } catch (\Exception $e) {
+            $this->logError("Error loading sponsors for translation: " . $e->getMessage());
+        }
+
+        // Companies (TLOS)
+        if (!$entityType || $entityType === 'company') try {
+            $stmt = $db->query("SELECT id, name, description FROM companies WHERE active = 1");
+            foreach ($stmt->fetchAll() as $row) {
+                $entities[] = [
+                    'type' => 'company',
+                    'id' => $row['id'],
+                    'fields' => [
+                        'name' => $row['name'],
+                        'description' => $row['description']
+                    ]
+                ];
+            }
+        } catch (\Exception $e) {
+            $this->logError("Error loading companies for translation: " . $e->getMessage());
+        }
+
+        // Team Members (TLOS)
+        if (!$entityType || $entityType === 'team_member') try {
+            $stmt = $db->query("SELECT id, name, position, bio FROM team_members WHERE is_active = 1");
+            foreach ($stmt->fetchAll() as $row) {
+                $entities[] = [
+                    'type' => 'team_member',
+                    'id' => $row['id'],
+                    'fields' => [
+                        'name' => $row['name'],
+                        'position' => $row['position'],
+                        'bio' => $row['bio']
+                    ]
+                ];
+            }
+        } catch (\Exception $e) {
+            $this->logError("Error loading team_members for translation: " . $e->getMessage());
+        }
+
+        // Ticket Types (TLOS)
+        if (!$entityType || $entityType === 'ticket_type') try {
+            $stmt = $db->query("SELECT id, name, description FROM ticket_types WHERE active = 1");
+            foreach ($stmt->fetchAll() as $row) {
+                $entities[] = [
+                    'type' => 'ticket_type',
+                    'id' => $row['id'],
+                    'fields' => [
+                        'name' => $row['name'],
+                        'description' => $row['description']
+                    ]
+                ];
+            }
+        } catch (\Exception $e) {
+            // Table might not exist
+        }
+
         // Knowledge Articles
-        try {
+        if (!$entityType || $entityType === 'knowledge_article') try {
             $stmt = $db->query("SELECT id, title, excerpt, content, meta_title, meta_description, llm_qa_content FROM knowledge_articles WHERE status = 'published'");
             foreach ($stmt->fetchAll() as $row) {
                 $fields = [
@@ -592,7 +704,7 @@ Text to translate:
         }
 
         // Page Blocks
-        try {
+        if (!$entityType || $entityType === 'block') try {
             $stmt = $db->query("SELECT pb.id, pb.content, pb.type FROM page_blocks pb JOIN pages p ON p.id = pb.page_id WHERE pb.is_active = 1 AND p.status = 'published'");
             foreach ($stmt->fetchAll() as $row) {
                 $content = json_decode($row['content'], true);
@@ -612,7 +724,7 @@ Text to translate:
         }
 
         // Landings (admin-managed fields only, not HTML content)
-        try {
+        if (!$entityType || $entityType === 'landing') try {
             $stmt = $db->query("SELECT id, title, subtitle, description, meta_title, meta_description FROM landings WHERE is_active = 1");
             foreach ($stmt->fetchAll() as $row) {
                 $entities[] = [
@@ -632,7 +744,7 @@ Text to translate:
         }
 
         // Landing Themes
-        try {
+        if (!$entityType || $entityType === 'landing_theme') try {
             $stmt = $db->query("SELECT id, title, description FROM landing_themes WHERE is_active = 1");
             foreach ($stmt->fetchAll() as $row) {
                 $entities[] = [
@@ -649,7 +761,7 @@ Text to translate:
         }
 
         // Integrations
-        try {
+        if (!$entityType || $entityType === 'integration') try {
             $stmt = $db->query("SELECT id, title, subtitle, description, llm_qa_content FROM integrations WHERE is_active = 1");
             foreach ($stmt->fetchAll() as $row) {
                 $fields = [
@@ -672,7 +784,7 @@ Text to translate:
         }
 
         // Partners
-        try {
+        if (!$entityType || $entityType === 'partner') try {
             $stmt = $db->query("SELECT id, name, description, testimonial, testimonial_author, testimonial_role, meta_title, meta_description FROM partners WHERE is_active = 1");
             foreach ($stmt->fetchAll() as $row) {
                 $fields = [

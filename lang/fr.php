@@ -35,7 +35,7 @@ return [
 
     // Features page
     'features_title' => 'Fonctionnalités',
-    'features_subtitle' => 'Découvrez tous les outils qu\'Omniwallet met à votre disposition pour transformer votre entreprise',
+    'features_subtitle' => 'Découvrez tous les outils que nous mettons à votre disposition pour transformer votre entreprise',
     'category' => 'Catégorie',
     'all_categories' => 'Toutes les catégories',
     'services_in_category' => 'Services disponibles dans cette catégorie',
@@ -48,14 +48,14 @@ return [
     'features_count' => 'fonctionnalités',
     'no_features_found' => 'Aucune fonctionnalité trouvée',
     'try_different_filters' => 'Essayez de modifier les filtres',
-    'start_using_omniwallet' => 'Commencez à utiliser Omniwallet aujourd\'hui',
+    'start_using_omniwallet' => 'Commencez à utiliser la plateforme aujourd\'hui',
     'all_features_available' => 'Toutes ces fonctionnalités disponibles dès le premier jour',
     'start_free_btn' => 'Commencer gratuitement',
     'contact_sales' => 'Contacter les ventes',
 
     // Cases page
     'cases_title' => 'Cas de succès',
-    'cases_subtitle' => 'Découvrez comment des entreprises comme la vôtre se sont transformées avec Omniwallet',
+    'cases_subtitle' => 'Découvrez comment des entreprises comme la vôtre se sont transformées avec notre plateforme',
     'industry' => 'Secteur',
     'all_industries' => 'Tous les secteurs',
     'search_cases' => 'Rechercher des cas de succès...',
@@ -76,7 +76,7 @@ return [
     'no_cases_available' => 'Aucun cas de succès disponible',
     'more_cases_coming_soon' => 'Nouveaux cas bientôt disponibles',
     'cta_next_success_story' => 'Voulez-vous être notre prochaine success story?',
-    'cta_join_companies' => 'Rejoignez les entreprises qui font déjà confiance à Omniwallet',
+    'cta_join_companies' => 'Rejoignez les entreprises qui font déjà confiance à la plateforme',
     'contact_now' => 'Contactez maintenant',
     'about' => 'À propos de',
     'company_size' => 'Taille',
@@ -125,7 +125,7 @@ return [
 
     // Integrations page
     'integrations_title' => 'Intégrations',
-    'integrations_subtitle' => 'Connectez Omniwallet avec vos outils préférés et boostez votre activité',
+    'integrations_subtitle' => 'Connectez la plateforme avec vos outils préférés et boostez votre activité',
     'integration_type' => 'Type',
     'all_types' => 'Toutes',
     'search_integration' => 'Rechercher une intégration...',
@@ -145,7 +145,7 @@ return [
 
     // Team page
     'team_title' => 'Notre équipe',
-    'team_subtitle' => 'Les personnes derrière Omniwallet',
+    'team_subtitle' => 'Découvrez les personnes qui composent notre équipe',
     'meet_team' => 'Rencontrez l\'équipe',
 
     // Contact/CTA
@@ -223,7 +223,7 @@ return [
     // Landings
     'landing_resources' => 'Ressources',
     'landing_resources_title' => 'Ressources et Cas d\'Utilisation',
-    'landing_resources_subtitle' => 'Découvrez comment tirer le meilleur parti d\'Omniwallet',
+    'landing_resources_subtitle' => 'Découvrez comment tirer le meilleur parti de la plateforme',
     'no_content_available' => 'Aucun contenu disponible pour le moment.',
 
     // Empty states
@@ -287,6 +287,55 @@ return [
     'request_info' => 'Demander des informations',
 
     // Landings Block
+    // Events
+    'upcoming_events' => 'Événements à venir',
+    'upcoming_events_subtitle' => 'Découvrez les meilleurs événements de networking B2B et SaaS',
+    'no_events_scheduled' => 'Aucun événement programmé',
+    'no_events_hint' => 'Revenez bientôt pour découvrir de nouveaux événements',
+    'featured' => 'En vedette',
+    'seats' => 'places',
+    'view_event' => 'Voir l\'événement',
+    'from_free' => 'À PARTIR DE GRATUIT',
+    'from' => 'À PARTIR DE',
+    'limited_seats' => 'PLACES LIMITÉES',
+    'get_ticket' => 'OBTENIR UN BILLET',
+    'about_event' => 'À PROPOS DE L\'ÉVÉNEMENT',
+    'joining_us' => 'ILS NOUS ACCOMPAGNENT',
+    'agenda' => 'PROGRAMME',
+    'our_spaces' => 'NOS ESPACES',
+    'speakers' => 'INTERVENANTS',
+    'sponsors' => 'SPONSORS',
+    'event_details' => 'DÉTAILS DE L\'ÉVÉNEMENT',
+    'date' => 'DATE',
+    'time' => 'HEURE',
+    'venue' => 'LIEU',
+    'capacity' => 'CAPACITÉ',
+    'people' => 'personnes',
+    'get_your_ticket' => 'OBTENEZ VOTRE BILLET',
+    'dont_miss_event' => 'Ne manquez pas cet événement. Les places sont limitées.',
+    'register_now' => 'S\'INSCRIRE MAINTENANT',
+    'at_speaker_company' => 'chez',
+    'invitation_from' => 'Invitation de',
+    'free' => 'Gratuit',
+    'seat_available' => 'place disponible',
+    'seats_available' => 'places disponibles',
+    'sold_out' => 'Complet',
+    'seats_available_generic' => 'Places disponibles',
+    'buy_ticket' => 'Acheter un billet',
+    'activity_type_charla' => 'Conférence',
+    'activity_type_mesa_redonda' => 'Table ronde',
+    'activity_type_taller' => 'Atelier',
+    'activity_type_reuniones_1to1' => 'Réunions 1-à-1',
+    'activity_type_networking' => 'Networking',
+    'activity_type_comida' => 'Déjeuner',
+    'activity_type_cafe' => 'Pause café',
+    'activity_type_bienvenida' => 'Accueil',
+    'activity_type_cierre' => 'Clôture',
+    'activity_type_registro' => 'Inscription',
+    'activity_type_otro' => 'Autre',
+    'view_all_activities' => 'Voir toutes les activités',
+    'no_activities_available' => 'Aucune activité disponible',
+
     'view_solutions' => 'Voir les solutions',
     'no_landings_available' => 'Aucune landing page disponible',
 
@@ -310,13 +359,13 @@ return [
     'view_partner' => 'Voir partenaire',
     'related_partners' => 'Partenaires liés',
     'back_to_directory' => 'Retour a l\'annuaire',
-    'become_partner_title' => 'Vous souhaitez devenir partenaire Omniwallet?',
+    'become_partner_title' => 'Vous souhaitez devenir partenaire?',
     'become_partner_text' => 'Rejoignez notre programme partenaires et aidez les entreprises a transformer leur stratégie de fidélisation.',
     'all_countries' => 'Tous les pays',
     'all_cities' => 'Toutes les villes',
     'search_partners' => 'Rechercher des partenaires...',
     'certified_partners' => 'Partenaires Certifiés',
-    'certified_partners_desc' => 'Nos Partenaires Certifiés sont des professionnels et des agences qui ont réussi notre test de certification, s\'accréditant comme experts en fidélisation et dans l\'utilisation d\'Omniwallet.',
+    'certified_partners_desc' => 'Nos Partenaires Certifiés sont des professionnels et des agences qui ont réussi notre test de certification, s\'accréditant comme experts en fidélisation et dans l\'utilisation de la plateforme.',
     'featured_partners' => 'Partenaires en Vedette',
     'no_partners_found' => 'Aucun partenaire trouvé',
     'try_different_filters' => 'Essayez de modifier les filtres de recherche',

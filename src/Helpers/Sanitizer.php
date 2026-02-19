@@ -65,7 +65,7 @@ class Sanitizer
     /**
      * Sanitize HTML content (allow specific tags)
      */
-    public static function html(?string $value, array $allowedTags = null): string
+    public static function html(?string $value, ?array $allowedTags = null): string
     {
         if ($value === null) {
             return '';

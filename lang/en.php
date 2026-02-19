@@ -37,7 +37,7 @@ return [
 
     // Features page
     'features_title' => 'Features',
-    'features_subtitle' => 'Discover all the tools Omniwallet offers to transform your business',
+    'features_subtitle' => 'Discover all the tools we offer to transform your business',
     'category' => 'Category',
     'all_categories' => 'All categories',
     'services_in_category' => 'Services available in this category',
@@ -50,14 +50,14 @@ return [
     'features_count' => 'features',
     'no_features_found' => 'No features found',
     'try_different_filters' => 'Try different filters',
-    'start_using_omniwallet' => 'Start using Omniwallet today',
+    'start_using_omniwallet' => 'Start using the platform today',
     'all_features_available' => 'All these features available from day one',
     'start_free_btn' => 'Start free',
     'contact_sales' => 'Contact sales',
 
     // Cases page
     'cases_title' => 'Success Cases',
-    'cases_subtitle' => 'Discover how businesses like yours have transformed with Omniwallet',
+    'cases_subtitle' => 'Discover how businesses like yours have transformed with our platform',
     'industry' => 'Industry',
     'all_industries' => 'All industries',
     'search_cases' => 'Search success cases...',
@@ -82,7 +82,7 @@ return [
     'no_cases_available' => 'No success cases available',
     'more_cases_coming_soon' => 'More cases coming soon',
     'cta_next_success_story' => 'Want to be our next success story?',
-    'cta_join_companies' => 'Join the companies that already trust Omniwallet',
+    'cta_join_companies' => 'Join the companies that already trust us',
     'contact_now' => 'Contact now',
     'about' => 'About',
     'company_size' => 'Size',
@@ -141,7 +141,7 @@ return [
 
     // Integrations page
     'integrations_title' => 'Integrations',
-    'integrations_subtitle' => 'Connect Omniwallet with your favorite tools and power up your business',
+    'integrations_subtitle' => 'Connect the platform with your favorite tools and power up your business',
     'integration_type' => 'Type',
     'all_types' => 'All',
     'search_integration' => 'Search integration...',
@@ -161,7 +161,7 @@ return [
 
     // Team page
     'team_title' => 'Our Team',
-    'team_subtitle' => 'The people behind Omniwallet',
+    'team_subtitle' => 'Meet the people who make up our team',
     'meet_team' => 'Meet the team',
 
     // Contact/CTA
@@ -239,7 +239,7 @@ return [
     // Landings
     'landing_resources' => 'Resources',
     'landing_resources_title' => 'Resources and Use Cases',
-    'landing_resources_subtitle' => 'Discover how to get the most out of Omniwallet',
+    'landing_resources_subtitle' => 'Discover how to get the most out of the platform',
     'no_content_available' => 'No content available at this time.',
 
     // Empty states
@@ -302,6 +302,59 @@ return [
     'high_volume_description' => 'For more than 150,000 monthly activities, we offer custom pricing. Contact us to receive a proposal tailored to your business.',
     'request_info' => 'Request information',
 
+    // Events
+    'upcoming_events' => 'Upcoming Events',
+    'upcoming_events_subtitle' => 'Discover the best B2B and SaaS networking events',
+    'no_events_scheduled' => 'No events scheduled',
+    'no_events_hint' => 'Come back soon to discover new events',
+    'featured' => 'Featured',
+    'seats' => 'seats',
+    'view_event' => 'View event',
+    'from_free' => 'FROM FREE',
+    'from' => 'FROM',
+    'limited_seats' => 'LIMITED SEATS',
+    'get_ticket' => 'GET TICKET',
+    'about_event' => 'ABOUT THE EVENT',
+    'joining_us' => 'JOINING US',
+    'agenda' => 'AGENDA',
+    'our_spaces' => 'OUR SPACES',
+    'speakers' => 'SPEAKERS',
+    'sponsors' => 'SPONSORS',
+    'event_details' => 'EVENT DETAILS',
+    'date' => 'DATE',
+    'time' => 'TIME',
+    'venue' => 'VENUE',
+    'capacity' => 'CAPACITY',
+    'people' => 'people',
+    'get_your_ticket' => 'GET YOUR TICKET',
+    'dont_miss_event' => 'Don\'t miss this event. Seats are limited.',
+    'register_now' => 'REGISTER NOW',
+    'at_speaker_company' => 'at',
+
+    // Tickets Block
+    'invitation_from' => 'Invitation from',
+    'free' => 'Free',
+    'seat_available' => 'seat available',
+    'seats_available' => 'seats available',
+    'sold_out' => 'Sold out',
+    'seats_available_generic' => 'Seats available',
+    'buy_ticket' => 'Buy ticket',
+
+    // Activities Block
+    'activity_type_charla' => 'Talk',
+    'activity_type_mesa_redonda' => 'Round Table',
+    'activity_type_taller' => 'Workshop',
+    'activity_type_reuniones_1to1' => '1-to-1 Meetings',
+    'activity_type_networking' => 'Networking',
+    'activity_type_comida' => 'Lunch',
+    'activity_type_cafe' => 'Coffee Break',
+    'activity_type_bienvenida' => 'Welcome',
+    'activity_type_cierre' => 'Closing',
+    'activity_type_registro' => 'Registration',
+    'activity_type_otro' => 'Other',
+    'view_all_activities' => 'View all activities',
+    'no_activities_available' => 'No activities available',
+
     // Landings Block
     'view_solutions' => 'View solutions',
     'no_landings_available' => 'No landing pages available',
@@ -326,13 +379,13 @@ return [
     'view_partner' => 'View partner',
     'related_partners' => 'Related partners',
     'back_to_directory' => 'Back to directory',
-    'become_partner_title' => 'Want to become an Omniwallet partner?',
+    'become_partner_title' => 'Want to become a partner?',
     'become_partner_text' => 'Join our partner program and help businesses transform their loyalty strategy.',
     'all_countries' => 'All countries',
     'all_cities' => 'All cities',
     'search_partners' => 'Search partners...',
     'certified_partners' => 'Certified Partners',
-    'certified_partners_desc' => 'Our Certified Partners are professionals and agencies that have passed our certification test, accrediting themselves as experts in loyalty and in the use of Omniwallet.',
+    'certified_partners_desc' => 'Our Certified Partners are professionals and agencies that have passed our certification test, accrediting themselves as experts in loyalty and in the use of the platform.',
     'featured_partners' => 'Featured Partners',
     'no_partners_found' => 'No partners found',
     'try_different_filters' => 'Try changing the search filters',

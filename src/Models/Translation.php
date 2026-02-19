@@ -40,20 +40,21 @@ class Translation extends Model
     public const DEFAULT_LANGUAGE = 'es';
 
     /**
-     * Translatable entity types
+     * Translatable entity types (TLOS)
      */
     public const ENTITY_TYPES = [
         'page' => 'Página',
         'post' => 'Post',
         'category' => 'Categoría',
-        'service' => 'Servicio',
-        'tool' => 'Herramienta',
-        'client' => 'Cliente',
+        'event' => 'Evento',
+        'activity' => 'Actividad',
+        'sponsor' => 'Sponsor',
+        'company' => 'Empresa',
+        'team_member' => 'Miembro Equipo',
+        'ticket_type' => 'Tipo de Entrada',
         'faq' => 'FAQ',
-        'success_case' => 'Caso de Éxito',
         'block' => 'Bloque',
         'landing' => 'Landing',
-        'landing_theme' => 'Tema Landing',
         'ui' => 'Interfaz'
     ];
 
@@ -167,14 +168,15 @@ class Translation extends Model
                     WHEN 'page' THEN (SELECT title FROM pages WHERE id = t.entity_id)
                     WHEN 'post' THEN (SELECT title FROM posts WHERE id = t.entity_id)
                     WHEN 'category' THEN (SELECT name FROM categories WHERE id = t.entity_id)
-                    WHEN 'service' THEN (SELECT title FROM services WHERE id = t.entity_id)
-                    WHEN 'tool' THEN (SELECT title FROM tools WHERE id = t.entity_id)
-                    WHEN 'client' THEN (SELECT name FROM clients WHERE id = t.entity_id)
+                    WHEN 'event' THEN (SELECT name FROM events WHERE id = t.entity_id)
+                    WHEN 'activity' THEN (SELECT title FROM activities WHERE id = t.entity_id)
+                    WHEN 'sponsor' THEN (SELECT name FROM sponsors WHERE id = t.entity_id)
+                    WHEN 'company' THEN (SELECT name FROM companies WHERE id = t.entity_id)
+                    WHEN 'team_member' THEN (SELECT name FROM team_members WHERE id = t.entity_id)
                     WHEN 'faq' THEN (SELECT question FROM faqs WHERE id = t.entity_id)
-                    WHEN 'success_case' THEN (SELECT title FROM success_cases WHERE id = t.entity_id)
+                    WHEN 'ticket_type' THEN (SELECT name FROM ticket_types WHERE id = t.entity_id)
                     WHEN 'block' THEN CONCAT('Bloque #', t.entity_id)
                     WHEN 'landing' THEN (SELECT title FROM landings WHERE id = t.entity_id)
-                    WHEN 'landing_theme' THEN (SELECT title FROM landing_themes WHERE id = t.entity_id)
                     ELSE NULL
                 END as entity_name
                 FROM {$this->table} t
@@ -265,7 +267,7 @@ class Translation extends Model
     }
 
     /**
-     * Get untranslated content count per language
+     * Get untranslated content count per language (TLOS)
      */
     public function getUntranslatedStats(string $targetLanguage): array
     {
@@ -290,29 +292,45 @@ class Translation extends Model
             $translatedPosts = (int)$stmt->fetchColumn();
             $stats['post'] = max(0, $totalPosts - $translatedPosts);
 
-            // Services
-            $stmt = $this->db->query("SELECT COUNT(*) FROM services WHERE is_active = 1");
-            $totalServices = (int)$stmt->fetchColumn();
-            $stmt = $this->db->prepare("SELECT COUNT(DISTINCT entity_id) FROM {$this->table} WHERE entity_type = 'service' AND language = ?");
+            // Events
+            $stmt = $this->db->query("SELECT COUNT(*) FROM events WHERE status IN ('published', 'active')");
+            $totalEvents = (int)$stmt->fetchColumn();
+            $stmt = $this->db->prepare("SELECT COUNT(DISTINCT entity_id) FROM {$this->table} WHERE entity_type = 'event' AND language = ?");
             $stmt->execute([$targetLanguage]);
-            $translatedServices = (int)$stmt->fetchColumn();
-            $stats['service'] = max(0, $totalServices - $translatedServices);
+            $translatedEvents = (int)$stmt->fetchColumn();
+            $stats['event'] = max(0, $totalEvents - $translatedEvents);
 
-            // Tools
-            $stmt = $this->db->query("SELECT COUNT(*) FROM tools WHERE is_active = 1");
-            $totalTools = (int)$stmt->fetchColumn();
-            $stmt = $this->db->prepare("SELECT COUNT(DISTINCT entity_id) FROM {$this->table} WHERE entity_type = 'tool' AND language = ?");
+            // Activities
+            $stmt = $this->db->query("SELECT COUNT(*) FROM activities WHERE active = 1");
+            $totalActivities = (int)$stmt->fetchColumn();
+            $stmt = $this->db->prepare("SELECT COUNT(DISTINCT entity_id) FROM {$this->table} WHERE entity_type = 'activity' AND language = ?");
             $stmt->execute([$targetLanguage]);
-            $translatedTools = (int)$stmt->fetchColumn();
-            $stats['tool'] = max(0, $totalTools - $translatedTools);
+            $translatedActivities = (int)$stmt->fetchColumn();
+            $stats['activity'] = max(0, $totalActivities - $translatedActivities);
 
-            // Success Cases
-            $stmt = $this->db->query("SELECT COUNT(*) FROM success_cases WHERE status = 'published'");
-            $totalCases = (int)$stmt->fetchColumn();
-            $stmt = $this->db->prepare("SELECT COUNT(DISTINCT entity_id) FROM {$this->table} WHERE entity_type = 'success_case' AND language = ?");
+            // Sponsors
+            $stmt = $this->db->query("SELECT COUNT(*) FROM sponsors WHERE active = 1");
+            $totalSponsors = (int)$stmt->fetchColumn();
+            $stmt = $this->db->prepare("SELECT COUNT(DISTINCT entity_id) FROM {$this->table} WHERE entity_type = 'sponsor' AND language = ?");
             $stmt->execute([$targetLanguage]);
-            $translatedCases = (int)$stmt->fetchColumn();
-            $stats['success_case'] = max(0, $totalCases - $translatedCases);
+            $translatedSponsors = (int)$stmt->fetchColumn();
+            $stats['sponsor'] = max(0, $totalSponsors - $translatedSponsors);
+
+            // Companies
+            $stmt = $this->db->query("SELECT COUNT(*) FROM companies WHERE active = 1");
+            $totalCompanies = (int)$stmt->fetchColumn();
+            $stmt = $this->db->prepare("SELECT COUNT(DISTINCT entity_id) FROM {$this->table} WHERE entity_type = 'company' AND language = ?");
+            $stmt->execute([$targetLanguage]);
+            $translatedCompanies = (int)$stmt->fetchColumn();
+            $stats['company'] = max(0, $totalCompanies - $translatedCompanies);
+
+            // Team Members
+            $stmt = $this->db->query("SELECT COUNT(*) FROM team_members WHERE is_active = 1");
+            $totalTeam = (int)$stmt->fetchColumn();
+            $stmt = $this->db->prepare("SELECT COUNT(DISTINCT entity_id) FROM {$this->table} WHERE entity_type = 'team_member' AND language = ?");
+            $stmt->execute([$targetLanguage]);
+            $translatedTeam = (int)$stmt->fetchColumn();
+            $stats['team_member'] = max(0, $totalTeam - $translatedTeam);
 
             // Landings
             $stmt = $this->db->query("SELECT COUNT(*) FROM landings WHERE is_active = 1");
@@ -321,6 +339,22 @@ class Translation extends Model
             $stmt->execute([$targetLanguage]);
             $translatedLandings = (int)$stmt->fetchColumn();
             $stats['landing'] = max(0, $totalLandings - $translatedLandings);
+
+            // Ticket Types
+            $stmt = $this->db->query("SELECT COUNT(*) FROM ticket_types WHERE active = 1");
+            $totalTicketTypes = (int)$stmt->fetchColumn();
+            $stmt = $this->db->prepare("SELECT COUNT(DISTINCT entity_id) FROM {$this->table} WHERE entity_type = 'ticket_type' AND language = ?");
+            $stmt->execute([$targetLanguage]);
+            $translatedTicketTypes = (int)$stmt->fetchColumn();
+            $stats['ticket_type'] = max(0, $totalTicketTypes - $translatedTicketTypes);
+
+            // Blocks (from published pages)
+            $stmt = $this->db->query("SELECT COUNT(*) FROM page_blocks pb JOIN pages p ON p.id = pb.page_id WHERE pb.is_active = 1 AND p.status = 'published'");
+            $totalBlocks = (int)$stmt->fetchColumn();
+            $stmt = $this->db->prepare("SELECT COUNT(DISTINCT entity_id) FROM {$this->table} WHERE entity_type = 'block' AND language = ?");
+            $stmt->execute([$targetLanguage]);
+            $translatedBlocks = (int)$stmt->fetchColumn();
+            $stats['block'] = max(0, $totalBlocks - $translatedBlocks);
         } catch (\PDOException $e) {
             // If any table doesn't exist or has different structure, return empty stats
             error_log("Translation stats error: " . $e->getMessage());
@@ -339,7 +373,7 @@ class Translation extends Model
         $results = [];
 
         try {
-            // Define entity configurations: table, fields to translate, name field, filter
+            // Define entity configurations: table, fields to translate, name field, filter (TLOS)
             $entities = [
                 'page' => [
                     'table' => 'pages',
@@ -353,30 +387,37 @@ class Translation extends Model
                     'name_field' => 'title',
                     'filter' => "status = 'published'"
                 ],
-                'service' => [
-                    'table' => 'services',
-                    'fields' => ['title', 'short_description', 'full_description'],
-                    'name_field' => 'title',
-                    'filter' => "is_active = 1"
-                ],
-                'tool' => [
-                    'table' => 'tools',
-                    'fields' => ['title', 'subtitle', 'description'],
-                    'name_field' => 'title',
-                    'filter' => "is_active = 1"
-                ],
-                'client' => [
-                    'table' => 'clients',
+                'event' => [
+                    'table' => 'events',
                     'fields' => ['name', 'description'],
+                    'name_field' => 'name',
+                    'filter' => "status IN ('published', 'active')"
+                ],
+                'activity' => [
+                    'table' => 'activities',
+                    'fields' => ['title', 'description'],
+                    'name_field' => 'title',
+                    'filter' => "active = 1"
+                ],
+                'sponsor' => [
+                    'table' => 'sponsors',
+                    'fields' => ['name', 'description', 'tagline'],
+                    'name_field' => 'name',
+                    'filter' => "active = 1"
+                ],
+                'company' => [
+                    'table' => 'companies',
+                    'fields' => ['name', 'description'],
+                    'name_field' => 'name',
+                    'filter' => "active = 1"
+                ],
+                'team_member' => [
+                    'table' => 'team_members',
+                    'fields' => ['name', 'position', 'bio'],
                     'name_field' => 'name',
                     'filter' => "is_active = 1"
                 ],
-                'success_case' => [
-                    'table' => 'success_cases',
-                    'fields' => ['title', 'challenge', 'solution', 'results', 'testimonial'],
-                    'name_field' => 'title',
-                    'filter' => "status = 'published'"
-                ],
+
                 'landing' => [
                     'table' => 'landings',
                     'fields' => ['title', 'subtitle', 'description', 'meta_title', 'meta_description'],
@@ -394,12 +435,35 @@ class Translation extends Model
                     'fields' => ['name', 'description'],
                     'name_field' => 'name',
                     'filter' => "1=1"
+                ],
+                'ticket_type' => [
+                    'table' => 'ticket_types',
+                    'fields' => ['name', 'description'],
+                    'name_field' => 'name',
+                    'filter' => "active = 1"
                 ]
             ];
 
             // Filter by entity type if specified
             if ($entityType && isset($entities[$entityType])) {
                 $entities = [$entityType => $entities[$entityType]];
+            }
+
+            // Handle blocks separately (JSON content, not direct columns)
+            if (!$entityType || $entityType === 'block') {
+                $blockResults = $this->getUntranslatedBlocks($targetLanguage, $limit);
+                $results = array_merge($results, $blockResults);
+            }
+
+            // Skip generic loop if only blocks were requested
+            if ($entityType === 'block') {
+                // Sort and return early
+                usort($results, function($a, $b) {
+                    $cmp = strcmp($a['entity_type'], $b['entity_type']);
+                    if ($cmp !== 0) return $cmp;
+                    return strcmp($a['entity_name'] ?? '', $b['entity_name'] ?? '');
+                });
+                return array_slice($results, 0, $limit);
             }
 
             foreach ($entities as $type => $config) {
@@ -464,5 +528,109 @@ class Translation extends Model
         }
 
         return array_slice($results, 0, $limit);
+    }
+
+    /**
+     * Get untranslated blocks for a specific language
+     * Blocks store translatable content as JSON, so they need special handling
+     */
+    private function getUntranslatedBlocks(string $targetLanguage, int $limit = 100): array
+    {
+        $results = [];
+
+        $translatableKeys = [
+            'title', 'subtitle', 'description', 'text', 'content', 'cta_text',
+            'link_text', 'button_text', 'label', 'placeholder', 'heading',
+            'subheading', 'caption', 'quote', 'author', 'name', 'message',
+            'success_title', 'success_message', 'submit_text', 'more_text',
+            'price_suffix', 'badge_text', 'empty_text', 'helper_text'
+        ];
+
+        try {
+            // Get block IDs that already have translations
+            $stmt = $this->db->prepare("
+                SELECT DISTINCT entity_id
+                FROM {$this->table}
+                WHERE entity_type = 'block' AND language = ?
+            ");
+            $stmt->execute([$targetLanguage]);
+            $translatedIds = $stmt->fetchAll(\PDO::FETCH_COLUMN);
+
+            // Get active blocks from published pages that don't have translations yet
+            $sql = "SELECT pb.id, pb.type, pb.content, p.title as page_title
+                    FROM page_blocks pb
+                    JOIN pages p ON p.id = pb.page_id
+                    WHERE pb.is_active = 1 AND p.status = 'published'";
+
+            if (!empty($translatedIds)) {
+                $placeholders = implode(',', array_fill(0, count($translatedIds), '?'));
+                $sql .= " AND pb.id NOT IN ({$placeholders})";
+            }
+            $sql .= " ORDER BY pb.id DESC LIMIT " . (int)$limit;
+
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute(!empty($translatedIds) ? $translatedIds : []);
+            $rows = $stmt->fetchAll();
+
+            foreach ($rows as $row) {
+                $content = json_decode($row['content'], true);
+                if (!$content) continue;
+
+                // Extract top-level translatable fields as a preview
+                $fields = $this->extractTopLevelTranslatable($content, $translatableKeys);
+
+                foreach ($fields as $fieldPath => $fieldValue) {
+                    $results[] = [
+                        'id' => null,
+                        'entity_type' => 'block',
+                        'entity_id' => $row['id'],
+                        'field_name' => $fieldPath,
+                        'language' => $targetLanguage,
+                        'original_content' => $fieldValue,
+                        'translated_content' => '',
+                        'is_auto_translated' => 0,
+                        'is_approved' => 0,
+                        'entity_name' => 'Bloque ' . ucfirst($row['type']) . ' (' . $row['page_title'] . ')',
+                        'is_new' => true
+                    ];
+                }
+            }
+        } catch (\PDOException $e) {
+            error_log("Error getting untranslated blocks: " . $e->getMessage());
+        }
+
+        return $results;
+    }
+
+    /**
+     * Extract top-level translatable fields from block content for admin display
+     */
+    private function extractTopLevelTranslatable(array $content, array $translatableKeys, string $prefix = ''): array
+    {
+        $fields = [];
+
+        foreach ($content as $key => $value) {
+            $fieldPath = $prefix ? "{$prefix}.{$key}" : $key;
+
+            if (is_string($value) && !empty($value) && in_array($key, $translatableKeys)) {
+                $fields[$fieldPath] = $value;
+            } elseif (is_array($value)) {
+                if (isset($value[0]) && is_array($value[0])) {
+                    // Array of objects (slides, plans, items...)
+                    foreach ($value as $index => $item) {
+                        if (is_array($item)) {
+                            $nested = $this->extractTopLevelTranslatable($item, $translatableKeys, "{$fieldPath}.{$index}");
+                            $fields = array_merge($fields, $nested);
+                        }
+                    }
+                } elseif (!isset($value[0])) {
+                    // Associative array, recurse
+                    $nested = $this->extractTopLevelTranslatable($value, $translatableKeys, $fieldPath);
+                    $fields = array_merge($fields, $nested);
+                }
+            }
+        }
+
+        return $fields;
     }
 }

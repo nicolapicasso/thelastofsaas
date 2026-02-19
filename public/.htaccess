@@ -1,6 +1,9 @@
 <IfModule mod_rewrite.c>
     RewriteEngine On
 
+    # 301 Redirects
+    RewriteRule ^the-last-of-saas-barcelona-2025/?$ / [R=301,L]
+
     # Detect if we're being accessed via /public/ and set base accordingly
     RewriteCond %{REQUEST_URI} ^/public/
     RewriteRule ^ - [E=BASE:/public]
@@ -27,9 +30,11 @@
 
     # Prevent browser from serving stale content for dynamic pages
     # This applies to all rewritten URLs (going through index.php)
+    # Using no-store to ensure browser never uses cached version without checking
     <FilesMatch "^index\.php$">
-        Header set Cache-Control "no-cache, must-revalidate, private"
+        Header set Cache-Control "no-cache, no-store, must-revalidate, private"
         Header set Pragma "no-cache"
+        Header set Expires "0"
     </FilesMatch>
 </IfModule>
 
@@ -43,6 +48,13 @@
     Header set Expires "Thu, 01 Jan 1970 00:00:00 GMT" env=no_cache
     Header set Vary "Cookie" env=no_cache
     Header unset ETag env=no_cache
+</IfModule>
+
+# Restrict Service Worker scope to scanner only
+<IfModule mod_headers.c>
+    <FilesMatch "scanner-sw\.js$">
+        Header set Service-Worker-Allowed "/admin/tickets/scanner"
+    </FilesMatch>
 </IfModule>
 
 # Disable ETags globally (they can cause caching issues)

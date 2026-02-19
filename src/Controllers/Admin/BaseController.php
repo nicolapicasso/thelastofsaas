@@ -51,9 +51,6 @@ abstract class BaseController extends Controller
         } catch (\Exception $e) {
             // Site settings not available yet (migration pending)
         }
-
-        // Configure SEO service with site settings from database
-        $this->configureSeoService();
     }
 
     /**
@@ -163,11 +160,9 @@ abstract class BaseController extends Controller
         ];
 
         // Prevent browser caching of dynamic frontend pages
-        header('Cache-Control: no-cache, no-store, must-revalidate, private, max-age=0');
+        header('Cache-Control: no-cache, no-store, must-revalidate');
         header('Pragma: no-cache');
-        header('Expires: Thu, 01 Jan 1970 00:00:00 GMT');
-        header_remove('ETag');
-        header_remove('Last-Modified');
+        header('Expires: 0');
 
         $view = new View();
         $view->setLayout('frontend/layouts/main');
@@ -433,40 +428,6 @@ abstract class BaseController extends Controller
     /**
      * Get a setting value from the settings table
      */
-    /**
-     * Configure SEO service with site settings from database
-     */
-    protected function configureSeoService(): void
-    {
-        if (!$this->settingModel) {
-            return;
-        }
-
-        try {
-            $siteName = $this->settingModel->get('site_name');
-            if ($siteName) {
-                $this->seo->setSiteName($siteName);
-            }
-
-            $siteUrl = $this->settingModel->get('site_url');
-            if ($siteUrl) {
-                $this->seo->setBaseUrl($siteUrl);
-            }
-
-            $twitterHandle = $this->settingModel->get('twitter_handle');
-            if ($twitterHandle) {
-                $this->seo->setTwitterHandle($twitterHandle);
-            }
-
-            $ogDefaultImage = $this->settingModel->get('og_default_image');
-            if ($ogDefaultImage) {
-                $this->seo->setDefaultImage($ogDefaultImage);
-            }
-        } catch (\Exception $e) {
-            // Settings not available, use defaults
-        }
-    }
-
     protected function getSetting(string $key, ?string $default = null): ?string
     {
         if ($this->settingModel) {

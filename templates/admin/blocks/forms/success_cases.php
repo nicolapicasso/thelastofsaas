@@ -3,7 +3,7 @@
         <h4>Configuración del bloque Casos de Éxito</h4>
         <div class="form-group">
             <label>Título de la sección</label>
-            <input type="text" data-content="title" value="<?= htmlspecialchars($content['title'] ?? 'Quiénes confían en Omniwallet') ?>">
+            <input type="text" data-content="title" value="<?= htmlspecialchars($content['title'] ?? 'Casos de éxito') ?>">
         </div>
         <div class="form-group">
             <label>Subtítulo</label>

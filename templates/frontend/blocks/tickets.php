@@ -7,6 +7,9 @@
 use App\Models\Event;
 use App\Models\Sponsor;
 use App\Models\TicketType;
+use App\Helpers\TranslationHelper;
+
+$t = TranslationHelper::getInstance();
 
 $eventModel = new Event();
 $sponsorModel = new Sponsor();
@@ -93,7 +96,7 @@ $blockId = 'tickets-' . uniqid();
             <div class="ticket-card">
                 <?php if ($sponsor && !empty($sponsor['logo_url'])): ?>
                     <div class="ticket-sponsor">
-                        <span class="sponsor-label">Invitacion de</span>
+                        <span class="sponsor-label"><?= $t->text('invitation_from') ?></span>
                         <img src="<?= htmlspecialchars($sponsor['logo_url']) ?>" alt="<?= htmlspecialchars($sponsor['name']) ?>" class="sponsor-logo">
                     </div>
                 <?php endif; ?>
@@ -142,7 +145,7 @@ $blockId = 'tickets-' . uniqid();
                                     <?php elseif (isset($ticketType['price']) && $ticketType['price'] > 0): ?>
                                         <span class="price"><?= number_format($ticketType['price'], 2) ?> EUR</span>
                                     <?php else: ?>
-                                        <span class="price free">Gratis</span>
+                                        <span class="price free"><?= $t->text('free') ?></span>
                                     <?php endif; ?>
                                 </div>
                             <?php endif; ?>
@@ -155,18 +158,18 @@ $blockId = 'tickets-' . uniqid();
                                         <?php if ($remaining > 0): ?>
                                             <span class="availability available">
                                                 <i class="fas fa-check-circle"></i>
-                                                <?= $remaining ?> <?= $remaining === 1 ? 'plaza disponible' : 'plazas disponibles' ?>
+                                                <?= $remaining ?> <?= $remaining === 1 ? $t->text('seat_available') : $t->text('seats_available') ?>
                                             </span>
                                         <?php else: ?>
                                             <span class="availability sold-out">
                                                 <i class="fas fa-times-circle"></i>
-                                                Agotado
+                                                <?= $t->text('sold_out') ?>
                                             </span>
                                         <?php endif; ?>
                                     <?php else: ?>
                                         <span class="availability available">
                                             <i class="fas fa-check-circle"></i>
-                                            Plazas disponibles
+                                            <?= $t->text('seats_available_generic') ?>
                                         </span>
                                     <?php endif; ?>
                                 </div>
@@ -177,7 +180,7 @@ $blockId = 'tickets-' . uniqid();
 
                 <div class="ticket-action">
                     <a href="<?= $registerUrl ?>" class="btn btn-primary btn-lg btn-block">
-                        <?= htmlspecialchars($content['cta_text'] ?? 'Comprar entrada') ?>
+                        <?= htmlspecialchars($content['cta_text'] ?? $t->text('buy_ticket')) ?>
                         <i class="fas fa-arrow-right"></i>
                     </a>
                 </div>

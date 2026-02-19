@@ -84,6 +84,10 @@ date_default_timezone_set('Europe/Madrid');
 
 // Start session with secure cookie settings
 if (session_status() === PHP_SESSION_NONE) {
+    // Disable PHP's automatic cache headers from session_start()
+    // We manage cache headers ourselves for precise control
+    session_cache_limiter('');
+
     // Configure session cookie to prevent caching issues
     session_set_cookie_params([
         'lifetime' => 0,           // Session cookie (deleted on browser close)
@@ -122,10 +126,13 @@ if ($isAuthenticatedRoute && !$isAjaxRequest) {
     header_remove('ETag');
     header_remove('Last-Modified');
 } elseif (!$isAjaxRequest) {
-    // Frontend dynamic pages: force browser to validate with server
-    // This ensures changes to blocks are reflected immediately on F5 refresh
-    header('Cache-Control: no-cache, must-revalidate, private');
+    // Frontend dynamic pages: force browser to never use cached version
+    // Using no-store ensures changes to blocks are reflected immediately
+    header('Cache-Control: no-cache, no-store, must-revalidate, private, max-age=0');
     header('Pragma: no-cache');
+    header('Expires: Thu, 01 Jan 1970 00:00:00 GMT');
+    header_remove('ETag');
+    header_remove('Last-Modified');
 }
 
 // Initialize application

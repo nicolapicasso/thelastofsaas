@@ -21,72 +21,10 @@ if (!empty($page['enable_llm_qa']) && !empty($page['llm_qa_content'])) {
 <section class="hero-section">
     <div class="container">
         <div class="hero-content">
-            <h1>La Plataforma de Pagos que Impulsa tu Negocio</h1>
-            <p class="hero-subtitle">Omniwallet te ofrece las herramientas para gestionar pagos, automatizar procesos financieros y ofrecer una experiencia excepcional a tus clientes.</p>
+            <h1>Bienvenido</h1>
+            <p class="hero-subtitle">Configura los bloques de esta pagina desde el panel de administracion para personalizar el contenido.</p>
             <div class="hero-actions">
-                <a href="/registro" class="btn btn-primary btn-lg">Empezar Gratis</a>
-                <a href="/demo" class="btn btn-outline btn-lg">Ver Demo</a>
-            </div>
-            <div class="hero-trust">
-                <span>Confían en nosotros:</span>
-                <div class="trust-logos">
-                    <img src="/assets/images/logos/client1.svg" alt="Cliente 1">
-                    <img src="/assets/images/logos/client2.svg" alt="Cliente 2">
-                    <img src="/assets/images/logos/client3.svg" alt="Cliente 3">
-                </div>
-            </div>
-        </div>
-        <div class="hero-image">
-            <img src="/assets/images/hero-dashboard.png" alt="Dashboard Omniwallet">
-        </div>
-    </div>
-</section>
-
-<!-- Features Section -->
-<section class="section bg-light">
-    <div class="container">
-        <div class="section-header">
-            <h2>Todo lo que necesitas para gestionar tus pagos</h2>
-            <p>Una plataforma completa que se adapta a las necesidades de tu negocio</p>
-        </div>
-        <div class="features-grid grid grid-3">
-            <div class="feature-card">
-                <div class="feature-icon">
-                    <i class="fas fa-wallet"></i>
-                </div>
-                <h3>Wallet Digital</h3>
-                <p>Permite a tus clientes cargar saldo y pagar de forma rápida y segura.</p>
-            </div>
-            <div class="feature-card">
-                <div class="feature-icon">
-                    <i class="fas fa-chart-line"></i>
-                </div>
-                <h3>Analíticas en Tiempo Real</h3>
-                <p>Monitoriza tus ventas, transacciones y métricas clave al instante.</p>
-            </div>
-            <div class="feature-card">
-                <div class="feature-icon">
-                    <i class="fas fa-plug"></i>
-                </div>
-                <h3>Integraciones</h3>
-                <p>Conecta con tu ERP, CRM y sistemas de facturación fácilmente.</p>
-            </div>
-        </div>
-        <div class="text-center mt-xl">
-            <a href="/funcionalidades" class="btn btn-primary">Ver todas las funcionalidades</a>
-        </div>
-    </div>
-</section>
-
-<!-- CTA Section -->
-<section class="section bg-primary">
-    <div class="container">
-        <div class="cta-content">
-            <h2>¿Listo para transformar tu negocio?</h2>
-            <p>Únete a cientos de empresas que ya confían en Omniwallet</p>
-            <div class="cta-actions">
-                <a href="/registro" class="btn btn-white btn-lg">Empezar Gratis</a>
-                <a href="/contacto" class="btn btn-outline btn-lg" style="border-color: white; color: white;">Contactar Ventas</a>
+                <a href="/admin" class="btn btn-primary btn-lg">Ir al Admin</a>
             </div>
         </div>
     </div>

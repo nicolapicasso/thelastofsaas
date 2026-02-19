@@ -9,8 +9,8 @@
     <!-- Hero Section -->
     <div class="team-hero">
         <div class="container">
-            <h1>Nuestro Equipo</h1>
-            <p class="hero-subtitle">Conoce a las personas que hacen posible Omniwallet</p>
+            <h1><?= __('team_title') ?></h1>
+            <p class="hero-subtitle"><?= __('team_subtitle') ?></p>
         </div>
     </div>
 

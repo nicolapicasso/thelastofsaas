@@ -1,9 +1,14 @@
 /**
  * TLOS Scanner Service Worker
  * Provides offline support for the check-in scanner PWA
+ *
+ * IMPORTANT: This SW is scoped to /admin/tickets/scanner only.
+ * It must NOT intercept requests outside its scope.
  */
 
-const CACHE_NAME = 'tlos-scanner-v1';
+const CACHE_NAME = 'tlos-scanner-v2';
+const SCANNER_PATH = '/admin/tickets/scanner';
+
 const ASSETS_TO_CACHE = [
     '/admin/tickets/scanner',
     '/assets/css/admin.css',
@@ -36,46 +41,65 @@ self.addEventListener('activate', (event) => {
     self.clients.claim();
 });
 
-// Fetch event - serve from cache, fallback to network
+// Fetch event - ONLY cache scanner-related assets
 self.addEventListener('fetch', (event) => {
-    // Skip cross-origin requests and POST requests
-    if (!event.request.url.startsWith(self.location.origin) &&
-        !event.request.url.includes('cdnjs.cloudflare.com') &&
-        !event.request.url.includes('unpkg.com')) {
-        return;
-    }
+    const url = new URL(event.request.url);
 
+    // Only handle GET requests
     if (event.request.method !== 'GET') {
         return;
     }
 
-    event.respondWith(
-        caches.match(event.request).then((cachedResponse) => {
-            if (cachedResponse) {
-                // Return cached version, but also update cache in background
-                event.waitUntil(
-                    fetch(event.request).then((response) => {
-                        if (response.ok) {
-                            caches.open(CACHE_NAME).then((cache) => {
-                                cache.put(event.request, response);
-                            });
-                        }
-                    }).catch(() => {})
-                );
-                return cachedResponse;
-            }
+    // Only intercept requests that are part of the scanner functionality
+    const isScannerPage = url.pathname.startsWith(SCANNER_PATH);
+    const isStaticAsset = url.pathname.startsWith('/assets/css/') ||
+                          url.pathname.startsWith('/assets/js/');
+    const isCDNAsset = url.hostname === 'cdnjs.cloudflare.com' ||
+                       url.hostname === 'unpkg.com';
 
-            // Not in cache, fetch from network
-            return fetch(event.request).then((response) => {
-                // Cache successful responses
-                if (response.ok) {
-                    const responseToCache = response.clone();
-                    caches.open(CACHE_NAME).then((cache) => {
-                        cache.put(event.request, responseToCache);
-                    });
+    // Skip everything that's not scanner-related
+    if (!isScannerPage && !isStaticAsset && !isCDNAsset) {
+        return;
+    }
+
+    // For the scanner page itself, use network-first strategy
+    if (isScannerPage) {
+        event.respondWith(
+            fetch(event.request)
+                .then((response) => {
+                    if (response.ok) {
+                        const responseToCache = response.clone();
+                        caches.open(CACHE_NAME).then((cache) => {
+                            cache.put(event.request, responseToCache);
+                        });
+                    }
+                    return response;
+                })
+                .catch(() => {
+                    return caches.match(event.request);
+                })
+        );
+        return;
+    }
+
+    // For static assets and CDN resources, use cache-first strategy
+    if (isStaticAsset || isCDNAsset) {
+        event.respondWith(
+            caches.match(event.request).then((cachedResponse) => {
+                if (cachedResponse) {
+                    return cachedResponse;
                 }
-                return response;
-            });
-        })
-    );
+                return fetch(event.request).then((response) => {
+                    if (response.ok) {
+                        const responseToCache = response.clone();
+                        caches.open(CACHE_NAME).then((cache) => {
+                            cache.put(event.request, responseToCache);
+                        });
+                    }
+                    return response;
+                });
+            })
+        );
+        return;
+    }
 });

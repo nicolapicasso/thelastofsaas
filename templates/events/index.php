@@ -3,12 +3,14 @@
  * Events List Template
  * TLOS - The Last of SaaS
  */
+use App\Helpers\TranslationHelper;
+$t = TranslationHelper::getInstance();
 ?>
 
 <section class="events-hero">
     <div class="container">
-        <h1>Próximos Eventos</h1>
-        <p class="lead">Descubre los mejores eventos de networking B2B y SaaS</p>
+        <h1><?= $t->text('upcoming_events') ?></h1>
+        <p class="lead"><?= $t->text('upcoming_events_subtitle') ?></p>
     </div>
 </section>
 
@@ -17,8 +19,8 @@
         <?php if (empty($events)): ?>
             <div class="empty-state">
                 <i class="fas fa-calendar-alt"></i>
-                <h2>No hay eventos programados</h2>
-                <p>Vuelve pronto para descubrir nuevos eventos</p>
+                <h2><?= $t->text('no_events_scheduled') ?></h2>
+                <p><?= $t->text('no_events_hint') ?></p>
             </div>
         <?php else: ?>
             <div class="events-grid">
@@ -28,7 +30,7 @@
                             <div class="event-card__image">
                                 <img src="<?= htmlspecialchars($event['featured_image']) ?>" alt="<?= htmlspecialchars($event['name']) ?>">
                                 <?php if ($event['is_featured']): ?>
-                                    <span class="badge badge-featured">Destacado</span>
+                                    <span class="badge badge-featured"><?= $t->text('featured') ?></span>
                                 <?php endif; ?>
                             </div>
                         <?php endif; ?>
@@ -52,11 +54,11 @@
                                     <span><i class="fas fa-map-marker-alt"></i> <?= htmlspecialchars($event['location']) ?></span>
                                 <?php endif; ?>
                                 <?php if ($event['max_attendees']): ?>
-                                    <span><i class="fas fa-users"></i> <?= $event['max_attendees'] ?> plazas</span>
+                                    <span><i class="fas fa-users"></i> <?= $event['max_attendees'] ?> <?= $t->text('seats') ?></span>
                                 <?php endif; ?>
                             </div>
 
-                            <a href="/eventos/<?= htmlspecialchars($event['slug']) ?>" class="btn btn-primary">Ver evento</a>
+                            <a href="/eventos/<?= htmlspecialchars($event['slug']) ?>" class="btn btn-primary"><?= $t->text('view_event') ?></a>
                         </div>
                     </article>
                 <?php endforeach; ?>
@@ -67,14 +69,16 @@
 
 <style>
 .events-hero {
-    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+    background: linear-gradient(135deg, #1a1a1a 0%, #000000 100%);
     color: white;
     padding: 4rem 0;
+    padding-top: 8rem;
     text-align: center;
 }
 .events-hero h1 {
     font-size: 2.5rem;
     margin-bottom: 1rem;
+    color: white;
 }
 .events-hero .lead {
     font-size: 1.25rem;
@@ -134,12 +138,12 @@
     position: absolute;
     top: -2rem;
     left: 1.5rem;
-    background: var(--primary-color);
+    background: #1a1a1a;
     color: white;
     padding: 0.5rem 1rem;
     border-radius: 8px;
     text-align: center;
-    box-shadow: 0 4px 10px rgba(79, 70, 229, 0.3);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
 }
 .event-card__date .day {
     display: block;
@@ -184,6 +188,25 @@
 }
 .event-card__meta i {
     margin-right: 0.25rem;
+}
+
+.event-card .btn-primary {
+    display: inline-block;
+    background: #1a1a1a;
+    color: white;
+    padding: 0.75rem 1.5rem;
+    border-radius: 6px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+    border: 1px solid #1a1a1a;
+}
+.event-card .btn-primary:hover {
+    background: #333333;
+    border-color: #333333;
+    color: white;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
 .empty-state {
