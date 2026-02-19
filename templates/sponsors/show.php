@@ -171,6 +171,7 @@
     margin-bottom: 3rem;
     position: relative;
     display: inline-block;
+    color: #ffffff;
 }
 
 .sponsor-description h2::after {
@@ -180,13 +181,13 @@
     left: 0;
     width: 60px;
     height: 3px;
-    background: var(--text-light);
+    background: #ffffff;
 }
 
 .sponsor-description .description-content {
     font-size: 18px;
     line-height: 1.9;
-    color: var(--text-grey);
+    color: #ffffff;
 }
 
 .sponsor-events {
