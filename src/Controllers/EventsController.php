@@ -10,7 +10,6 @@ use App\Models\TeamMember;
 use App\Models\Sponsor;
 use App\Models\Company;
 use App\Models\Room;
-use App\Models\Post;
 
 /**
  * Frontend Events Controller
@@ -255,11 +254,6 @@ class EventsController extends BaseController
         $events = $sponsorModel->getEvents($sponsor['id']);
         $this->translator->translateEntities('event', $events);
 
-        // Get blog posts associated with this sponsor
-        $postModel = new Post();
-        $sponsorPosts = $postModel->getBySponsor($sponsor['id']);
-        $this->translator->translateEntities('post', $sponsorPosts);
-
         // Get activities associated with this sponsor
         $sponsorActivities = $this->activityModel->getBySponsor($sponsor['id']);
         $this->translator->translateEntities('activity', $sponsorActivities);
@@ -268,7 +262,6 @@ class EventsController extends BaseController
         $this->render('sponsors/show', $this->getEventData([
             'sponsor' => $sponsor,
             'events' => $events,
-            'sponsorPosts' => $sponsorPosts,
             'sponsorActivities' => $sponsorActivities,
             'meta_title' => $sponsor['name'] . '' . ($this->getSiteName() ? ' - ' . $this->getSiteName() : ''),
             'meta_description' => $sponsor['description'] ?? ''
